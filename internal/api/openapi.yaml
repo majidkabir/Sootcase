@@ -714,6 +714,7 @@ components:
               lane: { type: string }
               weight_kg: { type: number }
               now: { $ref: "#/components/schemas/RecommendRoute" }
+              legs: { type: array, items: { type: object }, description: The shipment's own legs }
               options:
                 type: array
                 items:

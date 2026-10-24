@@ -293,11 +293,13 @@ type Option struct {
 // ShipmentResult is the alternatives for one shipment, best first. Only
 // alternatives with lower emissions than now are listed.
 type ShipmentResult struct {
-	ShipmentID string   `json:"shipment_id"`
-	Lane       string   `json:"lane"`
-	WeightKg   float64  `json:"weight_kg"`
-	Now        Route    `json:"now"`
-	Options    []Option `json:"options"`
+	ShipmentID string  `json:"shipment_id"`
+	Lane       string  `json:"lane"`
+	WeightKg   float64 `json:"weight_kg"`
+	Now        Route   `json:"now"`
+	// Legs are the shipment's own legs, to calculate or map it again.
+	Legs    []calc.Leg `json:"legs,omitempty"`
+	Options []Option   `json:"options"`
 	// Notes say why route changes that were tried don't apply.
 	Notes []string `json:"notes,omitempty"`
 	Error string   `json:"error,omitempty"`
@@ -602,6 +604,7 @@ func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settin
 	}
 	a.now = route(c, base)
 	sr.Now = a.now
+	sr.Legs = s.Legs
 	sr.Lane = a.lane()
 
 	if set.has(Rail) {
