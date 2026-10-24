@@ -1452,7 +1452,8 @@
       "ttw_kg_per_unit": 3104.16462,
       "wtt_kg_per_unit": 733.64436,
       "source": "DESNZ 2026: Fuels \u003e Liquid fuels \u003e Diesel (average biofuel blend) (tonnes)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 163.17
     },
     {
       "fuel": "liquid_fuels/diesel_average_biofuel_blend/litres",
@@ -1460,7 +1461,8 @@
       "ttw_kg_per_unit": 2.58354,
       "wtt_kg_per_unit": 0.61101,
       "source": "DESNZ 2026: Fuels \u003e Liquid fuels \u003e Diesel (average biofuel blend) (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 0.14
     },
     {
       "fuel": "liquid_fuels/diesel_average_biofuel_blend/kwh_net_cv",
@@ -1644,7 +1646,8 @@
       "ttw_kg_per_unit": 2765.46935,
       "wtt_kg_per_unit": 777.33392,
       "source": "DESNZ 2026: Fuels \u003e Liquid fuels \u003e Petrol (average biofuel blend) (tonnes)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 177.88
     },
     {
       "fuel": "liquid_fuels/petrol_average_biofuel_blend/litres",
@@ -1652,7 +1655,8 @@
       "ttw_kg_per_unit": 2.075,
       "wtt_kg_per_unit": 0.58094,
       "source": "DESNZ 2026: Fuels \u003e Liquid fuels \u003e Petrol (average biofuel blend) (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 0.13
     },
     {
       "fuel": "liquid_fuels/petrol_average_biofuel_blend/kwh_net_cv",
@@ -2036,7 +2040,8 @@
       "ttw_kg_per_unit": 0.00901,
       "wtt_kg_per_unit": 0.61516,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Bioethanol (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1.52
     },
     {
       "fuel": "biofuel/bioethanol/gj",
@@ -2044,7 +2049,8 @@
       "ttw_kg_per_unit": 0.42339,
       "wtt_kg_per_unit": 28.909,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Bioethanol (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 71.37
     },
     {
       "fuel": "biofuel/bioethanol/kg",
@@ -2052,7 +2058,8 @@
       "ttw_kg_per_unit": 0.01135,
       "wtt_kg_per_unit": 0.77476,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Bioethanol (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1.91
     },
     {
       "fuel": "biofuel/biodiesel_me/litres",
@@ -2060,7 +2067,8 @@
       "ttw_kg_per_unit": 0.16751,
       "wtt_kg_per_unit": 0.39508,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel ME (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.39
     },
     {
       "fuel": "biofuel/biodiesel_me/gj",
@@ -2068,7 +2076,8 @@
       "ttw_kg_per_unit": 5.05961,
       "wtt_kg_per_unit": 11.933,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel ME (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 72.16
     },
     {
       "fuel": "biofuel/biodiesel_me/kg",
@@ -2076,7 +2085,8 @@
       "ttw_kg_per_unit": 0.18822,
       "wtt_kg_per_unit": 0.44391,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel ME (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.68
     },
     {
       "fuel": "biofuel/biomethane_compressed/gj",
@@ -2084,7 +2094,8 @@
       "ttw_kg_per_unit": 0.10625,
       "wtt_kg_per_unit": 15.797,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biomethane (compressed) (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 55.28
     },
     {
       "fuel": "biofuel/biomethane_compressed/kg",
@@ -2092,7 +2103,8 @@
       "ttw_kg_per_unit": 0.00521,
       "wtt_kg_per_unit": 0.77405,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biomethane (compressed) (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.71
     },
     {
       "fuel": "biofuel/biodiesel_me_from_used_cooking_oil/litres",
@@ -2100,7 +2112,8 @@
       "ttw_kg_per_unit": 0.16751,
       "wtt_kg_per_unit": 0.3534,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel ME (from used cooking oil) (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.39
     },
     {
       "fuel": "biofuel/biodiesel_me_from_used_cooking_oil/gj",
@@ -2108,7 +2121,8 @@
       "ttw_kg_per_unit": 5.05961,
       "wtt_kg_per_unit": 10.6742,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel ME (from used cooking oil) (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 72.16
     },
     {
       "fuel": "biofuel/biodiesel_me_from_used_cooking_oil/kg",
@@ -2116,7 +2130,8 @@
       "ttw_kg_per_unit": 0.18822,
       "wtt_kg_per_unit": 0.39708,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel ME (from used cooking oil) (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.68
     },
     {
       "fuel": "biofuel/biodiesel_me_from_tallow/litres",
@@ -2124,7 +2139,8 @@
       "ttw_kg_per_unit": 0.16751,
       "wtt_kg_per_unit": 0.53232,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel ME (from tallow) (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.39
     },
     {
       "fuel": "biofuel/biodiesel_me_from_tallow/gj",
@@ -2132,7 +2148,8 @@
       "ttw_kg_per_unit": 5.05961,
       "wtt_kg_per_unit": 16.07836,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel ME (from tallow) (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 72.16
     },
     {
       "fuel": "biofuel/biodiesel_me_from_tallow/kg",
@@ -2140,7 +2157,8 @@
       "ttw_kg_per_unit": 0.18822,
       "wtt_kg_per_unit": 0.59812,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel ME (from tallow) (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.68
     },
     {
       "fuel": "biofuel/biodiesel_hvo/litres",
@@ -2148,7 +2166,8 @@
       "ttw_kg_per_unit": 0.03558,
       "wtt_kg_per_unit": 0.56439,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel HVO (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.43
     },
     {
       "fuel": "biofuel/biodiesel_hvo/gj",
@@ -2156,7 +2175,8 @@
       "ttw_kg_per_unit": 1.03677,
       "wtt_kg_per_unit": 16.445,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel HVO (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 70.83
     },
     {
       "fuel": "biofuel/biodiesel_hvo/kg",
@@ -2164,7 +2184,8 @@
       "ttw_kg_per_unit": 0.04562,
       "wtt_kg_per_unit": 0.72358,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biodiesel HVO (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 3.12
     },
     {
       "fuel": "biofuel/biopropane/litres",
@@ -2172,7 +2193,8 @@
       "ttw_kg_per_unit": 0.00214,
       "wtt_kg_per_unit": 0.15752,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biopropane (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1.54
     },
     {
       "fuel": "biofuel/biopropane/gj",
@@ -2180,7 +2202,8 @@
       "ttw_kg_per_unit": 0.08952,
       "wtt_kg_per_unit": 6.613,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biopropane (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 64.51
     },
     {
       "fuel": "biofuel/biopropane/kg",
@@ -2188,7 +2211,8 @@
       "ttw_kg_per_unit": 0.00415,
       "wtt_kg_per_unit": 0.30684,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biopropane (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.99
     },
     {
       "fuel": "biofuel/development_diesel/litres",
@@ -2196,7 +2220,8 @@
       "ttw_kg_per_unit": 0.03705,
       "wtt_kg_per_unit": 0.83338,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Development diesel (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.63
     },
     {
       "fuel": "biofuel/development_diesel/gj",
@@ -2204,7 +2229,8 @@
       "ttw_kg_per_unit": 1.03677,
       "wtt_kg_per_unit": 23.32,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Development diesel (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 73.54
     },
     {
       "fuel": "biofuel/development_diesel/kg",
@@ -2212,7 +2238,8 @@
       "ttw_kg_per_unit": 0.04461,
       "wtt_kg_per_unit": 1.0034,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Development diesel (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 3.16
     },
     {
       "fuel": "biofuel/development_petrol/litres",
@@ -2220,7 +2247,8 @@
       "ttw_kg_per_unit": 0.01409,
       "wtt_kg_per_unit": 0.76505,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Development petrol (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.33
     },
     {
       "fuel": "biofuel/development_petrol/gj",
@@ -2228,7 +2256,8 @@
       "ttw_kg_per_unit": 0.42339,
       "wtt_kg_per_unit": 23.097,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Development petrol (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 70.21
     },
     {
       "fuel": "biofuel/development_petrol/kg",
@@ -2236,7 +2265,8 @@
       "ttw_kg_per_unit": 0.01888,
       "wtt_kg_per_unit": 1.03129,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Development petrol (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 3.13
     },
     {
       "fuel": "biofuel/off_road_biodiesel/litres",
@@ -2244,7 +2274,8 @@
       "ttw_kg_per_unit": 0.16751,
       "wtt_kg_per_unit": 0.39508,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Off road biodiesel (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.39
     },
     {
       "fuel": "biofuel/off_road_biodiesel/gj",
@@ -2252,7 +2283,8 @@
       "ttw_kg_per_unit": 5.05961,
       "wtt_kg_per_unit": 11.933,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Off road biodiesel (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 72.16
     },
     {
       "fuel": "biofuel/off_road_biodiesel/kg",
@@ -2260,7 +2292,8 @@
       "ttw_kg_per_unit": 0.18822,
       "wtt_kg_per_unit": 0.44391,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Off road biodiesel (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.68
     },
     {
       "fuel": "biofuel/biomethane_liquified/gj",
@@ -2268,7 +2301,8 @@
       "ttw_kg_per_unit": 0.10625,
       "wtt_kg_per_unit": 23.903,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biomethane (liquified) (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 56.8
     },
     {
       "fuel": "biofuel/biomethane_liquified/kg",
@@ -2276,7 +2310,8 @@
       "ttw_kg_per_unit": 0.00521,
       "wtt_kg_per_unit": 1.17125,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Biomethane (liquified) (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.78
     },
     {
       "fuel": "biofuel/methanol_bio/litres",
@@ -2284,7 +2319,8 @@
       "ttw_kg_per_unit": 0.00669,
       "wtt_kg_per_unit": 0.59414,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Methanol (bio) (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1.09
     },
     {
       "fuel": "biofuel/methanol_bio/gj",
@@ -2292,7 +2328,8 @@
       "ttw_kg_per_unit": 0.42339,
       "wtt_kg_per_unit": 37.597,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Methanol (bio) (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 68.92
     },
     {
       "fuel": "biofuel/methanol_bio/kg",
@@ -2300,7 +2337,8 @@
       "ttw_kg_per_unit": 0.00844,
       "wtt_kg_per_unit": 0.74923,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Methanol (bio) (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1.37
     },
     {
       "fuel": "biofuel/avtur_renewable/litres",
@@ -2308,7 +2346,8 @@
       "ttw_kg_per_unit": 0.02533,
       "wtt_kg_per_unit": 0.53386,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Avtur (renewable) (litres)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 2.51
     },
     {
       "fuel": "biofuel/avtur_renewable/gj",
@@ -2316,7 +2355,8 @@
       "ttw_kg_per_unit": 0.7234,
       "wtt_kg_per_unit": 15.256,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Avtur (renewable) (GJ)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 71.74
     },
     {
       "fuel": "biofuel/avtur_renewable/kg",
@@ -2324,7 +2364,8 @@
       "ttw_kg_per_unit": 0.03179,
       "wtt_kg_per_unit": 0.67052,
       "source": "DESNZ 2026: Bioenergy \u003e Biofuel \u003e Avtur (renewable) (kg)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 3.15
     },
     {
       "fuel": "biomass/wood_logs/tonnes",
@@ -2332,7 +2373,8 @@
       "ttw_kg_per_unit": 48.73751,
       "wtt_kg_per_unit": 52.14,
       "source": "DESNZ 2026: Bioenergy \u003e Biomass \u003e Wood logs (tonnes)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1436.23
     },
     {
       "fuel": "biomass/wood_logs/kwh",
@@ -2340,7 +2382,8 @@
       "ttw_kg_per_unit": 0.01193,
       "wtt_kg_per_unit": 0.01277,
       "source": "DESNZ 2026: Bioenergy \u003e Biomass \u003e Wood logs (kWh)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 0.35
     },
     {
       "fuel": "biomass/wood_chips/tonnes",
@@ -2348,7 +2391,8 @@
       "ttw_kg_per_unit": 45.05983,
       "wtt_kg_per_unit": 30.4,
       "source": "DESNZ 2026: Bioenergy \u003e Biomass \u003e Wood chips (tonnes)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1335.71
     },
     {
       "fuel": "biomass/wood_chips/kwh",
@@ -2356,7 +2400,8 @@
       "ttw_kg_per_unit": 0.01193,
       "wtt_kg_per_unit": 0.00792,
       "source": "DESNZ 2026: Bioenergy \u003e Biomass \u003e Wood chips (kWh)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 0.35
     },
     {
       "fuel": "biomass/wood_pellets/tonnes",
@@ -2364,7 +2409,8 @@
       "ttw_kg_per_unit": 57.25249,
       "wtt_kg_per_unit": 177,
       "source": "DESNZ 2026: Bioenergy \u003e Biomass \u003e Wood pellets (tonnes)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1677.18
     },
     {
       "fuel": "biomass/wood_pellets/kwh",
@@ -2372,7 +2418,8 @@
       "ttw_kg_per_unit": 0.01193,
       "wtt_kg_per_unit": 0.03744,
       "source": "DESNZ 2026: Bioenergy \u003e Biomass \u003e Wood pellets (kWh)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 0.35
     },
     {
       "fuel": "biomass/grass_straw/tonnes",
@@ -2380,7 +2427,8 @@
       "ttw_kg_per_unit": 46.89059,
       "wtt_kg_per_unit": 68.65,
       "source": "DESNZ 2026: Bioenergy \u003e Biomass \u003e Grass/straw (tonnes)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1287.25
     },
     {
       "fuel": "biomass/grass_straw/kwh",
@@ -2388,7 +2436,8 @@
       "ttw_kg_per_unit": 0.0126,
       "wtt_kg_per_unit": 0.01604,
       "source": "DESNZ 2026: Bioenergy \u003e Biomass \u003e Grass/straw (kWh)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 0.35
     },
     {
       "fuel": "biogas/biogas/tonnes",
@@ -2396,7 +2445,8 @@
       "ttw_kg_per_unit": 1.22851,
       "wtt_kg_per_unit": 102.85714,
       "source": "DESNZ 2026: Bioenergy \u003e Biogas \u003e Biogas (tonnes)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 1105.6695
     },
     {
       "fuel": "biogas/biogas/kwh",
@@ -2404,7 +2454,8 @@
       "ttw_kg_per_unit": 0.00022,
       "wtt_kg_per_unit": 0.01851,
       "source": "DESNZ 2026: Bioenergy \u003e Biogas \u003e Biogas (kWh)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 0.19902
     },
     {
       "fuel": "biogas/landfill_gas/tonnes",
@@ -2412,7 +2463,8 @@
       "ttw_kg_per_unit": 0.6977,
       "wtt_kg_per_unit": 0,
       "source": "DESNZ 2026: Bioenergy \u003e Biogas \u003e Landfill gas (tonnes)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 679.98674
     },
     {
       "fuel": "biogas/landfill_gas/kwh",
@@ -2420,7 +2472,8 @@
       "ttw_kg_per_unit": 0.0002,
       "wtt_kg_per_unit": 0,
       "source": "DESNZ 2026: Bioenergy \u003e Biogas \u003e Landfill gas (kWh)",
-      "year": 2026
+      "year": 2026,
+      "biogenic_co2_kg_per_unit": 0.19902
     }
   ],
   "vehicle_aliases": [

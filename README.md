@@ -262,14 +262,16 @@ Fuels are converted with the selected dataset's fuel factors, including `electri
 
 | Change | What it does | Defaults (source) |
 |---|---|---|
-| `road_to_rail` | Road legs longer than `min_road_km` go by rail for `share` of the cargo; the rail part must be longer than `min_rail_km` in a straight line, with road legs added to and from the rail terminals | 300 km and 30% (EU Transport White Paper 2011: "30% of road freight over 300 km should shift to other modes … by 2030"); 100 km (Directive 92/106/EEC on combined transport, Art. 1) |
+| `road_to_rail` | Road legs longer than `min_road_km` go by rail for `share` of the cargo; the rail part must be longer than `min_rail_km` in a straight line, with road legs to and from the nearest rail terminal on the network reachable by road (`terminal`: `nearest`, or `best_trip` for the calculator's usual choice). The place list can't tell which terminals handle containers or trailers | 300 km and 30% (EU Transport White Paper 2011: "30% of road freight over 300 km should shift to other modes … by 2030"); 100 km (Directive 92/106/EEC on combined transport, Art. 1) |
 | `electrify` | Matching road legs: no tank-to-wheel emissions, `kwh_per_tkm` × the `country`'s grid factor upstream | none: give `kwh_per_tkm`, `country` and `source` |
-| `fuel_switch` | Matching diesel road legs use `fuel` (`hvo`, `b100`, `biomethane`, `biomethane_lng`, `cng`, `lng` or a dataset fuel id): energy from the leg's diesel emissions and DESNZ's diesel factor per kWh, × `energy_ratio`, × the fuel's factor per GJ (modelled, ISO 14083 7.2.4). Biofuel factors exclude biogenic CO2 (GLEC v3.2 p. 64) | `energy_ratio` 1 (same energy per tonne-km; an assumption, stated in the output) |
+| `fuel_switch` | Matching diesel road legs use `fuel` (`hvo`, `b100`, `biomethane`, `biomethane_lng`, `cng`, `lng` or a dataset fuel id): energy from the leg's diesel emissions and DESNZ's diesel factor per kWh, × `energy_ratio`, × the fuel's factor per GJ (modelled, ISO 14083 7.2.4). Biofuel factors exclude biogenic CO2, which is given separately as `biogenic_co2_kg` (GLEC v3.2 p. 64) | `energy_ratio` 1 (same energy per tonne-km; an assumption, stated in the output) |
 | `load` | The shipment's own matching road legs get `load_tonnes` or `load_factor`, and `empty_trip_factor` | none |
 
 `vehicle_types` limits a change to those road vehicle types (empty: all road legs). `share` applies a change to that share of the cargo on each matching leg: emissions are (1 − share) × before + share × after. Changes apply in order; a later change works on what an earlier one left on diesel. The CSV is the same as for `batch`; up to 2,500 shipments per API request.
 
 ## Inputs
+
+**Biogenic CO2.** Fuels with DESNZ's "outside of scopes" factor (biofuels, and the biofuel share of average diesel and petrol) carry `biogenic_co2_kg_per_unit`. A leg given as measured fuel reports `biogenic_co2_kg`, and results and reports sum it, separately and not in the totals, as the GLEC Framework v3.2 asks (p. 64). Fleet-average vehicle factors don't give it.
 
 **Weight or containers.** Give `weight_kg`, or `teu` plus either `teu_net_tonnes` (net cargo tonnes per TEU) or `container_load`, a profile name from the dataset's `container_loads`. The default dataset has GLEC's: `average` 10 t, `light` 6 t, `heavy` 14.5 t per TEU (GLEC Framework v3.2, Section 1 Chapter 2, for when the mass is known only in TEU); `teu` alone uses `average`. Results show the `weight_kg` used, its `weight_basis` and the `container_load` used. Container tare weight is not added.
 

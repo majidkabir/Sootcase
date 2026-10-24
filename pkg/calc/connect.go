@@ -484,7 +484,11 @@ func (c Calculator) accessPoint(ctx context.Context, m Mode, p, other Location, 
 		}
 		good = append(good, scored{q, km})
 	}
-	sort.SliceStable(good, func(i, j int) bool { return good[i].km < good[j].km })
+	if c.NearestTerminal && m == Rail {
+		sort.SliceStable(good, func(i, j int) bool { return gcKm(p, good[i].q) < gcKm(p, good[j].q) })
+	} else {
+		sort.SliceStable(good, func(i, j int) bool { return good[i].km < good[j].km })
+	}
 	// The best that can be reached by road.
 	for _, s := range good {
 		a, b := p, s.q

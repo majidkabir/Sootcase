@@ -13,9 +13,10 @@
 //     waterborne transport by 2030") move to rail for share of the cargo
 //     (default 0.3, same source). The rail part must be longer than
 //     min_rail_km in a straight line (default 100 km, Council Directive
-//     92/106/EEC on combined transport, Article 1); the calculator adds the
-//     road legs to and from the rail terminals, as it does for any rail leg
-//     that starts or ends off the network.
+//     92/106/EEC on combined transport, Article 1), with road legs to and
+//     from the nearest rail terminal on the network that can be reached by
+//     road (the Directive's "nearest suitable rail station"; terminal
+//     "best_trip" uses the calculator's usual choice instead).
 //   - electrify: matching road legs run on electricity: no tank-to-wheel
 //     emissions, and kwh_per_tkm × the country's grid factor upstream (as
 //     the calculator's energy method). kwh_per_tkm, country and source are
@@ -62,12 +63,18 @@ const (
 		"should shift to other modes such as rail or waterborne transport by 2030\""
 	SourceDirective = "Council Directive 92/106/EEC (combined transport), Article 1: the rail section exceeds 100 km as the crow flies; " +
 		"road to and from the nearest suitable rail station"
-	SourceTerminals = "Road legs to and from the rail terminals added as for any rail leg off the network: the terminal giving " +
-		"the best trip among the nearest ones"
-	SourceEnergy = "Energy use derived from the leg's diesel emissions and the diesel (average biofuel blend) factor per kWh net CV; " +
+	SourceTerminals = "Road legs to and from the nearest rail terminal on the rail network that can be reached by road. " +
+		"\"Suitable\" in the Directive's sense can't be checked further: the place list (UN/LOCODE) marks rail terminals, " +
+		"not which ones handle containers or trailers"
+	SourceBestTrip = "Road legs to and from the rail terminal giving the best trip among the nearest ones (terminal: best_trip)"
+
+	TerminalNearest  = "nearest"
+	TerminalBestTrip = "best_trip"
+	SourceEnergy     = "Energy use derived from the leg's diesel emissions and the diesel (average biofuel blend) factor per kWh net CV; " +
 		"modelled calculation (ISO 14083 7.2.4)"
 	SourceBiogenic = "Biofuel factors exclude biogenic CO2, as the GLEC Framework v3.2 asks (p. 64: CO2e excluding biogenic CO2, " +
-		"reported separately); biogenic CO2 is not calculated here"
+		"reported separately): it is given separately as biogenic_co2_kg, from DESNZ's \"outside of scopes\" factor for the fuel. " +
+		"The biofuel share of the average diesel blend in fleet-average factors isn't counted (the vehicle factors don't give it)"
 )
 
 // DieselFuel is the fuel the diesel road factors are converted from.
@@ -106,6 +113,10 @@ type Change struct {
 	MinRoadKm   *float64 `json:"min_road_km,omitempty"`
 	MinRailKm   *float64 `json:"min_rail_km,omitempty"`
 	RailVehicle string   `json:"rail_vehicle,omitempty"` // default freight_train
+	// Terminal is how road_to_rail picks the rail terminals: "nearest"
+	// (default; Directive 92/106/EEC: the nearest suitable rail station) or
+	// "best_trip" (the calculator's usual choice among the nearest).
+	Terminal string `json:"terminal,omitempty"`
 
 	// electrify
 	KWhPerTkm float64 `json:"kwh_per_tkm,omitempty"`
@@ -132,12 +143,17 @@ type Totals struct {
 	TTWKg float64 `json:"ttw_kg"`
 	WTTKg float64 `json:"wtt_kg"`
 	WTWKg float64 `json:"wtw_kg"`
+	// BiogenicCO2Kg is reported separately, not part of the totals (GLEC
+	// Framework v3.2 p. 64): from biofuels a change switches to, and from
+	// legs given as measured biofuel use.
+	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
 }
 
 func (t *Totals) add(o Totals, w float64) {
 	t.TTWKg += w * o.TTWKg
 	t.WTTKg += w * o.WTTKg
 	t.WTWKg += w * o.WTWKg
+	t.BiogenicCO2Kg += w * o.BiogenicCO2Kg
 }
 
 // ShipmentResult compares one shipment.
@@ -203,6 +219,13 @@ func (p Plan) Validate() ([]Change, error) {
 			}
 			if c.RailVehicle == "" {
 				c.RailVehicle = "freight_train"
+			}
+			switch c.Terminal {
+			case "":
+				c.Terminal = TerminalNearest
+			case TerminalNearest, TerminalBestTrip:
+			default:
+				return nil, bad("terminal must be %s or %s", TerminalNearest, TerminalBestTrip)
 			}
 		case Electrify:
 			if !(c.KWhPerTkm > 0) || c.KWhPerTkm > 10 {
@@ -272,7 +295,11 @@ func (c Change) sources(f calc.FactorProvider) []string {
 		if *c.MinRailKm == DefaultMinRailKm {
 			s = append(s, SourceDirective)
 		}
-		s = append(s, SourceTerminals)
+		if c.Terminal == TerminalBestTrip {
+			s = append(s, SourceBestTrip)
+		} else {
+			s = append(s, SourceTerminals)
+		}
 		if rf, err := f.LegFactor(calc.Rail, c.RailVehicle); err == nil {
 			s = append(s, "Rail: "+rf.Source)
 		}
@@ -342,7 +369,7 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 	f := c.Factors
 	// Resolve the factors the post-calculation changes need, once.
 	var dieselPerGJ float64
-	fuels := map[int][2]float64{} // change index -> TTW, WTT kg per GJ
+	fuels := map[int][3]float64{} // change index -> TTW, WTT, biogenic CO2 kg per GJ
 	grids := map[int]float64{}    // change index -> g per kWh
 	for i, ch := range changes {
 		switch ch.Type {
@@ -358,7 +385,7 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 			if err != nil {
 				return Result{}, err
 			}
-			fuels[i] = [2]float64{nf.TTW * m, nf.WTT * m}
+			fuels[i] = [3]float64{nf.TTW * m, nf.WTT * m, nf.BiogenicCO2 * m}
 		case Electrify:
 			gp, ok := f.(calc.GridProvider)
 			if !ok {
@@ -434,11 +461,11 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 	return res, nil
 }
 
-func totals(r calc.Result) Totals { return Totals{r.TTWKg, r.WTTKg, r.WTWKg} }
+func totals(r calc.Result) Totals { return Totals{r.TTWKg, r.WTTKg, r.WTWKg, r.BiogenicCO2Kg} }
 
 // runOne compares one shipment.
 func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []Change, dieselPerGJ float64,
-	fuels map[int][2]float64, grids map[int]float64, reports []ChangeReport) ShipmentResult {
+	fuels map[int][3]float64, grids map[int]float64, reports []ChangeReport) ShipmentResult {
 	sr := ShipmentResult{ShipmentID: s.ID}
 	s.Legs = append([]calc.Leg(nil), s.Legs...)
 	for i := range s.Legs {
@@ -585,7 +612,7 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 
 // legChanges returns the change in a leg's emissions from the
 // post-calculation changes (electrify, fuel_switch), and which changes hit.
-func legChanges(l calc.LegResult, changes []Change, dieselPerGJ float64, fuels map[int][2]float64,
+func legChanges(l calc.LegResult, changes []Change, dieselPerGJ float64, fuels map[int][3]float64,
 	grids map[int]float64, touched []bool) (Totals, []bool) {
 	hit := make([]bool, len(changes))
 	if l.Mode != calc.Road {
@@ -617,7 +644,7 @@ func legChanges(l calc.LegResult, changes []Change, dieselPerGJ float64, fuels m
 			}
 			gj := ttw / dieselPerGJ * *ch.EnergyRatio
 			nt, nw := gj*fuels[i][0], gj*fuels[i][1]
-			d.add(Totals{TTWKg: nt - ttw, WTTKg: nw - wtt, WTWKg: nt + nw - ttw - wtt}, p)
+			d.add(Totals{TTWKg: nt - ttw, WTTKg: nw - wtt, WTWKg: nt + nw - ttw - wtt, BiogenicCO2Kg: gj * fuels[i][2]}, p)
 		default:
 			continue
 		}
@@ -665,6 +692,7 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 		rs := s
 		rs.Legs = append([]calc.Leg(nil), s.Legs...)
 		cc := c
+		cc.NearestTerminal = ch.Terminal != TerminalBestTrip
 		for _, j := range js {
 			l := s.Legs[j]
 			if cc.RoadVehicle == "" {

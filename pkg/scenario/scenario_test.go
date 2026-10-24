@@ -39,7 +39,7 @@ func TestValidate_Defaults(t *testing.T) {
 		t.Fatal(err)
 	}
 	c := cs[0]
-	if *c.Share != 0.3 || *c.MinRoadKm != 300 || *c.MinRailKm != 100 || c.RailVehicle != "freight_train" {
+	if *c.Share != 0.3 || *c.MinRoadKm != 300 || *c.MinRailKm != 100 || c.RailVehicle != "freight_train" || c.Terminal != TerminalNearest {
 		t.Errorf("defaults: %+v", c)
 	}
 	for name, p := range map[string]Plan{
@@ -54,6 +54,7 @@ func TestValidate_Defaults(t *testing.T) {
 		"load both":        {Changes: []Change{{Type: LoadChange, LoadTonnes: ptr(10), LoadFactor: ptr(0.5)}}},
 		"share 0":          {Changes: []Change{{Type: RoadToRail, Share: ptr(0)}}},
 		"share > 1":        {Changes: []Change{{Type: RoadToRail, Share: ptr(1.5)}}},
+		"bad terminal":     {Changes: []Change{{Type: RoadToRail, Terminal: "closest"}}},
 	} {
 		if _, err := p.Validate(); !errors.Is(err, ErrInvalidPlan) {
 			t.Errorf("%s: want ErrInvalidPlan, got %v", name, err)
@@ -144,6 +145,9 @@ func TestFuelSwitch_HVO(t *testing.T) {
 	base := res.Shipments[0].Base
 	gj := base.TTWKg / (d.TTW * kWhPerGJ)
 	got := res.Shipments[0].Scenario
+	if !near(got.BiogenicCO2Kg, gj*h.BiogenicCO2) || h.BiogenicCO2 != 70.83 || base.BiogenicCO2Kg != 0 {
+		t.Errorf("HVO biogenic CO2: %v, want %v (factor %v)", got.BiogenicCO2Kg, gj*h.BiogenicCO2, h.BiogenicCO2)
+	}
 	if !near(got.TTWKg, gj*h.TTW) || !near(got.WTTKg, gj*h.WTT) {
 		t.Errorf("HVO: %+v; want TTW %v WTT %v", got, gj*h.TTW, gj*h.WTT)
 	}

@@ -60,6 +60,12 @@ type Calculator struct {
 	// NoRoadLegs adds no road legs for shipments that don't ask for them
 	// (Shipment.AddRoadLegs); see connect.go.
 	NoRoadLegs bool
+	// NearestTerminal moves a rail leg end that is off the network to the
+	// nearest rail terminal on the network that can be reached by road,
+	// instead of the one giving the best trip among the nearest (as the
+	// Combined Transport Directive 92/106/EEC describes combined transport:
+	// road to the nearest suitable rail station).
+	NearestTerminal bool
 	// RetryWaits are the pauses before CalculateRetrying tries again after
 	// a temporary failure (nil: DefaultRetryWaits; empty: no retries).
 	RetryWaits []time.Duration
@@ -187,6 +193,7 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 		res.TonneKm += lr.TonneKm
 		res.TTWKg += lr.TTWKg
 		res.WTWKg += lr.WTWKg
+		res.BiogenicCO2Kg += lr.BiogenicCO2Kg
 	}
 
 	if res.TonneKm > 0 {
@@ -433,6 +440,7 @@ func (c Calculator) fuelLeg(lr LegResult, fu FuelUse) (LegResult, error) {
 	lr.AllocationShare = share
 	lr.TTWKg = fu.Amount * ff.TTW * share
 	lr.WTWKg = fu.Amount * ff.WTW() * share
+	lr.BiogenicCO2Kg = fu.Amount * ff.BiogenicCO2 * share
 	return lr, nil
 }
 

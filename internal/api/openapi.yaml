@@ -396,6 +396,7 @@ components:
       type: object
       properties:
         fuel: { type: string }
+        biogenic_co2_kg_per_unit: { type: number, description: "Biogenic CO2 per unit, outside the TTW/WTT factors" }
         unit: { type: string }
         ttw_kg_per_unit: { type: number }
         wtt_kg_per_unit: { type: number }
@@ -412,6 +413,7 @@ components:
       type: object
       properties:
         leg_id: { type: string, description: "The leg's id, or added-N for an added road leg" }
+        biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.2 p. 64)" }
         added:
           type: string
           enum: [gap, access]
@@ -481,6 +483,7 @@ components:
       type: object
       properties:
         shipment_id: { type: string }
+        biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.2 p. 64)" }
         weight_kg: { type: number, description: Cargo weight used }
         weight_basis: { type: string, enum: [weight, teu] }
         container_load: { type: string, description: Container load profile that set the tonnes per TEU }
@@ -621,6 +624,7 @@ components:
         min_road_km: { type: number, description: "road_to_rail: road legs longer than this (default 300)" }
         min_rail_km: { type: number, description: "road_to_rail: rail part longer than this in a straight line (default 100)" }
         rail_vehicle: { type: string, description: "road_to_rail: default freight_train" }
+        terminal: { type: string, enum: [nearest, best_trip], description: "road_to_rail: nearest rail terminal reachable by road (default, Directive 92/106/EEC), or the best trip among the nearest" }
         kwh_per_tkm: { type: number, description: "electrify: kWh per tonne-km" }
         country: { type: string, description: "electrify: ISO 3166 alpha-3 for the grid factor" }
         fuel: { type: string, description: "fuel_switch: hvo, b100, biodiesel, biomethane, biomethane_lng, cng, lng, or a dataset fuel id" }
@@ -638,6 +642,7 @@ components:
       type: object
       properties:
         ttw_kg: { type: number }
+        biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.2 p. 64)" }
         wtt_kg: { type: number }
         wtw_kg: { type: number }
     ScenarioResult:

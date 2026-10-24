@@ -510,3 +510,28 @@ func TestContainerLoads_GLEC(t *testing.T) {
 		t.Errorf("TEU alone: weight %v profile %q, %v", r.WeightKg, r.ContainerLoad, err)
 	}
 }
+
+// DESNZ "outside of scopes": biogenic CO2 per unit, kept out of the totals
+// and reported separately (GLEC Framework v3.2 p. 64).
+func TestBiogenicCO2(t *testing.T) {
+	ds, err := Open("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, want := range map[string]float64{"biofuel/biodiesel_hvo/litres": 2.43, "biofuel/biodiesel_hvo/kg": 3.12,
+		"liquid_fuels/diesel_average_biofuel_blend/litres": 0.14, "liquid_fuels/diesel_100pct_mineral_diesel/litres": 0} {
+		if f, err := ds.FuelFactor(id); err != nil || f.BiogenicCO2 != want {
+			t.Errorf("%s: biogenic %v, %v; want %v", id, f.BiogenicCO2, err, want)
+		}
+	}
+	c := calc.Calculator{Factors: ds}
+	r, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 10000, Legs: []calc.Leg{
+		{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 300, Fuel: &calc.FuelUse{Fuel: "hvo", Amount: 100}}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, _ := ds.FuelFactor("hvo")
+	if math.Abs(r.BiogenicCO2Kg-243) > 1e-9 || math.Abs(r.WTWKg-100*h.WTW()) > 1e-9 {
+		t.Errorf("HVO leg: biogenic %v (want 243, outside WTW %v)", r.BiogenicCO2Kg, r.WTWKg)
+	}
+}

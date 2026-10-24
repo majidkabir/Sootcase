@@ -168,6 +168,9 @@ type Total struct {
 	HubWTWKg   float64 `json:"hub_wtw_kg"`
 	TonneKm    float64 `json:"tonne_km"`
 	IntensityG float64 `json:"intensity_g_per_tkm"` // transport WTW
+	// BiogenicCO2Kg is reported separately and not included above (GLEC
+	// Framework v3.2 p. 64); only measured fuel with a biogenic factor.
+	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
 	// DistanceTypes is the share of tonne-km per distance type (sfd, gcd,
 	// actual, or "unspecified").
 	DistanceTypes map[string]float64 `json:"distance_types"`
@@ -399,6 +402,7 @@ func (b *Builder) element(l calc.LegResult) {
 	b.tot.TTWKg += l.TTWKg
 	b.tot.WTTKg += l.WTTKg
 	b.tot.TransportWTWKg += l.WTWKg
+	b.tot.BiogenicCO2Kg += l.BiogenicCO2Kg
 
 	carrier := Unspecified
 	switch {

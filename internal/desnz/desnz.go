@@ -6,6 +6,8 @@
 //   - "WTT- delivery vehs & freight" rows    -> the matching leg WTT
 //   - "Fuels" and "Bioenergy" rows           -> fuel factors (TTW)
 //   - "WTT- fuels" / "WTT- bioenergy" rows   -> the matching fuel WTT
+//   - "Outside of scopes" rows (kg CO2 per unit) -> biogenic CO2 of the
+//     matching bioenergy fuel, kept outside its totals
 //
 // Rows are matched to their WTT counterpart by Level 2/3/4, Column Text and
 // unit. Vehicle types and fuel ids are slugs of those labels, so the dataset
@@ -56,7 +58,7 @@ func Parse(rows [][]string) (Result, error) {
 	var res Result
 	warn := func(format string, a ...any) { res.Warnings = append(res.Warnings, fmt.Sprintf(format, a...)) }
 
-	var freight, freightWTT, fuel, fuelWTT, freightKm, freightWTTKm []row
+	var freight, freightWTT, fuel, fuelWTT, freightKm, freightWTTKm, biogenic []row
 	for i := hdr + 1; i < len(rows); i++ {
 		get := func(c string) string {
 			idx := cols[c]
@@ -65,11 +67,21 @@ func Parse(rows [][]string) (Result, error) {
 			}
 			return strings.TrimSpace(rows[i][idx])
 		}
-		if norm(get("ghg/unit")) != "kgco2e" {
+		l1, uom := norm(get("level 1")), norm(get("uom"))
+		ghg := norm(get("ghg/unit"))
+		if l1 == "outsideofscopes" && strings.Contains(ghg, "ofco2") {
+			// Biogenic CO2 of bioenergy ("kg CO2e of CO2 per unit"):
+			// kept beside the fuel factor, outside its totals.
+			if v, err := strconv.ParseFloat(get("factor"), 64); err == nil {
+				biogenic = append(biogenic, row{level2: get("level 2"), level3: get("level 3"), level4: get("level 4"),
+					text: get("column text"), uom: get("uom"), value: v, line: i + 1})
+			}
+			continue
+		}
+		if ghg != "kgco2e" {
 			continue
 		}
 		var dst *[]row
-		l1, uom := norm(get("level 1")), norm(get("uom"))
 		switch {
 		case l1 == "freightinggoods" && uom == "tonne.km":
 			dst = &freight
@@ -141,6 +153,15 @@ func Parse(rows [][]string) (Result, error) {
 	}
 
 	fwtt := index(fuelWTT, warn, "fuel WTT")
+	bio := map[string]row{}
+	for _, r := range biogenic {
+		bio[key(r)] = r
+		if norm(r.level2) == "forecourtfuelscontainingbiofuel" {
+			// The biogenic share of diesel and petrol as sold, listed under
+			// another Level 2 than the fuel itself.
+			bio["blend|"+norm(r.level3)+"|"+norm(r.uom)] = r
+		}
+	}
 	seen = map[string]bool{}
 	for _, r := range fuel {
 		id := slugPath(r.level2, r.level3, r.level4, r.text, r.uom)
@@ -158,6 +179,11 @@ func Parse(rows [][]string) (Result, error) {
 			delete(fwtt, key(r))
 		} else {
 			warn("line %d: no WTT factor for fuel %s, WTT set to 0", r.line, id)
+		}
+		if b, ok := bio[key(r)]; ok && norm(r.level1) == "bioenergy" {
+			f.BiogenicCO2 = clean(b.value)
+		} else if b, ok := bio["blend|"+norm(r.level3)+"|"+norm(r.uom)]; ok && norm(r.level1) == "fuels" {
+			f.BiogenicCO2 = clean(b.value)
 		}
 		ds.Fuels = append(ds.Fuels, f)
 	}

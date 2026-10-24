@@ -71,6 +71,10 @@ type FuelFactor struct {
 	WTT    float64 `json:"wtt_kg_per_unit"`
 	Source string  `json:"source"`
 	Year   int     `json:"year"`
+	// BiogenicCO2 is the CO2 of biological origin released by burning a
+	// unit (kg). It is not part of TTW or WTW: the GLEC Framework v3.2 and
+	// the GHG Protocol report it separately (GLEC p. 64).
+	BiogenicCO2 float64 `json:"biogenic_co2_kg_per_unit,omitempty"`
 }
 
 // WTW is the well-to-wheel factor (WTT + TTW).
@@ -168,7 +172,11 @@ type LegResult struct {
 	WTWKg        float64 `json:"wtw_kg"`
 	// IntensityG is WTW g CO2e per tonne-km for this leg.
 	IntensityG float64 `json:"intensity_g_per_tkm"`
-	Method     string  `json:"method"`
+	// BiogenicCO2Kg is the biogenic CO2 of the fuel burnt (fuel method with
+	// a fuel that has a biogenic factor), reported separately and not part
+	// of TTW or WTW (GLEC Framework v3.2 p. 64).
+	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
+	Method        string  `json:"method"`
 	// DataType is primary, modelled or default (see Data* constants).
 	DataType string `json:"data_type"`
 	// Factor is set for the intensity method, FuelFactor and
@@ -235,6 +243,10 @@ type Result struct {
 	WTWKg         float64     `json:"wtw_kg"`
 	// IntensityG is transport WTW intensity in g CO2e per tonne-km (hubs excluded).
 	IntensityG float64 `json:"intensity_g_per_tkm"`
+	// BiogenicCO2Kg sums the legs' biogenic CO2: reported separately, not
+	// part of the totals (GLEC Framework v3.2 p. 64). Fleet-average factors
+	// don't give it, so only measured fuel contributes.
+	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
 	// PrimaryDataShare is the share of WTW emissions computed from primary
 	// data (0..1).
 	PrimaryDataShare float64 `json:"primary_data_share"`

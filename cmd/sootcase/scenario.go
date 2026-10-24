@@ -90,6 +90,9 @@ func writeScenario(w io.Writer, r scenario.Result) {
 	fmt.Fprintf(w, "%-10s %11.1f kg %11.1f kg\n", "TTW", r.Base.TTWKg, r.Scenario.TTWKg)
 	fmt.Fprintf(w, "%-10s %11.1f kg %11.1f kg\n", "WTT", r.Base.WTTKg, r.Scenario.WTTKg)
 	fmt.Fprintf(w, "%-10s %11.1f kg %11.1f kg\n", "WTW", r.Base.WTWKg, r.Scenario.WTWKg)
+	if r.Base.BiogenicCO2Kg > 0 || r.Scenario.BiogenicCO2Kg > 0 {
+		fmt.Fprintf(w, "%-10s %11.1f kg %11.1f kg   (biogenic CO2, reported separately, not in WTW)\n", "biogenic", r.Base.BiogenicCO2Kg, r.Scenario.BiogenicCO2Kg)
+	}
 	fmt.Fprintf(w, "\nChange: %+.1f kg CO2e WTW (%+.1f%%)\n", r.DiffKg, r.DiffPct)
 	for i, c := range r.Changes {
 		fmt.Fprintf(w, "\n%d. %s, share %.0f%%: %d shipments, %d legs\n", i+1, c.Type, *c.Share*100, c.ShipmentsAffected, c.LegsAffected)

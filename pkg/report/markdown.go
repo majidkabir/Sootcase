@@ -35,6 +35,9 @@ func WriteMarkdown(w io.Writer, r Report) error {
 	p("| Transport, operational (TTW) | %s |\n", num(t.TTWKg, 1))
 	p("| Transport, energy provision (WTT) | %s |\n", num(t.WTTKg, 1))
 	p("| Hub operations (WTW) | %s |\n\n", num(t.HubWTWKg, 1))
+	if t.BiogenicCO2Kg > 0 {
+		p("Biogenic CO2, reported separately and not included above (GLEC Framework v3.2 p. 64): %s kg, from measured biofuel use.\n\n", num(t.BiogenicCO2Kg, 1))
+	}
 	p("Transport activity: %s tonne-km (%s).  \n", num(t.TonneKm, 0), distText(t.DistanceTypes))
 	p("Transport emission intensity (WTW): **%s g CO2e/tkm**.\n\n", num(t.IntensityG, 2))
 

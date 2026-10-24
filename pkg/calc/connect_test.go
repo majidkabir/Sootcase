@@ -294,3 +294,30 @@ func TestRoadLegs_AirFromCity(t *testing.T) {
 		t.Errorf("off: %+v %q %v", r.Legs, r.Warnings, err)
 	}
 }
+
+// NearestTerminal: the nearest rail terminal on the network, as the
+// Combined Transport Directive puts it, instead of the best trip.
+func TestRoadLegs_NearestTerminal(t *testing.T) {
+	dest := Location{Name: "Dest", Lat: 50.0, Lon: 12.0}
+	south := Location{Name: "South terminal", Lat: 49.64, Lon: 12.0} // 40 km from Dest, away from Berlin
+	north := Location{Name: "North terminal", Lat: 50.45, Lon: 12.0} // 50 km from Dest, towards Berlin
+	w := world{rail: []Location{berlin, south, north}}
+	places := gazetteer{{berlin, []string{KindRail}}, {south, []string{KindRail}}, {north, []string{KindRail}}}
+	s := Shipment{ID: "s", WeightKg: 1000, Legs: []Leg{{ID: "r", Mode: Rail, VehicleType: "train", From: berlin, To: dest}}}
+
+	c := Calculator{Factors: connectFactors, Distances: w, Places: places}
+	r, err := c.Calculate(context.Background(), s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Legs[0].To.Name != "North terminal" {
+		t.Errorf("best trip: rail to %s, want North terminal", r.Legs[0].To.Name)
+	}
+	c.NearestTerminal = true
+	if r, err = c.Calculate(context.Background(), s); err != nil {
+		t.Fatal(err)
+	}
+	if r.Legs[0].To.Name != "South terminal" || r.Legs[1].From.Name != "South terminal" {
+		t.Errorf("nearest: rail to %s, want South terminal", r.Legs[0].To.Name)
+	}
+}

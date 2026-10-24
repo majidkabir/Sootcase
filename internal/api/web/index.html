@@ -652,7 +652,8 @@ function render(req, r) {
     ${warnings ? `<div class="warn">Check these, they may make the result too low:<ul>${warnings}</ul></div>` : ""}
     <p class="answer-sub">${fmt(r.weight_kg / 1000, 2)} t over ${fmt(r.tonne_km, 0)} tonne-km:
       ${kg(r.ttw_kg)} from the vehicles, ${kg(r.wtt_kg)} from producing their fuel or electricity,
-      ${fmt(r.intensity_g_per_tkm, 1)} g per tonne-km. ${share}% from measured data.</p>
+      ${fmt(r.intensity_g_per_tkm, 1)} g per tonne-km. ${share}% from measured data.${r.biogenic_co2_kg > 0 ? `
+      Biogenic CO₂ ${kg(r.biogenic_co2_kg)}, reported separately and not included (GLEC Framework v3.2).` : ""}</p>
     <div class="ribbon grow" role="img" aria-label="Share of emissions by leg">${segs}</div>
     <div class="ribbon-labels" aria-hidden="true">${labels}</div>
     <div class="legend"><span><i style="background:var(--ttw)"></i>Vehicle (tank-to-wheel)</span>
@@ -1134,6 +1135,8 @@ function renderScenario(r) {
       <tr><td>Tank-to-wheel</td><td class="num">${kg(b.ttw_kg)}</td><td class="num">${kg(sc.ttw_kg)}</td></tr>
       <tr><td>Well-to-tank</td><td class="num">${kg(b.wtt_kg)}</td><td class="num">${kg(sc.wtt_kg)}</td></tr>
       <tr><td><strong>Well-to-wheel</strong></td><td class="num"><strong>${kg(b.wtw_kg)}</strong></td><td class="num"><strong>${kg(sc.wtw_kg)}</strong></td></tr>
+      ${(b.biogenic_co2_kg || sc.biogenic_co2_kg) ? `<tr><td>Biogenic CO₂, separate (not included above)</td>
+        <td class="num">${kg(b.biogenic_co2_kg || 0)}</td><td class="num">${kg(sc.biogenic_co2_kg || 0)}</td></tr>` : ""}
     </tbody></table>
     <h3>Changes</h3><ul>${changes}</ul>
     ${notes ? `<h3>Notes</h3><ul>${notes}</ul>` : ""}

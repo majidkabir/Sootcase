@@ -247,6 +247,12 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 		emissions.Formula = fmt.Sprintf("TTW = %s %s × %s kg/%s × %s = %s kg\nWTT = %s %s × %s kg/%s × %s = %s kg\nWTW = %s kg",
 			n(amount, 3), ff.Unit, n(ff.TTW, 4), unit(ff.Unit), n(share, 4), n(ttwKg, 3),
 			n(amount, 3), ff.Unit, n(ff.WTT, 4), unit(ff.Unit), n(share, 4), n(wttKg, 3), n(wtwKg, 3))
+		if l.BiogenicCO2Kg > 0 {
+			emissions.Text += fmt.Sprintf(" Biogenic CO₂ from burning the fuel's biological part, %s kg per %s, is reported separately and "+
+				"not included (GLEC p.64).", n(ff.BiogenicCO2, 4), unit(ff.Unit))
+			emissions.Formula += fmt.Sprintf("\nbiogenic CO₂ (separate) = %s %s × %s kg/%s × %s = %s kg",
+				n(amount, 3), ff.Unit, n(ff.BiogenicCO2, 4), unit(ff.Unit), n(share, 4), n(l.BiogenicCO2Kg, 3))
+		}
 		return []Step{s, emissions}
 
 	case calc.MethodEnergy:
