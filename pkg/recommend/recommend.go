@@ -1007,7 +1007,7 @@ func (a *analyser) otherPorts() {
 			}
 		}
 	}
-	if !found {
+	if !found && hasSea(a.s.Legs) {
 		a.note("Other port: no sea leg with a road or rail leg on its land side")
 	}
 }
@@ -1143,4 +1143,13 @@ func summarise(res *Result) {
 	if math.IsNaN(res.SavedPct) {
 		res.SavedPct = 0
 	}
+}
+
+func hasSea(legs []calc.Leg) bool {
+	for _, l := range legs {
+		if l.Mode == calc.Sea {
+			return true
+		}
+	}
+	return false
 }
