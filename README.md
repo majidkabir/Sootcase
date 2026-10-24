@@ -269,6 +269,23 @@ Fuels are converted with the selected dataset's fuel factors, including `electri
 
 `vehicle_types` limits a change to those road vehicle types (empty: all road legs). `share` applies a change to that share of the cargo on each matching leg: emissions are (1 − share) × before + share × after. Changes apply in order; a later change works on what an earlier one left on diesel. The CSV is the same as for `batch`; up to 2,500 shipments per API request.
 
+## Recommendations (route changes)
+
+`sootcase recommend shipments.csv` (or `POST /v1/recommend`) looks for route changes that lower each shipment's emissions and calculates every alternative with the same method as the shipment. It lists those lower than now, best first, with totals per kind and per lane. Results are scenarios, not reported emissions.
+
+| Kind | What it tries |
+|---|---|
+| `road_to_rail` | Road legs over `min_road_km` by rail, with road to and from the nearest rail terminal |
+| `road_to_waterway` | The same legs by inland waterway (`waterway_vehicle`, default `container_barge`) |
+| `road_to_short_sea` | The same legs by sea (`short_sea_vehicle`, default `roro`) |
+| `air_to_sea`, `air_to_rail` | Each air leg, with the road legs next to it, as one sea or rail leg from where the cargo starts to where it ends |
+| `other_port` | The large sea ports within `port_radius_km` of each port used now, with the leg on the land side going there |
+| `fuller_loads` | The shipment's road vehicles at `load_tonnes` or `load_factor` (and `empty_trip_factor`, `load_vehicle`); only when you give a load |
+
+Rules (defaults, with sources, all settable): road legs over 300 km (EU Transport White Paper 2011); the rail, waterway or sea part over 100 km in a straight line, road to and from a waterway or sea port within 150 km of it, and road to the nearest rail terminal (Council Directive 92/106/EEC, Article 1). Sea and waterway alternatives need their networks loaded.
+
+Not taken into account (also in every result): transit times and costs; whether a service runs on the lane; terminal equipment; emissions at the extra transshipments (no hub factors yet); combining shipments (the CSV has no dates). Up to 1,000 shipments per API request; shipments with the same legs are calculated once and scaled by weight.
+
 ## Inputs
 
 **Biogenic CO2.** Fuels with DESNZ's "outside of scopes" factor (biofuels, and the biofuel share of average diesel and petrol) carry `biogenic_co2_kg_per_unit`. A leg given as measured fuel reports `biogenic_co2_kg`, and results and reports sum it, separately and not in the totals, as the GLEC Framework v3.2 asks (p. 64). Fleet-average vehicle factors don't give it.
@@ -431,6 +448,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 | `internal/api` | HTTP handlers and OpenAPI spec. |
 | `cmd/sootcase` | CLI. |
 | `pkg/scenario` | What-if comparisons: the same shipments with changed inputs. |
+| `pkg/recommend` | Route changes that lower emissions: alternatives per shipment, calculated with the same method. |
 | `tools/loadtest` | Load generator for a running server. |
 | `tools/gazetteer` | Builds the embedded place list. |
 
@@ -465,6 +483,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 - [x] Inland waterway routing (OSRM barge profile on OpenStreetMap)
 - [x] ISO 14083 style reports (`sootcase report`, `/v1/report`)
 - [x] What-if scenarios (`sootcase scenario`, `/v1/scenario`): road to rail, electric trucks, other fuels, loads
+- [x] Recommendations (`sootcase recommend`, `/v1/recommend`): road to rail, waterway or short sea, air to sea or rail, other ports, fuller loads
 - [x] Missing road legs: gaps between legs, first and last mile to ports, rail terminals and airports
 - [ ] Cargo-type presets (needs licensed values, e.g. EcoTransIT with permission)
 

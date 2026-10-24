@@ -139,6 +139,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/calculate/batch", s.limited(s.calculateBatch))
 	mux.HandleFunc("POST /v1/report", s.limited(s.report))
 	mux.HandleFunc("POST /v1/scenario", s.limited(s.scenarioRun))
+	mux.HandleFunc("POST /v1/recommend", s.limited(s.recommendRun))
 	var h http.Handler = s.recoverPanics(secureHeaders(mux))
 	if s.Log != nil {
 		h = s.logRequests(h)

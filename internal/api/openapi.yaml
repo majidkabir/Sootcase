@@ -235,6 +235,50 @@ paths:
         "413": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Busy" }
         "504": { $ref: "#/components/responses/Error" }
+  /v1/recommend:
+    post:
+      summary: Route changes that lower emissions, for up to 1,000 shipments
+      description: >
+        For each shipment, calculates alternatives with the same method:
+        road legs to rail, inland waterway or short sea; air legs to sea or
+        rail; other sea ports; fuller loads (when a load is given). Lists
+        those lower than now, best first, with totals per kind and per lane,
+        the sources of the rules, and what isn't taken into account
+        (limitations). Defaults: road legs over 300 km (EU Transport White
+        Paper 2011); rail, waterway or sea part over 100 km in a straight
+        line, road to a waterway or sea port within 150 km of it, road to
+        the nearest rail terminal (Directive 92/106/EEC, Art. 1). Results are
+        scenarios, not reported emissions. Send JSON, or a shipments CSV
+        (text/csv) with the settings as JSON in the settings query parameter.
+      parameters:
+        - name: settings
+          in: query
+          schema: { type: string }
+          description: With a text/csv body, the settings as JSON (optional).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [shipments]
+              properties:
+                settings: { $ref: "#/components/schemas/RecommendSettings" }
+                shipments:
+                  type: array
+                  items: { $ref: "#/components/schemas/Shipment" }
+          text/csv:
+            schema: { type: string }
+      responses:
+        "200":
+          description: Alternatives
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecommendResult" }
+        "400": { $ref: "#/components/responses/Error" }
+        "413": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Busy" }
+        "504": { $ref: "#/components/responses/Error" }
 components:
   responses:
     Busy:
@@ -613,6 +657,78 @@ components:
         data_quality: { type: object }
         distance_adjustments: { type: array, items: { type: object } }
         notes: { type: array, items: { type: string } }
+    RecommendSettings:
+      type: object
+      properties:
+        kinds:
+          type: array
+          items: { type: string, enum: [road_to_rail, road_to_waterway, road_to_short_sea, air_to_sea, air_to_rail, other_port, fuller_loads] }
+          description: Kinds to try; empty means all (fuller_loads only with a load)
+        min_road_km: { type: number, description: "Road legs longer than this are tried on rail, waterway and short sea (default 300)" }
+        min_main_km: { type: number, description: "The rail, waterway or sea part must be longer than this in a straight line (default 100)" }
+        max_port_road_km: { type: number, description: "Road to and from a waterway or sea port within this of it in a straight line (default 150)" }
+        terminal: { type: string, enum: [nearest, best_trip] }
+        rail_vehicle: { type: string, description: default freight_train }
+        waterway_vehicle: { type: string, description: default container_barge }
+        short_sea_vehicle: { type: string, description: default roro }
+        sea_vehicle: { type: string, description: "default container_ship (air to sea)" }
+        port_radius_km: { type: number, description: "Other ports within this of the port used now (default 800)" }
+        max_ports: { type: integer, description: "Other ports to try per port (default 4)" }
+        load_tonnes: { type: number }
+        load_factor: { type: number }
+        empty_trip_factor: { type: number }
+        load_vehicle: { type: string }
+        source: { type: string, description: Where the load values come from }
+    RecommendRoute:
+      type: object
+      properties:
+        ttw_kg: { type: number }
+        wtt_kg: { type: number }
+        wtw_kg: { type: number }
+        biogenic_co2_kg: { type: number }
+        distance_km: { type: number }
+        transfers: { type: integer, description: Changes of mode along the route }
+        modes: { type: array, items: { type: string } }
+        steps: { type: array, items: { type: object } }
+    RecommendResult:
+      type: object
+      properties:
+        label: { type: string }
+        settings: { $ref: "#/components/schemas/RecommendSettings" }
+        skipped: { type: object, additionalProperties: { type: string } }
+        now: { $ref: "#/components/schemas/ScenarioTotals" }
+        best: { $ref: "#/components/schemas/ScenarioTotals" }
+        saved_kg: { type: number }
+        saved_pct: { type: number }
+        kinds: { type: array, items: { type: object } }
+        lanes: { type: array, items: { type: object } }
+        sources: { type: array, items: { type: string } }
+        limitations: { type: array, items: { type: string } }
+        failed: { type: integer }
+        shipments:
+          type: array
+          items:
+            type: object
+            properties:
+              shipment_id: { type: string }
+              lane: { type: string }
+              weight_kg: { type: number }
+              now: { $ref: "#/components/schemas/RecommendRoute" }
+              options:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/RecommendRoute"
+                    - type: object
+                      properties:
+                        kind: { type: string }
+                        summary: { type: string }
+                        saved_kg: { type: number }
+                        saved_pct: { type: number }
+                        extra_km_pct: { type: number }
+                        legs: { type: array, items: { type: object } }
+              notes: { type: array, items: { type: string } }
+              error: { type: string }
     ScenarioChange:
       type: object
       required: [type]

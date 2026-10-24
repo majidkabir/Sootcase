@@ -29,6 +29,7 @@ Usage:
   sootcase batch   [-factors name|file] shipments.csv   many shipments, CSV result
   sootcase report  [-factors name|file] [-from -to -org] shipments.csv   ISO 14083 style report (Markdown or JSON)
   sootcase scenario [-factors name|file] shipments.csv plan.json   what-if: the shipments now vs with the plan's changes
+  sootcase recommend [-factors name|file] [-settings file.json] shipments.csv   route changes that lower emissions
   sootcase stream  [-factors name|file] [file]          one shipment JSON per line in, one result per line out
   sootcase serve   [-factors name|file] [-addr :8080]   HTTP API
   sootcase factors [-factors name|file]                 print the factor dataset
@@ -54,6 +55,7 @@ func main() {
 		"batch":        runBatch,
 		"report":       runReport,
 		"scenario":     runScenario,
+		"recommend":    runRecommend,
 		"stream":       runStream,
 		"serve":        runServe,
 		"factors":      runFactors,
