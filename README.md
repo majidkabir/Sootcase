@@ -247,6 +247,28 @@ sootcase calc -factors desnz-2026,acme-2025.json shipment.json
 
 Fuels are converted with the selected dataset's fuel factors, including `electricity/<country>`.
 
+## Scenarios (what-if)
+
+`sootcase scenario shipments.csv plan.json` (or `POST /v1/scenario`) calculates the shipments as they are and with the plan's changes, with the same method, and shows both totals and the difference. Results are scenarios, not reported emissions; every value a change uses is given by you (with its source) or a default with its source, listed in the output.
+
+```json
+{"name": "2030", "changes": [
+  {"type": "road_to_rail"},
+  {"type": "electrify", "vehicle_types": ["hgv_rigid"], "kwh_per_tkm": 0.06, "country": "DEU", "source": "maker's data sheet"},
+  {"type": "fuel_switch", "fuel": "hvo", "share": 0.5},
+  {"type": "load", "vehicle_types": ["hgv_artic_33t"], "load_tonnes": 20, "empty_trip_factor": 0.15}
+]}
+```
+
+| Change | What it does | Defaults (source) |
+|---|---|---|
+| `road_to_rail` | Road legs longer than `min_road_km` go by rail for `share` of the cargo; the rail part must be longer than `min_rail_km` in a straight line, with road legs added to and from the rail terminals | 300 km and 30% (EU Transport White Paper 2011: "30% of road freight over 300 km should shift to other modes … by 2030"); 100 km (Directive 92/106/EEC on combined transport, Art. 1) |
+| `electrify` | Matching road legs: no tank-to-wheel emissions, `kwh_per_tkm` × the `country`'s grid factor upstream | none: give `kwh_per_tkm`, `country` and `source` |
+| `fuel_switch` | Matching diesel road legs use `fuel` (`hvo`, `b100`, `biomethane`, `biomethane_lng`, `cng`, `lng` or a dataset fuel id): energy from the leg's diesel emissions and DESNZ's diesel factor per kWh, × `energy_ratio`, × the fuel's factor per GJ (modelled, ISO 14083 7.2.4). Biofuel factors exclude biogenic CO2 (GLEC v3.2 p. 64) | `energy_ratio` 1 (same energy per tonne-km; an assumption, stated in the output) |
+| `load` | The shipment's own matching road legs get `load_tonnes` or `load_factor`, and `empty_trip_factor` | none |
+
+`vehicle_types` limits a change to those road vehicle types (empty: all road legs). `share` applies a change to that share of the cargo on each matching leg: emissions are (1 − share) × before + share × after. Changes apply in order; a later change works on what an earlier one left on diesel. The CSV is the same as for `batch`; up to 2,500 shipments per API request.
+
 ## Inputs
 
 **Weight or containers.** Give `weight_kg`, or `teu` plus either `teu_net_tonnes` (net cargo tonnes per TEU) or `container_load`, a profile name from the dataset's `container_loads`. The default dataset has GLEC's: `average` 10 t, `light` 6 t, `heavy` 14.5 t per TEU (GLEC Framework v3.2, Section 1 Chapter 2, for when the mass is known only in TEU); `teu` alone uses `average`. Results show the `weight_kg` used, its `weight_basis` and the `container_load` used. Container tare weight is not added.
@@ -406,6 +428,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 | `internal/grid` | Grid intensity importer (Our World in Data / Ember). |
 | `internal/api` | HTTP handlers and OpenAPI spec. |
 | `cmd/sootcase` | CLI. |
+| `pkg/scenario` | What-if comparisons: the same shipments with changed inputs. |
 | `tools/loadtest` | Load generator for a running server. |
 | `tools/gazetteer` | Builds the embedded place list. |
 
@@ -439,6 +462,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 - [x] Bundled inland waterway factors (Dutch CO2 emission factor list)
 - [x] Inland waterway routing (OSRM barge profile on OpenStreetMap)
 - [x] ISO 14083 style reports (`sootcase report`, `/v1/report`)
+- [x] What-if scenarios (`sootcase scenario`, `/v1/scenario`): road to rail, electric trucks, other fuels, loads
 - [x] Missing road legs: gaps between legs, first and last mile to ports, rail terminals and airports
 - [ ] Cargo-type presets (needs licensed values, e.g. EcoTransIT with permission)
 

@@ -190,6 +190,51 @@ paths:
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Busy" }
         "504": { $ref: "#/components/responses/Error" }
+  /v1/scenario:
+    post:
+      summary: What-if comparison of up to 2,500 shipments
+      description: >
+        Calculates the shipments as they are and with the plan's changes
+        (road_to_rail, electrify, fuel_switch, load), with the same method,
+        and returns both totals, the difference, and per change what it
+        affected and the sources of its values. Defaults for road_to_rail:
+        legs over 300 km, 30% of the cargo (EU Transport White Paper 2011),
+        rail part over 100 km in a straight line (Directive 92/106/EEC).
+        Results are scenarios, not reported emissions. Send JSON, or a
+        shipments CSV (text/csv) with the plan as JSON in the plan query
+        parameter.
+      parameters:
+        - name: plan
+          in: query
+          schema: { type: string }
+          description: With a text/csv body, the plan as JSON.
+        - name: add_road_legs
+          in: query
+          schema: { type: boolean, default: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [plan, shipments]
+              properties:
+                plan: { $ref: "#/components/schemas/ScenarioPlan" }
+                shipments:
+                  type: array
+                  items: { $ref: "#/components/schemas/Shipment" }
+          text/csv:
+            schema: { type: string }
+      responses:
+        "200":
+          description: Comparison
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScenarioResult" }
+        "400": { $ref: "#/components/responses/Error" }
+        "413": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Busy" }
+        "504": { $ref: "#/components/responses/Error" }
 components:
   responses:
     Busy:
@@ -565,3 +610,64 @@ components:
         data_quality: { type: object }
         distance_adjustments: { type: array, items: { type: object } }
         notes: { type: array, items: { type: string } }
+    ScenarioChange:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [road_to_rail, electrify, fuel_switch, load] }
+        vehicle_types: { type: array, items: { type: string }, description: Road vehicle types the change applies to; empty means all road legs }
+        share: { type: number, exclusiveMinimum: 0, maximum: 1, description: "Share of the cargo on each matching leg (default 0.3 for road_to_rail, else 1)" }
+        source: { type: string, description: Where the given values come from (required for electrify, and for energy_ratio other than 1) }
+        min_road_km: { type: number, description: "road_to_rail: road legs longer than this (default 300)" }
+        min_rail_km: { type: number, description: "road_to_rail: rail part longer than this in a straight line (default 100)" }
+        rail_vehicle: { type: string, description: "road_to_rail: default freight_train" }
+        kwh_per_tkm: { type: number, description: "electrify: kWh per tonne-km" }
+        country: { type: string, description: "electrify: ISO 3166 alpha-3 for the grid factor" }
+        fuel: { type: string, description: "fuel_switch: hvo, b100, biodiesel, biomethane, biomethane_lng, cng, lng, or a dataset fuel id" }
+        energy_ratio: { type: number, description: "fuel_switch: energy per tonne-km relative to the diesel vehicle (default 1)" }
+        load_tonnes: { type: number }
+        load_factor: { type: number }
+        empty_trip_factor: { type: number }
+    ScenarioPlan:
+      type: object
+      required: [changes]
+      properties:
+        name: { type: string }
+        changes: { type: array, items: { $ref: "#/components/schemas/ScenarioChange" } }
+    ScenarioTotals:
+      type: object
+      properties:
+        ttw_kg: { type: number }
+        wtt_kg: { type: number }
+        wtw_kg: { type: number }
+    ScenarioResult:
+      type: object
+      properties:
+        plan: { type: string }
+        label: { type: string }
+        base: { $ref: "#/components/schemas/ScenarioTotals" }
+        scenario: { $ref: "#/components/schemas/ScenarioTotals" }
+        diff_kg: { type: number, description: Scenario minus base, WTW }
+        diff_pct: { type: number }
+        failed: { type: integer }
+        changes:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/ScenarioChange"
+              - type: object
+                properties:
+                  shipments_affected: { type: integer }
+                  legs_affected: { type: integer }
+                  sources: { type: array, items: { type: string } }
+        shipments:
+          type: array
+          items:
+            type: object
+            properties:
+              shipment_id: { type: string }
+              base: { $ref: "#/components/schemas/ScenarioTotals" }
+              scenario: { $ref: "#/components/schemas/ScenarioTotals" }
+              diff_kg: { type: number }
+              notes: { type: array, items: { type: string } }
+              error: { type: string }

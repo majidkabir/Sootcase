@@ -49,6 +49,13 @@ button, input, select { font: inherit; color: inherit; }
 main, .grid { max-width: 1240px; margin: 0 auto; padding: 16px 24px 48px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px; align-items: start; }
 @media (max-width: 900px) { main, .grid { grid-template-columns: minmax(0, 1fr); padding: 12px 16px 40px; } .top { padding: 20px 16px 4px; } }
 
+.change { border-top: 1px solid var(--rule); padding-top: 12px; margin-top: 12px; }
+.change .check { margin-bottom: 8px; }
+.hint { color: var(--muted); font-size: .8rem; margin: -4px 0 4px; }
+#scenario h3 { margin: 20px 0 6px; font-size: 1rem; }
+.cmp { display: grid; grid-template-columns: 7em 1fr; gap: 6px 10px; align-items: center; margin: 14px 0; }
+.cmp .track { height: 22px; background: var(--paper); border-radius: 3px; overflow: hidden; display: flex; }
+.cmp .track span { display: block; height: 100%; }
 section.panel { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; }
 .panel h2 { font-size: 1.15rem; margin-bottom: 14px; }
 
@@ -250,6 +257,80 @@ footer.credits a { color: var(--blue); }
   <section class="panel" aria-labelledby="rep-h" aria-live="polite">
     <h2 id="rep-h">Emissions report</h2>
     <div id="report"><p class="empty">Choose a shipments file to see the report.</p></div>
+  </section>
+</div>
+
+<div class="section-title">
+  <h2>Scenarios</h2>
+  <p>What if: the same shipments with road moved to rail, electric trucks, other fuels or other loads. Same method; a scenario, not reported emissions.</p>
+</div>
+<div class="grid">
+  <section class="panel" aria-labelledby="sc-form-h">
+    <h2 id="sc-form-h">Changes</h2>
+    <form id="sform" novalidate>
+      <div class="row"><div><label for="sfile">Shipments CSV (as for the report)</label>
+        <input id="sfile" type="file" accept=".csv,text/csv"></div></div>
+
+      <div class="change">
+        <label class="check"><input type="checkbox" id="s-rail" checked><span><strong>Road to rail</strong></span></label>
+        <div class="row">
+          <div><label for="s-rail-km">Road legs over (km)</label><input id="s-rail-km" type="number" min="0" step="any" value="300"></div>
+          <div><label for="s-rail-share">Share moved (%)</label><input id="s-rail-share" type="number" min="1" max="100" step="any" value="30"></div>
+          <div><label for="s-rail-min">Rail part over (km, straight line)</label><input id="s-rail-min" type="number" min="0" step="any" value="100"></div>
+        </div>
+        <p class="hint">Defaults: 300 km and 30% from the EU Transport White Paper (2011), 100 km from the EU Combined Transport Directive (92/106/EEC). Road legs to and from the rail terminals are added.</p>
+      </div>
+
+      <div class="change">
+        <label class="check"><input type="checkbox" id="s-el"><span><strong>Electric trucks</strong></span></label>
+        <div class="row">
+          <div><label for="s-el-kwh">kWh per tonne-km</label><input id="s-el-kwh" type="number" min="0" step="any"></div>
+          <div><label for="s-el-country">Grid country (ISO alpha-3)</label><input id="s-el-country" placeholder="DEU" maxlength="3"></div>
+          <div><label for="s-el-share">Share (%)</label><input id="s-el-share" type="number" min="1" max="100" step="any" value="100"></div>
+        </div>
+        <div class="row">
+          <div><label for="s-el-vt">Vehicle types (empty: all road)</label><input id="s-el-vt" placeholder="hgv_rigid, van"></div>
+          <div><label for="s-el-src">Source of the kWh value</label><input id="s-el-src" placeholder="maker's data sheet"></div>
+        </div>
+      </div>
+
+      <div class="change">
+        <label class="check"><input type="checkbox" id="s-fuel"><span><strong>Other fuel</strong> (for diesel trucks)</span></label>
+        <div class="row">
+          <div><label for="s-fuel-name">Fuel</label><select id="s-fuel-name">
+            <option value="hvo">HVO</option><option value="b100">Biodiesel (B100, FAME)</option>
+            <option value="biomethane">Biomethane (compressed)</option><option value="biomethane_lng">Biomethane (liquefied)</option>
+            <option value="cng">CNG</option><option value="lng">LNG</option></select></div>
+          <div><label for="s-fuel-share">Share (%)</label><input id="s-fuel-share" type="number" min="1" max="100" step="any" value="100"></div>
+          <div><label for="s-fuel-ratio">Energy vs diesel (×)</label><input id="s-fuel-ratio" type="number" min="0" step="any" value="1"></div>
+        </div>
+        <div class="row">
+          <div><label for="s-fuel-vt">Vehicle types (empty: all road)</label><input id="s-fuel-vt"></div>
+          <div><label for="s-fuel-src">Source (if energy isn't 1×)</label><input id="s-fuel-src"></div>
+        </div>
+      </div>
+
+      <div class="change">
+        <label class="check"><input type="checkbox" id="s-load"><span><strong>Fuller trucks</strong></span></label>
+        <div class="row">
+          <div><label for="s-load-t">Tonnes on the truck</label><input id="s-load-t" type="number" min="0" step="any"></div>
+          <div><label for="s-load-etf">Empty km per loaded km</label><input id="s-load-etf" type="number" min="0" step="any"></div>
+          <div><label for="s-load-vt">Vehicle types</label><input id="s-load-vt" placeholder="hgv_artic_33t"></div>
+        </div>
+      </div>
+
+      <label class="check"><input type="checkbox" id="sroadlegs" checked><span>Add missing road legs (see above).</span></label>
+      <div class="actions">
+        <button type="submit" class="btn primary" id="ssubmit">Compare</button>
+        <button type="button" class="btn quiet" id="sexample">Try with example data</button>
+      </div>
+      <p class="error" id="serror" role="alert"></p>
+      <p class="working" id="sworking" role="status" hidden></p>
+    </form>
+  </section>
+  <section class="panel" aria-labelledby="sc-h" aria-live="polite">
+    <h2 id="sc-h">Now and with the changes</h2>
+    <div id="scenario"><p class="empty">Choose a shipments file and the changes to compare.</p></div>
   </section>
 </div>
 
@@ -955,6 +1036,114 @@ $("#rexample").addEventListener("click", () => {
   if (!$("#rorg").value) $("#rorg").value = "Example Logistics";
   makeReport(null, exampleCSV);
 });
+
+// ---- Scenarios ----
+const splitList = v => v.split(",").map(x => x.trim()).filter(Boolean);
+const shareOf = id => Math.min(100, Math.max(0, Number($(id).value) || 0)) / 100;
+
+function scenarioPlan() {
+  const changes = [];
+  if ($("#s-rail").checked) changes.push({ type: "road_to_rail", min_road_km: Number($("#s-rail-km").value),
+    share: shareOf("#s-rail-share"), min_rail_km: Number($("#s-rail-min").value) });
+  if ($("#s-el").checked) {
+    const c = { type: "electrify", kwh_per_tkm: Number($("#s-el-kwh").value), country: $("#s-el-country").value.trim().toUpperCase(),
+      share: shareOf("#s-el-share"), source: $("#s-el-src").value.trim() };
+    const vt = splitList($("#s-el-vt").value); if (vt.length) c.vehicle_types = vt;
+    changes.push(c);
+  }
+  if ($("#s-fuel").checked) {
+    const c = { type: "fuel_switch", fuel: $("#s-fuel-name").value, share: shareOf("#s-fuel-share"),
+      energy_ratio: Number($("#s-fuel-ratio").value) || 1 };
+    const src = $("#s-fuel-src").value.trim(); if (src) c.source = src;
+    const vt = splitList($("#s-fuel-vt").value); if (vt.length) c.vehicle_types = vt;
+    changes.push(c);
+  }
+  if ($("#s-load").checked) {
+    const c = { type: "load", load_tonnes: Number($("#s-load-t").value) };
+    if ($("#s-load-etf").value !== "") c.empty_trip_factor = Number($("#s-load-etf").value);
+    const vt = splitList($("#s-load-vt").value); if (vt.length) c.vehicle_types = vt;
+    changes.push(c);
+  }
+  return { name: "web", changes };
+}
+
+let scenarioBusy = false, lastScenario = null;
+
+async function compare(e, body) {
+  e && e.preventDefault();
+  if (scenarioBusy) return;
+  $("#serror").textContent = "";
+  const plan = scenarioPlan();
+  if (!plan.changes.length) { $("#serror").textContent = "Tick at least one change."; return; }
+  if (!body) {
+    const file = $("#sfile").files[0];
+    if (!file) { $("#serror").textContent = "Choose a CSV file first, or try the example data."; return; }
+    body = file;
+  }
+  const q = new URLSearchParams({ plan: JSON.stringify(plan) });
+  if (!$("#sroadlegs").checked) q.set("add_road_legs", "false");
+  scenarioBusy = true;
+  const buttons = [$("#ssubmit"), $("#sexample")], working = $("#sworking"), started = Date.now();
+  buttons.forEach(b => b.disabled = true);
+  $("#sform").setAttribute("aria-busy", "true");
+  const tick = () => {
+    const s = Math.round((Date.now() - started) / 1000);
+    working.textContent = `Calculating the shipments now and with the changes${s >= 2 ? `, ${s} s` : ""}.`;
+  };
+  tick(); working.hidden = false;
+  const timer = setInterval(tick, 1000);
+  let res, r;
+  try {
+    res = await fetch("v1/scenario?" + q, { method: "POST", headers: { "Content-Type": "text/csv" }, body });
+    r = await res.json();
+  } catch {
+    $("#serror").textContent = "Couldn't reach the Sootcase server, or it took too long. Try again.";
+    return;
+  } finally {
+    clearInterval(timer);
+    working.hidden = true;
+    buttons.forEach(b => b.disabled = false);
+    $("#sform").removeAttribute("aria-busy");
+    scenarioBusy = false;
+  }
+  if (!res.ok) { $("#serror").textContent = r.error || `Request failed (HTTP ${res.status}).`; return; }
+  lastScenario = r;
+  renderScenario(r);
+}
+
+const changeName = { road_to_rail: "Road to rail", electrify: "Electric trucks", fuel_switch: "Other fuel", load: "Fuller trucks" };
+
+function renderScenario(r) {
+  const b = r.base, sc = r.scenario, max = Math.max(b.wtw_kg, sc.wtw_kg) || 1;
+  const bar = t => `<div class="track" role="img" aria-label="${esc(kg(t.wtw_kg))}: ${esc(kg(t.ttw_kg))} vehicles, ${esc(kg(t.wtt_kg))} energy provision">
+    <span style="width:${t.ttw_kg / max * 100}%;background:var(--ttw)"></span><span style="width:${t.wtt_kg / max * 100}%;background:var(--wtt)"></span></div>`;
+  const down = r.diff_kg < 0;
+  const changes = (r.changes || []).map(c => `<li><strong>${esc(changeName[c.type] || c.type)}</strong>, ${fmt(c.share * 100, 0)}% of the cargo:
+    ${c.shipments_affected} shipments, ${legs(c.legs_affected)}.
+    <details><summary>Based on</summary><ul>${c.sources.map(x => `<li>${esc(x)}</li>`).join("")}</ul></details></li>`).join("");
+  const failed = (r.shipments || []).filter(x => x.error).map(x => `<li>${esc(x.shipment_id)}: ${esc(x.error)}</li>`).join("");
+  const notes = (r.shipments || []).flatMap(x => (x.notes || []).map(n => `<li>${esc(x.shipment_id)}: ${esc(n)}</li>`)).join("");
+  $("#scenario").innerHTML = `
+    <p class="answer">The changes would ${down ? "cut" : "raise"} emissions by <strong>${kg(Math.abs(r.diff_kg))}</strong>
+      (${fmt(Math.abs(r.diff_pct), 1)}%) well-to-wheel.</p>
+    <p class="answer-sub">${esc(r.label)}</p>
+    <div class="cmp"><span>Now</span>${bar(b)}<span>Scenario</span>${bar(sc)}</div>
+    <div class="legend"><span><i style="background:var(--ttw)"></i>Vehicles (tank-to-wheel)</span>
+      <span><i style="background:var(--wtt)"></i>Energy provision (well-to-tank)</span></div>
+    <table><thead><tr><th></th><th class="num">Now</th><th class="num">Scenario</th></tr></thead><tbody>
+      <tr><td>Tank-to-wheel</td><td class="num">${kg(b.ttw_kg)}</td><td class="num">${kg(sc.ttw_kg)}</td></tr>
+      <tr><td>Well-to-tank</td><td class="num">${kg(b.wtt_kg)}</td><td class="num">${kg(sc.wtt_kg)}</td></tr>
+      <tr><td><strong>Well-to-wheel</strong></td><td class="num"><strong>${kg(b.wtw_kg)}</strong></td><td class="num"><strong>${kg(sc.wtw_kg)}</strong></td></tr>
+    </tbody></table>
+    <h3>Changes</h3><ul>${changes}</ul>
+    ${notes ? `<h3>Notes</h3><ul>${notes}</ul>` : ""}
+    ${failed ? `<h3>${r.failed} shipments left out</h3><ul>${failed}</ul>` : ""}
+    <div class="actions"><button type="button" class="btn" id="dl-sjson">Comparison as JSON</button></div>`;
+  $("#dl-sjson").addEventListener("click", () => download(JSON.stringify(lastScenario, null, 2), "application/json", "scenario.json"));
+}
+
+$("#sform").addEventListener("submit", compare);
+$("#sexample").addEventListener("click", () => compare(null, exampleCSV));
 
 document.querySelectorAll('input[name="cargo"]').forEach(r => r.addEventListener("change", toggleCargo));
 $("#add").addEventListener("click", () => addLeg());
