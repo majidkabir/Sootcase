@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sootcase</title>
+<title>Freight CO2e calculator · Sootcase</title>
+<meta name="description" content="Calculate a shipment's CO2e by road, rail, sea, inland waterway and air, following the GLEC Framework v3.2 and ISO 14083, with every step and source shown.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F4F3EE'/%3E%3Cpath d='M24 22V17a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v5' fill='none' stroke='%231E1F1C' stroke-width='5'/%3E%3Crect x='8' y='22' width='48' height='34' rx='7' fill='none' stroke='%231E1F1C' stroke-width='5'/%3E%3Ccircle cx='19' cy='46' r='4' fill='%231E1F1C'/%3E%3Ccircle cx='45' cy='32' r='5' fill='%232F8F5B'/%3E%3C/svg%3E">
 <style>
 :root {
@@ -45,10 +46,16 @@ button, input, select { font: inherit; color: inherit; }
 .top h1 { font-size: 2rem; letter-spacing: .02em; }
 .top p { margin: 0; color: var(--muted); }
 .top .dataset { margin-left: auto; color: var(--muted); font-size: .9rem; }
-.top .account { color: var(--blue); font-size: .9rem; }
+.top .home { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.top .home svg { flex: none; }
+.top .dataset { min-height: 1.3em; }
+nav.site { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px 16px; min-height: 1.5em; font-size: .95rem; }
+nav.site a { color: var(--blue); text-decoration: none; }
+nav.site a:hover { text-decoration: underline; }
 
 main, .grid { max-width: 1240px; margin: 0 auto; padding: 16px 24px 48px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px; align-items: start; }
-@media (max-width: 900px) { main, .grid { grid-template-columns: minmax(0, 1fr); padding: 12px 16px 40px; } .top { padding: 20px 16px 4px; } }
+@media (max-width: 900px) { main, .grid { grid-template-columns: minmax(0, 1fr); padding: 12px 16px 40px; } .top { padding: 20px 16px 4px; }
+  .top .dataset { margin-left: 0; flex-basis: 100%; overflow-wrap: anywhere; } }
 
 .change { border-top: 1px solid var(--rule); padding-top: 12px; margin-top: 12px; }
 .change .check { margin-bottom: 8px; }
@@ -181,10 +188,10 @@ footer.credits a { color: var(--blue); }
 </head>
 <body>
 <header class="top">
-  <h1>Sootcase</h1>
+  <h1><a href="../" class="home"><svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><path d="M24 22V17a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v5" fill="none" stroke="currentColor" stroke-width="4"/><rect x="8" y="22" width="48" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="4"/><path d="M18 47C27 47 25 34 33 34S41 30 46 31" fill="none" stroke="#2F8F5B" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 5.5"/><circle cx="18" cy="47" r="3.5" fill="currentColor"/><circle cx="46" cy="31" r="4" fill="#2F8F5B"/></svg>Sootcase</a></h1>
   <p>Freight emissions, with the working shown.</p>
   <span class="dataset" id="dataset"></span>
-  <a class="account" id="account" href="/" hidden>Account and API key</a>
+  <nav class="site" id="sitenav" aria-label="Site"></nav>
 </header>
 
 <main>
@@ -214,7 +221,7 @@ footer.credits a { color: var(--blue); }
       <div class="actions">
         <button type="button" class="btn" id="add">Add leg</button>
         <button type="submit" class="btn primary" id="csubmit">Calculate</button>
-        <select id="example" aria-label="Load an example" style="width:auto">
+        <select id="example" aria-label="Load an example" style="width:auto;max-width:100%">
           <option value="">Load an example…</option>
         </select>
       </div>
@@ -344,7 +351,8 @@ footer.credits a { color: var(--blue); }
           <option value="road">Road</option><option value="rail">Rail</option><option value="sea">Sea</option>
           <option value="air">Air</option><option value="inland_waterway">Inland waterway</option>
         </select></div>
-      <div><label>Vehicle</label><input name="vehicle_type" autocomplete="off"></div>
+      <div><label>Vehicle</label><select name="vehicle_pick"></select>
+        <input name="vehicle_type" autocomplete="off" placeholder="Dataset vehicle type" aria-label="Dataset vehicle type" hidden style="margin-top:6px"></div>
     </div>
     <div class="row">
       <div class="place"><label>From</label><input name="from_q" placeholder="City, port, airport or code" autocomplete="off"
@@ -413,6 +421,15 @@ function payloadHint(node) {
 const fmt = (v, d = 1) => Number(v).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
 const kg = v => v >= 10000 ? fmt(v / 1000, 2) + " t" : fmt(v, 1) + " kg";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// Names people know for the dataset's short vehicle names.
+const vehicleLabels = {
+  hgv: "Truck (HGV), average", hgv_rigid: "Rigid truck", hgv_artic: "Articulated truck", hgv_artic_33t: "Articulated truck over 33 t",
+  hgv_reefer: "Refrigerated truck", van: "Van up to 3.5 t", van_electric: "Electric van", freight_train: "Freight train",
+  container_ship: "Container ship (short or deep sea by distance)", container_ship_short_sea: "Container ship, short sea",
+  container_ship_deep_sea: "Container ship, deep sea", bulk_carrier: "Bulk carrier", general_cargo: "General cargo ship",
+  roro: "RoRo ferry", ropax: "RoPax ferry (freight and passengers)", air_freight: "Air freight", barge: "Barge (bulk)",
+  container_barge: "Container barge" };
+const vehicleLabel = v => vehicleLabels[v] || v;
 const modeName = { road: "Road", rail: "Rail", sea: "Sea", air: "Air", inland_waterway: "Inland waterway" };
 const distName = { given: "given", great_circle: "great-circle", great_circle_adjusted: "great-circle, adjusted",
   osrm: "road routing", osrm_rail: "rail routing", osrm_waterway: "waterway routing", sea_network: "sea route" };
@@ -424,10 +441,11 @@ function addLeg(values = {}) {
   node.querySelectorAll("input, select").forEach(el => {
     el.id = `leg${n}-${el.name}`;
     const lab = el.closest("div").querySelector("label");
-    if (lab) lab.htmlFor = el.id;
+    if (lab && !lab.htmlFor) lab.htmlFor = el.id;
     if (values[el.name] !== undefined) el.value = values[el.name];
   });
   const vt = node.querySelector('[name="vehicle_type"]');
+  const pick = node.querySelector('[name="vehicle_pick"]');
   const mode = node.querySelector('[name="mode"]');
   const list = document.createElement("datalist");
   list.id = `leg${n}-vehicles`;
@@ -438,11 +456,27 @@ function addLeg(values = {}) {
     list.innerHTML = vs.map(v => `<option value="${esc(v)}">`).join("");
     // A vehicle of another mode can't be right: take this mode's first.
     if (vs.length && !vs.includes(vt.value.trim())) vt.value = vs[0];
+    fillPick();
     // Load model fields are for trucks; energy per tonne-km for road and rail.
     node.querySelector(".only-road").hidden = mode.value !== "road";
     node.querySelector(".only-road-rail").hidden = !["road", "rail"].includes(mode.value);
     payloadHint(node);
   };
+  // The vehicle by name: the dataset's short names, or any dataset vehicle type ("Other").
+  function fillPick() {
+    const aliases = (vehicleLists[mode.value] || []).filter(v => v in vehicleNames);
+    const cur = vt.value.trim();
+    const opts = (aliases.length ? aliases : cur ? [cur] : []).map(v => `<option value="${esc(v)}">${esc(vehicleLabel(v))}</option>`);
+    pick.innerHTML = opts.join("") + `<option value="__other">Other vehicle type…</option>`;
+    const known = aliases.includes(cur) || (!aliases.length && cur);
+    pick.value = known ? cur : "__other";
+    vt.hidden = !!known;
+  }
+  pick.addEventListener("change", () => {
+    if (pick.value === "__other") { vt.hidden = false; vt.value = ""; vt.focus(); }
+    else { vt.hidden = true; vt.value = pick.value; }
+    payloadHint(node);
+  });
   mode.addEventListener("change", fillList);
   fillList();
   for (const ev of ["input", "change"]) {
@@ -631,13 +665,14 @@ function render(req, r) {
         `Give energy per tonne-km and a country to calculate the electrified part on the grid.`;
     }
     const vt = f.vehicle_type || l.vehicle_type || info.req.vehicle_type || "";
+    const vname = vehicleLabels[info.req.vehicle_type] || vehicleLabels[l.vehicle_type] || "";
     if (l.note) how = `<div class="note">${esc(l.note)}</div>` + how;
     return `<tr>
       <td><strong>${info.name}</strong> ${esc((modeName[l.mode] || "").toLowerCase())}${l.added ? `<br><span class="dtype added">added</span>` : ""}</td>
       <td class="num">${fmt(l.distance_km, 0)} km<div class="id">${esc(distName[l.distance_method] || l.distance_method || "")}</div></td>
       <td>${esc(methodName[l.method] || l.method)}<br><span class="dtype ${esc(l.data_type)}">${esc(l.data_type)}</span></td>
       <td class="num">${kg(l.ttw_kg)}</td><td class="num">${kg(l.wtt_kg)}</td><td class="num"><strong>${kg(l.wtw_kg)}</strong></td>
-    </tr><tr class="how-row"><td colspan="6"><div class="id">${esc(vt)}</div><div class="how">${how}</div></td></tr>`;
+    </tr><tr class="how-row"><td colspan="6"><div class="id">${vname ? `<strong>${esc(vname)}</strong> · ` : ""}${esc(vt)}</div><div class="how">${how}</div></td></tr>`;
   }).join("") + (r.hubs || []).map(h => `<tr>
       <td><strong>Hub</strong> ${esc(h.hub_type)}</td><td></td>
       <td>hub factor<br><span class="dtype ${esc(h.data_type)}">${esc(h.data_type)}</span></td>
@@ -1159,9 +1194,12 @@ $("#example").addEventListener("change", e => {
   calculate(null, "example");
 });
 $("#form").addEventListener("submit", calculate);
-// Behind the hosted service's sign-in (served under /app/): link to the
-// account page, where people sign in for an API key and bigger files.
-if (location.pathname.startsWith("/app/")) $("#account").hidden = false;
+// A hosting site can give its menu at ../site-nav.json ({"links":[{"href","label"}]}).
+fetch("../site-nav.json").then(r => r.ok ? r.json() : null).then(d => {
+  if (!d || !Array.isArray(d.links)) return;
+  $("#sitenav").innerHTML = d.links.filter(l => typeof l.href === "string" && /^\//.test(l.href))
+    .map(l => `<a href="${esc(l.href)}"${l.current ? ' aria-current="page"' : ""}>${esc(l.label)}</a>`).join("");
+}).catch(() => {});
 loadExample(0);
 loadFactors().then(() => calculate(null, "example"));
 </script>
