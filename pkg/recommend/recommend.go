@@ -686,7 +686,16 @@ func placeName(c calc.Calculator, p calc.Location) string {
 	if p.Code != "" && p.Lat == 0 && p.Lon == 0 {
 		return p.Code
 	}
-	if f, ok := c.Places.(calc.PlaceFinder); ok {
+	if t, ok := c.Places.(interface {
+		Town(calc.Location) (string, float64, bool)
+	}); ok {
+		if n, km, ok := t.Town(p); ok {
+			if km > 5 {
+				return "near " + n
+			}
+			return n
+		}
+	} else if f, ok := c.Places.(calc.PlaceFinder); ok {
 		if near := f.Near(p, []string{"city"}, 30, 1); len(near) > 0 {
 			n := near[0].Name
 			if i := strings.Index(n, " ("); i > 0 {

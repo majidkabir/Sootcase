@@ -385,3 +385,48 @@ func (Codes) Country(p calc.Location) string {
 	}
 	return ix.Country(p)
 }
+
+// Town names the town a point is in or near, for labels: the biggest city
+// (GeoNames, by the list's rank) within 15 km, so a city centre is named
+// after the city rather than one of its districts; else the nearest city
+// within 30 km. km is the distance to it; ok is false when there is none.
+func (ix *Index) Town(p calc.Location) (name string, km float64, ok bool) {
+	var best *Place
+	bestKm, near, nearKm := 0.0, (*Place)(nil), math.Inf(1)
+	for _, j := range ix.latWindow(p.Lat-30/111.0, p.Lat+30/111.0) {
+		q := &ix.places[j]
+		if !q.allKinds([]string{City}) {
+			continue
+		}
+		d := haversine(p.Lat, p.Lon, q.Lat, q.Lon)
+		if d > 30 {
+			continue
+		}
+		if d < nearKm {
+			near, nearKm = q, d
+		}
+		if d <= 15 && (best == nil || q.rank > best.rank || q.rank == best.rank && d < bestKm) {
+			best, bestKm = q, d
+		}
+	}
+	if best == nil {
+		best, bestKm = near, nearKm
+	}
+	if best == nil {
+		return "", 0, false
+	}
+	n := best.Name
+	if best.AltName != "" {
+		n = best.AltName
+	}
+	return n, bestKm, true
+}
+
+// Town is Index.Town on the embedded place list.
+func (Codes) Town(p calc.Location) (string, float64, bool) {
+	ix, err := Default()
+	if err != nil {
+		return "", 0, false
+	}
+	return ix.Town(p)
+}

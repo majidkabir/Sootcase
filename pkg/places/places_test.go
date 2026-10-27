@@ -154,3 +154,23 @@ func TestCountry(t *testing.T) {
 		}
 	}
 }
+
+func TestTown(t *testing.T) {
+	for _, c := range []struct {
+		lat, lon float64
+		want     string
+	}{
+		{41.3874, 2.1686, "Barcelona"}, // in Eixample: the city, not the district
+		{48.8566, 2.3522, "Paris"},
+		{45.764, 4.8357, "Lyon"},
+		{53.5511, 9.9937, "Hamburg"},
+	} {
+		got, _, ok := Codes{}.Town(calc.Location{Lat: c.lat, Lon: c.lon})
+		if !ok || got != c.want {
+			t.Errorf("%v,%v: %q, want %q", c.lat, c.lon, got, c.want)
+		}
+	}
+	if _, _, ok := (Codes{}).Town(calc.Location{Lat: 0, Lon: -30}); ok {
+		t.Error("mid-Atlantic should have no town")
+	}
+}
