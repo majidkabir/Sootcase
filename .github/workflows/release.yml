@@ -1,14 +1,18 @@
 name: Release
 
-# Two ways to release:
+# Three ways to release:
 #   1. From GitHub: Actions > Release > Run workflow, enter a version like v0.1.0.
 #      The workflow tests, creates the tag on the chosen branch, then builds.
 #   2. From a terminal: git tag v0.1.0 && git push origin v0.1.0
+#   3. Write the version (like v0.1.0) into the RELEASE file and push it to main:
+#      same as 1, for setups that can push commits but not tags.
 # Tags created by this workflow don't re-trigger it (GitHub doesn't start
 # workflows from GITHUB_TOKEN pushes), so each release builds once.
 on:
   push:
     tags: ["v*"]
+    branches: [main]
+    paths: [RELEASE]
   workflow_dispatch:
     inputs:
       version:
@@ -29,31 +33,34 @@ jobs:
     outputs:
       version: ${{ steps.v.outputs.version }}
     steps:
+      - uses: actions/checkout@v4
+        if: github.ref_type == 'branch'
+        with:
+          fetch-depth: 0
       - id: v
         name: Resolve version
         env:
           INPUT: ${{ inputs.version }}
           REF: ${{ github.ref_name }}
           EVENT: ${{ github.event_name }}
+          REF_TYPE: ${{ github.ref_type }}
         run: |
-          if [ "$EVENT" = "workflow_dispatch" ]; then v="$INPUT"; else v="$REF"; fi
+          if [ "$EVENT" = "workflow_dispatch" ]; then v="$INPUT"
+          elif [ "$REF_TYPE" = "branch" ]; then v="$(tr -d ' \r\n' < RELEASE)"
+          else v="$REF"; fi
           if ! printf '%s' "$v" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
             echo "::error::Version '$v' must look like v1.2.3 or v1.2.3-rc.1"; exit 1
           fi
           echo "version=$v" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
-        if: github.event_name == 'workflow_dispatch'
-        with:
-          fetch-depth: 0
       - uses: actions/setup-go@v5
-        if: github.event_name == 'workflow_dispatch'
+        if: github.ref_type == 'branch'
         with:
           go-version-file: go.mod
       - name: Test before tagging
-        if: github.event_name == 'workflow_dispatch'
+        if: github.ref_type == 'branch'
         run: go vet ./... && go test ./...
       - name: Create and push tag
-        if: github.event_name == 'workflow_dispatch'
+        if: github.ref_type == 'branch'
         env:
           VERSION: ${{ steps.v.outputs.version }}
         run: |
