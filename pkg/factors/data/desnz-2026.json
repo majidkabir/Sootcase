@@ -23,9 +23,9 @@
     {
       "mode": "road",
       "vehicle_type": "vans/class_i_up_to_1_305_tonnes/battery_electric_vehicle",
-      "ttw_g_per_tkm": 92.63,
-      "wtt_g_per_tkm": 34.81,
-      "source": "DESNZ 2026: Freighting goods \u003e Vans \u003e Class I (up to 1.305 tonnes) \u003e Battery Electric Vehicle",
+      "ttw_g_per_tkm": 0,
+      "wtt_g_per_tkm": 127.44,
+      "source": "DESNZ 2026: Freighting goods \u003e Vans \u003e Class I (up to 1.305 tonnes) \u003e Battery Electric Vehicle; electricity (generation, T\u0026D and upstream) counted as energy provision (WTT), none at the vehicle (DESNZ 2026 methodology, Table 15)",
       "year": 2026,
       "distance_basis": "actual"
     },
@@ -50,9 +50,9 @@
     {
       "mode": "road",
       "vehicle_type": "vans/class_ii_1_305_to_1_74_tonnes/battery_electric_vehicle",
-      "ttw_g_per_tkm": 180.27,
-      "wtt_g_per_tkm": 61.9,
-      "source": "DESNZ 2026: Freighting goods \u003e Vans \u003e Class II (1.305 to 1.74 tonnes) \u003e Battery Electric Vehicle",
+      "ttw_g_per_tkm": 0,
+      "wtt_g_per_tkm": 242.17,
+      "source": "DESNZ 2026: Freighting goods \u003e Vans \u003e Class II (1.305 to 1.74 tonnes) \u003e Battery Electric Vehicle; electricity (generation, T\u0026D and upstream) counted as energy provision (WTT), none at the vehicle (DESNZ 2026 methodology, Table 15)",
       "year": 2026,
       "distance_basis": "actual"
     },
@@ -86,9 +86,9 @@
     {
       "mode": "road",
       "vehicle_type": "vans/class_iii_1_74_to_3_5_tonnes/battery_electric_vehicle",
-      "ttw_g_per_tkm": 132.52,
-      "wtt_g_per_tkm": 52.41,
-      "source": "DESNZ 2026: Freighting goods \u003e Vans \u003e Class III (1.74 to 3.5 tonnes) \u003e Battery Electric Vehicle",
+      "ttw_g_per_tkm": 0,
+      "wtt_g_per_tkm": 184.93,
+      "source": "DESNZ 2026: Freighting goods \u003e Vans \u003e Class III (1.74 to 3.5 tonnes) \u003e Battery Electric Vehicle; electricity (generation, T\u0026D and upstream) counted as energy provision (WTT), none at the vehicle (DESNZ 2026 methodology, Table 15)",
       "year": 2026,
       "distance_basis": "actual"
     },
@@ -149,9 +149,9 @@
     {
       "mode": "road",
       "vehicle_type": "vans/average_up_to_3_5_tonnes/battery_electric_vehicle",
-      "ttw_g_per_tkm": 146.99,
-      "wtt_g_per_tkm": 56.33,
-      "source": "DESNZ 2026: Freighting goods \u003e Vans \u003e Average (up to 3.5 tonnes) \u003e Battery Electric Vehicle",
+      "ttw_g_per_tkm": 0,
+      "wtt_g_per_tkm": 203.32,
+      "source": "DESNZ 2026: Freighting goods \u003e Vans \u003e Average (up to 3.5 tonnes) \u003e Battery Electric Vehicle; electricity (generation, T\u0026D and upstream) counted as energy provision (WTT), none at the vehicle (DESNZ 2026 methodology, Table 15)",
       "year": 2026,
       "distance_basis": "actual"
     },

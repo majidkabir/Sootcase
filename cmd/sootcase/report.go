@@ -29,12 +29,17 @@ func runReport(args []string) error {
 	fs.StringVar(&m.Reference, "reference", "", "where supporting information can be found")
 	fs.BoolVar(&m.DeclareISO, "declare-iso", false,
 		"add the ISO 14083:2023 conformity statement (only if your data collection and boundaries conform)")
+	fs.IntVar(&m.Scope3Category, "scope3-category", 0,
+		"GHG Protocol scope 3 category for the reporting company: 4 (transport it pays for) or 9 (sold products, transport it doesn't pay for)")
 	format := fs.String("format", "md", "md or json")
 	workers := fs.Int("workers", 0, "parallel calculations (default: one per CPU)")
 	ungrouped := fs.Bool("ungrouped", false, "allow a shipment's rows anywhere in the file (loads the whole file into memory)")
 	_ = fs.Parse(args)
 	if fs.NArg() != 1 {
 		return fmt.Errorf("report: expected one CSV file")
+	}
+	if m.Scope3Category != 0 && m.Scope3Category != 4 && m.Scope3Category != 9 {
+		return fmt.Errorf("report: -scope3-category must be 4 or 9")
 	}
 	if *format != "md" && *format != "json" {
 		return fmt.Errorf("report: -format must be md or json")

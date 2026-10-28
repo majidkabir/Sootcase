@@ -62,6 +62,7 @@ const (
 	bHubTCE    = "ISO 14083 clause 11, calculation of GHG emissions for a hub TCE (GLEC p.27); 9.3, 9.5 (GLEC pp.33–34)"
 	bWTW       = "ISO 14083 5.2 system boundaries (GLEC p.19); GLEC p.10 (Figure 4) and p.57: well-to-wheel = tank-to-wheel (operational) + well-to-tank (energy provision)"
 	bResults   = "ISO 14083 clause 12.1, results for one transport chain (GLEC p.27)"
+	bGHGP      = "GHG Protocol Corporate Value Chain (Scope 3) Standard; Technical Guidance for Calculating Scope 3 Emissions, chapters 3 (fuel- and energy-related activities), 4 (upstream transportation and distribution) and 9 (downstream)"
 )
 
 // Shipment explains the result r of shipment s, calculated with factors f
@@ -130,6 +131,15 @@ func Shipment(s calc.Shipment, r calc.Result, f calc.FactorProvider) Sheet {
 			"the rest from modelled data (load model, electricity use) or default values (published average intensities), as marked on each leg.",
 			n(r.PrimaryDataShare*100, 1)),
 		Basis: []string{bDataCats}})
+	g := r.GHGProtocol
+	sh.Steps = append(sh.Steps, Step{Group: "Total", Title: "GHG Protocol scopes",
+		Text: "For a company buying this transport, all of it is scope 3: category 4 if it pays for the transport (inbound or outbound), " +
+			"category 9 for sold products moved by transport it doesn't pay for. For the operator of the vehicles it splits into scope 1 " +
+			"(fuel burnt in the vehicles), scope 2 (electricity they use, including the upstream share its factor contains) and scope 3 " +
+			"category 3 (producing and delivering the fuel); hub operations are well-to-wheel only and not split.",
+		Formula: fmt.Sprintf("shipper: scope 3 = %s kg\noperator: scope 1 = %s kg, scope 2 = %s kg, scope 3 cat. 3 = %s kg, hubs = %s kg",
+			n(g.Scope3Kg, 3), n(g.OperatorScope1Kg, 3), n(g.OperatorScope2Kg, 3), n(g.OperatorScope3Cat3Kg, 3), n(g.HubsKg, 3)),
+		Basis: []string{bGHGP}})
 	for _, w := range r.Warnings {
 		sh.Steps = append(sh.Steps, Step{Group: "Total", Title: "Warning", Text: w})
 	}
@@ -275,8 +285,8 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 		s := Step{Group: group, Title: "Intensity from the load model",
 			Text: fmt.Sprintf("The vehicle's emissions per vehicle-km depend on its load; they are interpolated between the dataset's values "+
 				"empty, half and fully laden, and spread over the tonnes carried, with empty running added. Load factor %s of the model's "+
-				"%s t payload%s, %s empty km per loaded km. Source: %s.",
-				n(l.LoadFactor, 4), n(l.PayloadT, 2), loadTonnesText(l), n(l.EmptyTripFactor, 3), fac.Source),
+				"%s t payload%s, %s empty km per loaded km%s. Source: %s.",
+				n(l.LoadFactor, 4), n(l.PayloadT, 2), loadTonnesText(l), n(l.EmptyTripFactor, 3), repositioningText(l), fac.Source),
 			Basis: []string{bModel, bLoad, bDataCats}}
 		if lmp, ok := f.(calc.LoadModelProvider); ok && f != nil {
 			if m, err := lmp.LoadModel(l.Mode, l.VehicleType); err == nil {
@@ -510,4 +520,13 @@ func n(v float64, dec int) string {
 		out = "-" + out
 	}
 	return out
+}
+
+// repositioningText says how repositioning km entered the empty trip factor.
+func repositioningText(l calc.LegResult) string {
+	if l.RepositioningKm <= 0 {
+		return ""
+	}
+	return fmt.Sprintf(" (including %s km driven empty for this trip, over the leg's %s km actual distance)",
+		n(l.RepositioningKm, 1), n(l.DistanceKm*max(l.DAF, 1), 1))
 }

@@ -472,6 +472,12 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		req.Meta = report.Meta{Title: q.Get("title"), Organisation: q.Get("organisation"),
 			PeriodFrom: q.Get("period_from"), PeriodTo: q.Get("period_to"), Reference: q.Get("reference"),
 			DeclareISO: q.Get("declare_iso") == "true"}
+		if v := q.Get("scope3_category"); v != "" {
+			req.Meta.Scope3Category, _ = strconv.Atoi(v)
+			if req.Meta.Scope3Category == 0 {
+				req.Meta.Scope3Category = -1 // refused below
+			}
+		}
 		r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
 		items, err := csvio.Read(r.Body)
 		if err != nil {
@@ -505,6 +511,10 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusBadRequest, fmt.Errorf("report text fields are limited to %d bytes", maxMetaLen))
 			return
 		}
+	}
+	if m.Scope3Category != 0 && m.Scope3Category != 4 && m.Scope3Category != 9 {
+		writeError(w, http.StatusBadRequest, errors.New("scope3_category must be 4 (transport the company pays for) or 9 (sold products, transport it doesn't pay for)"))
+		return
 	}
 	for _, d := range []string{m.PeriodFrom, m.PeriodTo} {
 		if _, err := time.Parse(time.DateOnly, d); d != "" && err != nil {

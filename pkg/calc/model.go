@@ -47,6 +47,12 @@ type Leg struct {
 	LoadFactor      float64 `json:"load_factor,omitempty"`
 	LoadTonnes      float64 `json:"load_tonnes,omitempty"`
 	EmptyTripFactor float64 `json:"empty_trip_factor,omitempty"`
+	// RepositioningKm is km the truck drives empty for this trip (to the
+	// pickup, or back after delivery), shared over its load like empty
+	// running (GLEC Framework: empty running and repositioning belong to the
+	// loaded trips). It uses the load model; without a load, the shipment is
+	// taken as the truck's whole load (a dedicated truck).
+	RepositioningKm float64 `json:"repositioning_km,omitempty"`
 	// EnergyKWhPerTkm with Country switches the leg to the energy method:
 	// electricity per tonne-km times the country's grid intensity.
 	EnergyKWhPerTkm float64 `json:"energy_kwh_per_tkm,omitempty"`
@@ -191,6 +197,9 @@ type LegResult struct {
 	LoadTonnes      float64 `json:"load_tonnes,omitempty"`
 	EmptyTripFactor float64 `json:"empty_trip_factor,omitempty"`
 	PayloadT        float64 `json:"payload_t,omitempty"`
+	// RepositioningKm is the empty km given for the leg; they are included
+	// in EmptyTripFactor.
+	RepositioningKm float64 `json:"repositioning_km,omitempty"`
 	// Set for the energy method.
 	EnergyKWhPerTkm float64 `json:"energy_kwh_per_tkm,omitempty"`
 	Country         string  `json:"country,omitempty"`
@@ -247,6 +256,8 @@ type Result struct {
 	// part of the totals (GLEC Framework v3.2 p. 64). Fleet-average factors
 	// don't give it, so only measured fuel contributes.
 	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
+	// GHGProtocol places the emissions in GHG Protocol scopes (see GHGScopes).
+	GHGProtocol GHGScopes `json:"ghg_protocol"`
 	// PrimaryDataShare is the share of WTW emissions computed from primary
 	// data (0..1).
 	PrimaryDataShare float64 `json:"primary_data_share"`

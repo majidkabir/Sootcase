@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -240,6 +241,7 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 	if res.WTWKg > 0 {
 		res.PrimaryDataShare = primary / res.WTWKg
 	}
+	res.GHGProtocol = ghgScopes(res)
 	if err := checkResult(res); err != nil {
 		return Result{}, err
 	}
@@ -369,6 +371,17 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 	if leg.LoadFactor != 0 && leg.LoadTonnes != 0 {
 		return LegResult{}, fmt.Errorf("%w: give load_factor or load_tonnes, not both", ErrInvalidLoad)
 	}
+	if leg.RepositioningKm != 0 {
+		if leg.Mode != Road {
+			return LegResult{}, fmt.Errorf("%w: repositioning_km is for trucks (road legs); for other modes it is in the vehicle's factor or measured fuel", ErrInvalidLoad)
+		}
+		if leg.Fuel != nil || leg.EnergyKWhPerTkm != 0 {
+			return LegResult{}, fmt.Errorf("%w: repositioning_km uses the load model; with measured fuel or energy, include the empty km in the fuel or energy", ErrInvalidLoad)
+		}
+		if leg.LoadFactor == 0 && leg.LoadTonnes == 0 {
+			leg.LoadTonnes = tonnes // a dedicated truck: the shipment is its whole load
+		}
+	}
 	for _, set := range []bool{leg.Fuel != nil, leg.LoadFactor != 0 || leg.LoadTonnes != 0, leg.EnergyKWhPerTkm != 0} {
 		if set {
 			methods++
@@ -456,6 +469,19 @@ func (c Calculator) loadLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype s
 	// A load factor is a share of the model's payload: the dataset's average
 	// full load, not the truck's rated payload (as in GLEC and EcoTransIT),
 	// so the source says how many tonnes it means.
+	// Repositioning km are empty running for this trip: as empty km per
+	// loaded km (actual), they join the empty trip factor.
+	adjKm, daf, err := c.adjust(leg.Mode, dtype, m.DistanceBasis, dist)
+	if err != nil {
+		return LegResult{}, err
+	}
+	etf := leg.EmptyTripFactor
+	if leg.RepositioningKm > 0 {
+		if adjKm <= 0 {
+			return LegResult{}, fmt.Errorf("%w: repositioning_km needs a loaded distance > 0", ErrInvalidLoad)
+		}
+		etf += leg.RepositioningKm / adjKm
+	}
 	lf, load := leg.LoadFactor, fmt.Sprintf("load factor %g = %.1f t on the vehicle, a share of the model's %.1f t payload "+
 		"(an average full load, not the rated payload; give load_tonnes to set the tonnes)", leg.LoadFactor, leg.LoadFactor*m.PayloadT, m.PayloadT)
 	var ttw, wtt float64
@@ -476,31 +502,28 @@ func (c Calculator) loadLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype s
 		if lf > 1 {
 			load += ", extended beyond its 100% laden"
 		}
-		ttw, wtt, err = m.perTonneKm(lf, leg.EmptyTripFactor, MaxLoadFactor)
+		ttw, wtt, err = m.perTonneKm(lf, etf, MaxLoadFactor)
 	} else {
-		ttw, wtt, err = m.PerTonneKm(lf, leg.EmptyTripFactor)
+		ttw, wtt, err = m.PerTonneKm(lf, etf)
 	}
 	if err != nil {
 		return LegResult{}, err
 	}
 	f := Factor{
 		Mode: m.Mode, VehicleType: m.VehicleType, TTW: ttw, WTT: wtt, Year: m.Year,
-		Source: fmt.Sprintf("load model (%s, empty trip factor %g, payload %.1f t) from %s",
-			load, leg.EmptyTripFactor, m.PayloadT, m.Source),
+		Source: fmt.Sprintf("load model (%s, empty trip factor %g%s, payload %.1f t) from %s",
+			load, round3(etf), repoText(leg.RepositioningKm), m.PayloadT, m.Source),
 	}
 	f.DistanceBasis = m.DistanceBasis
 	// Emissions = tonne-km x intensity x DAF, as for fleet-average factors.
-	adjKm, daf, err := c.adjust(leg.Mode, dtype, m.DistanceBasis, dist)
-	if err != nil {
-		return LegResult{}, err
-	}
 	if daf != nil && dist > 0 {
 		lr.DAF, lr.DAFSource = adjKm/dist, daf.Source
 	}
 	adjTkm := tonnes * adjKm
 	lr.Method = MethodLoadModel
 	lr.Factor = &f
-	lr.LoadFactor, lr.LoadTonnes, lr.EmptyTripFactor, lr.PayloadT = lf, leg.LoadTonnes, leg.EmptyTripFactor, m.PayloadT
+	lr.LoadFactor, lr.LoadTonnes, lr.EmptyTripFactor, lr.PayloadT = lf, leg.LoadTonnes, etf, m.PayloadT
+	lr.RepositioningKm = leg.RepositioningKm
 	lr.TTWKg = adjTkm * ttw / 1000
 	lr.WTWKg = adjTkm * f.WTW() / 1000
 	return lr, nil
@@ -537,4 +560,13 @@ func (c Calculator) distance(ctx context.Context, leg Leg) (rt Route, method, dt
 		dtype = dt.DistanceType(leg.Mode)
 	}
 	return rt, method, dtype, nil
+}
+
+func round3(v float64) float64 { return math.Round(v*1000) / 1000 }
+
+func repoText(km float64) string {
+	if km <= 0 {
+		return ""
+	}
+	return fmt.Sprintf(", including %g km repositioning", km)
 }

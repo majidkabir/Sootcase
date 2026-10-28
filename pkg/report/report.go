@@ -10,7 +10,10 @@
 //   - a breakdown by energy carrier;
 //   - the share of primary, modelled and default data, the sources of
 //     default values and the models and parameters used;
-//   - omissions and deviations, and a reference to supporting information.
+//   - omissions and deviations, and a reference to supporting information;
+//   - the totals placed in GHG Protocol scopes, for the shipper (scope 3,
+//     category 4 or 9) and for the operator of the vehicles (scopes 1, 2
+//     and 3 category 3).
 //
 // A Builder takes results one at a time, so reports over millions of
 // shipments need no more memory than one shipment.
@@ -49,6 +52,17 @@ type Meta struct {
 	// can make that claim: it covers data collection and boundaries that
 	// Sootcase cannot see.
 	DeclareISO bool `json:"declare_iso,omitempty"`
+	// Scope3Category is the GHG Protocol scope 3 category the transport is
+	// in for the reporting company: 4 (upstream: transport it pays for,
+	// inbound or outbound) or 9 (downstream: sold products moved by
+	// transport it doesn't pay for). 0: not said; the report names both.
+	Scope3Category int `json:"scope3_category,omitempty"`
+}
+
+// GHG is the report's totals in GHG Protocol scopes (calc.GHGScopes).
+type GHG struct {
+	Scope3Category int `json:"scope3_category,omitempty"`
+	calc.GHGScopes
 }
 
 // Report is the finished report. Emissions are kg CO2e, intensities g CO2e
@@ -70,6 +84,7 @@ type Report struct {
 	Energy   []Energy `json:"energy_carriers"`
 	Data     Data     `json:"data_quality"`
 	DAFs     []DAF    `json:"distance_adjustments,omitempty"`
+	GHG      GHG      `json:"ghg_protocol"`
 	Notes    []string `json:"notes,omitempty"`
 }
 
@@ -250,6 +265,7 @@ type Builder struct {
 	now       func() time.Time
 	cov       Coverage
 	tot       Total
+	ghg       calc.GHGScopes
 	modes     map[calc.Mode]*Mode
 	modeDist  map[calc.Mode]map[string]float64
 	dist      map[string]float64
@@ -314,6 +330,12 @@ func (b *Builder) Add(id string, r calc.Result, err error) {
 	}
 	b.cov.Calculated++
 	b.cov.WeightT += r.WeightKg / 1000
+	g := r.GHGProtocol
+	b.ghg.Scope3Kg += g.Scope3Kg
+	b.ghg.OperatorScope1Kg += g.OperatorScope1Kg
+	b.ghg.OperatorScope2Kg += g.OperatorScope2Kg
+	b.ghg.OperatorScope3Cat3Kg += g.OperatorScope3Cat3Kg
+	b.ghg.HubsKg += g.HubsKg
 	added := false
 	for _, l := range r.Legs {
 		if l.Added != "" {
@@ -515,6 +537,7 @@ func (b *Builder) Report() Report {
 		Generated:    b.now().UTC().Truncate(time.Second),
 		Coverage:     b.cov,
 		Total:        b.tot,
+		GHG:          GHG{Scope3Category: b.meta.Scope3Category, GHGScopes: b.ghg},
 	}
 	if r.Title == "" {
 		r.Title = "Freight GHG emissions report"

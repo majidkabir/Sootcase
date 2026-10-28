@@ -100,7 +100,11 @@ This is the capacity-utilisation approach EcoTransIT World and GLEC use, built e
 
 **Energy** — when a leg has `energy_kwh_per_tkm` and `country` (ISO alpha-3, e.g. `DNK`), for electric trains or trucks: the electricity used per tonne-km × that country's grid intensity, all well-to-tank (nothing is emitted at the vehicle). Grid intensities for 213 countries come from Ember via Our World in Data (2024–2025 values). There's no default energy figure: give your operator's, or your own. For metered kWh use the fuel method with fuel `electricity/DNK`.
 
+**Repositioning** — `repositioning_km` on a truck leg: km driven empty for this trip (to the pickup, or back after delivery). They are shared over the truck's load like empty running: added to the empty trip factor as km per actual loaded km. Without a load, the shipment is taken as the whole load (a dedicated truck).
+
 **Hubs** add `weight_t × hub g/t / 1000` (WTW) to the total. Intensity (g/tkm) covers transport only.
+
+**GHG Protocol scopes** — every result has `ghg_protocol`: for a company buying the transport, all of it is scope 3 (category 4 for transport it pays for, inbound or outbound; category 9 for sold products moved by transport it doesn't pay for); for the operator of the vehicles, scope 1 (fuel burnt), scope 2 (electricity used, including the upstream share its factor contains) and scope 3 category 3 (producing and delivering the fuel). Hubs are well-to-wheel only and given apart. Reports take `scope3_category` (4 or 9) to name the category. Battery electric vehicle factors from DESNZ (electricity generation and T&D) are counted as energy provision (WTT), none at the vehicle (DESNZ methodology, Table 15).
 
 **Distance** comes from `distance_km` when given. Otherwise:
 
@@ -305,6 +309,7 @@ Not taken into account (also in every result): transit times and costs; whether 
 | `from_code`, `to_code` | leg, instead of coordinates: a UN/LOCODE (`NLRTM`) or IATA airport code (`CPH`) |
 | `fuel`, `fuel_amount`, `vehicle_tonne_km` | leg, fuel method |
 | `load_tonnes` or `load_factor`, `empty_trip_factor` | leg, load model |
+| `repositioning_km` | leg, trucks: empty km for this trip |
 | `energy_kwh_per_tkm`, `country` | leg, energy method |
 | `hub_id`, `hub_type` | hub stop (row is a hub when `hub_type` is set) |
 

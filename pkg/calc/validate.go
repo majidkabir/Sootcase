@@ -29,6 +29,7 @@ func validate(s Shipment) error {
 		nums := map[string]float64{
 			"distance_km": l.DistanceKm, "load_factor": l.LoadFactor, "load_tonnes": l.LoadTonnes,
 			"empty_trip_factor": l.EmptyTripFactor, "energy_kwh_per_tkm": l.EnergyKWhPerTkm,
+			"repositioning_km": l.RepositioningKm,
 		}
 		if l.Fuel != nil {
 			nums["fuel.amount"] = l.Fuel.Amount
@@ -41,6 +42,9 @@ func validate(s Shipment) error {
 		}
 		if !validDistanceType(l.DistanceType) {
 			return bad("%s: distance_type must be sfd, gcd or actual, got %q", where, l.DistanceType)
+		}
+		if l.RepositioningKm < 0 {
+			return bad("%s: repositioning_km must be >= 0, got %v", where, l.RepositioningKm)
 		}
 		if l.DistanceKm < 0 {
 			return bad("%s: distance_km must be >= 0, got %v", where, l.DistanceKm)

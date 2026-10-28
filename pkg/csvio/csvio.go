@@ -13,6 +13,7 @@
 //	from_code, to_code                              leg, UN/LOCODE or IATA code instead of coordinates
 //	fuel, fuel_amount, vehicle_tonne_km             leg, fuel-based method
 //	load_factor or load_tonnes, empty_trip_factor   leg, load model method
+//	repositioning_km                                leg, empty km for this trip (trucks)
 //	energy_kwh_per_tkm, country                     leg, energy method
 //	hub_id, hub_type                                hub stop
 package csvio
@@ -245,6 +246,7 @@ func addRow(s *calc.Shipment, row rowReader) error {
 	leg.LoadFactor = get("load_factor")
 	leg.LoadTonnes = get("load_tonnes")
 	leg.EmptyTripFactor = get("empty_trip_factor")
+	leg.RepositioningKm = get("repositioning_km")
 	leg.EnergyKWhPerTkm = get("energy_kwh_per_tkm")
 	leg.Country = row.str("country")
 	if fuel := row.str("fuel"); fuel != "" {
@@ -285,9 +287,12 @@ func (r rowReader) float(name string) (float64, error) {
 
 // ResultHeader is the header row written by Writer.
 // added_road_legs counts the road legs the calculator added; warnings are
-// the result's warnings, joined by " | ".
+// the result's warnings, joined by " | ". The operator_* columns split WTW
+// by GHG Protocol scope for the operator of the vehicles (calc.GHGScopes);
+// for a shipper all of wtw_kg is scope 3, category 4 or 9.
 var ResultHeader = []string{"shipment_id", "weight_kg", "tonne_km", "ttw_kg", "wtt_kg", "wtw_kg",
-	"intensity_g_per_tkm", "primary_data_share", "dataset", "error", "added_road_legs", "warnings"}
+	"intensity_g_per_tkm", "primary_data_share", "dataset", "error", "added_road_legs", "warnings",
+	"operator_scope1_kg", "operator_scope2_kg", "operator_scope3_cat3_kg", "hubs_kg"}
 
 // Writer writes one summary row per shipment.
 type Writer struct{ cw *csv.Writer }
@@ -304,7 +309,7 @@ func NewWriter(w io.Writer) (*Writer, error) {
 // Write writes a result, or the error for that shipment.
 func (w *Writer) Write(id string, r calc.Result, err error) error {
 	if err != nil {
-		return w.cw.Write([]string{id, "", "", "", "", "", "", "", "", err.Error(), "", ""})
+		return w.cw.Write([]string{id, "", "", "", "", "", "", "", "", err.Error(), "", "", "", "", "", ""})
 	}
 	added := 0
 	for _, l := range r.Legs {
@@ -313,7 +318,8 @@ func (w *Writer) Write(id string, r calc.Result, err error) error {
 		}
 	}
 	return w.cw.Write([]string{id, num(r.WeightKg), num(r.TonneKm), num(r.TTWKg), num(r.WTTKg), num(r.WTWKg),
-		num(r.IntensityG), num(r.PrimaryDataShare), r.Dataset, "", strconv.Itoa(added), strings.Join(r.Warnings, " | ")})
+		num(r.IntensityG), num(r.PrimaryDataShare), r.Dataset, "", strconv.Itoa(added), strings.Join(r.Warnings, " | "),
+		num(r.GHGProtocol.OperatorScope1Kg), num(r.GHGProtocol.OperatorScope2Kg), num(r.GHGProtocol.OperatorScope3Cat3Kg), num(r.GHGProtocol.HubsKg)})
 }
 
 // Flush flushes buffered rows and reports any write error.

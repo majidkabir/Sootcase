@@ -257,6 +257,9 @@ footer.credits a { color: var(--blue); }
       </div>
       <label class="check"><input type="checkbox" id="rroadlegs" checked>
         <span>Add missing road legs (see above).</span></label>
+      <div class="row"><div><label for="rcat">GHG Protocol scope 3 category for your company</label>
+        <select id="rcat"><option value="">Not set: show both</option><option value="4">4: transport we pay for (inbound or outbound)</option>
+        <option value="9">9: our sold products, transport we don't pay for</option></select></div></div>
       <label class="check"><input type="checkbox" id="riso">
         <span>Declare conformity with ISO 14083:2023. Only tick this if your data collection and boundaries conform.</span></label>
       <div class="actions">
@@ -383,7 +386,9 @@ footer.credits a { color: var(--blue); }
         <div><label>Load on the truck (t)</label><input name="load_tonnes" type="number" min="0" step="any"></div>
         <div><label>or load factor (0–1)</label><input name="load_factor" type="number" min="0" max="1" step="any"></div>
         <div><label>Empty km per loaded km</label><input name="empty_trip_factor" type="number" min="0" step="any"></div>
+        <div><label>Empty km for this trip (repositioning)</label><input name="repositioning_km" type="number" min="0" step="any"></div>
       </div>
+      <p class="hint">Repositioning: km the truck drives empty to the pickup or back, shared over its load. Without a load, the shipment is taken as the whole load.</p>
       <p class="hint payload-hint"></p>
     </details>
     <details><summary>Measured fuel</summary>
@@ -585,7 +590,7 @@ function buildShipment() {
       if (fq) l.from.name = fq;
       if (tq) l.to.name = tq;
     }
-    const keys = l.mode === "road" ? ["load_tonnes", "load_factor", "empty_trip_factor", "energy_kwh_per_tkm"]
+    const keys = l.mode === "road" ? ["load_tonnes", "load_factor", "empty_trip_factor", "repositioning_km", "energy_kwh_per_tkm"]
       : l.mode === "rail" ? ["energy_kwh_per_tkm"] : [];
     for (const k of keys) { const v = num(f(k)); if (v) l[k] = v; }
     const country = f("country").value.trim();
@@ -706,6 +711,7 @@ function render(req, r) {
       <thead><tr><th>Element</th><th class="num">Distance</th><th>Method</th>
         <th class="num">Vehicle</th><th class="num">Supply</th><th class="num">Total</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
+    ${ghgHTML(r.ghg_protocol)}
     ${sheetHTML(r.explanation)}
     <details class="json"><summary>Show request and response JSON</summary>
       <pre>${esc(JSON.stringify(req, null, 2))}</pre><pre>${esc(JSON.stringify(r, (k, v) =>
@@ -716,6 +722,22 @@ function render(req, r) {
     $("#sheet-print").addEventListener("click", () => { $("#sheet").open = true; window.print(); });
   }
   drawMap(r);
+}
+
+// ---- GHG Protocol scopes ----
+function ghgHTML(g, cat) {
+  if (!g) return "";
+  const s3 = cat === 4 ? "Scope 3, category 4 (transport it pays for)" : cat === 9 ? "Scope 3, category 9 (sold products, transport it doesn't pay for)"
+    : "Scope 3: category 4 if it pays for the transport, 9 for sold products moved by transport it doesn't pay for";
+  return `<h3 class="sub">GHG Protocol scopes</h3>
+    <div class="scroll"><table class="report-table"><tbody>
+      <tr><td><strong>Company buying the transport</strong>: ${s3}</td><td class="num"><strong>${kg(g.scope3_shipper_kg)}</strong></td></tr>
+      <tr><td><strong>Operator of the vehicles</strong>: scope 1, fuel burnt in the vehicles</td><td class="num">${kg(g.operator_scope1_kg)}</td></tr>
+      <tr><td>Scope 2, electricity the vehicles use (location-based)</td><td class="num">${kg(g.operator_scope2_kg)}</td></tr>
+      <tr><td>Scope 3, category 3, producing and delivering the fuel</td><td class="num">${kg(g.operator_scope3_cat3_kg)}</td></tr>
+      ${g.hubs_kg ? `<tr><td>Hub operations (not split by scope)</td><td class="num">${kg(g.hubs_kg)}</td></tr>` : ""}
+    </tbody></table></div>
+    <p class="id">GHG Protocol Corporate Value Chain (Scope 3) Standard and technical guidance, chapters 3, 4 and 9. Electricity includes the upstream share its factor contains.</p>`;
 }
 
 // ---- Calculation sheet: every step with its numbers and its GLEC / ISO 14083 basis ----
@@ -904,6 +926,7 @@ function reportQuery(format) {
   if ($("#rfrom").value) q.set("period_from", $("#rfrom").value);
   if ($("#rto").value) q.set("period_to", $("#rto").value);
   if ($("#riso").checked) q.set("declare_iso", "true");
+  if ($("#rcat").value) q.set("scope3_category", $("#rcat").value);
   if (!$("#rroadlegs").checked) q.set("add_road_legs", "false");
   if (format) q.set("format", format);
   else { q.set("results", "true"); q.set("markdown", "true"); } // all downloads from one calculation
@@ -1008,6 +1031,7 @@ function renderReport(r) {
     ${sources ? `<p class="id">Default values from:</p><ul class="notes">${sources}</ul>` : ""}
     ${models ? `<p class="id">Models:</p><ul class="notes">${models}</ul>` : ""}
     ${dafs ? `<h3 class="sub">Distance adjustment factors</h3><ul class="notes">${dafs}</ul>` : ""}
+    ${ghgHTML(r.ghg_protocol, r.ghg_protocol && r.ghg_protocol.scope3_category)}
     ${(c.warnings || []).length ? `<h3 class="sub">Warnings</h3>
       <div class="scroll"><table class="report-table long-names"><thead><tr><th>Warning</th><th class="num">Shipments</th></tr></thead>
       <tbody>${c.warnings.map(x => `<tr><td>${esc(x.reason)}</td><td class="num">${x.shipments}</td></tr>`).join("")}</tbody></table></div>` : ""}

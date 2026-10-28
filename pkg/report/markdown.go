@@ -41,6 +41,24 @@ func WriteMarkdown(w io.Writer, r Report) error {
 	p("Transport activity: %s tonne-km (%s).  \n", num(t.TonneKm, 0), distText(t.DistanceTypes))
 	p("Transport emission intensity (WTW): **%s g CO2e/tkm**.\n\n", num(t.IntensityG, 2))
 
+	g := r.GHG
+	p("## GHG Protocol scopes\n\n")
+	switch g.Scope3Category {
+	case 4:
+		p("For the reporting company, all %s kg are **scope 3, category 4** (upstream transportation and distribution: transport it pays for).\n\n", num(g.Scope3Kg, 1))
+	case 9:
+		p("For the reporting company, all %s kg are **scope 3, category 9** (downstream transportation and distribution: sold products moved by transport it doesn't pay for).\n\n", num(g.Scope3Kg, 1))
+	default:
+		p("For a company buying the transport, all %s kg are **scope 3**: category 4 for transport it pays for (inbound or outbound), category 9 for sold products moved by transport it doesn't pay for.\n\n", num(g.Scope3Kg, 1))
+	}
+	p("For the operator of the vehicles:\n\n| | kg CO2e |\n|---|---:|\n")
+	p("| Scope 1: fuel burnt in the vehicles | %s |\n", num(g.OperatorScope1Kg, 1))
+	p("| Scope 2: electricity used by the vehicles (location-based) | %s |\n", num(g.OperatorScope2Kg, 1))
+	p("| Scope 3, category 3: producing and delivering the fuel | %s |\n", num(g.OperatorScope3Cat3Kg, 1))
+	p("| Hub operations (not split by scope) | %s |\n\n", num(g.HubsKg, 1))
+	p("GHG Protocol Corporate Value Chain (Scope 3) Standard and its technical guidance, chapters 3, 4 and 9. " +
+		"Electricity includes the upstream share its factor contains, which isn't split off.\n\n")
+
 	if len(r.Modes) > 0 {
 		p("## By mode of transport\n\n")
 		p("| Mode | Legs | Tonne-km | Distance type | TTW kg | WTT kg | WTW kg | g CO2e/tkm |\n")

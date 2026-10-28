@@ -146,6 +146,13 @@ func Parse(rows [][]string) (Result, error) {
 		} else {
 			warn("line %d: no WTT factor for %s, WTT set to 0", r.line, vt)
 		}
+		if strings.Contains(vt, "battery_electric") {
+			// DESNZ's battery electric factor is electricity generation and
+			// T&D losses (its Table 15): no emissions at the vehicle. In ISO
+			// 14083 terms all of it is energy provision (WTT).
+			f.WTT, f.TTW = clean(f.WTT+f.TTW), 0
+			f.Source += BEVNote
+		}
 		ds.Legs = append(ds.Legs, f)
 	}
 	for _, r := range sortedRest(wtt) {
@@ -254,6 +261,9 @@ func sortedRest(m map[string]row) []row {
 	sort.Slice(out, func(i, j int) bool { return out[i].line < out[j].line })
 	return out
 }
+
+// BEVNote marks battery electric factors moved to WTT.
+const BEVNote = "; electricity (generation, T&D and upstream) counted as energy provision (WTT), none at the vehicle (DESNZ 2026 methodology, Table 15)"
 
 // key matches a row to its WTT counterpart: WTT sheets repeat the labels,
 // sometimes with a "WTT-" prefix.

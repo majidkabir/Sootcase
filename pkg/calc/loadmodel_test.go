@@ -154,3 +154,44 @@ func TestCalculate_LoadTonnes(t *testing.T) {
 		t.Errorf("load factor 1.2: %v", err)
 	}
 }
+
+func TestCalculate_Repositioning(t *testing.T) {
+	c := Calculator{Factors: withModels{testFactors}}
+	ctx := context.Background()
+	calc := func(leg Leg) (LegResult, error) {
+		leg.ID, leg.Mode, leg.VehicleType, leg.DistanceKm = "l", Road, "truck", 100
+		r, err := c.Calculate(ctx, Shipment{WeightKg: 10_000, Legs: []Leg{leg}})
+		if err != nil {
+			return LegResult{}, err
+		}
+		return r.Legs[0], nil
+	}
+	// 50 km empty on a 100 km loaded trip is an empty trip factor of 0.5 on top.
+	repo, err1 := calc(Leg{LoadTonnes: 10, RepositioningKm: 50})
+	etf, err2 := calc(Leg{LoadTonnes: 10, EmptyTripFactor: 0.5})
+	if err1 != nil || err2 != nil || !approx(repo.WTWKg, etf.WTWKg) || repo.EmptyTripFactor != 0.5 || repo.RepositioningKm != 50 ||
+		!strings.Contains(repo.Factor.Source, "including 50 km repositioning") {
+		t.Fatalf("repositioning: %v %v %+v vs %+v", err1, err2, repo, etf)
+	}
+	both, _ := calc(Leg{LoadTonnes: 10, EmptyTripFactor: 0.2, RepositioningKm: 30})
+	if !approx(both.EmptyTripFactor, 0.5) {
+		t.Errorf("etf 0.2 + 30/100 = %v", both.EmptyTripFactor)
+	}
+	// Without a load: the shipment is the truck's whole load (dedicated).
+	ded, err := calc(Leg{RepositioningKm: 50})
+	if err != nil || ded.LoadTonnes != 10 || !approx(ded.WTWKg, repo.WTWKg) {
+		t.Errorf("dedicated: %v %+v", err, ded)
+	}
+	fu := FuelUse{Fuel: "diesel", Amount: 1}
+	for name, leg := range map[string]Leg{
+		"negative":  {RepositioningKm: -1},
+		"with fuel": {RepositioningKm: 10, Fuel: &fu},
+	} {
+		if _, err := calc(leg); err == nil {
+			t.Errorf("%s: want error", name)
+		}
+	}
+	if _, err := c.Calculate(ctx, Shipment{WeightKg: 1000, Legs: []Leg{{Mode: Rail, VehicleType: "train", DistanceKm: 100, RepositioningKm: 10}}}); !errors.Is(err, ErrInvalidLoad) {
+		t.Errorf("rail: want ErrInvalidLoad, got %v", err)
+	}
+}
