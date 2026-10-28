@@ -57,6 +57,7 @@ button, input, select { font: inherit; color: inherit; }
 nav.site { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px 16px; min-height: 1.5em; font-size: .95rem; }
 nav.site a { color: var(--blue); text-decoration: none; }
 nav.site a:hover { text-decoration: underline; }
+nav.site a[aria-current] { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px; }
 
 main, .grid { max-width: 1240px; margin: 0 auto; padding: 16px 24px 48px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px; align-items: start; }
 @media (max-width: 900px) { main, .grid { grid-template-columns: minmax(0, 1fr); padding: 12px 16px 40px; } .top { padding: 20px 16px 4px; }
@@ -194,8 +195,7 @@ footer.credits a { color: var(--blue); }
 <body>
 <header class="top">
   <h1><a href="../" class="home"><svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><path d="M24 22V17a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v5" fill="none" stroke="currentColor" stroke-width="4"/><rect x="8" y="22" width="48" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="4"/><path d="M18 47C27 47 25 34 33 34S41 30 46 31" fill="none" stroke="#2F8F5B" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 5.5"/><circle cx="18" cy="47" r="3.5" fill="currentColor"/><circle cx="46" cy="31" r="4" fill="#2F8F5B"/></svg>Sootcase</a></h1>
-  <p>Freight emissions, with the working shown.</p>
-  <span class="dataset" id="dataset"></span>
+  <p>Freight CO₂e following the GLEC Framework and ISO 14083</p>
   <nav class="site" id="sitenav" aria-label="Site"></nav>
 </header>
 
@@ -886,7 +886,7 @@ function toggleCargo() {
 async function loadFactors() {
   try {
     const d = await (await fetch("v1/factors")).json();
-    $("#dataset").textContent = `Factors: ${d.name}`;
+    $("#dataset").textContent = `Factors: ${d.name}.`;
     const lists = {};
     for (const a of d.vehicle_aliases || []) { (lists[a.mode] ||= []).push(a.alias); vehicleNames[a.alias] = a.vehicle_type; }
     loadModels = (d.load_models || []).filter(m => m.mode === "road");
@@ -1232,7 +1232,7 @@ fetch("../site-nav.json").then(r => r.ok ? r.json() : null).then(d => {
 try { loadExample(0); } finally { document.documentElement.classList.remove("js-loading"); }
 loadFactors().then(() => calculate(null, "example"));
 </script>
-<footer class="credits">Places: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0), UN/LOCODE (UNECE),
+<footer class="credits"><span id="dataset"></span> Places: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0), UN/LOCODE (UNECE),
 <a href="https://ourairports.com/">OurAirports</a>. Routing: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>.
 Distance adjustments: GLEC Framework v3.2, &copy; <a href="https://www.smartfreightcentre.org/">Smart Freight Centre</a>.</footer>
 </body>
