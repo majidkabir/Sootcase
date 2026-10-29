@@ -25,5 +25,5 @@ func ExampleBuild() {
 	f := layer.Legs[0]
 	fmt.Printf("%s: %.2f g CO2e/tkm WTW, %s data\n", f.VehicleType, f.WTW(), f.DataType)
 	// Output:
-	// dk_road: 79.86 g CO2e/tkm WTW, primary data
+	// dk_road: 86.94 g CO2e/tkm WTW, primary data
 }

@@ -14,7 +14,7 @@ Source-available freight emissions calculator following the GLEC Framework / ISO
 
 ![The Sootcase web page: a shipment entered leg by leg on the left; on the right its emissions, a bar per leg split into vehicle and fuel-supply emissions, and how each number was made](docs/screenshot.png)
 
-Ships with the **GLEC Framework v3.3 default values** built in (Smart Freight Centre, used with permission): road by region, rail, air, inland waterway, container ships by trade lane, other ships by size and fuel, and logistics hubs; plus the **UK DESNZ 2026** conversion factors for fuels, load models, ferries and the rest. Every factor is split into tank-to-wheel and well-to-tank.
+Ships with the **GLEC Framework v3.3 default values** built in (Smart Freight Centre, used with permission): road by region, rail, air, inland waterway, container ships by trade lane, other ships by size and fuel, and logistics hubs; GLEC's fuel emission factors (Module 1) for measured fuel; plus the **UK DESNZ 2026** conversion factors for load models, ferries and the rest. Every factor is split into tank-to-wheel and well-to-tank.
 
 ## Quick start
 
@@ -376,12 +376,12 @@ A dataset is JSON with `legs` (g CO2e/tkm), `hubs` (g CO2e/t), `fuels` (kg CO2e/
 
 | Mode | Aliases |
 |---|---|
-| road | `hgv`, `hgv_rigid`, `hgv_artic`, `hgv_artic_33t`, `hgv_reefer`, `van`, `truck_urban` (GLEC, by region), `van_electric` (DESNZ) |
-| rail | `freight_train` (GLEC, by region), `freight_train_diesel`, `freight_train_electric` (GLEC Europe) |
+| road | `hgv`, `hgv_rigid`, `hgv_artic`, `hgv_artic_33t`, `hgv_reefer`, `van`, `truck_urban` (GLEC, by region), `van_electric`, `truck_electric` (GLEC: Europe × GLEC's European electricity, China, India; elsewhere refused) |
+| rail | `freight_train` (GLEC, by region), `freight_train_diesel`, `freight_train_electric` (GLEC Europe), `freight_train_reefer` (GLEC +12%; not for North America) |
 | sea | `container_ship`, `container_ship_reefer` (GLEC, by trade lane), `container_ship_short_sea`, `container_ship_deep_sea` (EU MRV), `bulk_carrier`, `general_cargo`, `roro`, `ropax` (DESNZ) |
 | air | `air_freight` (GLEC, aircraft type unknown; short-haul under 1,500 km; within India GLEC's Indian value), `air_freighter`, `air_belly` |
 | inland_waterway | `barge` (GLEC motor vessel 85–110 m), `container_barge` (GLEC container vessel 110 m) |
-| fuel (per litre) | `diesel`, `diesel_mineral`, `petrol`, `hvo`, `marine_gas_oil`, `marine_fuel_oil`, `jet_fuel` |
+| fuel (per litre) | `diesel`, `diesel_mineral`, `petrol`, `hvo`, `jet_fuel` (GLEC Module 1, by region: Europe, North America, China, India), `marine_gas_oil`, `marine_fuel_oil` (DESNZ) |
 
 **GLEC v3.3 regions and trade lanes.** A regional alias looks at the country of both ends of the leg (from the place list): when both are in the same GLEC region it uses that region's value, otherwise the alias's default (Europe and South America). Road: North America (SmartWay, US and Canada), China, India, Asia (except China and India) and Africa (GLEC's +13% for vans, +22% for heavier vehicles on the Europe and South America values), Europe and South America (with Mexico, Central America and the Caribbean; also used for Oceania, which GLEC doesn't cover). The aliases use GLEC's "starting point" for the vehicle class in each region (e.g. 125 g CO2e/t-km WTW for HGVs in Europe); North America has none in GLEC, so SmartWay TL/Dry Van. `hgv_reefer` adds GLEC's +12% for temperature-controlled freight. GLEC road values include its +5% distance conversion, so they are per shortest feasible distance. `container_ship` picks the Clean Cargo trade lane (GLEC Tables 18–19) from the zones of the two ports (North Europe, Mediterranean/Black Sea, NE Asia, SE Asia, Middle East/India, Africa, North America EC/Gulf and WC, South America, Oceania; the country lists are Sootcase's), per TEU-km ÷ 10 t per TEU, GLEC's average. A leg's note says which region or lane was used. With a load given, the road aliases keep DESNZ's load models. GLEC values without a vehicle-size-free default (non-container ships, Ro-Ro, RoPax) are available by full id (`glec/sea/bulk_carrier/35000-59999_dwt/vlsfo`), and their aliases stay on DESNZ for now.
 
@@ -393,14 +393,14 @@ Why: DESNZ's container ship factors (about 20 g CO2e per tonne-km on average, 15
 
 **Notes on DESNZ data:**
 - Air freight comes `with_rf` and `without_rf` (radiative forcing). ISO 14083 reports without RF.
-- Hub factors come from GLEC v3.3 Table 3 (GILA project; Fraunhofer IML, Politecnico di Milano, GreenRouter): `transshipment`, `storage_transshipment`, `warehouse`, `liquid_bulk_terminal`, and `_mixed` for mixed ambient and temperature-controlled sites (kg CO2e per tonne; sample sizes in the source). Intermodal terminals are per container and not included yet. Add your own as a layer:
+- Hub factors come from GLEC v3.3 Table 3 (GILA project; Fraunhofer IML, Politecnico di Milano, GreenRouter): `transshipment`, `storage_transshipment`, `warehouse`, `liquid_bulk_terminal`, and `_mixed` for mixed ambient and temperature-controlled sites (kg CO2e per tonne; sample sizes in the source); `intermodal_terminal` and `intermodal_terminal_temperature_controlled` are per container handled: give the hub's `containers` (CSV `hub_containers`). Add your own as a layer:
 
   ```json
   {"name": "my-hubs", "note": "where these values come from",
    "hubs": [{"hub_type": "my_dc", "wtw_g_per_tonne": 0, "source": "…", "year": 2026}]}
   ```
 - Air factors are marked as great-circle based and road factors as actual-distance based; the GLEC default DAFs above are added. DESNZ sea factors (from IMO 2009) state no distance basis, so no DAF applies to them; GLEC's own sea default values include +15%.
-- GLEC default values: Smart Freight Centre. Global Logistics Emissions Council Framework for Logistics Emissions Accounting and Reporting; v3.3 edition, revised and updated (October 2026). ISBN 978-90-833629-0-8. Used with the permission of Smart Freight Centre, which is acknowledged as the source; no affiliation or endorsement is implied. GLEC's fuel emission factors (Module 1) aren't included yet: fuels use DESNZ.
+- GLEC default values: Smart Freight Centre. Global Logistics Emissions Council Framework for Logistics Emissions Accounting and Reporting; v3.3 edition, revised and updated (October 2026). ISBN 978-90-833629-0-8. Used with the permission of Smart Freight Centre, which is acknowledged as the source; no affiliation or endorsement is implied. GLEC Module 1 fuels: `glec/fuel/<eu|na|cn|in|marine|air>/<fuel>/<kg|t|l>` (per litre with GLEC's density; marine per kg or tonne), the biofuel blends (`diesel_b7`, `gasoline_e10`, `diesel_hvo20`, …; GLEC gives no biogenic CO2 for them), biogenic CO2 where GLEC gives it. `diesel` is GLEC's 100% diesel; a blend by its id. Electric trucks use GLEC's European average electricity (92.8 g CO2e/MJ, the only one GLEC confirms includes infrastructure as ISO 14083 asks); the charging country's own mix is more exact through `energy_kwh_per_tkm` with `country`.
 
 **Updating DESNZ** each year: download the "flat file" from [gov.uk](https://www.gov.uk/government/collections/government-conversion-factors-for-company-reporting) and run
 

@@ -69,5 +69,5 @@ func Example_fuel() {
 	l := res.Legs[0]
 	fmt.Printf("share %.0f%%, %.1f kg CO2e WTW, %s data\n", l.AllocationShare*100, l.WTWKg, l.DataType)
 	// Output:
-	// share 20%, 76.7 kg CO2e WTW, primary data
+	// share 20%, 83.5 kg CO2e WTW, primary data
 }

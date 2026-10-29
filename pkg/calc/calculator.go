@@ -30,6 +30,13 @@ type Where struct {
 	Lat, Lon float64
 }
 
+// PlaceFuelProvider is optionally implemented by a FactorProvider whose
+// fuel names can depend on where a leg is (e.g. GLEC's regional fuel
+// factors). note says which factor was chosen.
+type PlaceFuelProvider interface {
+	FuelFactorAt(fuel string, from, to Where) (f FuelFactor, note string, err error)
+}
+
 // PlaceFactorProvider is optionally implemented by a FactorProvider whose
 // vehicle types can depend on where a leg is (e.g. GLEC's regional road
 // values or container trade lanes). note says which factor was chosen.
@@ -220,8 +227,17 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 		if err != nil {
 			return Result{}, fmt.Errorf("hub %q: %w", h.ID, err)
 		}
+		if h.Containers < 0 || math.IsNaN(h.Containers) || math.IsInf(h.Containers, 0) {
+			return Result{}, fmt.Errorf("%w: hub %q: containers must be >= 0", ErrInvalidInput, h.ID)
+		}
 		hr := HubResult{HubID: h.ID, HubType: h.HubType, WTWKg: tonnes * hf.WTWPerTonneG / 1000,
 			DataType: DataDefault, Source: hf.Source}
+		if hf.WTWPerContainerG > 0 {
+			if h.Containers == 0 {
+				return Result{}, fmt.Errorf("%w: hub %q: %s is per container handled; give containers", ErrInvalidInput, h.ID, h.HubType)
+			}
+			hr.Containers, hr.WTWKg = h.Containers, h.Containers*hf.WTWPerContainerG/1000
+		}
 		if hf.DataType != "" {
 			hr.DataType = hf.DataType
 		}
@@ -414,7 +430,7 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 		return LegResult{}, fmt.Errorf("%w: empty_trip_factor needs load_factor or load_tonnes", ErrInvalidLoad)
 	}
 	if leg.Fuel != nil {
-		return c.fuelLeg(lr, *leg.Fuel)
+		return c.fuelLeg(lr, *leg.Fuel, c.where(leg.From), c.where(leg.To))
 	}
 	if leg.LoadFactor != 0 || leg.LoadTonnes != 0 {
 		return c.loadLeg(lr, leg, tonnes, dist, dtype)
@@ -457,7 +473,7 @@ func (c Calculator) where(l Location) Where {
 	return w
 }
 
-func (c Calculator) fuelLeg(lr LegResult, fu FuelUse) (LegResult, error) {
+func (c Calculator) fuelLeg(lr LegResult, fu FuelUse, from, to Where) (LegResult, error) {
 	if fu.Amount < 0 || fu.VehicleTonneKm < 0 {
 		return LegResult{}, fmt.Errorf("%w: amount and vehicle_tonne_km must be >= 0", ErrInvalidFuel)
 	}
@@ -469,7 +485,13 @@ func (c Calculator) fuelLeg(lr LegResult, fu FuelUse) (LegResult, error) {
 				ErrInvalidFuel, lr.TonneKm, fu.VehicleTonneKm)
 		}
 	}
-	ff, err := c.Factors.FuelFactor(fu.Fuel)
+	var ff FuelFactor
+	var err error
+	if pf, ok := c.Factors.(PlaceFuelProvider); ok {
+		ff, lr.FactorNote, err = pf.FuelFactorAt(fu.Fuel, from, to)
+	} else {
+		ff, err = c.Factors.FuelFactor(fu.Fuel)
+	}
 	if err != nil {
 		return LegResult{}, err
 	}

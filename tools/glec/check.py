@@ -39,6 +39,12 @@ for l in d["legs"]:
     vt, w, t = l["vehicle_type"], l["wtt_g_per_tkm"], l["ttw_g_per_tkm"]
     if "/asia_africa/" in vt or "temperature_controlled" in vt or vt == "glec/rail/eu/average_traction_unknown" or vt in BY_EYE:
         continue
+    if vt.startswith("glec/road/europe/electric/"):  # kWh/t-km x 334.08 g/kWh
+        checked += 1
+        kwh = round(w / (92.8 * 3.6), 4)
+        if not re.search(r"(?<![\d.])(" + "|".join(map(re.escape, forms(kwh))) + r")(?![\d.])", P(103)):
+            bad.append(f"{vt}: {kwh} kWh/t-km")
+        continue
     checked += 1
     if vt in ("glec/rail/na/average", "glec/rail/in/average"):
         flow = norm(subprocess.run(["pdftotext", "-f", "98", "-l", "98", sys.argv[1], "-"], capture_output=True, text=True).stdout)
@@ -58,8 +64,20 @@ for l in d["legs"]:
 hub_text = P(97)
 for h in d["hubs"]:
     checked += 1
-    if "%g" % (h["wtw_g_per_tonne"] / 1000) not in hub_text:
+    if "%g" % ((h.get("wtw_g_per_tonne") or h.get("wtw_g_per_container", 0)) / 1000) not in hub_text:
         bad.append(f"hub {h['hub_type']}")
+# Module 1 fuels: per kg, TTW and WTW (base tables) or WTT, TTW and WTW (blends), as printed.
+fuel_text = P(*range(77, 91))
+for f in d["fuels"]:
+    if not f["fuel"].endswith("/kg"):
+        continue
+    checked += 1
+    ttw, wtt = f["ttw_kg_per_unit"], f["wtt_kg_per_unit"]
+    wtw = round(ttw + wtt, 4)
+    blend = "/fuel/eu/diesel_" in f["fuel"] or "/fuel/eu/gasoline_" in f["fuel"] or "/fuel/na/diesel_" in f["fuel"] or "/fuel/na/gasoline_" in f["fuel"]
+    ok = pair(fuel_text, ttw, wtw)  # blends: WTT = WTW - TTW, the total as printed
+    if not ok:
+        bad.append(f"{f['fuel']}: {ttw} {wtw}")
 print(f"{checked} values checked against the PDF, {len(bad)} not found")
 for b in bad:
     print("  NOT FOUND", b)

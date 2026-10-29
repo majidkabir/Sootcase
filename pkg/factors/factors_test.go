@@ -303,7 +303,6 @@ func TestOpen_Layered(t *testing.T) {
 
 	clash := map[string]string{
 		"duplicate leg":       `{"legs":[{"mode":"rail","vehicle_type":"rail/freight_train","ttw_g_per_tkm":1}]}`,
-		"duplicate alias":     `{"fuel_aliases":{"diesel":"biofuel/biodiesel_hvo/litres"}}`,
 		"duplicate container": `{"container_loads":{"average":12}}`,
 	}
 	for name, body := range clash {
@@ -551,8 +550,9 @@ func TestBiogenicCO2(t *testing.T) {
 		t.Fatal(err)
 	}
 	h, _ := ds.FuelFactor("hvo")
-	if math.Abs(r.BiogenicCO2Kg-243) > 1e-9 || math.Abs(r.WTWKg-100*h.WTW()) > 1e-9 {
-		t.Errorf("HVO leg: biogenic %v (want 243, outside WTW %v)", r.BiogenicCO2Kg, r.WTWKg)
+	// "hvo" is GLEC v3.3's European HVO: biogenic 3.12 g/g × 0.77 kg/l.
+	if math.Abs(r.BiogenicCO2Kg-100*3.12*0.77) > 1e-9 || math.Abs(r.WTWKg-100*h.WTW()) > 1e-9 || h.Fuel != "glec/fuel/eu/hvo/l" {
+		t.Errorf("HVO leg: biogenic %v (want 240.24, outside WTW %v), fuel %s", r.BiogenicCO2Kg, r.WTWKg, h.Fuel)
 	}
 }
 
@@ -663,5 +663,88 @@ func TestModule4Container_GLEC33(t *testing.T) {
 		if err != nil || math.Abs(r.WTWKg-tc.want) > 1e-6 {
 			t.Errorf("%s: %v kg, %v; want %v", tc.vt, r.WTWKg, err, tc.want)
 		}
+	}
+}
+
+// GLEC v3.3 Module 1: regional fuel factors per litre (× GLEC's density),
+// a later layer's fuel alias wins, electric trucks only where GLEC gives
+// them, temperature-controlled rail +12%, intermodal terminals per container.
+func TestGLEC33Additions(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := func(c string, lat, lon float64) calc.Where { return calc.Where{Country: c, Lat: lat, Lon: lon} }
+	for _, tc := range []struct {
+		fuel     string
+		from, to calc.Where
+		want     string
+		wtw      float64
+	}{
+		{"diesel", w("DE", 53.5, 10), w("FR", 48.9, 2.3), "glec/fuel/eu/diesel/l", 4.19 * 0.83},
+		{"diesel", w("US", 41.9, -87.6), w("US", 40.7, -74), "glec/fuel/na/diesel/l", 3.83 * 0.847},
+		{"diesel", w("CN", 31.2, 121.5), w("CN", 39.9, 116.4), "glec/fuel/cn/diesel/l", 4.18 * 0.818},
+		{"diesel", w("IN", 19, 72.8), w("IN", 28.6, 77.1), "glec/fuel/in/diesel/l", 4.21 * 0.83},
+		{"diesel", w("US", 41.9, -87.6), w("MX", 25, -100), "glec/fuel/eu/diesel/l", 4.19 * 0.83},
+		{"jet_fuel", w("DE", 50, 8.5), w("US", 40.6, -73.8), "glec/fuel/air/jet_kerosene/l", 3.84 * 0.802},
+	} {
+		f, note, err := ds.FuelFactorAt(tc.fuel, tc.from, tc.to)
+		if err != nil || f.Fuel != tc.want || math.Abs(f.WTW()-tc.wtw) > 1e-6 || f.Unit != "l" {
+			t.Errorf("%s %s->%s = %s %v %s (%q), %v", tc.fuel, tc.from.Country, tc.to.Country, f.Fuel, f.WTW(), f.Unit, note, err)
+		}
+	}
+	if f, err := ds.FuelFactor("glec/fuel/marine/hfo_vlsfo/t"); err != nil || math.Abs(f.WTW()-3840) > 1e-9 || f.Unit != "tonnes" {
+		t.Errorf("VLSFO per tonne = %+v, %v", f, err)
+	}
+	if f, err := ds.FuelFactor("glec/fuel/eu/diesel_b7/l"); err != nil || math.Abs(f.WTW()-3.96*0.836) > 1e-9 || f.BiogenicCO2 != 0 {
+		t.Errorf("B7 = %+v, %v", f, err)
+	}
+	// A fuel alias defined again in a later layer is that layer's.
+	dir := t.TempDir()
+	p := dir + "/fuel.json"
+	if err := os.WriteFile(p, []byte(`{"name":"mine","fuel_aliases":{"diesel":"glec/fuel/eu/diesel_b7/l"}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	d2, err := Open(Default + "," + p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if f, _, err := d2.FuelFactorAt("diesel", w("US", 41.9, -87.6), w("US", 40.7, -74)); err != nil || f.Fuel != "glec/fuel/eu/diesel_b7/l" {
+		t.Errorf("later fuel alias = %s, %v", f.Fuel, err)
+	}
+
+	// Electric trucks: Europe Table 11 × GLEC's European electricity (92.8 g/MJ = 334.08 g/kWh), all WTT.
+	f, _, err := ds.LegFactorAt(calc.Road, "truck_electric", 500, w("DE", 53.5, 10), w("FR", 48.9, 2.3))
+	if err != nil || math.Abs(f.WTT-0.12*334.08) > 1e-9 || f.TTW != 0 || f.DistanceBasis != calc.DistSFD {
+		t.Errorf("truck_electric Europe = %+v, %v", f, err)
+	}
+	if f, _, err := ds.LegFactorAt(calc.Road, "van_electric", 50, w("CN", 31.2, 121.5), w("CN", 31.3, 121.4)); err != nil || f.VehicleType != "glec/road/cn/truck_4_5t/electricity" {
+		t.Errorf("van_electric China = %+v, %v", f, err)
+	}
+	if _, _, err := ds.LegFactorAt(calc.Road, "truck_electric", 500, w("US", 41.9, -87.6), w("US", 40.7, -74)); !errors.Is(err, calc.ErrInvalidInput) {
+		t.Errorf("truck_electric US: want an error, got %v", err)
+	}
+	if _, _, err := ds.LegFactorAt(calc.Road, "truck_electric", 500, w("BR", -23.5, -46.6), w("BR", -22.9, -43.2)); !errors.Is(err, calc.ErrInvalidInput) {
+		t.Errorf("truck_electric Brazil: want an error, got %v", err)
+	}
+	// Temperature-controlled rail: +12%, not for North America.
+	f, _, err = ds.LegFactorAt(calc.Rail, "freight_train_reefer", 800, w("DE", 50, 8.5), w("IT", 45, 9))
+	if err != nil || math.Abs(f.WTW()-1.12*(0.38*7.1+0.62*10.8+0.38*23.6)) > 1e-3 {
+		t.Errorf("reefer rail Europe = %v, %v", f.WTW(), err)
+	}
+	if _, _, err := ds.LegFactorAt(calc.Rail, "freight_train_reefer", 800, w("US", 41.9, -87.6), w("US", 40.7, -74)); !errors.Is(err, calc.ErrInvalidInput) {
+		t.Errorf("reefer rail US: want an error, got %v", err)
+	}
+	// Intermodal terminals: per container handled.
+	c := calc.Calculator{Factors: ds}
+	ship := calc.Shipment{WeightKg: 20000, Legs: []calc.Leg{{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 10, DistanceType: calc.DistSFD}},
+		Hubs: []calc.HubStop{{ID: "t", HubType: "intermodal_terminal", Containers: 2}}}
+	r, err := c.Calculate(context.Background(), ship)
+	if err != nil || len(r.Hubs) != 1 || math.Abs(r.Hubs[0].WTWKg-36.4) > 1e-9 || r.Hubs[0].Containers != 2 {
+		t.Errorf("terminal = %+v, %v", r.Hubs, err)
+	}
+	ship.Hubs[0].Containers = 0
+	if _, err := c.Calculate(context.Background(), ship); !errors.Is(err, calc.ErrInvalidInput) {
+		t.Errorf("terminal without containers: want an error, got %v", err)
 	}
 }

@@ -3826,6 +3826,177 @@
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Other (lanes not listed), reefer, 32.1 + 149.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
    "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/van_3_5t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 400.896,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 10: van < 3.5 t (combined load factor and empty running 31%): 1.2 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_7_5t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 207.1296,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck < 7.5 t GVW, light load (30%, empty 9%): 0.62 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_7_5t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 113.5872,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck < 7.5 t GVW, average/mixed load (60%, empty 17%): 0.34 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_7_5_12t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 193.7664,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck 7.5-12 t GVW, light load: 0.58 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_7_5_12t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 103.5648,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck 7.5-12 t GVW, average/mixed load: 0.31 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_14_20t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 120.2688,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck 14-20 t GVW, light load: 0.36 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_14_20t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 63.4752,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck 14-20 t GVW, average/mixed load: 0.19 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_20_26t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 106.9056,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck 20-26 t GVW, light load: 0.32 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_20_26t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 56.7936,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck 20-26 t GVW, average/mixed load: 0.17 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_28_32t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 103.5648,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck 28-32 t GVW, light load: 0.31 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/rigid_28_32t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 56.7936,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: rigid truck 28-32 t GVW, average/mixed load: 0.17 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/artic_28_34t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 86.8608,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: artic truck 28-34 t GVW, light load: 0.26 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/artic_28_34t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 46.7712,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: artic truck 28-34 t GVW, average/mixed load: 0.14 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/artic_34_40t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 76.8384,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: artic truck 34-40 t GVW, light load: 0.23 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/artic_34_40t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 40.0896,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: artic truck 34-40 t GVW, average/mixed load: 0.12 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/artic_40_50t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 66.816,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: artic truck 40-50 t GVW, light load: 0.2 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/electric/artic_40_50t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 33.408,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Europe and South America road, Table 11: artic truck 40-50 t GVW, average/mixed load: 0.1 kWh/t-km (HBEFA 5.1, including charging losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: 92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging country's own mix is more exact: give energy_kwh_per_tkm with country",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/average_traction_unknown",
+   "ttw_g_per_tkm": 10.0442,
+   "wtt_g_per_tkm": 10.5213,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/average_traction_unknown with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/in/temperature_controlled/average",
+   "ttw_g_per_tkm": 1.68,
+   "wtt_g_per_tkm": 10.752,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/in/average with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
   }
  ],
  "hubs": [
@@ -3870,9 +4041,1695 @@
    "wtw_g_per_tonne": 8900.0,
    "year": 2026,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Table 3, logistics hubs (GILA project: Fraunhofer IML, Politecnico di Milano, GreenRouter; median values): liquid bulk terminal, mixed (n = 35)"
+  },
+  {
+   "hub_type": "intermodal_terminal",
+   "wtw_g_per_container": 18200,
+   "year": 2026,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Table 3, logistics hubs (GILA project; market study by EcoTransIT World 2025, conducted and updated by SGKV and Fraunhofer IML 2026): intermodal terminals (sea and inland ports), ambient (n = 84), 18.2 kg CO2e per container"
+  },
+  {
+   "hub_type": "intermodal_terminal_temperature_controlled",
+   "wtw_g_per_container": 21400,
+   "year": 2026,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Table 3, logistics hubs: intermodal terminals (sea and inland ports), temperature-controlled (n = 84), 21.4 kg CO2e per container"
   }
  ],
- "fuels": [],
+ "fuels": [
+  {
+   "fuel": "glec/fuel/eu/gasoline/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.19,
+   "wtt_kg_per_unit": 1.02,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): gasoline, 3.19 kg CO2e/kg TTW, 4.21 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3190.0,
+   "wtt_kg_per_unit": 1020.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): gasoline, 3.19 kg CO2e/kg TTW, 4.21 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.3606,
+   "wtt_kg_per_unit": 0.7548,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): gasoline, 3.19 kg CO2e/kg TTW, 4.21 kg CO2e/kg WTW, × 0.74 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/ethanol/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.003,
+   "wtt_kg_per_unit": 1.297,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): ethanol (40% maize, 35% sugar beet, 25% wheat), 0.003 kg CO2e/kg TTW, 1.3 kg CO2e/kg WTW; biogenic CO2 1.91 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1.91
+  },
+  {
+   "fuel": "glec/fuel/eu/ethanol/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3.0,
+   "wtt_kg_per_unit": 1297.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): ethanol (40% maize, 35% sugar beet, 25% wheat), 0.003 kg CO2e/kg TTW, 1.3 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 1.91 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1910.0
+  },
+  {
+   "fuel": "glec/fuel/eu/ethanol/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 0.00234,
+   "wtt_kg_per_unit": 1.01166,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): ethanol (40% maize, 35% sugar beet, 25% wheat), 0.003 kg CO2e/kg TTW, 1.3 kg CO2e/kg WTW, × 0.78 kg/l (GLEC's density) per litre; biogenic CO2 1.91 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1.4898
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.22,
+   "wtt_kg_per_unit": 0.97,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): diesel, 3.22 kg CO2e/kg TTW, 4.19 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3220.0,
+   "wtt_kg_per_unit": 970.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): diesel, 3.22 kg CO2e/kg TTW, 4.19 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.6726,
+   "wtt_kg_per_unit": 0.8051,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): diesel, 3.22 kg CO2e/kg TTW, 4.19 kg CO2e/kg WTW, × 0.83 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/biodiesel/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.04,
+   "wtt_kg_per_unit": 1.27,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): biodiesel (50% rapeseed, 40% used cooking oil, 10% soybean), 0.04 kg CO2e/kg TTW, 1.31 kg CO2e/kg WTW; biogenic CO2 2.83 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.83
+  },
+  {
+   "fuel": "glec/fuel/eu/biodiesel/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 40.0,
+   "wtt_kg_per_unit": 1270.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): biodiesel (50% rapeseed, 40% used cooking oil, 10% soybean), 0.04 kg CO2e/kg TTW, 1.31 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.83 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2830.0
+  },
+  {
+   "fuel": "glec/fuel/eu/biodiesel/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 0.0356,
+   "wtt_kg_per_unit": 1.1303,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): biodiesel (50% rapeseed, 40% used cooking oil, 10% soybean), 0.04 kg CO2e/kg TTW, 1.31 kg CO2e/kg WTW, × 0.89 kg/l (GLEC's density) per litre; biogenic CO2 2.83 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.5187
+  },
+  {
+   "fuel": "glec/fuel/eu/lpg/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.05,
+   "wtt_kg_per_unit": 1.05,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): liquefied petroleum gas (LPG), 3.05 kg CO2e/kg TTW, 4.1 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/lpg/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3050.0,
+   "wtt_kg_per_unit": 1050.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): liquefied petroleum gas (LPG), 3.05 kg CO2e/kg TTW, 4.1 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/lpg/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.6775,
+   "wtt_kg_per_unit": 0.5775,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): liquefied petroleum gas (LPG), 3.05 kg CO2e/kg TTW, 4.1 kg CO2e/kg WTW, × 0.55 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/hydrogen_smr/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.0,
+   "wtt_kg_per_unit": 12.16,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): hydrogen (from SMR), 0 kg CO2e/kg TTW, 12.16 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/hydrogen_smr/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 0.0,
+   "wtt_kg_per_unit": 12160.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): hydrogen (from SMR), 0 kg CO2e/kg TTW, 12.16 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/hvo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.05,
+   "wtt_kg_per_unit": 1.26,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): HVO/HEFA (50% rapeseed, 50% used cooking oil), 0.05 kg CO2e/kg TTW, 1.31 kg CO2e/kg WTW; biogenic CO2 3.12 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 3.12
+  },
+  {
+   "fuel": "glec/fuel/eu/hvo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 50.0,
+   "wtt_kg_per_unit": 1260.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): HVO/HEFA (50% rapeseed, 50% used cooking oil), 0.05 kg CO2e/kg TTW, 1.31 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 3.12 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 3120.0
+  },
+  {
+   "fuel": "glec/fuel/eu/hvo/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 0.0385,
+   "wtt_kg_per_unit": 0.9702,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): HVO/HEFA (50% rapeseed, 50% used cooking oil), 0.05 kg CO2e/kg TTW, 1.31 kg CO2e/kg WTW, × 0.77 kg/l (GLEC's density) per litre; biogenic CO2 3.12 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.4024
+  },
+  {
+   "fuel": "glec/fuel/eu/cng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.74,
+   "wtt_kg_per_unit": 1.05,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): compressed natural gas (CNG), Europe spark ignition truck, 2.74 kg CO2e/kg TTW, 3.79 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/cng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 2740.0,
+   "wtt_kg_per_unit": 1050.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): compressed natural gas (CNG), Europe spark ignition truck, 2.74 kg CO2e/kg TTW, 3.79 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/lng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.8,
+   "wtt_kg_per_unit": 1.28,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): liquefied natural gas (LNG), Europe spark ignition truck, 2.8 kg CO2e/kg TTW, 4.08 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/lng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 2800.0,
+   "wtt_kg_per_unit": 1280.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): liquefied natural gas (LNG), Europe spark ignition truck, 2.8 kg CO2e/kg TTW, 4.08 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/bio_cng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.05,
+   "wtt_kg_per_unit": 1.23,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): bio-CNG (40% maize, 40% manure, 20% biowaste), 0.05 kg CO2e/kg TTW, 1.28 kg CO2e/kg WTW; biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.86
+  },
+  {
+   "fuel": "glec/fuel/eu/bio_cng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 50.0,
+   "wtt_kg_per_unit": 1230.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): bio-CNG (40% maize, 40% manure, 20% biowaste), 0.05 kg CO2e/kg TTW, 1.28 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2860.0
+  },
+  {
+   "fuel": "glec/fuel/eu/bio_lng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.05,
+   "wtt_kg_per_unit": 1.44,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): bio-LNG (40% maize, 40% manure, 20% biowaste), 0.05 kg CO2e/kg TTW, 1.49 kg CO2e/kg WTW; biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.86
+  },
+  {
+   "fuel": "glec/fuel/eu/bio_lng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 50.0,
+   "wtt_kg_per_unit": 1440.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025): bio-LNG (40% maize, 40% manure, 20% biowaste), 0.05 kg CO2e/kg TTW, 1.49 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2860.0
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.05,
+   "wtt_kg_per_unit": 0.65,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): gasoline, 3.05 kg CO2e/kg TTW, 3.7 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3050.0,
+   "wtt_kg_per_unit": 650.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): gasoline, 3.05 kg CO2e/kg TTW, 3.7 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.28445,
+   "wtt_kg_per_unit": 0.48685,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): gasoline, 3.05 kg CO2e/kg TTW, 3.7 kg CO2e/kg WTW, × 0.749 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/ethanol/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.01,
+   "wtt_kg_per_unit": 1.32,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): ethanol (corn), 0.01 kg CO2e/kg TTW, 1.33 kg CO2e/kg WTW; biogenic CO2 1.32 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1.32
+  },
+  {
+   "fuel": "glec/fuel/na/ethanol/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 10.0,
+   "wtt_kg_per_unit": 1320.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): ethanol (corn), 0.01 kg CO2e/kg TTW, 1.33 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 1.32 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1320.0
+  },
+  {
+   "fuel": "glec/fuel/na/ethanol/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 0.00789,
+   "wtt_kg_per_unit": 1.04148,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): ethanol (corn), 0.01 kg CO2e/kg TTW, 1.33 kg CO2e/kg WTW, × 0.789 kg/l (GLEC's density) per litre; biogenic CO2 1.32 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1.04148
+  },
+  {
+   "fuel": "glec/fuel/na/diesel/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.21,
+   "wtt_kg_per_unit": 0.62,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): diesel, 3.21 kg CO2e/kg TTW, 3.83 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3210.0,
+   "wtt_kg_per_unit": 620.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): diesel, 3.21 kg CO2e/kg TTW, 3.83 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.71887,
+   "wtt_kg_per_unit": 0.52514,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): diesel, 3.21 kg CO2e/kg TTW, 3.83 kg CO2e/kg WTW, × 0.847 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/biodiesel/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.02,
+   "wtt_kg_per_unit": 0.71,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): biodiesel (soybean), 0.02 kg CO2e/kg TTW, 0.73 kg CO2e/kg WTW; biogenic CO2 0.71 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 0.71
+  },
+  {
+   "fuel": "glec/fuel/na/biodiesel/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 20.0,
+   "wtt_kg_per_unit": 710.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): biodiesel (soybean), 0.02 kg CO2e/kg TTW, 0.73 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 0.71 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 710.0
+  },
+  {
+   "fuel": "glec/fuel/na/biodiesel/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 0.01762,
+   "wtt_kg_per_unit": 0.62551,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): biodiesel (soybean), 0.02 kg CO2e/kg TTW, 0.73 kg CO2e/kg WTW, × 0.881 kg/l (GLEC's density) per litre; biogenic CO2 0.71 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 0.62551
+  },
+  {
+   "fuel": "glec/fuel/na/hvo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.02,
+   "wtt_kg_per_unit": 0.73,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): HVO (tallow), 0.02 kg CO2e/kg TTW, 0.75 kg CO2e/kg WTW; biogenic CO2 0.72 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 0.72
+  },
+  {
+   "fuel": "glec/fuel/na/hvo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 20.0,
+   "wtt_kg_per_unit": 730.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): HVO (tallow), 0.02 kg CO2e/kg TTW, 0.75 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 0.72 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 720.0
+  },
+  {
+   "fuel": "glec/fuel/na/hvo/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 0.01558,
+   "wtt_kg_per_unit": 0.56867,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): HVO (tallow), 0.02 kg CO2e/kg TTW, 0.75 kg CO2e/kg WTW, × 0.779 kg/l (GLEC's density) per litre; biogenic CO2 0.72 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 0.56088
+  },
+  {
+   "fuel": "glec/fuel/na/lpg/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.02,
+   "wtt_kg_per_unit": 0.52,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): liquefied petroleum gas (LPG), 3.02 kg CO2e/kg TTW, 3.54 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/lpg/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3020.0,
+   "wtt_kg_per_unit": 520.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): liquefied petroleum gas (LPG), 3.02 kg CO2e/kg TTW, 3.54 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/lpg/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.53416,
+   "wtt_kg_per_unit": 0.26416,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): liquefied petroleum gas (LPG), 3.02 kg CO2e/kg TTW, 3.54 kg CO2e/kg WTW, × 0.508 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/cng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.63,
+   "wtt_kg_per_unit": 0.64,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): compressed natural gas (CNG), North America spark ignition truck, 2.63 kg CO2e/kg TTW, 3.27 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/cng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 2630.0,
+   "wtt_kg_per_unit": 640.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): compressed natural gas (CNG), North America spark ignition truck, 2.63 kg CO2e/kg TTW, 3.27 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/lng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.78,
+   "wtt_kg_per_unit": 0.84,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): liquefied natural gas (LNG), North America spark ignition truck, 2.78 kg CO2e/kg TTW, 3.62 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/lng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 2780.0,
+   "wtt_kg_per_unit": 840.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: North American sources (p. 79; GREET 2025): liquefied natural gas (LNG), North America spark ignition truck, 2.78 kg CO2e/kg TTW, 3.62 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/gasoline/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.11,
+   "wtt_kg_per_unit": 0.99,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): gasoline, 3.11 kg CO2e/kg TTW, 4.1 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/gasoline/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3110.0,
+   "wtt_kg_per_unit": 990.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): gasoline, 3.11 kg CO2e/kg TTW, 4.1 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/gasoline/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.32628,
+   "wtt_kg_per_unit": 0.74052,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): gasoline, 3.11 kg CO2e/kg TTW, 4.1 kg CO2e/kg WTW, × 0.748 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/diesel/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.21,
+   "wtt_kg_per_unit": 0.97,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): diesel, 3.21 kg CO2e/kg TTW, 4.18 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/diesel/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3210.0,
+   "wtt_kg_per_unit": 970.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): diesel, 3.21 kg CO2e/kg TTW, 4.18 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/diesel/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.62578,
+   "wtt_kg_per_unit": 0.79346,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): diesel, 3.21 kg CO2e/kg TTW, 4.18 kg CO2e/kg WTW, × 0.818 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/lpg/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.25,
+   "wtt_kg_per_unit": 1.13,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): liquefied petroleum gas (LPG), 3.25 kg CO2e/kg TTW, 4.38 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/lpg/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3250.0,
+   "wtt_kg_per_unit": 1130.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): liquefied petroleum gas (LPG), 3.25 kg CO2e/kg TTW, 4.38 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/lng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.06,
+   "wtt_kg_per_unit": 1.31,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): liquefied natural gas (LNG), China spark ignition truck, 3.06 kg CO2e/kg TTW, 4.37 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/lng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3060.0,
+   "wtt_kg_per_unit": 1310.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): liquefied natural gas (LNG), China spark ignition truck, 3.06 kg CO2e/kg TTW, 4.37 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/cn/lng/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.377,
+   "wtt_kg_per_unit": 0.5895,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards): liquefied natural gas (LNG), China spark ignition truck, 3.06 kg CO2e/kg TTW, 4.37 kg CO2e/kg WTW, × 0.45 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/diesel/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.24,
+   "wtt_kg_per_unit": 0.97,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): diesel, 3.24 kg CO2e/kg TTW, 4.21 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/diesel/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3240.0,
+   "wtt_kg_per_unit": 970.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): diesel, 3.24 kg CO2e/kg TTW, 4.21 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/diesel/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.6892,
+   "wtt_kg_per_unit": 0.8051,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): diesel, 3.24 kg CO2e/kg TTW, 4.21 kg CO2e/kg WTW, × 0.83 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/petrol/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.15,
+   "wtt_kg_per_unit": 1.01,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): petrol, 3.15 kg CO2e/kg TTW, 4.16 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/petrol/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3150.0,
+   "wtt_kg_per_unit": 1010.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): petrol, 3.15 kg CO2e/kg TTW, 4.16 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/petrol/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.2365,
+   "wtt_kg_per_unit": 0.7171,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): petrol, 3.15 kg CO2e/kg TTW, 4.16 kg CO2e/kg WTW, × 0.71 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/cng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.86,
+   "wtt_kg_per_unit": 0.34,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): CNG, 2.86 kg CO2e/kg TTW, 3.2 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/cng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 2860.0,
+   "wtt_kg_per_unit": 340.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): CNG, 2.86 kg CO2e/kg TTW, 3.2 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/ethanol/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.41,
+   "wtt_kg_per_unit": 1.07,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): ethanol, 2.41 kg CO2e/kg TTW, 3.48 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/ethanol/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 2410.0,
+   "wtt_kg_per_unit": 1070.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): ethanol, 2.41 kg CO2e/kg TTW, 3.48 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/in/ethanol/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.7111,
+   "wtt_kg_per_unit": 0.7597,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines): ethanol, 2.41 kg CO2e/kg TTW, 3.48 kg CO2e/kg WTW, × 0.71 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/hfo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.16,
+   "wtt_kg_per_unit": 0.68,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): HFO, default, 3.16 kg CO2e/kg TTW, 3.84 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/hfo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3160.0,
+   "wtt_kg_per_unit": 680.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): HFO, default, 3.16 kg CO2e/kg TTW, 3.84 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/hfo_vlsfo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.16,
+   "wtt_kg_per_unit": 0.68,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): HFO (VLSFO), 3.16 kg CO2e/kg TTW, 3.84 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/hfo_vlsfo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3160.0,
+   "wtt_kg_per_unit": 680.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): HFO (VLSFO), 3.16 kg CO2e/kg TTW, 3.84 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/hfo_hshfo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.16,
+   "wtt_kg_per_unit": 0.57,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): HFO (HSHFO), 3.16 kg CO2e/kg TTW, 3.73 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/hfo_hshfo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3160.0,
+   "wtt_kg_per_unit": 570.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): HFO (HSHFO), 3.16 kg CO2e/kg TTW, 3.73 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lfo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.2,
+   "wtt_kg_per_unit": 0.55,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LFO, default, 3.2 kg CO2e/kg TTW, 3.75 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lfo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3200.0,
+   "wtt_kg_per_unit": 550.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LFO, default, 3.2 kg CO2e/kg TTW, 3.75 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/mdo_mgo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.26,
+   "wtt_kg_per_unit": 0.75,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): MDO/MGO, default, 3.26 kg CO2e/kg TTW, 4.01 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/mdo_mgo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3260.0,
+   "wtt_kg_per_unit": 750.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): MDO/MGO, default, 3.26 kg CO2e/kg TTW, 4.01 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/mdo_mgo_ulsfo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.26,
+   "wtt_kg_per_unit": 0.75,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): MDO/MGO (ULSFO), 3.26 kg CO2e/kg TTW, 4.01 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/mdo_mgo_ulsfo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3260.0,
+   "wtt_kg_per_unit": 750.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): MDO/MGO (ULSFO), 3.26 kg CO2e/kg TTW, 4.01 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/mdo_mgo_vlsfo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.26,
+   "wtt_kg_per_unit": 0.61,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): MDO/MGO (VLSFO), 3.26 kg CO2e/kg TTW, 3.87 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/mdo_mgo_vlsfo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3260.0,
+   "wtt_kg_per_unit": 610.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): MDO/MGO (VLSFO), 3.26 kg CO2e/kg TTW, 3.87 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lpg_propane/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.05,
+   "wtt_kg_per_unit": 0.36,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LPG, propane, 3.05 kg CO2e/kg TTW, 3.41 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lpg_propane/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3050.0,
+   "wtt_kg_per_unit": 360.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LPG, propane, 3.05 kg CO2e/kg TTW, 3.41 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lpg_butane/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.08,
+   "wtt_kg_per_unit": 0.32,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LPG, butane, 3.08 kg CO2e/kg TTW, 3.4 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lpg_butane/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3080.0,
+   "wtt_kg_per_unit": 320.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LPG, butane, 3.08 kg CO2e/kg TTW, 3.4 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.73,
+   "wtt_kg_per_unit": 0.88,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, default, 3.73 kg CO2e/kg TTW, 4.61 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3730.0,
+   "wtt_kg_per_unit": 880.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, default, 3.73 kg CO2e/kg TTW, 4.61 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_otto_medium_speed/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.73,
+   "wtt_kg_per_unit": 0.88,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, Otto dual fuel (medium speed), 3.73 kg CO2e/kg TTW, 4.61 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_otto_medium_speed/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3730.0,
+   "wtt_kg_per_unit": 880.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, Otto dual fuel (medium speed), 3.73 kg CO2e/kg TTW, 4.61 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_otto_slow_speed/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.24,
+   "wtt_kg_per_unit": 0.89,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, Otto dual fuel (slow speed), 3.24 kg CO2e/kg TTW, 4.13 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_otto_slow_speed/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3240.0,
+   "wtt_kg_per_unit": 890.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, Otto dual fuel (slow speed), 3.24 kg CO2e/kg TTW, 4.13 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_diesel/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.82,
+   "wtt_kg_per_unit": 0.89,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, LNG Diesel, 2.82 kg CO2e/kg TTW, 3.71 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_diesel/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 2820.0,
+   "wtt_kg_per_unit": 890.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, LNG Diesel, 2.82 kg CO2e/kg TTW, 3.71 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_lbsi/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.48,
+   "wtt_kg_per_unit": 0.89,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, LBSI, 3.48 kg CO2e/kg TTW, 4.37 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_lbsi/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3480.0,
+   "wtt_kg_per_unit": 890.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, LBSI, 3.48 kg CO2e/kg TTW, 4.37 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_steam_turbine/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.78,
+   "wtt_kg_per_unit": 0.89,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, steam turbine & boilers, 2.78 kg CO2e/kg TTW, 3.67 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/lng_steam_turbine/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 2780.0,
+   "wtt_kg_per_unit": 890.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): LNG, steam turbine & boilers, 2.78 kg CO2e/kg TTW, 3.67 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.98,
+   "wtt_kg_per_unit": 1.45,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, default, 0.98 kg CO2e/kg TTW, 2.43 kg CO2e/kg WTW; biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.86
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 980.0,
+   "wtt_kg_per_unit": 1450.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, default, 0.98 kg CO2e/kg TTW, 2.43 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2860.0
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_otto_medium_speed/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.98,
+   "wtt_kg_per_unit": 1.45,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, Otto dual fuel (medium speed), 0.98 kg CO2e/kg TTW, 2.43 kg CO2e/kg WTW; biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.86
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_otto_medium_speed/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 980.0,
+   "wtt_kg_per_unit": 1450.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, Otto dual fuel (medium speed), 0.98 kg CO2e/kg TTW, 2.43 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2860.0
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_otto_slow_speed/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.49,
+   "wtt_kg_per_unit": 1.45,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, Otto dual fuel (slow speed), 0.49 kg CO2e/kg TTW, 1.94 kg CO2e/kg WTW; biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.86
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_otto_slow_speed/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 490.0,
+   "wtt_kg_per_unit": 1450.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, Otto dual fuel (slow speed), 0.49 kg CO2e/kg TTW, 1.94 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2860.0
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_diesel/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.07,
+   "wtt_kg_per_unit": 1.45,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, LNG Diesel, 0.07 kg CO2e/kg TTW, 1.52 kg CO2e/kg WTW; biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.86
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_diesel/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 70.0,
+   "wtt_kg_per_unit": 1450.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, LNG Diesel, 0.07 kg CO2e/kg TTW, 1.52 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2860.0
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_lbsi/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.74,
+   "wtt_kg_per_unit": 1.44,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, LBSI, 0.74 kg CO2e/kg TTW, 2.18 kg CO2e/kg WTW; biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.86
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_lbsi/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 740.0,
+   "wtt_kg_per_unit": 1440.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, LBSI, 0.74 kg CO2e/kg TTW, 2.18 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2860.0
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_steam_turbine/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.03,
+   "wtt_kg_per_unit": 1.45,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, steam turbine & boilers, 0.03 kg CO2e/kg TTW, 1.48 kg CO2e/kg WTW; biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.86
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_lng_steam_turbine/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 30.0,
+   "wtt_kg_per_unit": 1450.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-LNG, steam turbine & boilers, 0.03 kg CO2e/kg TTW, 1.48 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.86 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2860.0
+  },
+  {
+   "fuel": "glec/fuel/marine/biodiesel_fame/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.05,
+   "wtt_kg_per_unit": 0.77,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): biodiesel, default (FAME), 0.05 kg CO2e/kg TTW, 0.82 kg CO2e/kg WTW; biogenic CO2 2.83 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2.83
+  },
+  {
+   "fuel": "glec/fuel/marine/biodiesel_fame/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 50.0,
+   "wtt_kg_per_unit": 770.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): biodiesel, default (FAME), 0.05 kg CO2e/kg TTW, 0.82 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 2.83 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 2830.0
+  },
+  {
+   "fuel": "glec/fuel/marine/hvo/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.05,
+   "wtt_kg_per_unit": 0.66,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): HVO, default, 0.05 kg CO2e/kg TTW, 0.71 kg CO2e/kg WTW; biogenic CO2 3.12 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 3.12
+  },
+  {
+   "fuel": "glec/fuel/marine/hvo/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 50.0,
+   "wtt_kg_per_unit": 660.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): HVO, default, 0.05 kg CO2e/kg TTW, 0.71 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 3.12 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 3120.0
+  },
+  {
+   "fuel": "glec/fuel/marine/hydrogen_natural_gas/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.0,
+   "wtt_kg_per_unit": 15.84,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): hydrogen from natural gas, 0 kg CO2e/kg TTW, 15.84 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/hydrogen_natural_gas/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 0.0,
+   "wtt_kg_per_unit": 15840.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): hydrogen from natural gas, 0 kg CO2e/kg TTW, 15.84 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/ammonia_natural_gas/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.001,
+   "wtt_kg_per_unit": 2.249,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): ammonia from natural gas, 0.001 kg CO2e/kg TTW, 2.25 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/ammonia_natural_gas/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 1.0,
+   "wtt_kg_per_unit": 2249.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): ammonia from natural gas, 0.001 kg CO2e/kg TTW, 2.25 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/methanol_natural_gas/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 1.38,
+   "wtt_kg_per_unit": 0.62,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): methanol from natural gas, 1.38 kg CO2e/kg TTW, 2 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/methanol_natural_gas/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 1380.0,
+   "wtt_kg_per_unit": 620.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): methanol from natural gas, 1.38 kg CO2e/kg TTW, 2 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_methanol/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.01,
+   "wtt_kg_per_unit": 0.32,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-methanol, 0.01 kg CO2e/kg TTW, 0.33 kg CO2e/kg WTW; biogenic CO2 1.38 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1.38
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_methanol/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 10.0,
+   "wtt_kg_per_unit": 320.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-methanol, 0.01 kg CO2e/kg TTW, 0.33 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 1.38 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1380.0
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_ethanol/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 0.01,
+   "wtt_kg_per_unit": 1.28,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-ethanol, default (1st generation biogenic), 0.01 kg CO2e/kg TTW, 1.29 kg CO2e/kg WTW; biogenic CO2 1.91 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1.91
+  },
+  {
+   "fuel": "glec/fuel/marine/bio_ethanol/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 10.0,
+   "wtt_kg_per_unit": 1280.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II): bio-ethanol, default (1st generation biogenic), 0.01 kg CO2e/kg TTW, 1.29 kg CO2e/kg WTW (× 1,000 per tonne); biogenic CO2 1.91 g/g, reported separately",
+   "year": 2026,
+   "biogenic_co2_kg_per_unit": 1910.0
+  },
+  {
+   "fuel": "glec/fuel/air/jet_kerosene/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.18,
+   "wtt_kg_per_unit": 0.66,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, air fuel emission factors (p. 87): jet kerosene (Jet A1 and Jet A), 3.18 kg CO2e/kg TTW, 3.84 kg CO2e/kg WTW",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/air/jet_kerosene/t",
+   "unit": "tonnes",
+   "ttw_kg_per_unit": 3180.0,
+   "wtt_kg_per_unit": 660.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, air fuel emission factors (p. 87): jet kerosene (Jet A1 and Jet A), 3.18 kg CO2e/kg TTW, 3.84 kg CO2e/kg WTW (× 1,000 per tonne)",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/air/jet_kerosene/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.55036,
+   "wtt_kg_per_unit": 0.52932,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, air fuel emission factors (p. 87): jet kerosene (Jet A1 and Jet A), 3.18 kg CO2e/kg TTW, 3.84 kg CO2e/kg WTW, × 0.802 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b1/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.19,
+   "wtt_kg_per_unit": 0.96,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 99% diesel, 1% biodiesel, 3.19 kg CO2e/kg TTW, 4.15 kg CO2e/kg WTW (WTT printed as 0.97); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b1/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.65727,
+   "wtt_kg_per_unit": 0.79968,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 99% diesel, 1% biodiesel, 3.19 kg CO2e/kg TTW, 4.15 kg CO2e/kg WTW (WTT printed as 0.97); GLEC gives no biogenic CO2 for blends; × 0.833 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b2/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.15,
+   "wtt_kg_per_unit": 0.97,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 98% diesel, 2% biodiesel, 3.15 kg CO2e/kg TTW, 4.12 kg CO2e/kg WTW (WTT printed as 0.97); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b2/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.62395,
+   "wtt_kg_per_unit": 0.80801,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 98% diesel, 2% biodiesel, 3.15 kg CO2e/kg TTW, 4.12 kg CO2e/kg WTW (WTT printed as 0.97); GLEC gives no biogenic CO2 for blends; × 0.833 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b5/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.04,
+   "wtt_kg_per_unit": 0.99,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 95% diesel, 5% biodiesel, 3.04 kg CO2e/kg TTW, 4.03 kg CO2e/kg WTW (WTT printed as 0.98); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b5/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.5384,
+   "wtt_kg_per_unit": 0.82665,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 95% diesel, 5% biodiesel, 3.04 kg CO2e/kg TTW, 4.03 kg CO2e/kg WTW (WTT printed as 0.98); GLEC gives no biogenic CO2 for blends; × 0.835 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b7/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.97,
+   "wtt_kg_per_unit": 0.99,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 93% diesel, 7% biodiesel, 2.97 kg CO2e/kg TTW, 3.96 kg CO2e/kg WTW (WTT printed as 0.99); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b7/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.48292,
+   "wtt_kg_per_unit": 0.82764,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 93% diesel, 7% biodiesel, 2.97 kg CO2e/kg TTW, 3.96 kg CO2e/kg WTW (WTT printed as 0.99); GLEC gives no biogenic CO2 for blends; × 0.836 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b10/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.86,
+   "wtt_kg_per_unit": 1.01,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 90% diesel, 10% biodiesel, 2.86 kg CO2e/kg TTW, 3.87 kg CO2e/kg WTW (WTT printed as 1); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b10/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.39668,
+   "wtt_kg_per_unit": 0.84638,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 90% diesel, 10% biodiesel, 2.86 kg CO2e/kg TTW, 3.87 kg CO2e/kg WTW (WTT printed as 1); GLEC gives no biogenic CO2 for blends; × 0.838 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b20/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.52,
+   "wtt_kg_per_unit": 1.03,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 80% diesel, 20% biodiesel, 2.52 kg CO2e/kg TTW, 3.55 kg CO2e/kg WTW (WTT printed as 1.04); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b20/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.12688,
+   "wtt_kg_per_unit": 0.86932,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 80% diesel, 20% biodiesel, 2.52 kg CO2e/kg TTW, 3.55 kg CO2e/kg WTW (WTT printed as 1.04); GLEC gives no biogenic CO2 for blends; × 0.844 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b50/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 1.52,
+   "wtt_kg_per_unit": 1.14,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 50% diesel, 50% biodiesel, 1.52 kg CO2e/kg TTW, 2.66 kg CO2e/kg WTW (WTT printed as 1.13); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_b50/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.31024,
+   "wtt_kg_per_unit": 0.98268,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 50% diesel, 50% biodiesel, 1.52 kg CO2e/kg TTW, 2.66 kg CO2e/kg WTW (WTT printed as 1.13); GLEC gives no biogenic CO2 for blends; × 0.862 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e1/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.14,
+   "wtt_kg_per_unit": 1.03,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 99% gasoline, 1% ethanol, 3.14 kg CO2e/kg TTW, 4.17 kg CO2e/kg WTW (WTT printed as 1.03); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e1/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.33302,
+   "wtt_kg_per_unit": 0.76529,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 99% gasoline, 1% ethanol, 3.14 kg CO2e/kg TTW, 4.17 kg CO2e/kg WTW (WTT printed as 1.03); GLEC gives no biogenic CO2 for blends; × 0.743 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e2/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.1,
+   "wtt_kg_per_unit": 1.03,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 98% gasoline, 2% ethanol, 3.1 kg CO2e/kg TTW, 4.13 kg CO2e/kg WTW (WTT printed as 1.03); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e2/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.3064,
+   "wtt_kg_per_unit": 0.76632,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 98% gasoline, 2% ethanol, 3.1 kg CO2e/kg TTW, 4.13 kg CO2e/kg WTW (WTT printed as 1.03); GLEC gives no biogenic CO2 for blends; × 0.744 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e5/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.97,
+   "wtt_kg_per_unit": 1.05,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 95% gasoline, 5% ethanol, 2.97 kg CO2e/kg TTW, 4.02 kg CO2e/kg WTW (WTT printed as 1.05); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e5/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.21265,
+   "wtt_kg_per_unit": 0.78225,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 95% gasoline, 5% ethanol, 2.97 kg CO2e/kg TTW, 4.02 kg CO2e/kg WTW (WTT printed as 1.05); GLEC gives no biogenic CO2 for blends; × 0.745 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e7/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.89,
+   "wtt_kg_per_unit": 1.06,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 93% gasoline, 7% ethanol, 2.89 kg CO2e/kg TTW, 3.95 kg CO2e/kg WTW (WTT printed as 1.06); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e7/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.15594,
+   "wtt_kg_per_unit": 0.79076,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 93% gasoline, 7% ethanol, 2.89 kg CO2e/kg TTW, 3.95 kg CO2e/kg WTW (WTT printed as 1.06); GLEC gives no biogenic CO2 for blends; × 0.746 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e10/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.76,
+   "wtt_kg_per_unit": 1.08,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 90% gasoline, 10% ethanol, 2.76 kg CO2e/kg TTW, 3.84 kg CO2e/kg WTW (WTT printed as 1.08); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e10/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.06172,
+   "wtt_kg_per_unit": 0.80676,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 90% gasoline, 10% ethanol, 2.76 kg CO2e/kg TTW, 3.84 kg CO2e/kg WTW (WTT printed as 1.08); GLEC gives no biogenic CO2 for blends; × 0.747 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e20/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.36,
+   "wtt_kg_per_unit": 1.14,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 80% gasoline, 20% ethanol, 2.36 kg CO2e/kg TTW, 3.5 kg CO2e/kg WTW (WTT printed as 1.13); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e20/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.77,
+   "wtt_kg_per_unit": 0.855,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 80% gasoline, 20% ethanol, 2.36 kg CO2e/kg TTW, 3.5 kg CO2e/kg WTW (WTT printed as 1.13); GLEC gives no biogenic CO2 for blends; × 0.75 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e50/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 1.3,
+   "wtt_kg_per_unit": 1.25,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 50% gasoline, 50% ethanol, 1.3 kg CO2e/kg TTW, 2.55 kg CO2e/kg WTW (WTT printed as 1.25); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/gasoline_e50/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 0.9906,
+   "wtt_kg_per_unit": 0.9525,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 50% gasoline, 50% ethanol, 1.3 kg CO2e/kg TTW, 2.55 kg CO2e/kg WTW (WTT printed as 1.25); GLEC gives no biogenic CO2 for blends; × 0.762 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_hvo10/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.91,
+   "wtt_kg_per_unit": 1.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 90% diesel, 10% HVO, 2.91 kg CO2e/kg TTW, 3.91 kg CO2e/kg WTW (WTT printed as 0.99); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_hvo10/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.40366,
+   "wtt_kg_per_unit": 0.826,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 90% diesel, 10% HVO, 2.91 kg CO2e/kg TTW, 3.91 kg CO2e/kg WTW (WTT printed as 0.99); GLEC gives no biogenic CO2 for blends; × 0.826 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_hvo20/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.6,
+   "wtt_kg_per_unit": 1.02,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 80% diesel, 20% HVO, 2.6 kg CO2e/kg TTW, 3.62 kg CO2e/kg WTW (WTT printed as 1.02); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_hvo20/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.132,
+   "wtt_kg_per_unit": 0.8364,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 80% diesel, 20% HVO, 2.6 kg CO2e/kg TTW, 3.62 kg CO2e/kg WTW (WTT printed as 1.02); GLEC gives no biogenic CO2 for blends; × 0.82 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_hvo50/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 1.66,
+   "wtt_kg_per_unit": 1.11,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 50% diesel, 50% HVO, 1.66 kg CO2e/kg TTW, 2.77 kg CO2e/kg WTW (WTT printed as 1.11); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/eu/diesel_hvo50/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.32966,
+   "wtt_kg_per_unit": 0.88911,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, Europe (pp. 88-89): 50% diesel, 50% HVO, 1.66 kg CO2e/kg TTW, 2.77 kg CO2e/kg WTW (WTT printed as 1.11); GLEC gives no biogenic CO2 for blends; × 0.801 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_hvo10/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.91,
+   "wtt_kg_per_unit": 0.56,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 90% diesel, 10% HVO, 2.91 kg CO2e/kg TTW, 3.47 kg CO2e/kg WTW (WTT printed as 0.56); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_hvo10/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.40366,
+   "wtt_kg_per_unit": 0.46256,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 90% diesel, 10% HVO, 2.91 kg CO2e/kg TTW, 3.47 kg CO2e/kg WTW (WTT printed as 0.56); GLEC gives no biogenic CO2 for blends; × 0.826 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_hvo20/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.59,
+   "wtt_kg_per_unit": 0.64,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 80% diesel, 20% HVO, 2.59 kg CO2e/kg TTW, 3.23 kg CO2e/kg WTW (WTT printed as 0.64); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_hvo20/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.1238,
+   "wtt_kg_per_unit": 0.5248,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 80% diesel, 20% HVO, 2.59 kg CO2e/kg TTW, 3.23 kg CO2e/kg WTW (WTT printed as 0.64); GLEC gives no biogenic CO2 for blends; × 0.82 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_hvo50/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 1.65,
+   "wtt_kg_per_unit": 0.67,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 50% diesel, 50% HVO, 1.65 kg CO2e/kg TTW, 2.32 kg CO2e/kg WTW (WTT printed as 0.67); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_hvo50/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.32165,
+   "wtt_kg_per_unit": 0.53667,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 50% diesel, 50% HVO, 1.65 kg CO2e/kg TTW, 2.32 kg CO2e/kg WTW (WTT printed as 0.67); GLEC gives no biogenic CO2 for blends; × 0.801 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b1/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.18,
+   "wtt_kg_per_unit": 0.62,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 99% diesel, 1% biodiesel, 3.18 kg CO2e/kg TTW, 3.8 kg CO2e/kg WTW (WTT printed as 0.62); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b1/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.64894,
+   "wtt_kg_per_unit": 0.51646,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 99% diesel, 1% biodiesel, 3.18 kg CO2e/kg TTW, 3.8 kg CO2e/kg WTW (WTT printed as 0.62); GLEC gives no biogenic CO2 for blends; × 0.833 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b2/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.15,
+   "wtt_kg_per_unit": 0.62,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 98% diesel, 2% biodiesel, 3.15 kg CO2e/kg TTW, 3.77 kg CO2e/kg WTW (WTT printed as 0.62); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b2/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.62395,
+   "wtt_kg_per_unit": 0.51646,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 98% diesel, 2% biodiesel, 3.15 kg CO2e/kg TTW, 3.77 kg CO2e/kg WTW (WTT printed as 0.62); GLEC gives no biogenic CO2 for blends; × 0.833 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b5/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.04,
+   "wtt_kg_per_unit": 0.62,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 95% diesel, 5% biodiesel, 3.04 kg CO2e/kg TTW, 3.66 kg CO2e/kg WTW (WTT printed as 0.62); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b5/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.5384,
+   "wtt_kg_per_unit": 0.5177,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 95% diesel, 5% biodiesel, 3.04 kg CO2e/kg TTW, 3.66 kg CO2e/kg WTW (WTT printed as 0.62); GLEC gives no biogenic CO2 for blends; × 0.835 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b7/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.97,
+   "wtt_kg_per_unit": 0.63,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 93% diesel, 7% biodiesel, 2.97 kg CO2e/kg TTW, 3.6 kg CO2e/kg WTW (WTT printed as 0.63); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b7/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.48292,
+   "wtt_kg_per_unit": 0.52668,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 93% diesel, 7% biodiesel, 2.97 kg CO2e/kg TTW, 3.6 kg CO2e/kg WTW (WTT printed as 0.63); GLEC gives no biogenic CO2 for blends; × 0.836 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b10/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.86,
+   "wtt_kg_per_unit": 0.63,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 90% diesel, 10% biodiesel, 2.86 kg CO2e/kg TTW, 3.49 kg CO2e/kg WTW (WTT printed as 0.63); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b10/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.39668,
+   "wtt_kg_per_unit": 0.52794,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 90% diesel, 10% biodiesel, 2.86 kg CO2e/kg TTW, 3.49 kg CO2e/kg WTW (WTT printed as 0.63); GLEC gives no biogenic CO2 for blends; × 0.838 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b20/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.52,
+   "wtt_kg_per_unit": 0.64,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 80% diesel, 20% biodiesel, 2.52 kg CO2e/kg TTW, 3.16 kg CO2e/kg WTW (WTT printed as 0.64); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b20/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.12688,
+   "wtt_kg_per_unit": 0.54016,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 80% diesel, 20% biodiesel, 2.52 kg CO2e/kg TTW, 3.16 kg CO2e/kg WTW (WTT printed as 0.64); GLEC gives no biogenic CO2 for blends; × 0.844 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b50/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 1.53,
+   "wtt_kg_per_unit": 0.67,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 50% diesel, 50% biodiesel, 1.53 kg CO2e/kg TTW, 2.2 kg CO2e/kg WTW (WTT printed as 0.68); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/diesel_b50/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.31886,
+   "wtt_kg_per_unit": 0.57754,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 50% diesel, 50% biodiesel, 1.53 kg CO2e/kg TTW, 2.2 kg CO2e/kg WTW (WTT printed as 0.68); GLEC gives no biogenic CO2 for blends; × 0.862 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e1/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 3.0,
+   "wtt_kg_per_unit": 0.67,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 99% gasoline, 1% ethanol, 3 kg CO2e/kg TTW, 3.67 kg CO2e/kg WTW (WTT printed as 0.67); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e1/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.229,
+   "wtt_kg_per_unit": 0.49781,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 99% gasoline, 1% ethanol, 3 kg CO2e/kg TTW, 3.67 kg CO2e/kg WTW (WTT printed as 0.67); GLEC gives no biogenic CO2 for blends; × 0.743 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e2/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.96,
+   "wtt_kg_per_unit": 0.68,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 98% gasoline, 2% ethanol, 2.96 kg CO2e/kg TTW, 3.64 kg CO2e/kg WTW (WTT printed as 0.68); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e2/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.20224,
+   "wtt_kg_per_unit": 0.50592,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 98% gasoline, 2% ethanol, 2.96 kg CO2e/kg TTW, 3.64 kg CO2e/kg WTW (WTT printed as 0.68); GLEC gives no biogenic CO2 for blends; × 0.744 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e5/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.84,
+   "wtt_kg_per_unit": 0.71,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 95% gasoline, 5% ethanol, 2.84 kg CO2e/kg TTW, 3.55 kg CO2e/kg WTW (WTT printed as 0.71); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e5/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.1158,
+   "wtt_kg_per_unit": 0.52895,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 95% gasoline, 5% ethanol, 2.84 kg CO2e/kg TTW, 3.55 kg CO2e/kg WTW (WTT printed as 0.71); GLEC gives no biogenic CO2 for blends; × 0.745 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e7/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.76,
+   "wtt_kg_per_unit": 0.73,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 93% gasoline, 7% ethanol, 2.76 kg CO2e/kg TTW, 3.49 kg CO2e/kg WTW (WTT printed as 0.73); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e7/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 2.05896,
+   "wtt_kg_per_unit": 0.54458,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 93% gasoline, 7% ethanol, 2.76 kg CO2e/kg TTW, 3.49 kg CO2e/kg WTW (WTT printed as 0.73); GLEC gives no biogenic CO2 for blends; × 0.746 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e10/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.64,
+   "wtt_kg_per_unit": 0.76,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 90% gasoline, 10% ethanol, 2.64 kg CO2e/kg TTW, 3.4 kg CO2e/kg WTW (WTT printed as 0.76); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e10/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.97208,
+   "wtt_kg_per_unit": 0.56772,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 90% gasoline, 10% ethanol, 2.64 kg CO2e/kg TTW, 3.4 kg CO2e/kg WTW (WTT printed as 0.76); GLEC gives no biogenic CO2 for blends; × 0.747 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e20/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 2.27,
+   "wtt_kg_per_unit": 0.84,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 80% gasoline, 20% ethanol, 2.27 kg CO2e/kg TTW, 3.11 kg CO2e/kg WTW (WTT printed as 0.85); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e20/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 1.7025,
+   "wtt_kg_per_unit": 0.63,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 80% gasoline, 20% ethanol, 2.27 kg CO2e/kg TTW, 3.11 kg CO2e/kg WTW (WTT printed as 0.85); GLEC gives no biogenic CO2 for blends; × 0.75 kg/l (GLEC's density) per litre",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e50/kg",
+   "unit": "kg",
+   "ttw_kg_per_unit": 1.26,
+   "wtt_kg_per_unit": 1.06,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 50% gasoline, 50% ethanol, 1.26 kg CO2e/kg TTW, 2.32 kg CO2e/kg WTW (WTT printed as 1.06); GLEC gives no biogenic CO2 for blends",
+   "year": 2026
+  },
+  {
+   "fuel": "glec/fuel/na/gasoline_e50/l",
+   "unit": "l",
+   "ttw_kg_per_unit": 0.96012,
+   "wtt_kg_per_unit": 0.80772,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 1, biofuel blends, North America (pp. 89-90): 50% gasoline, 50% ethanol, 1.26 kg CO2e/kg TTW, 2.32 kg CO2e/kg WTW (WTT printed as 1.06); GLEC gives no biogenic CO2 for blends; × 0.762 kg/l (GLEC's density) per litre",
+   "year": 2026
+  }
+ ],
+ "fuel_aliases": {
+  "diesel": "glec/fuel/eu/diesel/l",
+  "diesel_mineral": "glec/fuel/eu/diesel/l",
+  "petrol": "glec/fuel/eu/gasoline/l",
+  "hvo": "glec/fuel/eu/hvo/l",
+  "jet_fuel": "glec/fuel/air/jet_kerosene/l"
+ },
+ "fuel_regions": {
+  "diesel": {
+   "region_set": "land",
+   "regions": {
+    "na": "glec/fuel/na/diesel/l",
+    "cn": "glec/fuel/cn/diesel/l",
+    "in": "glec/fuel/in/diesel/l"
+   }
+  },
+  "diesel_mineral": {
+   "region_set": "land",
+   "regions": {
+    "na": "glec/fuel/na/diesel/l",
+    "cn": "glec/fuel/cn/diesel/l",
+    "in": "glec/fuel/in/diesel/l"
+   }
+  },
+  "petrol": {
+   "region_set": "land",
+   "regions": {
+    "na": "glec/fuel/na/gasoline/l",
+    "cn": "glec/fuel/cn/gasoline/l",
+    "in": "glec/fuel/in/petrol/l"
+   }
+  },
+  "hvo": {
+   "region_set": "land",
+   "regions": {
+    "na": "glec/fuel/na/hvo/l"
+   }
+  }
+ },
  "vehicle_aliases": [
   {
    "mode": "road",
@@ -4710,6 +6567,45 @@
     }
    ],
    "note": "GLEC reefer container factor (Clean Cargo 2025) for the ports' trade lane."
+  },
+  {
+   "mode": "road",
+   "alias": "van_electric",
+   "vehicle_type": "glec/road/europe/electric/van_3_5t",
+   "region_set": "electricity",
+   "regions": {
+    "europe": "glec/road/europe/electric/van_3_5t",
+    "cn": "glec/road/cn/truck_4_5t/electricity",
+    "in": "glec/road/in/rigid_3_5t/electricity"
+   },
+   "only_regions": true,
+   "note": "GLEC electric van: Europe Table 10 × GLEC's European average electricity; China and India their own tables. Elsewhere give energy_kwh_per_tkm with the charging country."
+  },
+  {
+   "mode": "road",
+   "alias": "truck_electric",
+   "vehicle_type": "glec/road/europe/electric/artic_34_40t",
+   "region_set": "electricity",
+   "regions": {
+    "europe": "glec/road/europe/electric/artic_34_40t",
+    "cn": "glec/road/cn/truck_12t/electricity",
+    "in": "glec/road/in/artic_55t/electricity"
+   },
+   "only_regions": true,
+   "note": "GLEC electric truck: Europe Table 11 artic 34-40 t, average/mixed load, × GLEC's European average electricity; China and India their own tables. Elsewhere give energy_kwh_per_tkm with the charging country."
+  },
+  {
+   "mode": "rail",
+   "alias": "freight_train_reefer",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/average_traction_unknown",
+   "region_set": "land",
+   "regions": {
+    "in": "glec/rail/in/temperature_controlled/average"
+   },
+   "unavailable_regions": [
+    "na"
+   ],
+   "note": "GLEC's regional rail average + 12% for temperature-controlled freight (not given for North America)."
   }
  ],
  "regions": [
@@ -5309,6 +7205,79 @@
     "VU",
     "WF",
     "WS"
+   ]
+  },
+  {
+   "name": "europe",
+   "label": "Europe",
+   "set": "electricity",
+   "countries": [
+    "AD",
+    "AL",
+    "AT",
+    "BA",
+    "BE",
+    "BG",
+    "BY",
+    "CH",
+    "CZ",
+    "DE",
+    "DK",
+    "EE",
+    "ES",
+    "FI",
+    "FO",
+    "FR",
+    "GB",
+    "GG",
+    "GI",
+    "GR",
+    "HR",
+    "HU",
+    "IE",
+    "IM",
+    "IS",
+    "IT",
+    "JE",
+    "LI",
+    "LT",
+    "LU",
+    "LV",
+    "MC",
+    "MD",
+    "ME",
+    "MK",
+    "MT",
+    "NL",
+    "NO",
+    "PL",
+    "PT",
+    "RO",
+    "RS",
+    "RU",
+    "SE",
+    "SI",
+    "SK",
+    "SM",
+    "UA",
+    "VA",
+    "XK"
+   ]
+  },
+  {
+   "name": "cn",
+   "label": "China",
+   "set": "electricity",
+   "countries": [
+    "CN"
+   ]
+  },
+  {
+   "name": "in",
+   "label": "India",
+   "set": "electricity",
+   "countries": [
+    "IN"
    ]
   }
  ],

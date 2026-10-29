@@ -410,7 +410,8 @@ components:
       required: [hub_type]
       properties:
         id: { type: string }
-        hub_type: { type: string, example: container_terminal }
+        hub_type: { type: string, example: transshipment, description: "GLEC v3.3 Table 3 hub types: transshipment, storage_transshipment, warehouse, liquid_bulk_terminal (add _mixed for ambient and temperature-controlled sites; per tonne), intermodal_terminal, intermodal_terminal_temperature_controlled (per container)" }
+        containers: { type: number, description: "Containers handled, for per-container hub types (intermodal terminals)" }
     Shipment:
       type: object
       required: [legs]
@@ -463,6 +464,7 @@ components:
       properties:
         hub_type: { type: string }
         wtw_g_per_tonne: { type: number }
+        wtw_g_per_container: { type: number, description: "Set instead of wtw_g_per_tonne for per-container hub types" }
         source: { type: string }
         year: { type: integer }
     LegResult:

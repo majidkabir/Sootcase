@@ -97,6 +97,9 @@ const (
 type HubStop struct {
 	ID      string `json:"id"`
 	HubType string `json:"hub_type"`
+	// Containers is the number of containers handled, for hub types whose
+	// factor is per container (GLEC's intermodal terminals).
+	Containers float64 `json:"containers,omitempty"`
 }
 
 // Shipment is the unit of calculation.
@@ -140,9 +143,12 @@ func (f Factor) WTW() float64 { return f.TTW + f.WTT }
 type HubFactor struct {
 	HubType      string  `json:"hub_type"`
 	WTWPerTonneG float64 `json:"wtw_g_per_tonne"`
-	Source       string  `json:"source"`
-	Year         int     `json:"year"`
-	DataType     string  `json:"data_type,omitempty"` // as Factor.DataType
+	// WTWPerContainerG, when set, makes the factor per container handled
+	// instead of per tonne (HubStop.Containers).
+	WTWPerContainerG float64 `json:"wtw_g_per_container,omitempty"`
+	Source           string  `json:"source"`
+	Year             int     `json:"year"`
+	DataType         string  `json:"data_type,omitempty"` // as Factor.DataType
 }
 
 // LegResult is the outcome for one leg.
@@ -218,11 +224,12 @@ type LegResult struct {
 
 // HubResult is the outcome for one hub stop.
 type HubResult struct {
-	HubID    string  `json:"hub_id"`
-	HubType  string  `json:"hub_type"`
-	WTWKg    float64 `json:"wtw_kg"`
-	DataType string  `json:"data_type"`
-	Source   string  `json:"source"`
+	HubID      string  `json:"hub_id"`
+	HubType    string  `json:"hub_type"`
+	Containers float64 `json:"containers,omitempty"`
+	WTWKg      float64 `json:"wtw_kg"`
+	DataType   string  `json:"data_type"`
+	Source     string  `json:"source"`
 }
 
 // Data types, as ISO 14083 distinguishes them: measured by the operator

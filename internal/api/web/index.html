@@ -435,8 +435,8 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 const vehicleLabels = {
   hgv: "Truck (HGV), regional default", hgv_rigid: "Rigid truck", hgv_artic: "Articulated truck 34–40 t",
   hgv_artic_33t: "Articulated truck over 33 t", hgv_reefer: "Refrigerated truck", van: "Van up to 3.5 t",
-  van_electric: "Electric van", truck_urban: "Urban truck 3.5–7.5 t", freight_train: "Freight train, regional average",
-  freight_train_diesel: "Freight train, diesel", freight_train_electric: "Freight train, electric",
+  van_electric: "Electric van", truck_electric: "Electric truck 34–40 t", truck_urban: "Urban truck 3.5–7.5 t", freight_train: "Freight train, regional average",
+  freight_train_diesel: "Freight train, diesel", freight_train_electric: "Freight train, electric", freight_train_reefer: "Freight train, temperature-controlled",
   container_ship: "Container ship (by trade lane)", container_ship_reefer: "Container ship, reefer (by trade lane)",
   container_ship_short_sea: "Container ship, short sea (EU MRV)", container_ship_deep_sea: "Container ship, deep sea (EU MRV)",
   bulk_carrier: "Bulk carrier", general_cargo: "General cargo ship", roro: "RoRo ferry", ropax: "RoPax ferry (freight and passengers)",
@@ -1238,6 +1238,6 @@ loadFactors().then(() => calculate(null, "example"));
 <footer class="credits"><span id="dataset"></span> Places: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0), UN/LOCODE (UNECE),
 <a href="https://ourairports.com/">OurAirports</a>. Routing: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>.
 Default values and distance adjustments: GLEC Framework v3.3; source: <a href="https://www.smartfreightcentre.org/">Smart Freight Centre</a>, used with permission.
-Ferries, Ro-Ro, non-container ships, fuels and load models: UK DESNZ 2026 (Open Government Licence v3.0).</footer>
+Ferries, Ro-Ro, non-container ships and load models: UK DESNZ 2026 (Open Government Licence v3.0).</footer>
 </body>
 </html>

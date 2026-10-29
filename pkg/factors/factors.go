@@ -46,6 +46,9 @@ type Dataset struct {
 	// accept either; results always carry the full id.
 	VehicleAliases []VehicleAlias    `json:"vehicle_aliases,omitempty"`
 	FuelAliases    map[string]string `json:"fuel_aliases,omitempty"`
+	// FuelRegions make a fuel alias mean another fuel when both ends of the
+	// leg are in a region (e.g. GLEC's North American diesel).
+	FuelRegions map[string]FuelRegion `json:"fuel_regions,omitempty"`
 	// ContainerLoads maps profile names (e.g. "average") to net cargo
 	// tonnes per TEU, for shipments given in TEU.
 	ContainerLoads map[string]float64 `json:"container_loads,omitempty"`
@@ -70,6 +73,13 @@ type Dataset struct {
 	fuelIdx  map[string]calc.FuelFactor
 	placeIdx map[string]placeAlias
 	aliasLM  map[string]string
+	fuelReg  map[string]map[string]calc.FuelFactor
+}
+
+// FuelRegion is a fuel alias's meaning per region of RegionSet.
+type FuelRegion struct {
+	RegionSet string            `json:"region_set"`
+	Regions   map[string]string `json:"regions"`
 }
 
 // Embedded loads a dataset bundled in the binary, e.g. "sample".
@@ -104,6 +114,11 @@ type VehicleAlias struct {
 	// LoadModel is the load model class used when a load is given for
 	// this alias (the alias's own factor has none).
 	LoadModel string `json:"load_model,omitempty"`
+	// OnlyRegions refuses legs whose ends aren't both in one of Regions
+	// (e.g. GLEC's electric trucks, given for Europe, China and India).
+	// UnavailableRegions refuses legs with both ends in one of them.
+	OnlyRegions        bool     `json:"only_regions,omitempty"`
+	UnavailableRegions []string `json:"unavailable_regions,omitempty"`
 }
 
 // EmbeddedNames lists the datasets bundled in the binary.
@@ -126,7 +141,7 @@ func EmbeddedNames() []string {
 // A comma-separated list layers datasets, e.g. "desnz-2026,my-hubs.json":
 // their contents are combined, and defining the same factor, fuel alias,
 // grid country, or container profile with another value twice is an error.
-// A vehicle alias or DAF defined again is the later dataset's.
+// A vehicle or fuel alias or DAF defined again is the later dataset's.
 func Open(nameOrPath string) (*Dataset, error) {
 	if nameOrPath == "" {
 		nameOrPath = Default
@@ -239,13 +254,17 @@ func mergeInto(dst *Dataset, src Dataset) error {
 		dst.DistanceAdjustments = append(dst.DistanceAdjustments, a)
 	}
 	for k, v := range src.FuelAliases {
-		if _, dup := dst.FuelAliases[k]; dup {
-			return fmt.Errorf("fuel alias %q defined twice", k)
-		}
 		if dst.FuelAliases == nil {
 			dst.FuelAliases = map[string]string{}
 		}
-		dst.FuelAliases[k] = v
+		dst.FuelAliases[k] = v // a later layer's alias wins, as for vehicle aliases
+		delete(dst.FuelRegions, k)
+	}
+	for k, v := range src.FuelRegions {
+		if dst.FuelRegions == nil {
+			dst.FuelRegions = map[string]FuelRegion{}
+		}
+		dst.FuelRegions[k] = v
 	}
 	for k, v := range src.ContainerLoads {
 		if old, dup := dst.ContainerLoads[k]; dup && old != v {
@@ -293,6 +312,9 @@ func Parse(r io.Reader) (*Dataset, error) {
 	}
 	d.hubIdx = make(map[string]calc.HubFactor, len(d.Hubs))
 	for _, h := range d.Hubs {
+		if h.WTWPerContainerG < 0 || h.WTWPerContainerG > 0 && h.WTWPerTonneG != 0 {
+			return nil, fmt.Errorf("hub factor for %s: give wtw_g_per_tonne or wtw_g_per_container (>= 0), not both", h.HubType)
+		}
 		if h.WTWPerTonneG < 0 {
 			return nil, fmt.Errorf("negative hub factor for %s", h.HubType)
 		}
@@ -392,6 +414,29 @@ func Parse(r io.Reader) (*Dataset, error) {
 			return nil, fmt.Errorf("fuel alias %s clashes with an existing fuel", alias)
 		}
 		d.fuelIdx[alias] = target
+	}
+	for alias, fr := range d.FuelRegions {
+		if _, ok := d.fuelIdx[alias]; !ok {
+			return nil, fmt.Errorf("fuel_regions %s: no fuel or fuel alias of that name", alias)
+		}
+		known := map[string]bool{}
+		for _, r := range d.Regions {
+			if r.Set == fr.RegionSet {
+				known[r.Name] = true
+			}
+		}
+		m := map[string]calc.FuelFactor{}
+		for region, id := range fr.Regions {
+			f, ok := d.fuelIdx[id]
+			if !ok || !known[region] {
+				return nil, fmt.Errorf("fuel_regions %s: region %q in set %q or fuel %s unknown", alias, region, fr.RegionSet, id)
+			}
+			m[region] = f
+		}
+		if d.fuelReg == nil {
+			d.fuelReg = map[string]map[string]calc.FuelFactor{}
+		}
+		d.fuelReg[alias] = m
 	}
 	return &d, nil
 }

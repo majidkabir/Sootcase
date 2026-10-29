@@ -2,6 +2,7 @@ package factors
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
@@ -78,6 +79,9 @@ type placeAlias struct {
 	alias, set, note string
 	regions          map[string]calc.Factor
 	lanes            []placeLane
+	only             bool
+	unavailable      map[string]bool
+	labels           map[string]string
 }
 
 func (d *Dataset) indexPlaceAlias(a VehicleAlias) error {
@@ -88,19 +92,28 @@ func (d *Dataset) indexPlaceAlias(a VehicleAlias) error {
 		}
 		d.aliasLM[k] = a.LoadModel
 	}
-	if len(a.Regions) == 0 && len(a.Lanes) == 0 {
+	if len(a.Regions) == 0 && len(a.Lanes) == 0 && len(a.UnavailableRegions) == 0 {
 		return nil
 	}
 	if a.RegionSet == "" {
 		return fmt.Errorf("vehicle alias %s: regions and lanes need a region_set", k)
 	}
 	known := map[string]bool{}
+	labels := map[string]string{}
 	for _, r := range d.Regions {
 		if r.Set == a.RegionSet {
 			known[r.Name] = true
+			labels[r.Name] = r.Label
 		}
 	}
-	p := placeAlias{alias: a.Alias, set: a.RegionSet, note: a.Note, regions: map[string]calc.Factor{}}
+	p := placeAlias{alias: a.Alias, set: a.RegionSet, note: a.Note, regions: map[string]calc.Factor{},
+		only: a.OnlyRegions, unavailable: map[string]bool{}, labels: labels}
+	for _, r := range a.UnavailableRegions {
+		if !known[r] {
+			return fmt.Errorf("vehicle alias %s: no region %q in set %q", k, r, a.RegionSet)
+		}
+		p.unavailable[r] = true
+	}
 	for region, vt := range a.Regions {
 		if !known[region] {
 			return fmt.Errorf("vehicle alias %s: no region %q in set %q", k, region, a.RegionSet)
@@ -149,11 +162,21 @@ func (d *Dataset) region(set string, w calc.Where) (name, label string) {
 // as in LegFactorFor.
 func (d *Dataset) LegFactorAt(m calc.Mode, vt string, km float64, from, to calc.Where) (calc.Factor, string, error) {
 	p, ok := d.placeIdx[legKey(m, vt)]
-	if !ok || from.Country == "" && to.Country == "" {
+	if !ok {
 		return d.LegFactorFor(m, vt, km)
+	}
+	if from.Country == "" && to.Country == "" {
+		f, note, err := d.LegFactorFor(m, vt, km)
+		if err == nil && note == "" && (p.only || len(p.unavailable) > 0) {
+			note = fmt.Sprintf("%q: no country known for the leg's ends, so its default, %s.", p.alias, f.VehicleType)
+		}
+		return f, note, err
 	}
 	ra, la := d.region(p.set, from)
 	rb, lb := d.region(p.set, to)
+	if ra != "" && ra == rb && p.unavailable[ra] {
+		return calc.Factor{}, "", fmt.Errorf("%w: %q has no GLEC value in %s; choose another vehicle type", calc.ErrInvalidInput, p.alias, la)
+	}
 	where := func() string {
 		if la != "" && la == lb {
 			cs := strings.ToUpper(from.Country)
@@ -182,6 +205,21 @@ func (d *Dataset) LegFactorAt(m calc.Mode, vt string, km float64, from, to calc.
 			return f, withNote(fmt.Sprintf("%q %s: %s.", p.alias, where(), f.VehicleType)), nil
 		}
 	}
+	if p.only {
+		var in []string
+		for r := range p.regions {
+			in = append(in, p.labels[r])
+		}
+		sort.Strings(in)
+		where := "with its ends in different regions"
+		if ra != "" && ra == rb {
+			where = "in " + la
+		} else if ra == "" && ra == rb {
+			where = "outside them"
+		}
+		return calc.Factor{}, "", fmt.Errorf("%w: %q has GLEC values for %s only, and this leg is %s; give energy_kwh_per_tkm with the "+
+			"country instead", calc.ErrInvalidInput, p.alias, strings.Join(in, ", "), where)
+	}
 	f, note, err := d.LegFactorFor(m, vt, km)
 	if err != nil {
 		return f, note, err
@@ -209,4 +247,29 @@ func placeName(w calc.Where, label string) string {
 		return label
 	}
 	return "an unknown country"
+}
+
+// FuelFactorAt implements calc.PlaceFuelProvider: a fuel alias with
+// fuel_regions means the region's fuel when both ends of the leg are in it.
+func (d *Dataset) FuelFactorAt(fuel string, from, to calc.Where) (calc.FuelFactor, string, error) {
+	f, err := d.FuelFactor(fuel)
+	if err != nil {
+		return f, "", err
+	}
+	m, ok := d.fuelReg[fuel]
+	if !ok {
+		return f, "", nil
+	}
+	set := d.FuelRegions[fuel].RegionSet
+	ra, la := d.region(set, from)
+	rb, _ := d.region(set, to)
+	if ra != "" && ra == rb {
+		if rf, ok := m[ra]; ok {
+			return rf, fmt.Sprintf("%q in %s: %s.", fuel, la, rf.Fuel), nil
+		}
+	}
+	if from.Country == "" && to.Country == "" {
+		return f, fmt.Sprintf("%q: no country known for the leg's ends, so %s.", fuel, f.Fuel), nil
+	}
+	return f, fmt.Sprintf("%q %s: %s.", fuel, map[bool]string{true: "in " + la, false: "outside the regions with their own value"}[ra != "" && ra == rb], f.Fuel), nil
 }

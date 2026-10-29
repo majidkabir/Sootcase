@@ -16,6 +16,7 @@
 //	repositioning_km                                leg, empty km for this trip (trucks)
 //	energy_kwh_per_tkm, country                     leg, energy method
 //	hub_id, hub_type                                hub stop
+//	hub_containers                                  hub stop, containers handled (per-container hub types)
 package csvio
 
 import (
@@ -221,7 +222,11 @@ func addRow(s *calc.Shipment, row rowReader) error {
 	}
 
 	if ht := row.str("hub_type"); ht != "" {
-		s.Hubs = append(s.Hubs, calc.HubStop{ID: row.str("hub_id"), HubType: ht})
+		n, err := row.float("hub_containers")
+		if err != nil {
+			return err
+		}
+		s.Hubs = append(s.Hubs, calc.HubStop{ID: row.str("hub_id"), HubType: ht, Containers: n})
 		return nil
 	}
 

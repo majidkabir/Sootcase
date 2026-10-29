@@ -101,13 +101,20 @@ func Shipment(s calc.Shipment, r calc.Result, f calc.FactorProvider) Sheet {
 		sh.Steps = append(sh.Steps, legSteps(i, l, in, t, f)...)
 	}
 	for _, h := range r.Hubs {
-		sh.Steps = append(sh.Steps, Step{
+		st := Step{
 			Group: "Hub " + h.HubID, Title: "Hub emissions (" + h.HubType + ")",
 			Text: fmt.Sprintf("Mass handled times the hub operation's intensity per tonne, well-to-wheel only (%s data). Source: %s.",
 				h.DataType, h.Source),
 			Formula: fmt.Sprintf("WTW = %s t × %s g/t ÷ 1,000 = %s kg", n(t, 3), n(div(h.WTWKg*1e6, t*1000), 2), n(h.WTWKg, 3)),
 			Basis:   []string{bHubTCE, bDataCats},
-		})
+		}
+		if h.Containers > 0 {
+			st.Text = fmt.Sprintf("Containers handled times the hub operation's intensity per container, well-to-wheel only (%s data). Source: %s.",
+				h.DataType, h.Source)
+			st.Formula = fmt.Sprintf("WTW = %s containers × %s g/container ÷ 1,000 = %s kg", n(h.Containers, 0),
+				n(div(h.WTWKg*1000, h.Containers), 1), n(h.WTWKg, 3))
+		}
+		sh.Steps = append(sh.Steps, st)
 	}
 
 	// Total.
@@ -245,8 +252,8 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 			amount = in.Fuel.Amount
 		}
 		s := Step{Group: group, Title: "Measured fuel",
-			Text: fmt.Sprintf("Fuel actually used on the trip (primary data), times the fuel's emission factor: %s kg CO₂e per %s tank-to-wheel and %s well-to-tank (%s).",
-				n(ff.TTW, 4), unit(ff.Unit), n(ff.WTT, 4), ff.Source),
+			Text: strings.TrimSpace(l.FactorNote + " " + fmt.Sprintf("Fuel actually used on the trip (primary data), times the fuel's emission factor: %s kg CO₂e per %s tank-to-wheel and %s well-to-tank (%s).",
+				n(ff.TTW, 4), unit(ff.Unit), n(ff.WTT, 4), ff.Source)),
 			Basis: []string{bPrimary, bFuelEx, bDataCats}}
 		if share < 1 {
 			s.Text += fmt.Sprintf(" The trip carried other goods too: this shipment's share is its tonne-km over the trip's (%s).", n(share*100, 2)+"%")

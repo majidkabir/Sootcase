@@ -549,6 +549,216 @@ dafs = [
      "source": f"{GLEC}, Section 3 Module 2: non-container sea values with a +15% distance conversion between actual and shortest feasible distance"},
 ]
 
+# ================================================================ additions (GLEC v3.3, 2026-10-29)
+# ---------------------------------------------------------------- Module 1 fuel emission factors
+# (id, label, density kg/l or None, ttw kg/kg, wtw kg/kg, biogenic g/g or None, source note)
+FUEL_TABLES = {
+    "eu": ("Module 1, GHG emission factors: European sources (pp. 77-78; ifeu, infras & Fraunhofer IML 2025)", [
+        ("gasoline", "gasoline", 0.74, 3.19, 4.21, None),
+        ("ethanol", "ethanol (40% maize, 35% sugar beet, 25% wheat)", 0.78, 0.003, 1.30, 1.91),
+        ("diesel", "diesel", 0.83, 3.22, 4.19, None),
+        ("biodiesel", "biodiesel (50% rapeseed, 40% used cooking oil, 10% soybean)", 0.89, 0.04, 1.31, 2.83),
+        ("lpg", "liquefied petroleum gas (LPG)", 0.55, 3.05, 4.10, None),
+        ("hydrogen_smr", "hydrogen (from SMR)", None, 0.00, 12.16, None),
+        ("hvo", "HVO/HEFA (50% rapeseed, 50% used cooking oil)", 0.77, 0.05, 1.31, 3.12),
+        ("cng", "compressed natural gas (CNG), Europe spark ignition truck", None, 2.74, 3.79, None),
+        ("lng", "liquefied natural gas (LNG), Europe spark ignition truck", None, 2.80, 4.08, None),
+        ("bio_cng", "bio-CNG (40% maize, 40% manure, 20% biowaste)", None, 0.05, 1.28, 2.86),
+        ("bio_lng", "bio-LNG (40% maize, 40% manure, 20% biowaste)", None, 0.05, 1.49, 2.86),
+    ]),
+    "na": ("Module 1, GHG emission factors: North American sources (p. 79; GREET 2025)", [
+        ("gasoline", "gasoline", 0.749, 3.05, 3.70, None),
+        ("ethanol", "ethanol (corn)", 0.789, 0.01, 1.33, 1.32),
+        ("diesel", "diesel", 0.847, 3.21, 3.83, None),
+        ("biodiesel", "biodiesel (soybean)", 0.881, 0.02, 0.73, 0.71),
+        ("hvo", "HVO (tallow)", 0.779, 0.02, 0.75, 0.72),
+        ("lpg", "liquefied petroleum gas (LPG)", 0.508, 3.02, 3.54, None),
+        ("cng", "compressed natural gas (CNG), North America spark ignition truck", None, 2.63, 3.27, None),
+        ("lng", "liquefied natural gas (LNG), North America spark ignition truck", None, 2.78, 3.62, None),
+    ]),
+    "cn": ("Module 1, GHG emission factors: China sources (p. 80; MEE 2026 and national standards)", [
+        ("gasoline", "gasoline", 0.748, 3.11, 4.10, None),
+        ("diesel", "diesel", 0.818, 3.21, 4.18, None),
+        ("lpg", "liquefied petroleum gas (LPG)", None, 3.25, 4.38, None),
+        ("lng", "liquefied natural gas (LNG), China spark ignition truck", 0.450, 3.06, 4.37, None),
+    ]),
+    "in": ("Module 1, GHG emission factors: Indian sources (p. 81; 2006 IPCC Guidelines)", [
+        ("diesel", "diesel", 0.83, 3.24, 4.21, None),
+        ("petrol", "petrol", 0.71, 3.15, 4.16, None),
+        ("cng", "CNG", None, 2.86, 3.20, None),
+        ("ethanol", "ethanol", 0.71, 2.41, 3.48, None),
+    ]),
+    "marine": ("Module 1, marine fuel emission factors (p. 85; IMO MEPC 81, FuelEU Maritime, RED II)", [
+        ("hfo", "HFO, default", None, 3.16, 3.84, None),
+        ("hfo_vlsfo", "HFO (VLSFO)", None, 3.16, 3.84, None),
+        ("hfo_hshfo", "HFO (HSHFO)", None, 3.16, 3.73, None),
+        ("lfo", "LFO, default", None, 3.20, 3.75, None),
+        ("mdo_mgo", "MDO/MGO, default", None, 3.26, 4.01, None),
+        ("mdo_mgo_ulsfo", "MDO/MGO (ULSFO)", None, 3.26, 4.01, None),
+        ("mdo_mgo_vlsfo", "MDO/MGO (VLSFO)", None, 3.26, 3.87, None),
+        ("lpg_propane", "LPG, propane", None, 3.05, 3.41, None),
+        ("lpg_butane", "LPG, butane", None, 3.08, 3.40, None),
+        ("lng", "LNG, default", None, 3.73, 4.61, None),
+        ("lng_otto_medium_speed", "LNG, Otto dual fuel (medium speed)", None, 3.73, 4.61, None),
+        ("lng_otto_slow_speed", "LNG, Otto dual fuel (slow speed)", None, 3.24, 4.13, None),
+        ("lng_diesel", "LNG, LNG Diesel", None, 2.82, 3.71, None),
+        ("lng_lbsi", "LNG, LBSI", None, 3.48, 4.37, None),
+        ("lng_steam_turbine", "LNG, steam turbine & boilers", None, 2.78, 3.67, None),
+        ("bio_lng", "bio-LNG, default", None, 0.98, 2.43, 2.86),
+        ("bio_lng_otto_medium_speed", "bio-LNG, Otto dual fuel (medium speed)", None, 0.98, 2.43, 2.86),
+        ("bio_lng_otto_slow_speed", "bio-LNG, Otto dual fuel (slow speed)", None, 0.49, 1.94, 2.86),
+        ("bio_lng_diesel", "bio-LNG, LNG Diesel", None, 0.07, 1.52, 2.86),
+        ("bio_lng_lbsi", "bio-LNG, LBSI", None, 0.74, 2.18, 2.86),
+        ("bio_lng_steam_turbine", "bio-LNG, steam turbine & boilers", None, 0.03, 1.48, 2.86),
+        ("biodiesel_fame", "biodiesel, default (FAME)", None, 0.05, 0.82, 2.83),
+        ("hvo", "HVO, default", None, 0.05, 0.71, 3.12),
+        ("hydrogen_natural_gas", "hydrogen from natural gas", None, 0.00, 15.84, None),
+        ("ammonia_natural_gas", "ammonia from natural gas", None, 0.001, 2.25, None),
+        ("methanol_natural_gas", "methanol from natural gas", None, 1.38, 2.00, None),
+        ("bio_methanol", "bio-methanol", None, 0.01, 0.33, 1.38),
+        ("bio_ethanol", "bio-ethanol, default (1st generation biogenic)", None, 0.01, 1.29, 1.91),
+    ]),
+    "air": ("Module 1, air fuel emission factors (p. 87)", [
+        ("jet_kerosene", "jet kerosene (Jet A1 and Jet A)", 0.802, 3.18, 3.84, None),
+    ]),
+}
+# Biofuel blends (pp. 88-90): (id, label, density, wtt, ttw, wtw) per kg; GLEC gives no biogenic CO2 for them.
+BLENDS = {
+    "eu": ("Module 1, biofuel blends, Europe (pp. 88-89)", [
+        ("diesel_b1", "99% diesel, 1% biodiesel", 0.833, 0.97, 3.19, 4.15), ("diesel_b2", "98% diesel, 2% biodiesel", 0.833, 0.97, 3.15, 4.12),
+        ("diesel_b5", "95% diesel, 5% biodiesel", 0.835, 0.98, 3.04, 4.03), ("diesel_b7", "93% diesel, 7% biodiesel", 0.836, 0.99, 2.97, 3.96),
+        ("diesel_b10", "90% diesel, 10% biodiesel", 0.838, 1.00, 2.86, 3.87), ("diesel_b20", "80% diesel, 20% biodiesel", 0.844, 1.04, 2.52, 3.55),
+        ("diesel_b50", "50% diesel, 50% biodiesel", 0.862, 1.13, 1.52, 2.66),
+        ("gasoline_e1", "99% gasoline, 1% ethanol", 0.743, 1.03, 3.14, 4.17), ("gasoline_e2", "98% gasoline, 2% ethanol", 0.744, 1.03, 3.10, 4.13),
+        ("gasoline_e5", "95% gasoline, 5% ethanol", 0.745, 1.05, 2.97, 4.02), ("gasoline_e7", "93% gasoline, 7% ethanol", 0.746, 1.06, 2.89, 3.95),
+        ("gasoline_e10", "90% gasoline, 10% ethanol", 0.747, 1.08, 2.76, 3.84), ("gasoline_e20", "80% gasoline, 20% ethanol", 0.750, 1.13, 2.36, 3.50),
+        ("gasoline_e50", "50% gasoline, 50% ethanol", 0.762, 1.25, 1.30, 2.55),
+        ("diesel_hvo10", "90% diesel, 10% HVO", 0.826, 0.99, 2.91, 3.91), ("diesel_hvo20", "80% diesel, 20% HVO", 0.820, 1.02, 2.60, 3.62),
+        ("diesel_hvo50", "50% diesel, 50% HVO", 0.801, 1.11, 1.66, 2.77),
+    ]),
+    "na": ("Module 1, biofuel blends, North America (pp. 89-90)", [
+        ("diesel_hvo10", "90% diesel, 10% HVO", 0.826, 0.56, 2.91, 3.47), ("diesel_hvo20", "80% diesel, 20% HVO", 0.820, 0.64, 2.59, 3.23),
+        ("diesel_hvo50", "50% diesel, 50% HVO", 0.801, 0.67, 1.65, 2.32),
+        ("diesel_b1", "99% diesel, 1% biodiesel", 0.833, 0.62, 3.18, 3.80), ("diesel_b2", "98% diesel, 2% biodiesel", 0.833, 0.62, 3.15, 3.77),
+        ("diesel_b5", "95% diesel, 5% biodiesel", 0.835, 0.62, 3.04, 3.66), ("diesel_b7", "93% diesel, 7% biodiesel", 0.836, 0.63, 2.97, 3.60),
+        ("diesel_b10", "90% diesel, 10% biodiesel", 0.838, 0.63, 2.86, 3.49), ("diesel_b20", "80% diesel, 20% biodiesel", 0.844, 0.64, 2.52, 3.16),
+        ("diesel_b50", "50% diesel, 50% biodiesel", 0.862, 0.68, 1.53, 2.20),
+        ("gasoline_e1", "99% gasoline, 1% ethanol", 0.743, 0.67, 3.00, 3.67), ("gasoline_e2", "98% gasoline, 2% ethanol", 0.744, 0.68, 2.96, 3.64),
+        ("gasoline_e5", "95% gasoline, 5% ethanol", 0.745, 0.71, 2.84, 3.55), ("gasoline_e7", "93% gasoline, 7% ethanol", 0.746, 0.73, 2.76, 3.49),
+        ("gasoline_e10", "90% gasoline, 10% ethanol", 0.747, 0.76, 2.64, 3.40), ("gasoline_e20", "80% gasoline, 20% ethanol", 0.750, 0.85, 2.27, 3.11),
+        ("gasoline_e50", "50% gasoline, 50% ethanol", 0.762, 1.06, 1.26, 2.32),
+    ]),
+}
+fuels = []
+
+
+def fuel(fid, unit, ttw, wtt, source, bio=None):
+    f = {"fuel": fid, "unit": unit, "ttw_kg_per_unit": round(ttw, 6), "wtt_kg_per_unit": round(wtt, 6), "source": source, "year": YEAR}
+    if bio:
+        f["biogenic_co2_kg_per_unit"] = round(bio, 6)
+    fuels.append(f)
+
+
+for region, (where, rows) in FUEL_TABLES.items():
+    for fid, label, dens, ttw, wtw, bio in rows:
+        base = f"{GLEC}, Section 3 {where}: {label}, {ttw:g} kg CO2e/kg TTW, {wtw:g} kg CO2e/kg WTW"
+        biotxt = f"; biogenic CO2 {bio:g} g/g, reported separately" if bio else ""
+        fuel(f"glec/fuel/{region}/{fid}/kg", "kg", ttw, wtw - ttw, base + biotxt, bio)
+        fuel(f"glec/fuel/{region}/{fid}/t", "tonnes", ttw * 1000, (wtw - ttw) * 1000, base + " (× 1,000 per tonne)" + biotxt,
+             bio * 1000 if bio else None)
+        if dens:
+            fuel(f"glec/fuel/{region}/{fid}/l", "l", ttw * dens, (wtw - ttw) * dens,
+                 base + f", × {dens:g} kg/l (GLEC's density) per litre" + biotxt, bio * dens if bio else None)
+for region, (where, rows) in BLENDS.items():
+    for fid, label, dens, wtt, ttw, wtw in rows:
+        # WTT is taken as WTW - TTW so that the total is GLEC's printed WTW (its WTT column is rounded separately).
+        base = (f"{GLEC}, Section 3 {where}: {label}, {ttw:g} kg CO2e/kg TTW, {wtw:g} kg CO2e/kg WTW (WTT printed as {wtt:g}); "
+                f"GLEC gives no biogenic CO2 for blends")
+        fuel(f"glec/fuel/{region}/{fid}/kg", "kg", ttw, wtw - ttw, base)
+        fuel(f"glec/fuel/{region}/{fid}/l", "l", ttw * dens, (wtw - ttw) * dens, base + f"; × {dens:g} kg/l (GLEC's density) per litre")
+
+fuel_aliases = {"diesel": "glec/fuel/eu/diesel/l", "diesel_mineral": "glec/fuel/eu/diesel/l", "petrol": "glec/fuel/eu/gasoline/l",
+                "hvo": "glec/fuel/eu/hvo/l", "jet_fuel": "glec/fuel/air/jet_kerosene/l"}
+DIESEL_REG = {"na": "glec/fuel/na/diesel/l", "cn": "glec/fuel/cn/diesel/l", "in": "glec/fuel/in/diesel/l"}
+fuel_regions = {
+    "diesel": {"region_set": "land", "regions": DIESEL_REG},
+    "diesel_mineral": {"region_set": "land", "regions": DIESEL_REG},
+    "petrol": {"region_set": "land", "regions": {"na": "glec/fuel/na/gasoline/l", "cn": "glec/fuel/cn/gasoline/l", "in": "glec/fuel/in/petrol/l"}},
+    "hvo": {"region_set": "land", "regions": {"na": "glec/fuel/na/hvo/l"}},
+}
+
+# ---------------------------------------------------------------- electric trucks (Tables 10-11) x GLEC electricity
+# GLEC Module 1 p. 77: electricity European average at medium voltage level (EU 27, 2021, including infrastructure),
+# 92.8 g CO2e/MJ WTW, 0 TTW; GLEC notes it is the only electricity factor confirmed to include fuel and energy
+# production infrastructure in the WTT element as per ISO 14083. 92.8 g/MJ x 3.6 MJ/kWh = 334.08 g/kWh.
+EU_ELEC = 92.8 * 3.6
+EV = [
+    ("van_3_5t", "Table 10: van < 3.5 t (combined load factor and empty running 31%)", 1.2),
+    ("rigid_7_5t/light", "Table 11: rigid truck < 7.5 t GVW, light load (30%, empty 9%)", 0.62),
+    ("rigid_7_5t", "Table 11: rigid truck < 7.5 t GVW, average/mixed load (60%, empty 17%)", 0.34),
+    ("rigid_7_5_12t/light", "Table 11: rigid truck 7.5-12 t GVW, light load", 0.58),
+    ("rigid_7_5_12t", "Table 11: rigid truck 7.5-12 t GVW, average/mixed load", 0.31),
+    ("rigid_14_20t/light", "Table 11: rigid truck 14-20 t GVW, light load", 0.36),
+    ("rigid_14_20t", "Table 11: rigid truck 14-20 t GVW, average/mixed load", 0.19),
+    ("rigid_20_26t/light", "Table 11: rigid truck 20-26 t GVW, light load", 0.32),
+    ("rigid_20_26t", "Table 11: rigid truck 20-26 t GVW, average/mixed load", 0.17),
+    ("rigid_28_32t/light", "Table 11: rigid truck 28-32 t GVW, light load", 0.31),
+    ("rigid_28_32t", "Table 11: rigid truck 28-32 t GVW, average/mixed load", 0.17),
+    ("artic_28_34t/light", "Table 11: artic truck 28-34 t GVW, light load", 0.26),
+    ("artic_28_34t", "Table 11: artic truck 28-34 t GVW, average/mixed load", 0.14),
+    ("artic_34_40t/light", "Table 11: artic truck 34-40 t GVW, light load", 0.23),
+    ("artic_34_40t", "Table 11: artic truck 34-40 t GVW, average/mixed load", 0.12),
+    ("artic_40_50t/light", "Table 11: artic truck 40-50 t GVW, light load", 0.2),
+    ("artic_40_50t", "Table 11: artic truck 40-50 t GVW, average/mixed load", 0.1),
+]
+for vid, label, kwh in EV:
+    leg("road", "glec/road/europe/electric/" + vid, kwh * EU_ELEC, 0,
+        f"{GLEC}, Section 3 Module 2, Europe and South America road, {label}: {kwh:g} kWh/t-km (HBEFA 5.1, including charging "
+        f"losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: "
+        f"92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging "
+        f"country's own mix is more exact: give energy_kwh_per_tkm with country", "sfd")
+
+# ---------------------------------------------------------------- temperature-controlled rail (p. 99): +12%
+for base, vid, where in (("glec/rail/eu/average_traction_unknown", "glec/rail/eu/temperature_controlled/average_traction_unknown", "Europe"),
+                         ("glec/rail/in/average", "glec/rail/in/temperature_controlled/average", "India")):
+    b = find(base)
+    leg("rail", vid, b["wtt_g_per_tkm"] * 1.12, b["ttw_g_per_tkm"] * 1.12,
+        f"{GLEC}, Section 3 Module 2, rail: {base} with GLEC's +12% for temperature-controlled rail freight (p. 99, the road "
+        f"uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)", "")
+
+# ---------------------------------------------------------------- electricity region set (for electric vehicles)
+regions += [
+    {"name": "europe", "label": "Europe", "set": "electricity", "countries": countries("EU")},
+    {"name": "cn", "label": "China", "set": "electricity", "countries": ["CN"]},
+    {"name": "in", "label": "India", "set": "electricity", "countries": ["IN"]},
+]
+aliases += [
+    {"mode": "road", "alias": "van_electric", "vehicle_type": "glec/road/europe/electric/van_3_5t", "region_set": "electricity",
+     "regions": {"europe": "glec/road/europe/electric/van_3_5t", "cn": "glec/road/cn/truck_4_5t/electricity",
+                 "in": "glec/road/in/rigid_3_5t/electricity"}, "only_regions": True,
+     "note": "GLEC electric van: Europe Table 10 × GLEC's European average electricity; China and India their own tables. "
+             "Elsewhere give energy_kwh_per_tkm with the charging country."},
+    {"mode": "road", "alias": "truck_electric", "vehicle_type": "glec/road/europe/electric/artic_34_40t", "region_set": "electricity",
+     "regions": {"europe": "glec/road/europe/electric/artic_34_40t", "cn": "glec/road/cn/truck_12t/electricity",
+                 "in": "glec/road/in/artic_55t/electricity"}, "only_regions": True,
+     "note": "GLEC electric truck: Europe Table 11 artic 34-40 t, average/mixed load, × GLEC's European average electricity; "
+             "China and India their own tables. Elsewhere give energy_kwh_per_tkm with the charging country."},
+    {"mode": "rail", "alias": "freight_train_reefer", "vehicle_type": "glec/rail/eu/temperature_controlled/average_traction_unknown",
+     "region_set": "land", "regions": {"in": "glec/rail/in/temperature_controlled/average"}, "unavailable_regions": ["na"],
+     "note": "GLEC's regional rail average + 12% for temperature-controlled freight (not given for North America)."},
+]
+
+# ---------------------------------------------------------------- intermodal terminals (Table 3), per container
+hubs += [
+    {"hub_type": "intermodal_terminal", "wtw_g_per_container": 18200, "year": YEAR,
+     "source": f"{GLEC}, Section 3 Module 2, Table 3, logistics hubs (GILA project; market study by EcoTransIT World 2025, conducted "
+               f"and updated by SGKV and Fraunhofer IML 2026): intermodal terminals (sea and inland ports), ambient (n = 84), 18.2 kg CO2e "
+               f"per container"},
+    {"hub_type": "intermodal_terminal_temperature_controlled", "wtw_g_per_container": 21400, "year": YEAR,
+     "source": f"{GLEC}, Section 3 Module 2, Table 3, logistics hubs: intermodal terminals (sea and inland ports), temperature-controlled "
+               f"(n = 84), 21.4 kg CO2e per container"},
+]
+
 dataset = {
     "name": "glec-3.3",
     "note": ("GLEC Framework v3.3 default values. Source: Smart Freight Centre. Global Logistics Emissions Council Framework "
@@ -557,7 +767,9 @@ dataset = {
              "No affiliation with or endorsement by Smart Freight Centre is implied. " + LAND_NOTE + " " + SEA_NOTE),
     "legs": legs,
     "hubs": hubs,
-    "fuels": [],
+    "fuels": fuels,
+    "fuel_aliases": fuel_aliases,
+    "fuel_regions": fuel_regions,
     "vehicle_aliases": aliases,
     "regions": regions,
     "container_loads": {"average": 10, "light": 6, "heavy": 14.5},
@@ -566,4 +778,4 @@ dataset = {
 with open(OUT, "w", encoding="utf-8") as f:
     json.dump(dataset, f, indent=1, ensure_ascii=False)
     f.write("\n")
-print(f"wrote {OUT}: {len(legs)} factors, {len(hubs)} hubs, {len(aliases)} aliases, {len(regions)} region rules")
+print(f"wrote {OUT}: {len(legs)} factors, {len(fuels)} fuels, {len(hubs)} hubs, {len(aliases)} aliases, {len(regions)} region rules")
