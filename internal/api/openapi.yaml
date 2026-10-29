@@ -356,6 +356,7 @@ components:
       properties:
         id: { type: string }
         mode: { $ref: "#/components/schemas/Mode" }
+        cargo_type: { type: string, description: "Overrides the shipment's cargo_type for this leg" }
         vehicle_type:
           type: string
           example: hgv
@@ -422,6 +423,7 @@ components:
         teu: { type: number, exclusiveMinimum: 0 }
         teu_net_tonnes: { type: number, description: Net cargo tonnes per TEU }
         container_load: { type: string, description: "Profile name from the dataset's container_loads" }
+        cargo_type: { type: string, description: "Optional GLEC cargo or load category from the dataset's cargo_types (container, temperature_controlled, light, heavy, European rail commodities); picks GLEC's value for it where the leg's vehicle has one" }
         legs:
           type: array
           minItems: 1

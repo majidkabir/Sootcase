@@ -748,3 +748,62 @@ func TestGLEC33Additions(t *testing.T) {
 		t.Errorf("terminal without containers: want an error, got %v", err)
 	}
 }
+
+// Cargo types: GLEC's row for the cargo where GLEC has one for the same
+// vehicle, else the vehicle's own value with a note; hubs likewise.
+func TestCargoTypes_GLEC33(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds, Places: places.Codes{}}
+	run := func(cargo string, legs []calc.Leg, hubs ...calc.HubStop) calc.Result {
+		t.Helper()
+		r, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 10000, CargoType: cargo, Legs: legs, Hubs: hubs})
+		if err != nil {
+			t.Fatalf("%s: %v", cargo, err)
+		}
+		return r
+	}
+	ham, muc := calc.Location{Code: "DEHAM"}, calc.Location{Code: "DEMUC"}
+	road := calc.Leg{Mode: calc.Road, VehicleType: "hgv", From: ham, To: muc, DistanceKm: 780, DistanceType: calc.DistSFD}
+	for cargo, want := range map[string]string{"": "glec/road/eu_sa/rigid_26_32t/diesel", "average": "glec/road/eu_sa/rigid_26_32t/diesel",
+		"container": "glec/road/eu_sa/rigid_26_32t/container/diesel", "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_26_32t/diesel",
+		"heavy": "glec/road/eu_sa/rigid_26_32t/diesel"} {
+		r := run(cargo, []calc.Leg{road})
+		if got := r.Legs[0].Factor.VehicleType; got != want {
+			t.Errorf("road %q: %s, want %s (%s)", cargo, got, want, r.Legs[0].FactorNote)
+		}
+		if cargo == "heavy" && !strings.Contains(r.Legs[0].FactorNote, "own value") {
+			t.Errorf("heavy on a rigid truck should say the own value is used: %q", r.Legs[0].FactorNote)
+		}
+	}
+	// Temperature-controlled: +12% on the European HGV value.
+	if r := run("temperature_controlled", []calc.Leg{road}); math.Abs(r.Legs[0].Factor.WTW()-125*1.12) > 1e-6 {
+		t.Errorf("reefer HGV = %v", r.Legs[0].Factor.WTW())
+	}
+	rail := calc.Leg{Mode: calc.Rail, VehicleType: "freight_train_diesel", From: ham, To: muc, DistanceKm: 800, DistanceType: calc.DistSFD}
+	if r := run("chemicals", []calc.Leg{rail}); r.Legs[0].Factor.VehicleType != "glec/rail/eu/diesel/chemicals" {
+		t.Errorf("rail chemicals = %s", r.Legs[0].Factor.VehicleType)
+	}
+	sea := calc.Leg{Mode: calc.Sea, VehicleType: "container_ship", From: calc.Location{Code: "CNSGH"}, To: ham, DistanceKm: 20000, DistanceType: calc.DistSFD}
+	if r := run("temperature_controlled", []calc.Leg{sea}); r.Legs[0].Factor.VehicleType != "glec/sea/container/asia_north_europe/reefer" {
+		t.Errorf("reefer container = %s", r.Legs[0].Factor.VehicleType)
+	}
+	// Measured fuel: the cargo type doesn't apply, and the note says so.
+	fuel := road
+	fuel.Fuel = &calc.FuelUse{Fuel: "diesel", Amount: 100}
+	if r := run("container", []calc.Leg{fuel}); !strings.Contains(r.Legs[0].FactorNote, "isn't applied") {
+		t.Errorf("fuel leg note = %q", r.Legs[0].FactorNote)
+	}
+	// Hubs: temperature-controlled intermodal terminal; others keep their own value.
+	r := run("temperature_controlled", []calc.Leg{road}, calc.HubStop{ID: "t", HubType: "intermodal_terminal", Containers: 1},
+		calc.HubStop{ID: "w", HubType: "warehouse"})
+	if r.Hubs[0].HubType != "intermodal_terminal_temperature_controlled" || math.Abs(r.Hubs[0].WTWKg-21.4) > 1e-9 ||
+		r.Hubs[1].HubType != "warehouse" || !strings.Contains(r.Hubs[1].Note, "own value") {
+		t.Errorf("hubs = %+v", r.Hubs)
+	}
+	if _, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 1000, CargoType: "frozen", Legs: []calc.Leg{road}}); !errors.Is(err, calc.ErrInvalidInput) {
+		t.Errorf("unknown cargo type: want an error, got %v", err)
+	}
+}

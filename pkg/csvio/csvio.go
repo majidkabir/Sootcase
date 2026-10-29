@@ -7,6 +7,7 @@
 //
 //	shipment_id                                     required
 //	weight_kg, or teu with teu_net_tonnes or container_load   cargo
+//	cargo_type                                      shipment, e.g. container, temperature_controlled (optional)
 //	leg_id, mode, vehicle_type, distance_km         leg
 //	distance_type                                   leg: sfd, gcd or actual (optional)
 //	from_lat, from_lon, to_lat, to_lon              leg, used when distance_km is empty
@@ -213,6 +214,12 @@ func addRow(s *calc.Shipment, row rowReader) error {
 		case *f.dst != v:
 			return fmt.Errorf("%s %v conflicts with earlier %v", f.col, v, *f.dst)
 		}
+	}
+	if ct := row.str("cargo_type"); ct != "" {
+		if s.CargoType != "" && s.CargoType != ct {
+			return fmt.Errorf("cargo_type %q conflicts with earlier %q", ct, s.CargoType)
+		}
+		s.CargoType = ct
 	}
 	if cl := row.str("container_load"); cl != "" {
 		if s.ContainerLoad != "" && s.ContainerLoad != cl {

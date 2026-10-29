@@ -1480,10 +1480,154 @@
   },
   {
    "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/van_3_5t/diesel",
+   "ttw_g_per_tkm": 744.05,
+   "wtt_g_per_tkm": 224.25,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/van_3_5t/diesel with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/van_3_5t/petrol",
+   "ttw_g_per_tkm": 877.45,
+   "wtt_g_per_tkm": 280.6,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/van_3_5t/petrol with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/van_3_5t/cng",
+   "ttw_g_per_tkm": 739.45,
+   "wtt_g_per_tkm": 286.35,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/van_3_5t/cng with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/van_3_5t/lpg",
+   "ttw_g_per_tkm": 819.95,
+   "wtt_g_per_tkm": 282.9,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/van_3_5t/lpg with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_3_5_7_5t/diesel",
+   "ttw_g_per_tkm": 288.96,
+   "wtt_g_per_tkm": 87.36,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_3_5_7_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_3_5_7_5t/cng",
+   "ttw_g_per_tkm": 256.48,
+   "wtt_g_per_tkm": 98.56,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_3_5_7_5t/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_7_5_12t/diesel",
+   "ttw_g_per_tkm": 192.64,
+   "wtt_g_per_tkm": 58.24,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_7_5_12t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_7_5_12t/cng",
+   "ttw_g_per_tkm": 171.36,
+   "wtt_g_per_tkm": 64.96,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_7_5_12t/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_12_20t/diesel",
+   "ttw_g_per_tkm": 164.64,
+   "wtt_g_per_tkm": 49.28,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_12_20t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_12_20t/cng",
+   "ttw_g_per_tkm": 145.6,
+   "wtt_g_per_tkm": 57.12,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_12_20t/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_20_26t/diesel",
+   "ttw_g_per_tkm": 119.84,
+   "wtt_g_per_tkm": 35.84,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_20_26t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_20_26t/cng",
+   "ttw_g_per_tkm": 109.76,
+   "wtt_g_per_tkm": 42.56,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_20_26t/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_20_26t/lng",
+   "ttw_g_per_tkm": 119.84,
+   "wtt_g_per_tkm": 53.76,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_20_26t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
    "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_26_32t/diesel",
    "ttw_g_per_tkm": 107.52,
    "wtt_g_per_tkm": 32.48,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_26_32t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/rigid_26_32t/container/diesel",
+   "ttw_g_per_tkm": 106.4,
+   "wtt_g_per_tkm": 32.48,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/rigid_26_32t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34t/diesel",
+   "ttw_g_per_tkm": 106.4,
+   "wtt_g_per_tkm": 32.48,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34t/container/diesel",
+   "ttw_g_per_tkm": 106.4,
+   "wtt_g_per_tkm": 32.48,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -1498,28 +1642,208 @@
   },
   {
    "mode": "road",
-   "vehicle_type": "glec/road/eu_sa/temperature_controlled/van_3_5t/diesel",
-   "ttw_g_per_tkm": 744.05,
-   "wtt_g_per_tkm": 224.25,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/van_3_5t/diesel with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t/container/diesel",
+   "ttw_g_per_tkm": 87.36,
+   "wtt_g_per_tkm": 25.76,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
    "distance_basis": "sfd"
   },
   {
    "mode": "road",
-   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_26_32t/diesel",
-   "ttw_g_per_tkm": 131.1744,
-   "wtt_g_per_tkm": 39.6256,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_26_32t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/lng",
+   "ttw_g_per_tkm": 81.76,
+   "wtt_g_per_tkm": 35.84,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_si/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
    "distance_basis": "sfd"
   },
   {
    "mode": "road",
-   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t/diesel",
-   "ttw_g_per_tkm": 106.5792,
-   "wtt_g_per_tkm": 31.4272,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/cng",
+   "ttw_g_per_tkm": 80.64,
+   "wtt_g_per_tkm": 29.12,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_si/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/bio_lng",
+   "ttw_g_per_tkm": 3.36,
+   "wtt_g_per_tkm": 39.2,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_si/bio_lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/lng",
+   "ttw_g_per_tkm": 80.64,
+   "wtt_g_per_tkm": 36.96,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_si/container/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/cng",
+   "ttw_g_per_tkm": 80.64,
+   "wtt_g_per_tkm": 29.12,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_si/container/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/bio_lng",
+   "ttw_g_per_tkm": 3.36,
+   "wtt_g_per_tkm": 39.2,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_si/container/bio_lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/lng_diesel",
+   "ttw_g_per_tkm": 72.8,
+   "wtt_g_per_tkm": 31.36,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_hpdi/lng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/cng_diesel",
+   "ttw_g_per_tkm": 71.68,
+   "wtt_g_per_tkm": 25.76,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_hpdi/cng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/bio_lng_diesel",
+   "ttw_g_per_tkm": 10.08,
+   "wtt_g_per_tkm": 34.72,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_hpdi/bio_lng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/lng_diesel",
+   "ttw_g_per_tkm": 72.8,
+   "wtt_g_per_tkm": 31.36,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_hpdi/container/lng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/cng_diesel",
+   "ttw_g_per_tkm": 72.8,
+   "wtt_g_per_tkm": 25.76,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_hpdi/container/cng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/bio_lng_diesel",
+   "ttw_g_per_tkm": 10.08,
+   "wtt_g_per_tkm": 34.72,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_34_40t_hpdi/container/bio_lng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_40t_light_trailer/heavy/diesel",
+   "ttw_g_per_tkm": 69.44,
+   "wtt_g_per_tkm": 21.28,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_40t_light_trailer/heavy/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_40_44t/light/diesel",
+   "ttw_g_per_tkm": 123.2,
+   "wtt_g_per_tkm": 36.96,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_40_44t/light/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_40_44t/diesel",
+   "ttw_g_per_tkm": 77.28,
+   "wtt_g_per_tkm": 23.52,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_40_44t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_40_44t/heavy/diesel",
+   "ttw_g_per_tkm": 66.08,
+   "wtt_g_per_tkm": 20.16,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_40_44t/heavy/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_40_44t/container/diesel",
+   "ttw_g_per_tkm": 77.28,
+   "wtt_g_per_tkm": 23.52,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_40_44t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_60t/diesel",
+   "ttw_g_per_tkm": 60.48,
+   "wtt_g_per_tkm": 17.92,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_60t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_60t/heavy/diesel",
+   "ttw_g_per_tkm": 51.52,
+   "wtt_g_per_tkm": 15.68,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_60t/heavy/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_60t/container/diesel",
+   "ttw_g_per_tkm": 60.48,
+   "wtt_g_per_tkm": 17.92,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_60t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_72t/heavy/diesel",
+   "ttw_g_per_tkm": 40.32,
+   "wtt_g_per_tkm": 12.32,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_72t/heavy/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/eu_sa/temperature_controlled/artic_72t/container/diesel",
+   "ttw_g_per_tkm": 47.04,
+   "wtt_g_per_tkm": 14.56,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/eu_sa/artic_72t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -1534,6 +1858,636 @@
   },
   {
    "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/van_3_5t/petrol",
+   "ttw_g_per_tkm": 991.5185,
+   "wtt_g_per_tkm": 317.078,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/van_3_5t/petrol with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/van_3_5t/cng",
+   "ttw_g_per_tkm": 835.5785,
+   "wtt_g_per_tkm": 323.5755,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/van_3_5t/cng with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/van_3_5t/lpg",
+   "ttw_g_per_tkm": 926.5435,
+   "wtt_g_per_tkm": 319.677,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/van_3_5t/lpg with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_3_5_7_5t/diesel",
+   "ttw_g_per_tkm": 352.5312,
+   "wtt_g_per_tkm": 106.5792,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_3_5_7_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_3_5_7_5t/cng",
+   "ttw_g_per_tkm": 312.9056,
+   "wtt_g_per_tkm": 120.2432,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_3_5_7_5t/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_7_5_12t/diesel",
+   "ttw_g_per_tkm": 235.0208,
+   "wtt_g_per_tkm": 71.0528,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_7_5_12t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_7_5_12t/cng",
+   "ttw_g_per_tkm": 209.0592,
+   "wtt_g_per_tkm": 79.2512,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_7_5_12t/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_12_20t/diesel",
+   "ttw_g_per_tkm": 200.8608,
+   "wtt_g_per_tkm": 60.1216,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_12_20t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_12_20t/cng",
+   "ttw_g_per_tkm": 177.632,
+   "wtt_g_per_tkm": 69.6864,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_12_20t/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_20_26t/diesel",
+   "ttw_g_per_tkm": 146.2048,
+   "wtt_g_per_tkm": 43.7248,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_20_26t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_20_26t/cng",
+   "ttw_g_per_tkm": 133.9072,
+   "wtt_g_per_tkm": 51.9232,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_20_26t/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_20_26t/lng",
+   "ttw_g_per_tkm": 146.2048,
+   "wtt_g_per_tkm": 65.5872,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_20_26t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_26_32t/diesel",
+   "ttw_g_per_tkm": 131.1744,
+   "wtt_g_per_tkm": 39.6256,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_26_32t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/rigid_26_32t/container/diesel",
+   "ttw_g_per_tkm": 129.808,
+   "wtt_g_per_tkm": 39.6256,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/rigid_26_32t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34t/diesel",
+   "ttw_g_per_tkm": 129.808,
+   "wtt_g_per_tkm": 39.6256,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34t/container/diesel",
+   "ttw_g_per_tkm": 129.808,
+   "wtt_g_per_tkm": 39.6256,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t/diesel",
+   "ttw_g_per_tkm": 106.5792,
+   "wtt_g_per_tkm": 31.4272,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t/container/diesel",
+   "ttw_g_per_tkm": 106.5792,
+   "wtt_g_per_tkm": 31.4272,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/lng",
+   "ttw_g_per_tkm": 99.7472,
+   "wtt_g_per_tkm": 43.7248,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_si/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/cng",
+   "ttw_g_per_tkm": 98.3808,
+   "wtt_g_per_tkm": 35.5264,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_si/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/bio_lng",
+   "ttw_g_per_tkm": 4.0992,
+   "wtt_g_per_tkm": 47.824,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_si/bio_lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/lng",
+   "ttw_g_per_tkm": 98.3808,
+   "wtt_g_per_tkm": 45.0912,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_si/container/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/cng",
+   "ttw_g_per_tkm": 98.3808,
+   "wtt_g_per_tkm": 35.5264,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_si/container/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/bio_lng",
+   "ttw_g_per_tkm": 4.0992,
+   "wtt_g_per_tkm": 47.824,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_si/container/bio_lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/lng_diesel",
+   "ttw_g_per_tkm": 88.816,
+   "wtt_g_per_tkm": 38.2592,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_hpdi/lng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/cng_diesel",
+   "ttw_g_per_tkm": 87.4496,
+   "wtt_g_per_tkm": 31.4272,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_hpdi/cng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/bio_lng_diesel",
+   "ttw_g_per_tkm": 12.2976,
+   "wtt_g_per_tkm": 42.3584,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_hpdi/bio_lng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/lng_diesel",
+   "ttw_g_per_tkm": 88.816,
+   "wtt_g_per_tkm": 38.2592,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_hpdi/container/lng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/cng_diesel",
+   "ttw_g_per_tkm": 88.816,
+   "wtt_g_per_tkm": 31.4272,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_hpdi/container/cng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/bio_lng_diesel",
+   "ttw_g_per_tkm": 12.2976,
+   "wtt_g_per_tkm": 42.3584,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_34_40t_hpdi/container/bio_lng_diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_40t_light_trailer/heavy/diesel",
+   "ttw_g_per_tkm": 84.7168,
+   "wtt_g_per_tkm": 25.9616,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_40t_light_trailer/heavy/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_40_44t/light/diesel",
+   "ttw_g_per_tkm": 150.304,
+   "wtt_g_per_tkm": 45.0912,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_40_44t/light/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_40_44t/diesel",
+   "ttw_g_per_tkm": 94.2816,
+   "wtt_g_per_tkm": 28.6944,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_40_44t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_40_44t/heavy/diesel",
+   "ttw_g_per_tkm": 80.6176,
+   "wtt_g_per_tkm": 24.5952,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_40_44t/heavy/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_40_44t/container/diesel",
+   "ttw_g_per_tkm": 94.2816,
+   "wtt_g_per_tkm": 28.6944,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_40_44t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_60t/diesel",
+   "ttw_g_per_tkm": 73.7856,
+   "wtt_g_per_tkm": 21.8624,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_60t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_60t/heavy/diesel",
+   "ttw_g_per_tkm": 62.8544,
+   "wtt_g_per_tkm": 19.1296,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_60t/heavy/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_60t/container/diesel",
+   "ttw_g_per_tkm": 73.7856,
+   "wtt_g_per_tkm": 21.8624,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_60t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_72t/heavy/diesel",
+   "ttw_g_per_tkm": 49.1904,
+   "wtt_g_per_tkm": 15.0304,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_72t/heavy/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/asia_africa/temperature_controlled/artic_72t/container/diesel",
+   "ttw_g_per_tkm": 57.3888,
+   "wtt_g_per_tkm": 17.7632,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/asia_africa/artic_72t/container/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_3_5_4_5t/diesel",
+   "ttw_g_per_tkm": 404.1296,
+   "wtt_g_per_tkm": 122.7632,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_3_5_4_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_4_5_5_5t/diesel",
+   "ttw_g_per_tkm": 358.1648,
+   "wtt_g_per_tkm": 108.808,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_4_5_5_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_5_5_7t/diesel",
+   "ttw_g_per_tkm": 344.2544,
+   "wtt_g_per_tkm": 104.5744,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_5_5_7t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_7_8_5t/diesel",
+   "ttw_g_per_tkm": 266.6496,
+   "wtt_g_per_tkm": 81.0096,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_7_8_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_8_5_10_5t/diesel",
+   "ttw_g_per_tkm": 224.4368,
+   "wtt_g_per_tkm": 68.1856,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_8_5_10_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_10_5_12_5t/diesel",
+   "ttw_g_per_tkm": 199.0464,
+   "wtt_g_per_tkm": 60.4688,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_10_5_12_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_12_5_16t/diesel",
+   "ttw_g_per_tkm": 182.0784,
+   "wtt_g_per_tkm": 55.3168,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_12_5_16t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_16_20t/diesel",
+   "ttw_g_per_tkm": 130.872,
+   "wtt_g_per_tkm": 39.76,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_16_20t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_20_25t/diesel",
+   "ttw_g_per_tkm": 91.6272,
+   "wtt_g_per_tkm": 27.832,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_20_25t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_25_31t/diesel",
+   "ttw_g_per_tkm": 78.3552,
+   "wtt_g_per_tkm": 23.8,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_25_31t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_31t/diesel",
+   "ttw_g_per_tkm": 81.984,
+   "wtt_g_per_tkm": 24.9088,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_31t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_18t/diesel",
+   "ttw_g_per_tkm": 135.3072,
+   "wtt_g_per_tkm": 41.104,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_18t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_18_27t/diesel",
+   "ttw_g_per_tkm": 92.1312,
+   "wtt_g_per_tkm": 27.9888,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_18_27t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_27_35t/diesel",
+   "ttw_g_per_tkm": 83.1152,
+   "wtt_g_per_tkm": 25.2448,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_27_35t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_35_40t/diesel",
+   "ttw_g_per_tkm": 69.4624,
+   "wtt_g_per_tkm": 21.1008,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_35_40t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_40_43t/diesel",
+   "ttw_g_per_tkm": 67.1552,
+   "wtt_g_per_tkm": 20.4064,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_40_43t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_43_46t/diesel",
+   "ttw_g_per_tkm": 64.4784,
+   "wtt_g_per_tkm": 19.5888,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_43_46t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_46_49t/diesel",
+   "ttw_g_per_tkm": 63.9408,
+   "wtt_g_per_tkm": 19.4208,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_46_49t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_49t/diesel",
+   "ttw_g_per_tkm": 63.4704,
+   "wtt_g_per_tkm": 19.2864,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_49t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_3_5_4_5t/diesel",
+   "ttw_g_per_tkm": 479.8752,
+   "wtt_g_per_tkm": 145.7792,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_3_5_4_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_4_5_5_5t/diesel",
+   "ttw_g_per_tkm": 356.6416,
+   "wtt_g_per_tkm": 108.3376,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_4_5_5_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_5_5_7t/diesel",
+   "ttw_g_per_tkm": 337.792,
+   "wtt_g_per_tkm": 102.6144,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_5_5_7t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_7_8_5t/diesel",
+   "ttw_g_per_tkm": 262.0352,
+   "wtt_g_per_tkm": 79.5984,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_7_8_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_8_5_10_5t/diesel",
+   "ttw_g_per_tkm": 225.3328,
+   "wtt_g_per_tkm": 68.4544,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_8_5_10_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_10_5_12_5t/diesel",
+   "ttw_g_per_tkm": 193.1776,
+   "wtt_g_per_tkm": 58.6768,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_10_5_12_5t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_12_5_16t/diesel",
+   "ttw_g_per_tkm": 177.1168,
+   "wtt_g_per_tkm": 53.8048,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_12_5_16t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_16_20t/diesel",
+   "ttw_g_per_tkm": 131.2752,
+   "wtt_g_per_tkm": 39.872,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_16_20t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_20_25t/diesel",
+   "ttw_g_per_tkm": 85.8256,
+   "wtt_g_per_tkm": 26.0736,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_20_25t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_25_31t/diesel",
+   "ttw_g_per_tkm": 79.1616,
+   "wtt_g_per_tkm": 24.0464,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_25_31t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_31t/diesel",
+   "ttw_g_per_tkm": 68.656,
+   "wtt_g_per_tkm": 20.8544,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_31t/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
    "vehicle_type": "glec/road/cn/temperature_controlled/artic_14_24t/lng",
    "ttw_g_per_tkm": 196.8064,
    "wtt_g_per_tkm": 83.944,
@@ -1543,10 +2497,334 @@
   },
   {
    "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_24_25t/lng",
+   "ttw_g_per_tkm": 94.1024,
+   "wtt_g_per_tkm": 40.1408,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_24_25t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_25_29t/lng",
+   "ttw_g_per_tkm": 78.344,
+   "wtt_g_per_tkm": 33.4208,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_25_29t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_29_31t/lng",
+   "ttw_g_per_tkm": 64.7696,
+   "wtt_g_per_tkm": 27.6192,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_29_31t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/artic_31_60t/lng",
+   "ttw_g_per_tkm": 52.1696,
+   "wtt_g_per_tkm": 22.2544,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/artic_31_60t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_14_24t/lng",
+   "ttw_g_per_tkm": 152.0064,
+   "wtt_g_per_tkm": 64.8368,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_14_24t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_24_25t/lng",
+   "ttw_g_per_tkm": 75.1744,
+   "wtt_g_per_tkm": 32.0656,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_24_25t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_25_29t/lng",
+   "ttw_g_per_tkm": 64.8256,
+   "wtt_g_per_tkm": 27.6528,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_25_29t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_29_31t/lng",
+   "ttw_g_per_tkm": 53.5248,
+   "wtt_g_per_tkm": 22.8256,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_29_31t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/dump_31_60t/lng",
+   "ttw_g_per_tkm": 43.0528,
+   "wtt_g_per_tkm": 18.368,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/dump_31_60t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_14_24t/lng",
+   "ttw_g_per_tkm": 153.0368,
+   "wtt_g_per_tkm": 65.2736,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_14_24t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_24_25t/lng",
+   "ttw_g_per_tkm": 75.1744,
+   "wtt_g_per_tkm": 32.0656,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_24_25t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_25_29t/lng",
+   "ttw_g_per_tkm": 63.3808,
+   "wtt_g_per_tkm": 27.0368,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_25_29t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_29_31t/lng",
+   "ttw_g_per_tkm": 53.8048,
+   "wtt_g_per_tkm": 22.9488,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_29_31t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/rigid_31_60t/lng",
+   "ttw_g_per_tkm": 43.3888,
+   "wtt_g_per_tkm": 18.5024,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/rigid_31_60t/lng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/truck_4_5t/electricity",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 151.6928,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/truck_4_5t/electricity with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/truck_4_5_12t/electricity",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 83.8544,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/truck_4_5_12t/electricity with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/truck_12t/electricity",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 162.68,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/truck_12t/electricity with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/truck_4_5t/hydrogen",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 367.472,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/truck_4_5t/hydrogen with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/truck_4_5_12t/hydrogen",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 193.872,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/truck_4_5_12t/hydrogen with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/cn/temperature_controlled/truck_12t/hydrogen",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 222.7232,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/cn/truck_12t/hydrogen with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/small_cv/diesel",
+   "ttw_g_per_tkm": 264.27,
+   "wtt_g_per_tkm": 79.58,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/small_cv/diesel with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/small_cv/petrol",
+   "ttw_g_per_tkm": 334.765,
+   "wtt_g_per_tkm": 107.065,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/small_cv/petrol with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/small_cv/cng",
+   "ttw_g_per_tkm": 359.145,
+   "wtt_g_per_tkm": 134.09,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/small_cv/cng with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/medium_cv_1/diesel",
+   "ttw_g_per_tkm": 164.752,
+   "wtt_g_per_tkm": 49.616,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/medium_cv_1/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/medium_cv_1/cng",
+   "ttw_g_per_tkm": 201.376,
+   "wtt_g_per_tkm": 75.152,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/medium_cv_1/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/medium_cv_2/diesel",
+   "ttw_g_per_tkm": 96.096,
+   "wtt_g_per_tkm": 28.896,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/medium_cv_2/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/medium_cv_2/cng",
+   "ttw_g_per_tkm": 131.824,
+   "wtt_g_per_tkm": 49.168,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/medium_cv_2/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
    "vehicle_type": "glec/road/in/temperature_controlled/heavy_cv_1/diesel",
    "ttw_g_per_tkm": 77.728,
    "wtt_g_per_tkm": 23.408,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/heavy_cv_1/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/heavy_cv_1/cng",
+   "ttw_g_per_tkm": 60.368,
+   "wtt_g_per_tkm": 22.512,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/heavy_cv_1/cng with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/heavy_cv_2/diesel",
+   "ttw_g_per_tkm": 63.28,
+   "wtt_g_per_tkm": 19.04,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/heavy_cv_2/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/heavy_cv_3/diesel",
+   "ttw_g_per_tkm": 49.392,
+   "wtt_g_per_tkm": 14.896,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/heavy_cv_3/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/tractor_trailer/diesel",
+   "ttw_g_per_tkm": 45.584,
+   "wtt_g_per_tkm": 13.776,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/tractor_trailer/diesel with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/rigid_3_5t/electricity",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 159.045,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/rigid_3_5t/electricity with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/rigid_3_5_12t/electricity",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 149.968,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/rigid_3_5_12t/electricity with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/rigid_14t/electricity",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 144.368,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/rigid_14t/electricity with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/rigid_18_5t/electricity",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 86.352,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/rigid_18_5t/electricity with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/in/temperature_controlled/artic_55t/electricity",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 43.344,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/in/artic_55t/electricity with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); includes GLEC's +5% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -3995,6 +5273,186 @@
    "ttw_g_per_tkm": 1.68,
    "wtt_g_per_tkm": 10.752,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/in/average with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/average_mixed",
+   "ttw_g_per_tkm": 26.432,
+   "wtt_g_per_tkm": 7.952,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/average_mixed with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/container",
+   "ttw_g_per_tkm": 24.528,
+   "wtt_g_per_tkm": 7.392,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/container with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/cars",
+   "ttw_g_per_tkm": 56.784,
+   "wtt_g_per_tkm": 17.136,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/cars with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/chemicals",
+   "ttw_g_per_tkm": 22.736,
+   "wtt_g_per_tkm": 6.832,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/chemicals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/coal_steel",
+   "ttw_g_per_tkm": 17.584,
+   "wtt_g_per_tkm": 5.264,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/coal_steel with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/building_materials",
+   "ttw_g_per_tkm": 22.064,
+   "wtt_g_per_tkm": 6.608,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/building_materials with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/manufactured_products",
+   "ttw_g_per_tkm": 23.184,
+   "wtt_g_per_tkm": 6.944,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/manufactured_products with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/cereals",
+   "ttw_g_per_tkm": 17.36,
+   "wtt_g_per_tkm": 5.264,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/cereals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/truck_trailer_on_train",
+   "ttw_g_per_tkm": 54.88,
+   "wtt_g_per_tkm": 15.568,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/truck_trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/trailer_on_train",
+   "ttw_g_per_tkm": 34.496,
+   "wtt_g_per_tkm": 9.744,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/average_mixed",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 12.096,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/average_mixed with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/container",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 11.312,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/container with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/cars",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 26.096,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/cars with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/chemicals",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 10.528,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/chemicals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/coal_steel",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 8.176,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/coal_steel with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/building_materials",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 10.192,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/building_materials with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/manufactured_products",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 10.64,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/manufactured_products with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/cereals",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 8.064,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/cereals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/truck_trailer_on_train",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 16.352,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/truck_trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "year": 2026,
+   "distance_basis": ""
+  },
+  {
+   "mode": "rail",
+   "vehicle_type": "glec/rail/eu/temperature_controlled/electric/trailer_on_train",
+   "ttw_g_per_tkm": 0.0,
+   "wtt_g_per_tkm": 10.416,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
    "year": 2026,
    "distance_basis": ""
   }
@@ -7315,5 +8773,1405 @@
    "multiplier": 1.15,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2: non-container sea values with a +15% distance conversion between actual and shortest feasible distance"
   }
- ]
+ ],
+ "cargo_types": [
+  {
+   "name": "average",
+   "label": "Average or mixed (each vehicle's own value)"
+  },
+  {
+   "name": "container",
+   "label": "Containers (road: GLEC's container rows; rail: container trains)"
+  },
+  {
+   "name": "temperature_controlled",
+   "label": "Temperature-controlled (road +12%, vans +15%; rail +12%; reefer containers; temperature-controlled terminals)"
+  },
+  {
+   "name": "light",
+   "label": "Light load (road and electric truck rows GLEC gives with a light load)"
+  },
+  {
+   "name": "heavy",
+   "label": "Heavy load (road rows GLEC gives with a heavy load)"
+  },
+  {
+   "name": "cars",
+   "label": "Cars (European rail)"
+  },
+  {
+   "name": "chemicals",
+   "label": "Chemicals (European rail)"
+  },
+  {
+   "name": "coal_steel",
+   "label": "Coal and steel (European rail)"
+  },
+  {
+   "name": "building_materials",
+   "label": "Building materials (European rail)"
+  },
+  {
+   "name": "manufactured_products",
+   "label": "Manufactured products (European rail)"
+  },
+  {
+   "name": "cereals",
+   "label": "Cereals (European rail)"
+  },
+  {
+   "name": "truck_trailer_on_train",
+   "label": "Truck and trailer on a train (European rail)"
+  },
+  {
+   "name": "trailer_on_train",
+   "label": "Trailer only on a train (European rail)"
+  }
+ ],
+ "cargo_variants": {
+  "glec/road/eu_sa/van_3_5t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/van_3_5t/diesel"
+  },
+  "glec/road/eu_sa/van_3_5t/petrol": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/van_3_5t/petrol"
+  },
+  "glec/road/eu_sa/van_3_5t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/van_3_5t/cng"
+  },
+  "glec/road/eu_sa/van_3_5t/lpg": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/van_3_5t/lpg"
+  },
+  "glec/road/eu_sa/rigid_3_5_7_5t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_3_5_7_5t/diesel"
+  },
+  "glec/road/eu_sa/rigid_3_5_7_5t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_3_5_7_5t/cng"
+  },
+  "glec/road/eu_sa/rigid_7_5_12t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_7_5_12t/diesel"
+  },
+  "glec/road/eu_sa/rigid_7_5_12t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_7_5_12t/cng"
+  },
+  "glec/road/eu_sa/rigid_12_20t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_12_20t/diesel"
+  },
+  "glec/road/eu_sa/rigid_12_20t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_12_20t/cng"
+  },
+  "glec/road/eu_sa/rigid_20_26t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_20_26t/diesel"
+  },
+  "glec/road/eu_sa/rigid_20_26t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_20_26t/cng"
+  },
+  "glec/road/eu_sa/rigid_20_26t/lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_20_26t/lng"
+  },
+  "glec/road/eu_sa/rigid_26_32t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_26_32t/diesel",
+   "container": "glec/road/eu_sa/rigid_26_32t/container/diesel"
+  },
+  "glec/road/eu_sa/rigid_26_32t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_26_32t/container/diesel"
+  },
+  "glec/road/eu_sa/artic_34t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34t/diesel",
+   "container": "glec/road/eu_sa/artic_34t/container/diesel"
+  },
+  "glec/road/eu_sa/artic_34t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34t/container/diesel"
+  },
+  "glec/road/eu_sa/artic_34_40t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t/diesel",
+   "container": "glec/road/eu_sa/artic_34_40t/container/diesel"
+  },
+  "glec/road/eu_sa/artic_34_40t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t/container/diesel"
+  },
+  "glec/road/eu_sa/artic_34_40t_si/lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/lng",
+   "container": "glec/road/eu_sa/artic_34_40t_si/container/lng"
+  },
+  "glec/road/eu_sa/artic_34_40t_si/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/cng",
+   "container": "glec/road/eu_sa/artic_34_40t_si/container/cng"
+  },
+  "glec/road/eu_sa/artic_34_40t_si/bio_lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/bio_lng",
+   "container": "glec/road/eu_sa/artic_34_40t_si/container/bio_lng"
+  },
+  "glec/road/eu_sa/artic_34_40t_si/container/lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/lng"
+  },
+  "glec/road/eu_sa/artic_34_40t_si/container/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/cng"
+  },
+  "glec/road/eu_sa/artic_34_40t_si/container/bio_lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/bio_lng"
+  },
+  "glec/road/eu_sa/artic_34_40t_hpdi/lng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/lng_diesel",
+   "container": "glec/road/eu_sa/artic_34_40t_hpdi/container/lng_diesel"
+  },
+  "glec/road/eu_sa/artic_34_40t_hpdi/cng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/cng_diesel",
+   "container": "glec/road/eu_sa/artic_34_40t_hpdi/container/cng_diesel"
+  },
+  "glec/road/eu_sa/artic_34_40t_hpdi/bio_lng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/bio_lng_diesel",
+   "container": "glec/road/eu_sa/artic_34_40t_hpdi/container/bio_lng_diesel"
+  },
+  "glec/road/eu_sa/artic_34_40t_hpdi/container/lng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/lng_diesel"
+  },
+  "glec/road/eu_sa/artic_34_40t_hpdi/container/cng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/cng_diesel"
+  },
+  "glec/road/eu_sa/artic_34_40t_hpdi/container/bio_lng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/bio_lng_diesel"
+  },
+  "glec/road/eu_sa/artic_40t_light_trailer/heavy/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40t_light_trailer/heavy/diesel"
+  },
+  "glec/road/eu_sa/artic_40_44t/light/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40_44t/light/diesel"
+  },
+  "glec/road/eu_sa/artic_40_44t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40_44t/diesel",
+   "container": "glec/road/eu_sa/artic_40_44t/container/diesel",
+   "light": "glec/road/eu_sa/artic_40_44t/light/diesel",
+   "heavy": "glec/road/eu_sa/artic_40_44t/heavy/diesel"
+  },
+  "glec/road/eu_sa/artic_40_44t/heavy/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40_44t/heavy/diesel"
+  },
+  "glec/road/eu_sa/artic_40_44t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40_44t/container/diesel"
+  },
+  "glec/road/eu_sa/artic_60t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_60t/diesel",
+   "container": "glec/road/eu_sa/artic_60t/container/diesel",
+   "heavy": "glec/road/eu_sa/artic_60t/heavy/diesel"
+  },
+  "glec/road/eu_sa/artic_60t/heavy/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_60t/heavy/diesel"
+  },
+  "glec/road/eu_sa/artic_60t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_60t/container/diesel"
+  },
+  "glec/road/eu_sa/artic_72t/heavy/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_72t/heavy/diesel"
+  },
+  "glec/road/eu_sa/artic_72t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_72t/container/diesel"
+  },
+  "glec/road/asia_africa/van_3_5t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/van_3_5t/diesel"
+  },
+  "glec/road/asia_africa/van_3_5t/petrol": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/van_3_5t/petrol"
+  },
+  "glec/road/asia_africa/van_3_5t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/van_3_5t/cng"
+  },
+  "glec/road/asia_africa/van_3_5t/lpg": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/van_3_5t/lpg"
+  },
+  "glec/road/asia_africa/rigid_3_5_7_5t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_3_5_7_5t/diesel"
+  },
+  "glec/road/asia_africa/rigid_3_5_7_5t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_3_5_7_5t/cng"
+  },
+  "glec/road/asia_africa/rigid_7_5_12t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_7_5_12t/diesel"
+  },
+  "glec/road/asia_africa/rigid_7_5_12t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_7_5_12t/cng"
+  },
+  "glec/road/asia_africa/rigid_12_20t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_12_20t/diesel"
+  },
+  "glec/road/asia_africa/rigid_12_20t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_12_20t/cng"
+  },
+  "glec/road/asia_africa/rigid_20_26t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_20_26t/diesel"
+  },
+  "glec/road/asia_africa/rigid_20_26t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_20_26t/cng"
+  },
+  "glec/road/asia_africa/rigid_20_26t/lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_20_26t/lng"
+  },
+  "glec/road/asia_africa/rigid_26_32t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_26_32t/diesel",
+   "container": "glec/road/asia_africa/rigid_26_32t/container/diesel"
+  },
+  "glec/road/asia_africa/rigid_26_32t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_26_32t/container/diesel"
+  },
+  "glec/road/asia_africa/artic_34t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34t/diesel",
+   "container": "glec/road/asia_africa/artic_34t/container/diesel"
+  },
+  "glec/road/asia_africa/artic_34t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34t/container/diesel"
+  },
+  "glec/road/asia_africa/artic_34_40t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t/diesel",
+   "container": "glec/road/asia_africa/artic_34_40t/container/diesel"
+  },
+  "glec/road/asia_africa/artic_34_40t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t/container/diesel"
+  },
+  "glec/road/asia_africa/artic_34_40t_si/lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/lng",
+   "container": "glec/road/asia_africa/artic_34_40t_si/container/lng"
+  },
+  "glec/road/asia_africa/artic_34_40t_si/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/cng",
+   "container": "glec/road/asia_africa/artic_34_40t_si/container/cng"
+  },
+  "glec/road/asia_africa/artic_34_40t_si/bio_lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/bio_lng",
+   "container": "glec/road/asia_africa/artic_34_40t_si/container/bio_lng"
+  },
+  "glec/road/asia_africa/artic_34_40t_si/container/lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/lng"
+  },
+  "glec/road/asia_africa/artic_34_40t_si/container/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/cng"
+  },
+  "glec/road/asia_africa/artic_34_40t_si/container/bio_lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/bio_lng"
+  },
+  "glec/road/asia_africa/artic_34_40t_hpdi/lng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/lng_diesel",
+   "container": "glec/road/asia_africa/artic_34_40t_hpdi/container/lng_diesel"
+  },
+  "glec/road/asia_africa/artic_34_40t_hpdi/cng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/cng_diesel",
+   "container": "glec/road/asia_africa/artic_34_40t_hpdi/container/cng_diesel"
+  },
+  "glec/road/asia_africa/artic_34_40t_hpdi/bio_lng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/bio_lng_diesel",
+   "container": "glec/road/asia_africa/artic_34_40t_hpdi/container/bio_lng_diesel"
+  },
+  "glec/road/asia_africa/artic_34_40t_hpdi/container/lng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/lng_diesel"
+  },
+  "glec/road/asia_africa/artic_34_40t_hpdi/container/cng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/cng_diesel"
+  },
+  "glec/road/asia_africa/artic_34_40t_hpdi/container/bio_lng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/bio_lng_diesel"
+  },
+  "glec/road/asia_africa/artic_40t_light_trailer/heavy/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40t_light_trailer/heavy/diesel"
+  },
+  "glec/road/asia_africa/artic_40_44t/light/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40_44t/light/diesel"
+  },
+  "glec/road/asia_africa/artic_40_44t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40_44t/diesel",
+   "container": "glec/road/asia_africa/artic_40_44t/container/diesel",
+   "light": "glec/road/asia_africa/artic_40_44t/light/diesel",
+   "heavy": "glec/road/asia_africa/artic_40_44t/heavy/diesel"
+  },
+  "glec/road/asia_africa/artic_40_44t/heavy/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40_44t/heavy/diesel"
+  },
+  "glec/road/asia_africa/artic_40_44t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40_44t/container/diesel"
+  },
+  "glec/road/asia_africa/artic_60t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_60t/diesel",
+   "container": "glec/road/asia_africa/artic_60t/container/diesel",
+   "heavy": "glec/road/asia_africa/artic_60t/heavy/diesel"
+  },
+  "glec/road/asia_africa/artic_60t/heavy/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_60t/heavy/diesel"
+  },
+  "glec/road/asia_africa/artic_60t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_60t/container/diesel"
+  },
+  "glec/road/asia_africa/artic_72t/heavy/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_72t/heavy/diesel"
+  },
+  "glec/road/asia_africa/artic_72t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_72t/container/diesel"
+  },
+  "glec/road/cn/rigid_3_5_4_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_3_5_4_5t/diesel"
+  },
+  "glec/road/cn/rigid_4_5_5_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_4_5_5_5t/diesel"
+  },
+  "glec/road/cn/rigid_5_5_7t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_5_5_7t/diesel"
+  },
+  "glec/road/cn/rigid_7_8_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_7_8_5t/diesel"
+  },
+  "glec/road/cn/rigid_8_5_10_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_8_5_10_5t/diesel"
+  },
+  "glec/road/cn/rigid_10_5_12_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_10_5_12_5t/diesel"
+  },
+  "glec/road/cn/rigid_12_5_16t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_12_5_16t/diesel"
+  },
+  "glec/road/cn/rigid_16_20t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_16_20t/diesel"
+  },
+  "glec/road/cn/rigid_20_25t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_20_25t/diesel"
+  },
+  "glec/road/cn/rigid_25_31t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_25_31t/diesel"
+  },
+  "glec/road/cn/rigid_31t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_31t/diesel"
+  },
+  "glec/road/cn/artic_18t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_18t/diesel"
+  },
+  "glec/road/cn/artic_18_27t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_18_27t/diesel"
+  },
+  "glec/road/cn/artic_27_35t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_27_35t/diesel"
+  },
+  "glec/road/cn/artic_35_40t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_35_40t/diesel"
+  },
+  "glec/road/cn/artic_40_43t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_40_43t/diesel"
+  },
+  "glec/road/cn/artic_43_46t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_43_46t/diesel"
+  },
+  "glec/road/cn/artic_46_49t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_46_49t/diesel"
+  },
+  "glec/road/cn/artic_49t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_49t/diesel"
+  },
+  "glec/road/cn/dump_3_5_4_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_3_5_4_5t/diesel"
+  },
+  "glec/road/cn/dump_4_5_5_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_4_5_5_5t/diesel"
+  },
+  "glec/road/cn/dump_5_5_7t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_5_5_7t/diesel"
+  },
+  "glec/road/cn/dump_7_8_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_7_8_5t/diesel"
+  },
+  "glec/road/cn/dump_8_5_10_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_8_5_10_5t/diesel"
+  },
+  "glec/road/cn/dump_10_5_12_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_10_5_12_5t/diesel"
+  },
+  "glec/road/cn/dump_12_5_16t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_12_5_16t/diesel"
+  },
+  "glec/road/cn/dump_16_20t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_16_20t/diesel"
+  },
+  "glec/road/cn/dump_20_25t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_20_25t/diesel"
+  },
+  "glec/road/cn/dump_25_31t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_25_31t/diesel"
+  },
+  "glec/road/cn/dump_31t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_31t/diesel"
+  },
+  "glec/road/cn/artic_14_24t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_14_24t/lng"
+  },
+  "glec/road/cn/artic_24_25t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_24_25t/lng"
+  },
+  "glec/road/cn/artic_25_29t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_25_29t/lng"
+  },
+  "glec/road/cn/artic_29_31t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_29_31t/lng"
+  },
+  "glec/road/cn/artic_31_60t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_31_60t/lng"
+  },
+  "glec/road/cn/dump_14_24t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_14_24t/lng"
+  },
+  "glec/road/cn/dump_24_25t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_24_25t/lng"
+  },
+  "glec/road/cn/dump_25_29t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_25_29t/lng"
+  },
+  "glec/road/cn/dump_29_31t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_29_31t/lng"
+  },
+  "glec/road/cn/dump_31_60t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_31_60t/lng"
+  },
+  "glec/road/cn/rigid_14_24t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_14_24t/lng"
+  },
+  "glec/road/cn/rigid_24_25t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_24_25t/lng"
+  },
+  "glec/road/cn/rigid_25_29t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_25_29t/lng"
+  },
+  "glec/road/cn/rigid_29_31t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_29_31t/lng"
+  },
+  "glec/road/cn/rigid_31_60t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_31_60t/lng"
+  },
+  "glec/road/cn/truck_4_5t/electricity": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_4_5t/electricity"
+  },
+  "glec/road/cn/truck_4_5_12t/electricity": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_4_5_12t/electricity"
+  },
+  "glec/road/cn/truck_12t/electricity": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_12t/electricity"
+  },
+  "glec/road/cn/truck_4_5t/hydrogen": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_4_5t/hydrogen"
+  },
+  "glec/road/cn/truck_4_5_12t/hydrogen": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_4_5_12t/hydrogen"
+  },
+  "glec/road/cn/truck_12t/hydrogen": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_12t/hydrogen"
+  },
+  "glec/road/in/small_cv/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/small_cv/diesel"
+  },
+  "glec/road/in/small_cv/petrol": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/small_cv/petrol"
+  },
+  "glec/road/in/small_cv/cng": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/small_cv/cng"
+  },
+  "glec/road/in/medium_cv_1/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/medium_cv_1/diesel"
+  },
+  "glec/road/in/medium_cv_1/cng": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/medium_cv_1/cng"
+  },
+  "glec/road/in/medium_cv_2/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/medium_cv_2/diesel"
+  },
+  "glec/road/in/medium_cv_2/cng": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/medium_cv_2/cng"
+  },
+  "glec/road/in/heavy_cv_1/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/heavy_cv_1/diesel"
+  },
+  "glec/road/in/heavy_cv_1/cng": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/heavy_cv_1/cng"
+  },
+  "glec/road/in/heavy_cv_2/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/heavy_cv_2/diesel"
+  },
+  "glec/road/in/heavy_cv_3/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/heavy_cv_3/diesel"
+  },
+  "glec/road/in/tractor_trailer/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/tractor_trailer/diesel"
+  },
+  "glec/road/in/rigid_3_5t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/rigid_3_5t/electricity"
+  },
+  "glec/road/in/rigid_3_5_12t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/rigid_3_5_12t/electricity"
+  },
+  "glec/road/in/rigid_14t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/rigid_14t/electricity"
+  },
+  "glec/road/in/rigid_18_5t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/rigid_18_5t/electricity"
+  },
+  "glec/road/in/artic_55t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/artic_55t/electricity"
+  },
+  "glec/road/na/tl_dry_van": {
+   "temperature_controlled": "glec/road/na/refrigerated"
+  },
+  "glec/road/na/mixed_general": {
+   "temperature_controlled": "glec/road/na/refrigerated"
+  },
+  "glec/rail/eu/diesel/average_mixed": {
+   "container": "glec/rail/eu/diesel/container",
+   "cars": "glec/rail/eu/diesel/cars",
+   "chemicals": "glec/rail/eu/diesel/chemicals",
+   "coal_steel": "glec/rail/eu/diesel/coal_steel",
+   "building_materials": "glec/rail/eu/diesel/building_materials",
+   "manufactured_products": "glec/rail/eu/diesel/manufactured_products",
+   "cereals": "glec/rail/eu/diesel/cereals",
+   "truck_trailer_on_train": "glec/rail/eu/diesel/truck_trailer_on_train",
+   "trailer_on_train": "glec/rail/eu/diesel/trailer_on_train",
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/average_mixed"
+  },
+  "glec/rail/eu/electric/average_mixed": {
+   "container": "glec/rail/eu/electric/container",
+   "cars": "glec/rail/eu/electric/cars",
+   "chemicals": "glec/rail/eu/electric/chemicals",
+   "coal_steel": "glec/rail/eu/electric/coal_steel",
+   "building_materials": "glec/rail/eu/electric/building_materials",
+   "manufactured_products": "glec/rail/eu/electric/manufactured_products",
+   "cereals": "glec/rail/eu/electric/cereals",
+   "truck_trailer_on_train": "glec/rail/eu/electric/truck_trailer_on_train",
+   "trailer_on_train": "glec/rail/eu/electric/trailer_on_train",
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/average_mixed"
+  },
+  "glec/sea/container/industry_average/dry": {
+   "temperature_controlled": "glec/sea/container/industry_average/reefer"
+  },
+  "glec/sea/container/panama_trade/dry": {
+   "temperature_controlled": "glec/sea/container/panama_trade/reefer"
+  },
+  "glec/sea/container/trans_atlantic/dry": {
+   "temperature_controlled": "glec/sea/container/trans_atlantic/reefer"
+  },
+  "glec/sea/container/trans_suez/dry": {
+   "temperature_controlled": "glec/sea/container/trans_suez/reefer"
+  },
+  "glec/sea/container/trans_pacific/dry": {
+   "temperature_controlled": "glec/sea/container/trans_pacific/reefer"
+  },
+  "glec/sea/container/other_global/dry": {
+   "temperature_controlled": "glec/sea/container/other_global/reefer"
+  },
+  "glec/sea/container/asia_africa/dry": {
+   "temperature_controlled": "glec/sea/container/asia_africa/reefer"
+  },
+  "glec/sea/container/asia_med_bs/dry": {
+   "temperature_controlled": "glec/sea/container/asia_med_bs/reefer"
+  },
+  "glec/sea/container/asia_me_india/dry": {
+   "temperature_controlled": "glec/sea/container/asia_me_india/reefer"
+  },
+  "glec/sea/container/asia_na_ec/dry": {
+   "temperature_controlled": "glec/sea/container/asia_na_ec/reefer"
+  },
+  "glec/sea/container/asia_na_wc/dry": {
+   "temperature_controlled": "glec/sea/container/asia_na_wc/reefer"
+  },
+  "glec/sea/container/asia_north_europe/dry": {
+   "temperature_controlled": "glec/sea/container/asia_north_europe/reefer"
+  },
+  "glec/sea/container/asia_oceania/dry": {
+   "temperature_controlled": "glec/sea/container/asia_oceania/reefer"
+  },
+  "glec/sea/container/asia_south_america/dry": {
+   "temperature_controlled": "glec/sea/container/asia_south_america/reefer"
+  },
+  "glec/sea/container/europe_africa/dry": {
+   "temperature_controlled": "glec/sea/container/europe_africa/reefer"
+  },
+  "glec/sea/container/europe_south_america/dry": {
+   "temperature_controlled": "glec/sea/container/europe_south_america/reefer"
+  },
+  "glec/sea/container/europe_me_india/dry": {
+   "temperature_controlled": "glec/sea/container/europe_me_india/reefer"
+  },
+  "glec/sea/container/europe_oceania/dry": {
+   "temperature_controlled": "glec/sea/container/europe_oceania/reefer"
+  },
+  "glec/sea/container/med_bs_na_ec/dry": {
+   "temperature_controlled": "glec/sea/container/med_bs_na_ec/reefer"
+  },
+  "glec/sea/container/med_bs_na_wc/dry": {
+   "temperature_controlled": "glec/sea/container/med_bs_na_wc/reefer"
+  },
+  "glec/sea/container/na_africa/dry": {
+   "temperature_controlled": "glec/sea/container/na_africa/reefer"
+  },
+  "glec/sea/container/na_oceania/dry": {
+   "temperature_controlled": "glec/sea/container/na_oceania/reefer"
+  },
+  "glec/sea/container/na_south_america/dry": {
+   "temperature_controlled": "glec/sea/container/na_south_america/reefer"
+  },
+  "glec/sea/container/na_me_india/dry": {
+   "temperature_controlled": "glec/sea/container/na_me_india/reefer"
+  },
+  "glec/sea/container/north_europe_na_ec/dry": {
+   "temperature_controlled": "glec/sea/container/north_europe_na_ec/reefer"
+  },
+  "glec/sea/container/north_europe_na_wc/dry": {
+   "temperature_controlled": "glec/sea/container/north_europe_na_wc/reefer"
+  },
+  "glec/sea/container/south_america_africa/dry": {
+   "temperature_controlled": "glec/sea/container/south_america_africa/reefer"
+  },
+  "glec/sea/container/intra_africa/dry": {
+   "temperature_controlled": "glec/sea/container/intra_africa/reefer"
+  },
+  "glec/sea/container/intra_na/dry": {
+   "temperature_controlled": "glec/sea/container/intra_na/reefer"
+  },
+  "glec/sea/container/intra_south_america/dry": {
+   "temperature_controlled": "glec/sea/container/intra_south_america/reefer"
+  },
+  "glec/sea/container/se_asia_ne_asia/dry": {
+   "temperature_controlled": "glec/sea/container/se_asia_ne_asia/reefer"
+  },
+  "glec/sea/container/intra_ne_asia/dry": {
+   "temperature_controlled": "glec/sea/container/intra_ne_asia/reefer"
+  },
+  "glec/sea/container/intra_se_asia/dry": {
+   "temperature_controlled": "glec/sea/container/intra_se_asia/reefer"
+  },
+  "glec/sea/container/north_europe_med_bs/dry": {
+   "temperature_controlled": "glec/sea/container/north_europe_med_bs/reefer"
+  },
+  "glec/sea/container/intra_med_bs/dry": {
+   "temperature_controlled": "glec/sea/container/intra_med_bs/reefer"
+  },
+  "glec/sea/container/intra_north_europe/dry": {
+   "temperature_controlled": "glec/sea/container/intra_north_europe/reefer"
+  },
+  "glec/sea/container/intra_me_india/dry": {
+   "temperature_controlled": "glec/sea/container/intra_me_india/reefer"
+  },
+  "glec/sea/container/other/dry": {
+   "temperature_controlled": "glec/sea/container/other/reefer"
+  },
+  "glec/road/europe/electric/rigid_7_5t": {
+   "light": "glec/road/europe/electric/rigid_7_5t/light"
+  },
+  "glec/road/europe/electric/rigid_7_5_12t": {
+   "light": "glec/road/europe/electric/rigid_7_5_12t/light"
+  },
+  "glec/road/europe/electric/rigid_14_20t": {
+   "light": "glec/road/europe/electric/rigid_14_20t/light"
+  },
+  "glec/road/europe/electric/rigid_20_26t": {
+   "light": "glec/road/europe/electric/rigid_20_26t/light"
+  },
+  "glec/road/europe/electric/rigid_28_32t": {
+   "light": "glec/road/europe/electric/rigid_28_32t/light"
+  },
+  "glec/road/europe/electric/artic_28_34t": {
+   "light": "glec/road/europe/electric/artic_28_34t/light"
+  },
+  "glec/road/europe/electric/artic_34_40t": {
+   "light": "glec/road/europe/electric/artic_34_40t/light"
+  },
+  "glec/road/europe/electric/artic_40_50t": {
+   "light": "glec/road/europe/electric/artic_40_50t/light"
+  },
+  "glec/rail/eu/average_traction_unknown": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/average_traction_unknown"
+  },
+  "glec/rail/in/average": {
+   "temperature_controlled": "glec/rail/in/temperature_controlled/average"
+  },
+  "glec/rail/eu/diesel/container": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/container"
+  },
+  "glec/rail/eu/diesel/cars": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/cars"
+  },
+  "glec/rail/eu/diesel/chemicals": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/chemicals"
+  },
+  "glec/rail/eu/diesel/coal_steel": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/coal_steel"
+  },
+  "glec/rail/eu/diesel/building_materials": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/building_materials"
+  },
+  "glec/rail/eu/diesel/manufactured_products": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/manufactured_products"
+  },
+  "glec/rail/eu/diesel/cereals": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/cereals"
+  },
+  "glec/rail/eu/diesel/truck_trailer_on_train": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/truck_trailer_on_train"
+  },
+  "glec/rail/eu/diesel/trailer_on_train": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/trailer_on_train"
+  },
+  "glec/rail/eu/electric/container": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/container"
+  },
+  "glec/rail/eu/electric/cars": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/cars"
+  },
+  "glec/rail/eu/electric/chemicals": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/chemicals"
+  },
+  "glec/rail/eu/electric/coal_steel": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/coal_steel"
+  },
+  "glec/rail/eu/electric/building_materials": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/building_materials"
+  },
+  "glec/rail/eu/electric/manufactured_products": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/manufactured_products"
+  },
+  "glec/rail/eu/electric/cereals": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/cereals"
+  },
+  "glec/rail/eu/electric/truck_trailer_on_train": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/truck_trailer_on_train"
+  },
+  "glec/rail/eu/electric/trailer_on_train": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/trailer_on_train"
+  },
+  "glec/road/na/refrigerated": {
+   "temperature_controlled": "glec/road/na/refrigerated"
+  },
+  "glec/road/eu_sa/temperature_controlled/van_3_5t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/van_3_5t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/van_3_5t/petrol": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/van_3_5t/petrol"
+  },
+  "glec/road/eu_sa/temperature_controlled/van_3_5t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/van_3_5t/cng"
+  },
+  "glec/road/eu_sa/temperature_controlled/van_3_5t/lpg": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/van_3_5t/lpg"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_3_5_7_5t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_3_5_7_5t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_3_5_7_5t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_3_5_7_5t/cng"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_7_5_12t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_7_5_12t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_7_5_12t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_7_5_12t/cng"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_12_20t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_12_20t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_12_20t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_12_20t/cng"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_20_26t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_20_26t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_20_26t/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_20_26t/cng"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_20_26t/lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_20_26t/lng"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_26_32t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_26_32t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/rigid_26_32t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/rigid_26_32t/container/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34t/container/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t/container/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/lng"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/cng"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/bio_lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/bio_lng"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/lng"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/cng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/cng"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/bio_lng": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_si/container/bio_lng"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/lng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/lng_diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/cng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/cng_diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/bio_lng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/bio_lng_diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/lng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/lng_diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/cng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/cng_diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/bio_lng_diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_34_40t_hpdi/container/bio_lng_diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_40t_light_trailer/heavy/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40t_light_trailer/heavy/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_40_44t/light/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40_44t/light/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_40_44t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40_44t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_40_44t/heavy/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40_44t/heavy/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_40_44t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_40_44t/container/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_60t/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_60t/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_60t/heavy/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_60t/heavy/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_60t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_60t/container/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_72t/heavy/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_72t/heavy/diesel"
+  },
+  "glec/road/eu_sa/temperature_controlled/artic_72t/container/diesel": {
+   "temperature_controlled": "glec/road/eu_sa/temperature_controlled/artic_72t/container/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/van_3_5t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/van_3_5t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/van_3_5t/petrol": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/van_3_5t/petrol"
+  },
+  "glec/road/asia_africa/temperature_controlled/van_3_5t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/van_3_5t/cng"
+  },
+  "glec/road/asia_africa/temperature_controlled/van_3_5t/lpg": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/van_3_5t/lpg"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_3_5_7_5t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_3_5_7_5t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_3_5_7_5t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_3_5_7_5t/cng"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_7_5_12t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_7_5_12t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_7_5_12t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_7_5_12t/cng"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_12_20t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_12_20t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_12_20t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_12_20t/cng"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_20_26t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_20_26t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_20_26t/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_20_26t/cng"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_20_26t/lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_20_26t/lng"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_26_32t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_26_32t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/rigid_26_32t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/rigid_26_32t/container/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34t/container/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t/container/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/lng"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/cng"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/bio_lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/bio_lng"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/lng"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/cng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/cng"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/bio_lng": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_si/container/bio_lng"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/lng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/lng_diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/cng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/cng_diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/bio_lng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/bio_lng_diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/lng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/lng_diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/cng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/cng_diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/bio_lng_diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_34_40t_hpdi/container/bio_lng_diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_40t_light_trailer/heavy/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40t_light_trailer/heavy/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_40_44t/light/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40_44t/light/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_40_44t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40_44t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_40_44t/heavy/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40_44t/heavy/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_40_44t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_40_44t/container/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_60t/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_60t/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_60t/heavy/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_60t/heavy/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_60t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_60t/container/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_72t/heavy/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_72t/heavy/diesel"
+  },
+  "glec/road/asia_africa/temperature_controlled/artic_72t/container/diesel": {
+   "temperature_controlled": "glec/road/asia_africa/temperature_controlled/artic_72t/container/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_3_5_4_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_3_5_4_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_4_5_5_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_4_5_5_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_5_5_7t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_5_5_7t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_7_8_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_7_8_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_8_5_10_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_8_5_10_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_10_5_12_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_10_5_12_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_12_5_16t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_12_5_16t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_16_20t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_16_20t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_20_25t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_20_25t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_25_31t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_25_31t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/rigid_31t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_31t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/artic_18t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_18t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/artic_18_27t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_18_27t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/artic_27_35t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_27_35t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/artic_35_40t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_35_40t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/artic_40_43t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_40_43t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/artic_43_46t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_43_46t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/artic_46_49t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_46_49t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/artic_49t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_49t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_3_5_4_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_3_5_4_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_4_5_5_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_4_5_5_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_5_5_7t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_5_5_7t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_7_8_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_7_8_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_8_5_10_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_8_5_10_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_10_5_12_5t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_10_5_12_5t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_12_5_16t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_12_5_16t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_16_20t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_16_20t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_20_25t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_20_25t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_25_31t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_25_31t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/dump_31t/diesel": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_31t/diesel"
+  },
+  "glec/road/cn/temperature_controlled/artic_14_24t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_14_24t/lng"
+  },
+  "glec/road/cn/temperature_controlled/artic_24_25t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_24_25t/lng"
+  },
+  "glec/road/cn/temperature_controlled/artic_25_29t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_25_29t/lng"
+  },
+  "glec/road/cn/temperature_controlled/artic_29_31t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_29_31t/lng"
+  },
+  "glec/road/cn/temperature_controlled/artic_31_60t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/artic_31_60t/lng"
+  },
+  "glec/road/cn/temperature_controlled/dump_14_24t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_14_24t/lng"
+  },
+  "glec/road/cn/temperature_controlled/dump_24_25t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_24_25t/lng"
+  },
+  "glec/road/cn/temperature_controlled/dump_25_29t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_25_29t/lng"
+  },
+  "glec/road/cn/temperature_controlled/dump_29_31t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_29_31t/lng"
+  },
+  "glec/road/cn/temperature_controlled/dump_31_60t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/dump_31_60t/lng"
+  },
+  "glec/road/cn/temperature_controlled/rigid_14_24t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_14_24t/lng"
+  },
+  "glec/road/cn/temperature_controlled/rigid_24_25t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_24_25t/lng"
+  },
+  "glec/road/cn/temperature_controlled/rigid_25_29t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_25_29t/lng"
+  },
+  "glec/road/cn/temperature_controlled/rigid_29_31t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_29_31t/lng"
+  },
+  "glec/road/cn/temperature_controlled/rigid_31_60t/lng": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/rigid_31_60t/lng"
+  },
+  "glec/road/cn/temperature_controlled/truck_4_5t/electricity": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_4_5t/electricity"
+  },
+  "glec/road/cn/temperature_controlled/truck_4_5_12t/electricity": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_4_5_12t/electricity"
+  },
+  "glec/road/cn/temperature_controlled/truck_12t/electricity": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_12t/electricity"
+  },
+  "glec/road/cn/temperature_controlled/truck_4_5t/hydrogen": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_4_5t/hydrogen"
+  },
+  "glec/road/cn/temperature_controlled/truck_4_5_12t/hydrogen": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_4_5_12t/hydrogen"
+  },
+  "glec/road/cn/temperature_controlled/truck_12t/hydrogen": {
+   "temperature_controlled": "glec/road/cn/temperature_controlled/truck_12t/hydrogen"
+  },
+  "glec/road/in/temperature_controlled/small_cv/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/small_cv/diesel"
+  },
+  "glec/road/in/temperature_controlled/small_cv/petrol": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/small_cv/petrol"
+  },
+  "glec/road/in/temperature_controlled/small_cv/cng": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/small_cv/cng"
+  },
+  "glec/road/in/temperature_controlled/medium_cv_1/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/medium_cv_1/diesel"
+  },
+  "glec/road/in/temperature_controlled/medium_cv_1/cng": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/medium_cv_1/cng"
+  },
+  "glec/road/in/temperature_controlled/medium_cv_2/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/medium_cv_2/diesel"
+  },
+  "glec/road/in/temperature_controlled/medium_cv_2/cng": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/medium_cv_2/cng"
+  },
+  "glec/road/in/temperature_controlled/heavy_cv_1/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/heavy_cv_1/diesel"
+  },
+  "glec/road/in/temperature_controlled/heavy_cv_1/cng": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/heavy_cv_1/cng"
+  },
+  "glec/road/in/temperature_controlled/heavy_cv_2/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/heavy_cv_2/diesel"
+  },
+  "glec/road/in/temperature_controlled/heavy_cv_3/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/heavy_cv_3/diesel"
+  },
+  "glec/road/in/temperature_controlled/tractor_trailer/diesel": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/tractor_trailer/diesel"
+  },
+  "glec/road/in/temperature_controlled/rigid_3_5t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/rigid_3_5t/electricity"
+  },
+  "glec/road/in/temperature_controlled/rigid_3_5_12t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/rigid_3_5_12t/electricity"
+  },
+  "glec/road/in/temperature_controlled/rigid_14t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/rigid_14t/electricity"
+  },
+  "glec/road/in/temperature_controlled/rigid_18_5t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/rigid_18_5t/electricity"
+  },
+  "glec/road/in/temperature_controlled/artic_55t/electricity": {
+   "temperature_controlled": "glec/road/in/temperature_controlled/artic_55t/electricity"
+  },
+  "glec/sea/container/industry_average/reefer": {
+   "temperature_controlled": "glec/sea/container/industry_average/reefer"
+  },
+  "glec/sea/container/panama_trade/reefer": {
+   "temperature_controlled": "glec/sea/container/panama_trade/reefer"
+  },
+  "glec/sea/container/trans_atlantic/reefer": {
+   "temperature_controlled": "glec/sea/container/trans_atlantic/reefer"
+  },
+  "glec/sea/container/trans_suez/reefer": {
+   "temperature_controlled": "glec/sea/container/trans_suez/reefer"
+  },
+  "glec/sea/container/trans_pacific/reefer": {
+   "temperature_controlled": "glec/sea/container/trans_pacific/reefer"
+  },
+  "glec/sea/container/other_global/reefer": {
+   "temperature_controlled": "glec/sea/container/other_global/reefer"
+  },
+  "glec/sea/container/asia_africa/reefer": {
+   "temperature_controlled": "glec/sea/container/asia_africa/reefer"
+  },
+  "glec/sea/container/asia_med_bs/reefer": {
+   "temperature_controlled": "glec/sea/container/asia_med_bs/reefer"
+  },
+  "glec/sea/container/asia_me_india/reefer": {
+   "temperature_controlled": "glec/sea/container/asia_me_india/reefer"
+  },
+  "glec/sea/container/asia_na_ec/reefer": {
+   "temperature_controlled": "glec/sea/container/asia_na_ec/reefer"
+  },
+  "glec/sea/container/asia_na_wc/reefer": {
+   "temperature_controlled": "glec/sea/container/asia_na_wc/reefer"
+  },
+  "glec/sea/container/asia_north_europe/reefer": {
+   "temperature_controlled": "glec/sea/container/asia_north_europe/reefer"
+  },
+  "glec/sea/container/asia_oceania/reefer": {
+   "temperature_controlled": "glec/sea/container/asia_oceania/reefer"
+  },
+  "glec/sea/container/asia_south_america/reefer": {
+   "temperature_controlled": "glec/sea/container/asia_south_america/reefer"
+  },
+  "glec/sea/container/europe_africa/reefer": {
+   "temperature_controlled": "glec/sea/container/europe_africa/reefer"
+  },
+  "glec/sea/container/europe_south_america/reefer": {
+   "temperature_controlled": "glec/sea/container/europe_south_america/reefer"
+  },
+  "glec/sea/container/europe_me_india/reefer": {
+   "temperature_controlled": "glec/sea/container/europe_me_india/reefer"
+  },
+  "glec/sea/container/europe_oceania/reefer": {
+   "temperature_controlled": "glec/sea/container/europe_oceania/reefer"
+  },
+  "glec/sea/container/med_bs_na_ec/reefer": {
+   "temperature_controlled": "glec/sea/container/med_bs_na_ec/reefer"
+  },
+  "glec/sea/container/med_bs_na_wc/reefer": {
+   "temperature_controlled": "glec/sea/container/med_bs_na_wc/reefer"
+  },
+  "glec/sea/container/na_africa/reefer": {
+   "temperature_controlled": "glec/sea/container/na_africa/reefer"
+  },
+  "glec/sea/container/na_oceania/reefer": {
+   "temperature_controlled": "glec/sea/container/na_oceania/reefer"
+  },
+  "glec/sea/container/na_south_america/reefer": {
+   "temperature_controlled": "glec/sea/container/na_south_america/reefer"
+  },
+  "glec/sea/container/na_me_india/reefer": {
+   "temperature_controlled": "glec/sea/container/na_me_india/reefer"
+  },
+  "glec/sea/container/north_europe_na_ec/reefer": {
+   "temperature_controlled": "glec/sea/container/north_europe_na_ec/reefer"
+  },
+  "glec/sea/container/north_europe_na_wc/reefer": {
+   "temperature_controlled": "glec/sea/container/north_europe_na_wc/reefer"
+  },
+  "glec/sea/container/south_america_africa/reefer": {
+   "temperature_controlled": "glec/sea/container/south_america_africa/reefer"
+  },
+  "glec/sea/container/intra_africa/reefer": {
+   "temperature_controlled": "glec/sea/container/intra_africa/reefer"
+  },
+  "glec/sea/container/intra_na/reefer": {
+   "temperature_controlled": "glec/sea/container/intra_na/reefer"
+  },
+  "glec/sea/container/intra_south_america/reefer": {
+   "temperature_controlled": "glec/sea/container/intra_south_america/reefer"
+  },
+  "glec/sea/container/se_asia_ne_asia/reefer": {
+   "temperature_controlled": "glec/sea/container/se_asia_ne_asia/reefer"
+  },
+  "glec/sea/container/intra_ne_asia/reefer": {
+   "temperature_controlled": "glec/sea/container/intra_ne_asia/reefer"
+  },
+  "glec/sea/container/intra_se_asia/reefer": {
+   "temperature_controlled": "glec/sea/container/intra_se_asia/reefer"
+  },
+  "glec/sea/container/north_europe_med_bs/reefer": {
+   "temperature_controlled": "glec/sea/container/north_europe_med_bs/reefer"
+  },
+  "glec/sea/container/intra_med_bs/reefer": {
+   "temperature_controlled": "glec/sea/container/intra_med_bs/reefer"
+  },
+  "glec/sea/container/intra_north_europe/reefer": {
+   "temperature_controlled": "glec/sea/container/intra_north_europe/reefer"
+  },
+  "glec/sea/container/intra_me_india/reefer": {
+   "temperature_controlled": "glec/sea/container/intra_me_india/reefer"
+  },
+  "glec/sea/container/other/reefer": {
+   "temperature_controlled": "glec/sea/container/other/reefer"
+  },
+  "glec/rail/eu/temperature_controlled/average_traction_unknown": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/average_traction_unknown"
+  },
+  "glec/rail/in/temperature_controlled/average": {
+   "temperature_controlled": "glec/rail/in/temperature_controlled/average"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/average_mixed": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/average_mixed"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/container": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/container"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/cars": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/cars"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/chemicals": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/chemicals"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/coal_steel": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/coal_steel"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/building_materials": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/building_materials"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/manufactured_products": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/manufactured_products"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/cereals": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/cereals"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/truck_trailer_on_train": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/truck_trailer_on_train"
+  },
+  "glec/rail/eu/temperature_controlled/diesel/trailer_on_train": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/diesel/trailer_on_train"
+  },
+  "glec/rail/eu/temperature_controlled/electric/average_mixed": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/average_mixed"
+  },
+  "glec/rail/eu/temperature_controlled/electric/container": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/container"
+  },
+  "glec/rail/eu/temperature_controlled/electric/cars": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/cars"
+  },
+  "glec/rail/eu/temperature_controlled/electric/chemicals": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/chemicals"
+  },
+  "glec/rail/eu/temperature_controlled/electric/coal_steel": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/coal_steel"
+  },
+  "glec/rail/eu/temperature_controlled/electric/building_materials": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/building_materials"
+  },
+  "glec/rail/eu/temperature_controlled/electric/manufactured_products": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/manufactured_products"
+  },
+  "glec/rail/eu/temperature_controlled/electric/cereals": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/cereals"
+  },
+  "glec/rail/eu/temperature_controlled/electric/truck_trailer_on_train": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/truck_trailer_on_train"
+  },
+  "glec/rail/eu/temperature_controlled/electric/trailer_on_train": {
+   "temperature_controlled": "glec/rail/eu/temperature_controlled/electric/trailer_on_train"
+  }
+ },
+ "hub_cargo_variants": {
+  "intermodal_terminal": {
+   "temperature_controlled": "intermodal_terminal_temperature_controlled"
+  }
+ }
 }

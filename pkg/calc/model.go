@@ -24,11 +24,13 @@ type Location struct {
 
 // Leg is one transport movement within a shipment.
 type Leg struct {
-	ID          string   `json:"id"`
-	Mode        Mode     `json:"mode"`
-	VehicleType string   `json:"vehicle_type"`
-	From        Location `json:"from"`
-	To          Location `json:"to"`
+	ID          string `json:"id"`
+	Mode        Mode   `json:"mode"`
+	VehicleType string `json:"vehicle_type"`
+	// CargoType overrides the shipment's for this leg (see Shipment.CargoType).
+	CargoType string   `json:"cargo_type,omitempty"`
+	From      Location `json:"from"`
+	To        Location `json:"to"`
 	// DistanceKm overrides the DistanceProvider when > 0 (e.g. actual odometer distance).
 	DistanceKm float64 `json:"distance_km,omitempty"`
 	// DistanceType says what kind of distance DistanceKm is: "sfd", "gcd"
@@ -107,12 +109,17 @@ type Shipment struct {
 	ID string `json:"id"`
 	// WeightKg is the cargo weight. For containers, give TEU instead, with
 	// either TEUNetTonnes or a ContainerLoad profile from the dataset.
-	WeightKg      float64   `json:"weight_kg,omitempty"`
-	TEU           float64   `json:"teu,omitempty"`
-	TEUNetTonnes  float64   `json:"teu_net_tonnes,omitempty"`
-	ContainerLoad string    `json:"container_load,omitempty"`
-	Legs          []Leg     `json:"legs"`
-	Hubs          []HubStop `json:"hubs,omitempty"`
+	WeightKg      float64 `json:"weight_kg,omitempty"`
+	TEU           float64 `json:"teu,omitempty"`
+	TEUNetTonnes  float64 `json:"teu_net_tonnes,omitempty"`
+	ContainerLoad string  `json:"container_load,omitempty"`
+	// CargoType (e.g. "container", "temperature_controlled") picks the
+	// dataset's value for that cargo where it has one for the leg's vehicle
+	// (GLEC's cargo and load categories); otherwise the vehicle's own value
+	// is kept and the leg's note says so. Default values only.
+	CargoType string    `json:"cargo_type,omitempty"`
+	Legs      []Leg     `json:"legs"`
+	Hubs      []HubStop `json:"hubs,omitempty"`
 	// AddRoadLegs adds road legs where the legs don't join up or a sea,
 	// rail or waterway leg starts or ends off its network (see connect.go).
 	// nil means on, unless the context says otherwise (WithoutRoadLegs).
@@ -226,6 +233,7 @@ type LegResult struct {
 type HubResult struct {
 	HubID      string  `json:"hub_id"`
 	HubType    string  `json:"hub_type"`
+	Note       string  `json:"note,omitempty"` // e.g. the hub type the cargo type chose
 	Containers float64 `json:"containers,omitempty"`
 	WTWKg      float64 `json:"wtw_kg"`
 	DataType   string  `json:"data_type"`

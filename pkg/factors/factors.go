@@ -49,6 +49,12 @@ type Dataset struct {
 	// FuelRegions make a fuel alias mean another fuel when both ends of the
 	// leg are in a region (e.g. GLEC's North American diesel).
 	FuelRegions map[string]FuelRegion `json:"fuel_regions,omitempty"`
+	// CargoTypes name the cargo types a shipment can give; CargoVariants
+	// map a vehicle type to its factor for each cargo type, and
+	// HubCargoVariants a hub type to another hub type.
+	CargoTypes       []CargoType                  `json:"cargo_types,omitempty"`
+	CargoVariants    map[string]map[string]string `json:"cargo_variants,omitempty"`
+	HubCargoVariants map[string]map[string]string `json:"hub_cargo_variants,omitempty"`
 	// ContainerLoads maps profile names (e.g. "average") to net cargo
 	// tonnes per TEU, for shipments given in TEU.
 	ContainerLoads map[string]float64 `json:"container_loads,omitempty"`
@@ -74,6 +80,13 @@ type Dataset struct {
 	placeIdx map[string]placeAlias
 	aliasLM  map[string]string
 	fuelReg  map[string]map[string]calc.FuelFactor
+	cargoIdx map[string]map[string]calc.Factor
+}
+
+// CargoType is a cargo type a shipment can give (Shipment.CargoType).
+type CargoType struct {
+	Name  string `json:"name"`
+	Label string `json:"label,omitempty"`
 }
 
 // FuelRegion is a fuel alias's meaning per region of RegionSet.
@@ -230,6 +243,29 @@ func mergeInto(dst *Dataset, src Dataset) error {
 		}
 	}
 	dst.Regions = append(dst.Regions, src.Regions...)
+	for _, ct := range src.CargoTypes {
+		known := false
+		for _, x := range dst.CargoTypes {
+			known = known || x.Name == ct.Name
+		}
+		if !known {
+			dst.CargoTypes = append(dst.CargoTypes, ct)
+		}
+	}
+	for dstMap, srcMap := range map[*map[string]map[string]string]map[string]map[string]string{
+		&dst.CargoVariants: src.CargoVariants, &dst.HubCargoVariants: src.HubCargoVariants} {
+		for k, v := range srcMap {
+			if *dstMap == nil {
+				*dstMap = map[string]map[string]string{}
+			}
+			if (*dstMap)[k] == nil {
+				(*dstMap)[k] = map[string]string{}
+			}
+			for c, t := range v {
+				(*dstMap)[k][c] = t
+			}
+		}
+	}
 	for _, a := range src.VehicleAliases {
 		replaced := false
 		for i, b := range dst.VehicleAliases {
@@ -415,6 +451,42 @@ func Parse(r io.Reader) (*Dataset, error) {
 		}
 		d.fuelIdx[alias] = target
 	}
+	cargo := map[string]bool{}
+	for _, ct := range d.CargoTypes {
+		cargo[ct.Name] = true
+	}
+	for vt, m := range d.CargoVariants {
+		var mode calc.Mode
+		for _, f := range d.Legs {
+			if f.VehicleType == vt {
+				mode = f.Mode
+			}
+		}
+		if mode == "" {
+			return nil, fmt.Errorf("cargo_variants: unknown vehicle type %s", vt)
+		}
+		for c, t := range m {
+			f, ok := d.legIdx[legKey(mode, t)]
+			if !ok || !cargo[c] {
+				return nil, fmt.Errorf("cargo_variants %s: cargo type %q or vehicle type %s unknown", vt, c, t)
+			}
+			if d.cargoIdx == nil {
+				d.cargoIdx = map[string]map[string]calc.Factor{}
+			}
+			k := legKey(mode, vt)
+			if d.cargoIdx[k] == nil {
+				d.cargoIdx[k] = map[string]calc.Factor{}
+			}
+			d.cargoIdx[k][c] = f
+		}
+	}
+	for ht, m := range d.HubCargoVariants {
+		for c, t := range m {
+			if _, ok := d.hubIdx[t]; !ok || !cargo[c] {
+				return nil, fmt.Errorf("hub_cargo_variants %s: cargo type %q or hub type %s unknown", ht, c, t)
+			}
+		}
+	}
 	for alias, fr := range d.FuelRegions {
 		if _, ok := d.fuelIdx[alias]; !ok {
 			return nil, fmt.Errorf("fuel_regions %s: no fuel or fuel alias of that name", alias)
@@ -590,3 +662,39 @@ var (
 	_ calc.DatasetNamer          = (*Dataset)(nil)
 	_ calc.DAFProvider           = (*Dataset)(nil)
 )
+
+// CargoFactor implements calc.CargoProvider.
+func (d *Dataset) CargoFactor(m calc.Mode, f calc.Factor, cargo string) (calc.Factor, string, error) {
+	if err := d.knownCargo(cargo); err != nil || cargo == "average" {
+		return f, "", err
+	}
+	if v, ok := d.cargoIdx[legKey(m, f.VehicleType)][cargo]; ok {
+		return v, fmt.Sprintf("Cargo type %q: %s.", cargo, v.VehicleType), nil
+	}
+	return f, fmt.Sprintf("Cargo type %q: the dataset has no value for it with %s, so that vehicle's own value is used.", cargo, f.VehicleType), nil
+}
+
+// HubCargo implements calc.CargoProvider.
+func (d *Dataset) HubCargo(hubType, cargo string) (string, string, error) {
+	if err := d.knownCargo(cargo); err != nil || cargo == "average" {
+		return hubType, "", err
+	}
+	if t, ok := d.HubCargoVariants[hubType][cargo]; ok {
+		return t, fmt.Sprintf("Cargo type %q: hub type %s.", cargo, t), nil
+	}
+	return hubType, fmt.Sprintf("Cargo type %q: the dataset has no value for it at a %s hub, so that hub type's own value is used.", cargo, hubType), nil
+}
+
+// ValidCargo implements calc.CargoProvider.
+func (d *Dataset) ValidCargo(cargo string) error { return d.knownCargo(cargo) }
+
+func (d *Dataset) knownCargo(cargo string) error {
+	var names []string
+	for _, ct := range d.CargoTypes {
+		if ct.Name == cargo {
+			return nil
+		}
+		names = append(names, ct.Name)
+	}
+	return fmt.Errorf("%w: unknown cargo_type %q (known: %s)", calc.ErrInvalidInput, cargo, strings.Join(names, ", "))
+}

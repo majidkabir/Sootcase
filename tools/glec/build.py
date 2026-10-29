@@ -192,22 +192,41 @@ def find(vt):
 
 # Temperature-controlled road freight (GLEC p.106): +15% for vans, +12% for heavier vehicles, on the
 # regional values for Europe, South America, Asia and Africa. North America has its own Refrigerated row.
-REEFER = [
-    ("glec/road/eu_sa/rigid_26_32t/diesel", "glec/road/eu_sa/temperature_controlled/rigid_26_32t/diesel", 1.12),
-    ("glec/road/eu_sa/artic_34_40t/diesel", "glec/road/eu_sa/temperature_controlled/artic_34_40t/diesel", 1.12),
-    ("glec/road/eu_sa/van_3_5t/diesel", "glec/road/eu_sa/temperature_controlled/van_3_5t/diesel", 1.15),
-    ("glec/road/asia_africa/rigid_26_32t/diesel", "glec/road/asia_africa/temperature_controlled/rigid_26_32t/diesel", 1.12),
-    ("glec/road/asia_africa/artic_34_40t/diesel", "glec/road/asia_africa/temperature_controlled/artic_34_40t/diesel", 1.12),
-    ("glec/road/asia_africa/van_3_5t/diesel", "glec/road/asia_africa/temperature_controlled/van_3_5t/diesel", 1.15),
-    ("glec/road/cn/artic_14_24t/lng", "glec/road/cn/temperature_controlled/artic_14_24t/lng", 1.12),
-    ("glec/road/in/heavy_cv_1/diesel", "glec/road/in/temperature_controlled/heavy_cv_1/diesel", 1.12),
-]
-for base, vid, up in REEFER:
-    b = find(base)
+# Temperature-controlled road freight (GLEC p.106): +15% for vans, +12% for heavier vehicles, on the
+# regional values for Europe, South America, Asia and Africa (China and India are in Asia). North America has its
+# own Refrigerated row (SmartWay). Generated for every row of those regions, as glec/road/<region>/temperature_controlled/...
+cargo_variants = {}
+
+
+def variant(base, cargo, target):
+    cargo_variants.setdefault(base, {})[cargo] = target
+
+
+for b in [l for l in legs if l["mode"] == "road" and l["vehicle_type"].split("/")[2] in ("eu_sa", "asia_africa", "cn", "in")]:
+    region, rest = b["vehicle_type"].split("/")[2], "/".join(b["vehicle_type"].split("/")[3:])
+    van = rest.startswith("van_3_5t") or rest.startswith("small_cv") or rest.startswith("rigid_3_5t/")
+    up = 1.15 if van else 1.12
+    vid = f"glec/road/{region}/temperature_controlled/{rest}"
     leg("road", vid, b["wtt_g_per_tkm"] * up, b["ttw_g_per_tkm"] * up,
-        f"{GLEC}, Section 3 Module 2, road, temperature-controlled: {base} with GLEC's +{round((up - 1) * 100)}% uplift "
-        f"for temperature-controlled {'vans' if up == 1.15 else 'vehicles over 3.5 t GVW'} (p. 106; given for Europe, South "
+        f"{GLEC}, Section 3 Module 2, road, temperature-controlled: {b['vehicle_type']} with GLEC's +{round((up - 1) * 100)}% uplift "
+        f"for temperature-controlled {'vans' if van else 'vehicles over 3.5 t GVW'} (p. 106; given for Europe, South "
         f"America, Asia and Africa); {ROAD_SFD}", "sfd")
+    variant(b["vehicle_type"], "temperature_controlled", vid)
+for na in ("tl_dry_van", "mixed_general"):  # GLEC p.100: most temperature-controlled fleets are FTL
+    variant(f"glec/road/na/{na}", "temperature_controlled", "glec/road/na/refrigerated")
+# Container and load variants of the same vehicle (Tables 8-9), in both regions that use them.
+for region in ("eu_sa", "asia_africa"):
+    ids = {l["vehicle_type"] for l in legs}
+    pre = f"glec/road/{region}/"
+    for vt in sorted(ids):
+        if not vt.startswith(pre) or "/container/" in vt or "temperature_controlled" in vt:
+            continue
+        rest = vt[len(pre):]
+        cls, fuel_ = rest.rsplit("/", 1)
+        for cargo, cand in (("container", f"{pre}{cls}/container/{fuel_}"), ("light", f"{pre}{cls}/light/{fuel_}"),
+                            ("heavy", f"{pre}{cls}/heavy/{fuel_}")):
+            if cand in ids:
+                variant(vt, cargo, cand)
 
 # ---------------------------------------------------------------- rail
 RAIL = f"{GLEC}, Section 3 Module 2, rail"
@@ -234,6 +253,10 @@ for vid, label, wtt, ttw, el in RAIL_TYPES:
 leg("rail", "glec/rail/eu/average_traction_unknown", 0.38 * 7.1 + 0.62 * 10.8, 0.38 * 23.6,
     f"{RAIL}, Europe: EU average where the traction is unknown, 18.4 g CO2e/t-km WTW (p. 98, based on 62% of EU track "
     f"being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%", "")
+for traction in ("diesel", "electric"):
+    for vid, label, *_ in RAIL_TYPES:
+        if vid != "average_mixed":
+            variant(f"glec/rail/eu/{traction}/average_mixed", vid, f"glec/rail/eu/{traction}/{vid}")
 leg("rail", "glec/rail/na/average", 2.7, 13.4, f"{RAIL}, North America: US average (diesel), 16.1 g CO2e/t-km WTW (p. 98)", "")
 leg("rail", "glec/rail/in/average", 9.6, 1.5,
     f"{RAIL}, India: Indian average, diesel and electric traction mixed, 11.1 g CO2e/t-km WTW (p. 98)", "")
@@ -378,6 +401,9 @@ for lid, (label, dry, reefer) in LANES.items():
             f"{GLEC}, Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): "
             f"{label}, {kind}, {wtt:g} + {ttw:g} g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is "
             f"not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance", "sfd")
+
+for lid in LANES:
+    variant(f"glec/sea/container/{lid}/dry", "temperature_controlled", f"glec/sea/container/{lid}/reefer")
 
 # ---------------------------------------------------------------- regions
 continent = {}
@@ -712,6 +738,8 @@ EV = [
     ("artic_40_50t", "Table 11: artic truck 40-50 t GVW, average/mixed load", 0.1),
 ]
 for vid, label, kwh in EV:
+    if vid.endswith("/light"):
+        variant("glec/road/europe/electric/" + vid[:-len("/light")], "light", "glec/road/europe/electric/" + vid)
     leg("road", "glec/road/europe/electric/" + vid, kwh * EU_ELEC, 0,
         f"{GLEC}, Section 3 Module 2, Europe and South America road, {label}: {kwh:g} kWh/t-km (HBEFA 5.1, including charging "
         f"losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: "
@@ -719,8 +747,12 @@ for vid, label, kwh in EV:
         f"country's own mix is more exact: give energy_kwh_per_tkm with country", "sfd")
 
 # ---------------------------------------------------------------- temperature-controlled rail (p. 99): +12%
-for base, vid, where in (("glec/rail/eu/average_traction_unknown", "glec/rail/eu/temperature_controlled/average_traction_unknown", "Europe"),
-                         ("glec/rail/in/average", "glec/rail/in/temperature_controlled/average", "India")):
+RAIL_REEFER = [("glec/rail/eu/average_traction_unknown", "glec/rail/eu/temperature_controlled/average_traction_unknown"),
+               ("glec/rail/in/average", "glec/rail/in/temperature_controlled/average")]
+RAIL_REEFER += [(f"glec/rail/eu/{tr}/{vid}", f"glec/rail/eu/temperature_controlled/{tr}/{vid}")
+                for tr in ("diesel", "electric") for vid, *_ in RAIL_TYPES]
+for base, vid in RAIL_REEFER:
+    variant(base, "temperature_controlled", vid)
     b = find(base)
     leg("rail", vid, b["wtt_g_per_tkm"] * 1.12, b["ttw_g_per_tkm"] * 1.12,
         f"{GLEC}, Section 3 Module 2, rail: {base} with GLEC's +12% for temperature-controlled rail freight (p. 99, the road "
@@ -759,6 +791,29 @@ hubs += [
                f"(n = 84), 21.4 kg CO2e per container"},
 ]
 
+for l in legs:  # values that already are temperature-controlled keep themselves
+    vt = l["vehicle_type"]
+    if "temperature_controlled" in vt or vt.endswith("/reefer") or vt == "glec/road/na/refrigerated":
+        variant(vt, "temperature_controlled", vt)
+
+# GLEC v3.3's cargo and load categories. A shipment's cargo_type picks GLEC's row for it where GLEC has one for the
+# same vehicle; otherwise the vehicle's own (average) value is kept and the leg's note says so.
+CARGO_TYPES = [
+    {"name": "average", "label": "Average or mixed (each vehicle's own value)"},
+    {"name": "container", "label": "Containers (road: GLEC's container rows; rail: container trains)"},
+    {"name": "temperature_controlled", "label": "Temperature-controlled (road +12%, vans +15%; rail +12%; reefer containers; temperature-controlled terminals)"},
+    {"name": "light", "label": "Light load (road and electric truck rows GLEC gives with a light load)"},
+    {"name": "heavy", "label": "Heavy load (road rows GLEC gives with a heavy load)"},
+    {"name": "cars", "label": "Cars (European rail)"},
+    {"name": "chemicals", "label": "Chemicals (European rail)"},
+    {"name": "coal_steel", "label": "Coal and steel (European rail)"},
+    {"name": "building_materials", "label": "Building materials (European rail)"},
+    {"name": "manufactured_products", "label": "Manufactured products (European rail)"},
+    {"name": "cereals", "label": "Cereals (European rail)"},
+    {"name": "truck_trailer_on_train", "label": "Truck and trailer on a train (European rail)"},
+    {"name": "trailer_on_train", "label": "Trailer only on a train (European rail)"},
+]
+
 dataset = {
     "name": "glec-3.3",
     "note": ("GLEC Framework v3.3 default values. Source: Smart Freight Centre. Global Logistics Emissions Council Framework "
@@ -774,6 +829,9 @@ dataset = {
     "regions": regions,
     "container_loads": {"average": 10, "light": 6, "heavy": 14.5},
     "dafs": dafs,
+    "cargo_types": CARGO_TYPES,
+    "cargo_variants": cargo_variants,
+    "hub_cargo_variants": {"intermodal_terminal": {"temperature_controlled": "intermodal_terminal_temperature_controlled"}},
 }
 with open(OUT, "w", encoding="utf-8") as f:
     json.dump(dataset, f, indent=1, ensure_ascii=False)

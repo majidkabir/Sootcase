@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 )
 
@@ -28,6 +29,15 @@ type DistanceFactorProvider interface {
 type Where struct {
 	Country  string
 	Lat, Lon float64
+}
+
+// CargoProvider is optionally implemented by a FactorProvider with cargo
+// types: CargoFactor returns the factor for cargo instead of f (or f with a
+// note when there is none for it); HubCargo the hub type to use.
+type CargoProvider interface {
+	ValidCargo(cargo string) error
+	CargoFactor(mode Mode, f Factor, cargo string) (Factor, string, error)
+	HubCargo(hubType, cargo string) (string, string, error)
 }
 
 // PlaceFuelProvider is optionally implemented by a FactorProvider whose
@@ -187,7 +197,22 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 		return Result{}, err
 	}
 	res.Warnings = warnings
+	for _, ct := range append([]string{s.CargoType}, legCargo(s.Legs)...) {
+		if ct == "" {
+			continue
+		}
+		cp, ok := c.Factors.(CargoProvider)
+		if !ok {
+			return Result{}, fmt.Errorf("%w: cargo_type %q: the dataset has no cargo types", ErrInvalidInput, ct)
+		}
+		if err := cp.ValidCargo(ct); err != nil {
+			return Result{}, err
+		}
+	}
 	for _, p := range legs {
+		if p.Leg.CargoType == "" {
+			p.Leg.CargoType = s.CargoType
+		}
 		lr, err := c.leg(ctx, tonnes, p.Leg)
 		if err != nil && p.added != "" && !Temporary(err) {
 			// An added leg that can't be calculated is left out, as it
@@ -223,15 +248,22 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 	}
 
 	for _, h := range s.Hubs {
-		hf, err := c.Factors.HubFactor(h.HubType)
+		hubType, cargoNote := h.HubType, ""
+		if cp, ok := c.Factors.(CargoProvider); ok && s.CargoType != "" {
+			var err error
+			if hubType, cargoNote, err = cp.HubCargo(h.HubType, s.CargoType); err != nil {
+				return Result{}, fmt.Errorf("hub %q: %w", h.ID, err)
+			}
+		}
+		hf, err := c.Factors.HubFactor(hubType)
 		if err != nil {
 			return Result{}, fmt.Errorf("hub %q: %w", h.ID, err)
 		}
 		if h.Containers < 0 || math.IsNaN(h.Containers) || math.IsInf(h.Containers, 0) {
 			return Result{}, fmt.Errorf("%w: hub %q: containers must be >= 0", ErrInvalidInput, h.ID)
 		}
-		hr := HubResult{HubID: h.ID, HubType: h.HubType, WTWKg: tonnes * hf.WTWPerTonneG / 1000,
-			DataType: DataDefault, Source: hf.Source}
+		hr := HubResult{HubID: h.ID, HubType: hubType, WTWKg: tonnes * hf.WTWPerTonneG / 1000,
+			DataType: DataDefault, Source: hf.Source, Note: cargoNote}
 		if hf.WTWPerContainerG > 0 {
 			if h.Containers == 0 {
 				return Result{}, fmt.Errorf("%w: hub %q: %s is per container handled; give containers", ErrInvalidInput, h.ID, h.HubType)
@@ -377,6 +409,11 @@ func (c Calculator) leg(ctx context.Context, tonnes float64, leg Leg) (LegResult
 	if err != nil {
 		return LegResult{}, err
 	}
+	if leg.CargoType != "" && lr.Method != MethodIntensity {
+		lr.FactorNote = strings.TrimSpace(lr.FactorNote + fmt.Sprintf(" Cargo type %q isn't applied here: it chooses default values, "+
+			"and this leg is calculated from its own %s.", leg.CargoType, map[string]string{MethodFuel: "fuel", MethodLoadModel: "load",
+			MethodEnergy: "energy use"}[lr.Method]))
+	}
 	lr.LegID, lr.Mode, lr.VehicleType = leg.ID, leg.Mode, leg.VehicleType
 	lr.DistanceKm, lr.DistanceMethod, lr.DistanceType = dist, method, dtype
 	lr.TonneKm = tonnes * dist
@@ -447,6 +484,13 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 	}
 	if err != nil {
 		return LegResult{}, err
+	}
+	if cp, ok := c.Factors.(CargoProvider); ok && leg.CargoType != "" {
+		var note string
+		if f, note, err = cp.CargoFactor(leg.Mode, f, leg.CargoType); err != nil {
+			return LegResult{}, err
+		}
+		lr.FactorNote = strings.TrimSpace(lr.FactorNote + " " + note)
 	}
 	// Emissions = tonne-km x intensity x DAF (GLEC Framework, ISO 14083).
 	adjKm, daf, err := c.adjust(leg.Mode, dtype, f.DistanceBasis, dist)
@@ -616,4 +660,12 @@ func repoText(km float64) string {
 		return ""
 	}
 	return fmt.Sprintf(", including %g km repositioning", km)
+}
+
+func legCargo(legs []Leg) []string {
+	var out []string
+	for _, l := range legs {
+		out = append(out, l.CargoType)
+	}
+	return out
 }

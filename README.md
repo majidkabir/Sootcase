@@ -296,6 +296,8 @@ Not taken into account (also in every result): transit times and costs; whether 
 
 **Weight or containers.** Give `weight_kg`, or `teu` plus either `teu_net_tonnes` (net cargo tonnes per TEU) or `container_load`, a profile name from the dataset's `container_loads`. The default dataset has GLEC's: `average` 10 t, `light` 6 t, `heavy` 14.5 t per TEU (GLEC Framework v3.3, Section 1 Chapter 2, for when the mass is known only in TEU); `teu` alone uses `average`. Results show the `weight_kg` used, its `weight_basis` and the `container_load` used. Container tare weight is not added.
 
+**Cargo type.** `cargo_type` on the shipment (or a leg) is one of GLEC v3.3's cargo or load categories: `container`, `temperature_controlled`, `light`, `heavy`, and for European rail `cars`, `chemicals`, `coal_steel`, `building_materials`, `manufactured_products`, `cereals`, `truck_trailer_on_train`, `trailer_on_train` (`average` is the default). It picks GLEC's value for that cargo only where GLEC has one for the leg's own vehicle: the container row of the same truck, the European diesel or electric train for that commodity, the reefer factor of the container trade lane, GLEC's +12% (+15% for vans) on a truck or train for temperature control, the temperature-controlled intermodal terminal. Otherwise the vehicle's own value is kept and the leg's note says so; it never changes the vehicle's size, and it doesn't apply to legs with measured fuel, a load or energy use. The dataset lists them in `cargo_types`, with `cargo_variants` and `hub_cargo_variants`.
+
 **JSON** — see [`examples/cph-rotterdam.json`](examples/cph-rotterdam.json) and the [OpenAPI spec](internal/api/openapi.yaml).
 
 **CSV** — one row per leg or hub stop, grouped by `shipment_id`. Columns (any order):
@@ -304,6 +306,7 @@ Not taken into account (also in every result): transit times and costs; whether 
 |---|---|
 | `shipment_id` | required |
 | `weight_kg`, or `teu` with `teu_net_tonnes` / `container_load` | cargo; can be on the first row only |
+| `cargo_type` | optional: GLEC cargo or load category (see below) |
 | `leg_id`, `mode`, `vehicle_type`, `distance_km`, `distance_type` | leg |
 | `from_lat`, `from_lon`, `to_lat`, `to_lon` | leg, when `distance_km` is empty |
 | `from_code`, `to_code` | leg, instead of coordinates: a UN/LOCODE (`NLRTM`) or IATA airport code (`CPH`) |
@@ -311,7 +314,7 @@ Not taken into account (also in every result): transit times and costs; whether 
 | `load_tonnes` or `load_factor`, `empty_trip_factor` | leg, load model |
 | `repositioning_km` | leg, trucks: empty km for this trip |
 | `energy_kwh_per_tkm`, `country` | leg, energy method |
-| `hub_id`, `hub_type` | hub stop (row is a hub when `hub_type` is set) |
+| `hub_id`, `hub_type`, `hub_containers` | hub stop (row is a hub when `hub_type` is set); containers for per-container hub types |
 
 A bad row fails only its shipment; the rest still calculate. Only failures caused by the data are final: when a shipment fails because a routing service didn't answer (unreachable, timed out, overloaded or restarting), it is tried again after 1 s and 3 s. If it still fails, it is marked `retryable` (batch results, reports' `retryable_failed`, HTTP 503 with `Retry-After` for a single shipment), so you know to send it again rather than fix it.
 
@@ -491,7 +494,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 - [x] What-if scenarios (`sootcase scenario`, `/v1/scenario`): road to rail, electric trucks, other fuels, loads
 - [x] Recommendations (`sootcase recommend`, `/v1/recommend`): road to rail, waterway or short sea, air to sea or rail, other ports, fuller loads
 - [x] Missing road legs: gaps between legs, first and last mile to ports, rail terminals and airports
-- [ ] Cargo-type presets (needs licensed values, e.g. EcoTransIT with permission)
+- [x] Cargo-type presets (GLEC v3.3's cargo and load categories)
 
 ## Releasing
 

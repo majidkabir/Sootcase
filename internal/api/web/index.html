@@ -217,6 +217,10 @@ footer.credits a { color: var(--blue); }
         <div><label for="teu">TEU</label><input id="teu" type="number" min="0" step="any"></div>
         <div><label for="teut">Net tonnes per TEU (empty: 10, GLEC's average)</label><input id="teut" type="number" min="0" step="any" placeholder="10"></div>
       </div>
+      <div class="row">
+        <div><label for="cargotype">Cargo type (picks GLEC's value for it where GLEC has one)</label>
+          <select id="cargotype"><option value="">Average or mixed</option></select></div>
+      </div>
 
       <div id="legs"></div>
 
@@ -581,6 +585,7 @@ function buildShipment() {
   } else {
     s.weight_kg = num($("#weight"));
   }
+  if ($("#cargotype").value) s.cargo_type = $("#cargotype").value;
   [...legsEl.children].forEach((leg, i) => {
     const f = name => leg.querySelector(`[name="${name}"]`);
     const l = { id: `leg-${i + 1}`, mode: f("mode").value, vehicle_type: f("vehicle_type").value.trim() };
@@ -878,6 +883,7 @@ function loadExample(i = 0) {
   $("#sid").value = ex.id;
   $('input[name="cargo"][value="weight"]').checked = true; toggleCargo();
   $("#weight").value = ex.weight;
+  $("#cargotype").value = ex.cargo || "";
   ex.legs.forEach(l => addLeg(l));
 }
 
@@ -892,6 +898,10 @@ async function loadFactors() {
     $("#dataset").textContent = `Factors: ${d.name}.`;
     const lists = {};
     for (const a of d.vehicle_aliases || []) { (lists[a.mode] ||= []).push(a.alias); vehicleNames[a.alias] = a.vehicle_type; }
+    for (const c of d.cargo_types || []) {
+      if (c.name === "average") continue;
+      const o = document.createElement("option"); o.value = c.name; o.textContent = c.label || c.name; $("#cargotype").append(o);
+    }
     loadModels = (d.load_models || []).filter(m => m.mode === "road");
     for (const f of d.legs || []) (lists[f.mode] ||= []).push(f.vehicle_type);
     vehicleLists = lists;
