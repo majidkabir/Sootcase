@@ -13,14 +13,13 @@ func ExampleDataset_LegFactor() {
 	if err != nil {
 		panic(err)
 	}
-	f, err := ds.LegFactor(calc.Rail, "freight_train")
+	f, err := ds.LegFactor(calc.Road, "hgv")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%s: %.2f g CO2e/tkm WTW\n%s\n", f.VehicleType, f.WTW(), f.Source)
+	fmt.Printf("%s: %.2f g CO2e/tkm WTW (%d), per %s\n", f.VehicleType, f.WTW(), f.Year, f.DistanceBasis)
 	// Output:
-	// rail/freight_train: 32.74 g CO2e/tkm WTW
-	// DESNZ 2026: Freighting goods > Rail > Freight train
+	// glec/road/eu_sa/rigid_26_32t/diesel: 125.00 g CO2e/tkm WTW (2026), per sfd
 }
 
 // Grid intensities come with every dataset; "electricity/<ISO3>" works as a fuel.

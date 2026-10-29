@@ -12,6 +12,7 @@ import (
 
 	"github.com/majidkabir/sootcase/pkg/calc"
 	"github.com/majidkabir/sootcase/pkg/factors"
+	"github.com/majidkabir/sootcase/pkg/places"
 )
 
 var (
@@ -27,7 +28,7 @@ func sheet(t *testing.T) (Sheet, calc.Result) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c := calc.Calculator{Factors: ds, Distances: ds.Distances(), NoRoadLegs: true}
+	c := calc.Calculator{Factors: ds, Distances: ds.Distances(), NoRoadLegs: true, Places: places.Codes{}}
 	s := calc.Shipment{ID: "S1", WeightKg: 12000, Legs: []calc.Leg{
 		{ID: "truck", Mode: calc.Road, VehicleType: "hgv_artic_33t", From: cph, To: ham, DistanceKm: 332, DistanceType: calc.DistSFD, LoadTonnes: 15.6, EmptyTripFactor: 0.2},
 		{ID: "ship", Mode: calc.Sea, VehicleType: "container_ship", From: rtm, To: nyc, DistanceKm: 6200, DistanceType: calc.DistSFD},
@@ -123,7 +124,7 @@ func TestSheet_FactorNote(t *testing.T) {
 		if !strings.HasPrefix(s.Group, "Leg 2") {
 			continue
 		}
-		has := strings.Contains(s.Text, `"container_ship" on a 6200 km leg means container_ship/eu_mrv_2024/deep_sea`)
+		has := strings.Contains(s.Text, `"container_ship" from North Europe (NL) to North America EC/Gulf (US): trade lane North Europe to-from North America EC/Gulf`)
 		if (s.Title == "Emission intensity") != has {
 			t.Errorf("%s: %q", s.Title, s.Text)
 		}

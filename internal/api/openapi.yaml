@@ -67,7 +67,7 @@ paths:
           description: >
             Add "explanation": the calculation step by step (cargo mass, each leg's distance, transport
             activity, intensity and emissions, hubs, total), with the numbers used and the GLEC Framework
-            v3.2 pages and ISO 14083:2023 clauses each step follows, so that it can be checked by hand.
+            v3.3 pages and ISO 14083:2023 clauses each step follows, so that it can be checked by hand.
         - name: path
           in: query
           schema: { type: boolean, default: false }
@@ -469,7 +469,7 @@ components:
       type: object
       properties:
         leg_id: { type: string, description: "The leg's id, or added-N for an added road leg" }
-        biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.2 p. 64)" }
+        biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.3 p. 64)" }
         added:
           type: string
           enum: [gap, access]
@@ -539,7 +539,7 @@ components:
       type: object
       properties:
         shipment_id: { type: string }
-        biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.2 p. 64)" }
+        biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.3 p. 64)" }
         weight_kg: { type: number, description: Cargo weight used }
         weight_basis: { type: string, enum: [weight, teu] }
         container_load: { type: string, description: Container load profile that set the tonnes per TEU }
@@ -785,7 +785,7 @@ components:
       type: object
       properties:
         ttw_kg: { type: number }
-        biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.2 p. 64)" }
+        biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.3 p. 64)" }
         wtt_kg: { type: number }
         wtw_kg: { type: number }
     ScenarioResult:

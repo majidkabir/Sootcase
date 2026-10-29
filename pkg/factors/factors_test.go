@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
+	"github.com/majidkabir/sootcase/pkg/places"
 )
 
 func TestEmbeddedSample(t *testing.T) {
@@ -56,15 +57,15 @@ func TestEmbeddedSample_Fuel(t *testing.T) {
 
 func TestOpen(t *testing.T) {
 	names := EmbeddedNames()
-	if strings.Join(names, ",") != "desnz-2026,eu-mrv-2024,nl-iww-2026,sample" {
+	if strings.Join(names, ",") != "desnz-2026,eu-mrv-2024,glec-3.3,nl-iww-2026,sample" {
 		t.Errorf("EmbeddedNames = %v", names)
 	}
 	ds, err := Open("")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ds.Name != "desnz-2026+nl-iww-2026+eu-mrv-2024" || len(ds.Legs) < 100 || len(ds.Fuels) < 100 ||
-		!strings.Contains(ds.Note, "Open Government Licence v3.0") {
+	if ds.Name != "desnz-2026+nl-iww-2026+eu-mrv-2024+glec-3.3" || len(ds.Legs) < 100 || len(ds.Fuels) < 100 ||
+		!strings.Contains(ds.Note, "Open Government Licence v3.0") || !strings.Contains(ds.Note, "Smart Freight Centre is acknowledged as the source") {
 		t.Errorf("default dataset: name=%q legs=%d fuels=%d", ds.Name, len(ds.Legs), len(ds.Fuels))
 	}
 	// Spot-check one published value end to end (DESNZ 2026 flat file).
@@ -275,7 +276,7 @@ func TestOpen_Layered(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ds.Name != "desnz-2026+nl-iww-2026+eu-mrv-2024+my-hubs" || !strings.Contains(ds.Note, "own measurements") || !strings.Contains(ds.Note, "Open Government Licence") {
+	if ds.Name != "desnz-2026+nl-iww-2026+eu-mrv-2024+glec-3.3+my-hubs" || !strings.Contains(ds.Note, "own measurements") || !strings.Contains(ds.Note, "Open Government Licence") {
 		t.Errorf("name=%q note=%q", ds.Name, ds.Note)
 	}
 	if h, err := ds.HubFactor("transhipment"); err != nil || h.WTWPerTonneG != 1300 {
@@ -303,7 +304,6 @@ func TestOpen_Layered(t *testing.T) {
 	clash := map[string]string{
 		"duplicate leg":       `{"legs":[{"mode":"rail","vehicle_type":"rail/freight_train","ttw_g_per_tkm":1}]}`,
 		"duplicate alias":     `{"fuel_aliases":{"diesel":"biofuel/biodiesel_hvo/litres"}}`,
-		"duplicate DAF":       `{"dafs":[{"mode":"air","from":"actual","to":"gcd","add_km":-100,"source":"x"}]}`,
 		"duplicate container": `{"container_loads":{"average":12}}`,
 	}
 	for name, body := range clash {
@@ -311,6 +311,14 @@ func TestOpen_Layered(t *testing.T) {
 		if _, err := Open(layers); err == nil {
 			t.Errorf("%s: want error", name)
 		}
+	}
+	// A DAF defined again is the later layer's.
+	d2, err := Open(Default + "," + write("daf.json", `{"dafs":[{"mode":"air","from":"actual","to":"gcd","add_km":-100,"source":"mine"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if x, ok := d2.DAF(calc.Air, "actual", "gcd"); !ok || x.AddKm != -100 || x.Source != "mine" {
+		t.Errorf("later DAF = %+v, %v", x, ok)
 	}
 	if _, err := Open(Default + "," + dir + "/missing.json"); err == nil {
 		t.Error("missing layer: want error")
@@ -355,7 +363,7 @@ func TestParse_DAFs(t *testing.T) {
 // Inland waterway factors from www.co2emissiefactoren.nl 2026 (CE Delft
 // STREAM 2020 v2), checked row by row against the published list.
 func TestInlandWaterway_NL2026(t *testing.T) {
-	ds, err := Open(Default)
+	ds, err := Open("desnz-2026,nl-iww-2026")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -445,6 +453,7 @@ func TestShortAlias(t *testing.T) {
 // +5% DAF, for fleet averages and load models alike; measured fuel needs no
 // distance, and a great-circle road distance has no DAF and is refused.
 func TestRoadDAF_GLEC(t *testing.T) {
+	const desnzHGV = "hgv_non_refrigerated_all_diesel/average_non_refrigerated_hgvs/average_laden"
 	ds, err := Open("")
 	if err != nil {
 		t.Fatal(err)
@@ -458,11 +467,11 @@ func TestRoadDAF_GLEC(t *testing.T) {
 		}
 		return r.Legs[0], nil
 	}
-	f, err := ds.LegFactor(calc.Road, "hgv")
+	f, err := ds.LegFactor(calc.Road, desnzHGV)
 	if err != nil || f.DistanceBasis != calc.DistActual {
 		t.Fatalf("hgv factor = %+v, %v; want distance basis actual", f, err)
 	}
-	lr, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 100, DistanceType: calc.DistSFD})
+	lr, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: desnzHGV, DistanceKm: 100, DistanceType: calc.DistSFD})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -477,17 +486,28 @@ func TestRoadDAF_GLEC(t *testing.T) {
 	if math.Abs(lm.DAF-1.05) > 1e-12 || lm.Method != calc.MethodLoadModel {
 		t.Errorf("load model: method %s, DAF %v", lm.Method, lm.DAF)
 	}
-	act, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 100, DistanceType: calc.DistActual})
+	act, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: desnzHGV, DistanceKm: 100, DistanceType: calc.DistActual})
 	if err != nil || act.DAF != 0 || math.Abs(act.WTWKg*1.05-lr.WTWKg) > 1e-9 {
 		t.Errorf("actual distance: DAF %v, WTW %v, %v; want no DAF", act.DAF, act.WTWKg, err)
 	}
-	fu, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 100, DistanceType: calc.DistSFD,
+	fu, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: desnzHGV, DistanceKm: 100, DistanceType: calc.DistSFD,
 		Fuel: &calc.FuelUse{Fuel: "diesel", Amount: 30}})
 	if err != nil || fu.DAF != 0 {
 		t.Errorf("measured fuel: DAF %v, %v; want none", fu.DAF, err)
 	}
-	if _, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: "hgv", From: a, To: b}); !errors.Is(err, calc.ErrNoDAF) {
+	if _, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: desnzHGV, From: a, To: b}); !errors.Is(err, calc.ErrNoDAF) {
 		t.Errorf("great-circle road leg: err %v, want ErrNoDAF", err)
+	}
+	// GLEC v3.3 road defaults include the +5%: per shortest feasible
+	// distance, so a routed distance needs no DAF and an actual one is
+	// divided by 1.05.
+	g, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 100, DistanceType: calc.DistSFD})
+	if err != nil || g.DAF != 0 || math.Abs(g.WTWKg-125) > 1e-9 {
+		t.Errorf("GLEC sfd: %+v, %v", g, err)
+	}
+	g, err = calcLeg(calc.Leg{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 105, DistanceType: calc.DistActual})
+	if err != nil || math.Abs(g.WTWKg-125) > 1e-9 || !strings.Contains(g.DAFSource, "v3.3") {
+		t.Errorf("GLEC actual: %+v, %v", g, err)
 	}
 }
 
@@ -533,5 +553,115 @@ func TestBiogenicCO2(t *testing.T) {
 	h, _ := ds.FuelFactor("hvo")
 	if math.Abs(r.BiogenicCO2Kg-243) > 1e-9 || math.Abs(r.WTWKg-100*h.WTW()) > 1e-9 {
 		t.Errorf("HVO leg: biogenic %v (want 243, outside WTW %v)", r.BiogenicCO2Kg, r.WTWKg)
+	}
+}
+
+// GLEC v3.3 inland waterway defaults: per shortest feasible distance, with no
+// DAF for an actual distance (GLEC Section 1 Chapter 4, p. 44), and a
+// straight line from coordinates refused.
+func TestInlandWaterway_GLEC33(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for vt, want := range map[string][2]float64{"barge": {16.4, 4.9}, "container_barge": {22.5, 6.8}} {
+		f, err := ds.LegFactor(calc.InlandWaterway, vt)
+		if err != nil || f.TTW != want[0] || f.WTT != want[1] || f.DistanceBasis != calc.DistSFD {
+			t.Errorf("%s = %+v, %v", vt, f, err)
+		}
+	}
+	c := calc.Calculator{Factors: ds, Distances: ds.Distances()}
+	ctx := context.Background()
+	for _, dt := range []string{calc.DistActual, calc.DistSFD} {
+		r, err := c.Calculate(ctx, calc.Shipment{WeightKg: 1_000_000,
+			Legs: []calc.Leg{{Mode: calc.InlandWaterway, VehicleType: "barge", DistanceKm: 220, DistanceType: dt}}})
+		if err != nil || math.Abs(r.WTWKg-1000*220*21.3/1000) > 1e-6 {
+			t.Errorf("%s distance: %v kg, %v", dt, r.WTWKg, err)
+		}
+	}
+	_, err = c.Calculate(ctx, calc.Shipment{WeightKg: 1000,
+		Legs: []calc.Leg{{Mode: calc.InlandWaterway, VehicleType: "barge",
+			From: calc.Location{Lat: 51.95, Lon: 4.05}, To: calc.Location{Lat: 51.45, Lon: 6.73}}}})
+	if !errors.Is(err, calc.ErrNoDAF) {
+		t.Errorf("coordinates only: want ErrNoDAF, got %v", err)
+	}
+}
+
+// GLEC v3.3 regional aliases: the region (or container trade lane) of both
+// ends picks the factor; mixed or unknown ends use the alias's default.
+func TestRegionalAliases_GLEC33(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := func(c string, lat, lon float64) calc.Where { return calc.Where{Country: c, Lat: lat, Lon: lon} }
+	for _, tc := range []struct {
+		mode     calc.Mode
+		vt       string
+		km       float64
+		from, to calc.Where
+		want     string
+	}{
+		{calc.Road, "hgv", 700, w("DE", 53.5, 10), w("DE", 48.1, 11.6), "glec/road/eu_sa/rigid_26_32t/diesel"},
+		{calc.Road, "hgv", 700, w("US", 40, -80), w("US", 41, -87), "glec/road/na/tl_dry_van"},
+		{calc.Road, "hgv", 700, w("US", 40, -80), w("MX", 25, -100), "glec/road/eu_sa/rigid_26_32t/diesel"},
+		{calc.Road, "hgv", 700, w("CN", 31, 121), w("CN", 39.9, 116.4), "glec/road/cn/artic_14_24t/lng"},
+		{calc.Road, "hgv", 700, w("IN", 19, 72.8), w("IN", 28.6, 77.1), "glec/road/in/heavy_cv_1/diesel"},
+		{calc.Road, "van", 50, w("TH", 13, 100), w("TH", 13.5, 100.5), "glec/road/asia_africa/van_3_5t/diesel"},
+		{calc.Road, "hgv_reefer", 500, w("NL", 52, 4.5), w("FR", 48.9, 2.3), "glec/road/eu_sa/temperature_controlled/rigid_26_32t/diesel"},
+		{calc.Rail, "freight_train", 800, w("US", 40, -80), w("US", 41, -87), "glec/rail/na/average"},
+		{calc.Rail, "freight_train", 800, w("DE", 50, 8.5), w("IT", 45, 9), "glec/rail/eu/average_traction_unknown"},
+		{calc.Air, "air_freight", 800, w("IN", 19, 72.8), w("IN", 28.6, 77.1), "glec/air/in/domestic"},
+		{calc.Air, "air_freight", 800, w("DE", 50, 8.5), w("FR", 49, 2.5), "glec/air/unknown/short_haul"},
+		{calc.Air, "air_freight", 9000, w("DE", 50, 8.5), w("US", 40.6, -73.8), "glec/air/unknown/long_haul"},
+		{calc.Sea, "container_ship", 20000, w("CN", 31.2, 121.5), w("DE", 53.5, 9.9), "glec/sea/container/asia_north_europe/dry"},
+		{calc.Sea, "container_ship", 3000, w("ES", 39.4, -0.3), w("DE", 53.5, 9.9), "glec/sea/container/north_europe_med_bs/dry"},
+		{calc.Sea, "container_ship", 3000, w("ES", 43.3, -2.9), w("DE", 53.5, 9.9), "glec/sea/container/intra_north_europe/dry"},
+		{calc.Sea, "container_ship", 9000, w("US", 33.7, -118.2), w("CN", 22.5, 114), "glec/sea/container/asia_na_wc/dry"},
+		{calc.Sea, "container_ship", 9000, w("US", 29.7, -95), w("CN", 22.5, 114), "glec/sea/container/asia_na_ec/dry"},
+		{calc.Sea, "container_ship", 3000, w("", 0, 0), w("US", 33.7, -118.2), "glec/sea/container/industry_average/dry"},
+		{calc.Sea, "container_ship", 9000, w("AU", -33.9, 151.2), w("ZA", -29.9, 31), "glec/sea/container/other/dry"},
+		{calc.Sea, "container_ship_reefer", 12000, w("BR", -23.9, -46.3), w("NL", 51.9, 4.1), "glec/sea/container/europe_south_america/reefer"},
+	} {
+		f, note, err := ds.LegFactorAt(tc.mode, tc.vt, tc.km, tc.from, tc.to)
+		if err != nil || f.VehicleType != tc.want || !strings.Contains(note, tc.want) {
+			t.Errorf("%s %s %s->%s = %s (%q), %v; want %s", tc.mode, tc.vt, tc.from.Country, tc.to.Country, f.VehicleType, note, err, tc.want)
+		}
+	}
+	// The aliases keep DESNZ's load models for a given load.
+	if lm, err := ds.LoadModel(calc.Road, "hgv_artic_33t"); err != nil || lm.VehicleType != "hgv_non_refrigerated_all_diesel/articulated_33t" {
+		t.Errorf("load model = %+v, %v", lm, err)
+	}
+	// Spot checks against GLEC v3.3 tables: Table 18 Asia-North Europe dry 42.9 g/TEU-km = 4.29 g/tkm at 10 t per TEU;
+	// Table 3 transshipment 1.2 kg/t.
+	if f, _ := ds.LegFactor(calc.Sea, "glec/sea/container/asia_north_europe/dry"); math.Abs(f.WTW()-4.29) > 1e-9 {
+		t.Errorf("Asia-North Europe = %v g/tkm", f.WTW())
+	}
+	if h, err := ds.HubFactor("transshipment"); err != nil || h.WTWPerTonneG != 1200 {
+		t.Errorf("transshipment hub = %+v, %v", h, err)
+	}
+}
+
+// GLEC v3.3 Section 3 Module 4 (sea, p. 134 example): 10 TEU Hamburg to
+// Shanghai, 21,000 km, Asia to-from North Europe 42.9 g CO2e/TEU-km = 9.01 t;
+// 5 reefer TEU at 105.9 g = 11.12 t. With the 10 t per TEU average profile
+// the per-tonne-km factors give the same (reefer: WTT + TTW = 106.0 g, the
+// table's WTW rounds to 105.9).
+func TestModule4Container_GLEC33(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds, Distances: ds.Distances(), Places: places.Codes{}, NoRoadLegs: true}
+	for _, tc := range []struct {
+		vt   string
+		teu  float64
+		want float64
+	}{{"container_ship", 10, 9009}, {"container_ship_reefer", 5, 11130}} {
+		r, err := c.Calculate(context.Background(), calc.Shipment{TEU: tc.teu, Legs: []calc.Leg{{Mode: calc.Sea, VehicleType: tc.vt,
+			From: calc.Location{Code: "DEHAM"}, To: calc.Location{Code: "CNSGH"}, DistanceKm: 21000, DistanceType: calc.DistSFD}}})
+		if err != nil || math.Abs(r.WTWKg-tc.want) > 1e-6 {
+			t.Errorf("%s: %v kg, %v; want %v", tc.vt, r.WTWKg, err, tc.want)
+		}
 	}
 }

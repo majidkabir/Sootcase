@@ -23,7 +23,7 @@ import (
 // road, rail, sea, air and hubs, layered with Dutch inland waterway factors
 // and a container ship factor from EU MRV data (which "container_ship"
 // then means).
-const Default = "desnz-2026,nl-iww-2026,eu-mrv-2024"
+const Default = "desnz-2026,nl-iww-2026,eu-mrv-2024,glec-3.3"
 
 //go:embed data/*.json data/grid/*.json
 var embedded embed.FS
@@ -57,6 +57,9 @@ type Dataset struct {
 	// them use the embedded default (Ember via Our World in Data).
 	Grids    []calc.GridFactor `json:"grids,omitempty"`
 	GridNote string            `json:"grid_note,omitempty"`
+	// Regions place a leg's ends in the regions or zones that regional
+	// aliases choose by (see VehicleAlias.Regions and Lanes).
+	Regions []Region `json:"regions,omitempty"`
 
 	legIdx   map[string]calc.Factor
 	shortIdx map[string]shortAlias
@@ -65,6 +68,8 @@ type Dataset struct {
 	gridIdx  map[string]calc.GridFactor
 	hubIdx   map[string]calc.HubFactor
 	fuelIdx  map[string]calc.FuelFactor
+	placeIdx map[string]placeAlias
+	aliasLM  map[string]string
 }
 
 // Embedded loads a dataset bundled in the binary, e.g. "sample".
@@ -86,6 +91,19 @@ type VehicleAlias struct {
 	// than ShortBelowKm (e.g. a short-sea ship for "container_ship").
 	ShortVehicleType string  `json:"short_vehicle_type,omitempty"`
 	ShortBelowKm     float64 `json:"short_below_km,omitempty"`
+	// RegionSet names the set of Regions that Regions and Lanes use.
+	// Regions maps a region to the vehicle type the alias means when both
+	// ends of the leg are in it (e.g. GLEC's North American road values).
+	RegionSet string            `json:"region_set,omitempty"`
+	Regions   map[string]string `json:"regions,omitempty"`
+	// Lanes choose the vehicle type by the zones of both ends (e.g. GLEC's
+	// container trade lanes); the first matching lane wins.
+	Lanes []Lane `json:"lanes,omitempty"`
+	// Note explains the alias's choice; it is added to the leg's factor note.
+	Note string `json:"note,omitempty"`
+	// LoadModel is the load model class used when a load is given for
+	// this alias (the alias's own factor has none).
+	LoadModel string `json:"load_model,omitempty"`
 }
 
 // EmbeddedNames lists the datasets bundled in the binary.
@@ -107,8 +125,8 @@ func EmbeddedNames() []string {
 //
 // A comma-separated list layers datasets, e.g. "desnz-2026,my-hubs.json":
 // their contents are combined, and defining the same factor, fuel alias,
-// container profile or grid country twice is an error. A vehicle alias
-// defined again points to the later dataset's vehicle type.
+// grid country, or container profile with another value twice is an error.
+// A vehicle alias or DAF defined again is the later dataset's.
 func Open(nameOrPath string) (*Dataset, error) {
 	if nameOrPath == "" {
 		nameOrPath = Default
@@ -185,7 +203,18 @@ func mergeInto(dst *Dataset, src Dataset) error {
 	dst.Hubs = append(dst.Hubs, src.Hubs...)
 	dst.Fuels = append(dst.Fuels, src.Fuels...)
 	dst.LoadModels = append(dst.LoadModels, src.LoadModels...)
-	dst.DAFs = append(dst.DAFs, src.DAFs...)
+	for _, x := range src.DAFs {
+		replaced := false
+		for i, y := range dst.DAFs {
+			if x.Mode == y.Mode && x.From == y.From && x.To == y.To {
+				dst.DAFs[i], replaced = x, true
+			}
+		}
+		if !replaced {
+			dst.DAFs = append(dst.DAFs, x)
+		}
+	}
+	dst.Regions = append(dst.Regions, src.Regions...)
 	for _, a := range src.VehicleAliases {
 		replaced := false
 		for i, b := range dst.VehicleAliases {
@@ -219,8 +248,8 @@ func mergeInto(dst *Dataset, src Dataset) error {
 		dst.FuelAliases[k] = v
 	}
 	for k, v := range src.ContainerLoads {
-		if _, dup := dst.ContainerLoads[k]; dup {
-			return fmt.Errorf("container load %q defined twice", k)
+		if old, dup := dst.ContainerLoads[k]; dup && old != v {
+			return fmt.Errorf("container load %q defined twice with different values", k)
 		}
 		if dst.ContainerLoads == nil {
 			dst.ContainerLoads = map[string]float64{}
@@ -295,6 +324,9 @@ func Parse(r io.Reader) (*Dataset, error) {
 			return nil, fmt.Errorf("vehicle alias %s clashes with an existing vehicle type", k)
 		}
 		d.legIdx[k] = target
+		if err := d.indexPlaceAlias(a); err != nil {
+			return nil, err
+		}
 		if a.ShortVehicleType != "" || a.ShortBelowKm != 0 {
 			short, ok := d.legIdx[legKey(a.Mode, a.ShortVehicleType)]
 			if !ok || a.ShortBelowKm <= 0 {
@@ -432,6 +464,11 @@ func (d *Dataset) FuelFactor(fuel string) (calc.FuelFactor, error) {
 func (d *Dataset) LoadModel(m calc.Mode, vt string) (calc.LoadModel, error) {
 	if lm, ok := d.loadIdx[legKey(m, vt)]; ok {
 		return lm, nil
+	}
+	if class, ok := d.aliasLM[legKey(m, vt)]; ok {
+		if lm, ok := d.loadIdx[legKey(m, class)]; ok {
+			return lm, nil
+		}
 	}
 	if f, ok := d.legIdx[legKey(m, vt)]; ok {
 		if i := strings.LastIndex(f.VehicleType, "/"); i > 0 && strings.HasSuffix(f.VehicleType, "laden") {

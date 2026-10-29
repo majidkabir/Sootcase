@@ -11,6 +11,16 @@ Department for Energy Security and Net Zero.
 Contains public sector information licensed under the Open Government Licence v3.0.
 https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
 
+This product includes default emission intensity values (pkg/factors/data/glec-3.3.json,
+built by tools/glec/build.py) from: Smart Freight Centre. Global Logistics Emissions
+Council Framework for Logistics Emissions Accounting and Reporting; v3.3 edition, revised
+and updated (October 2026). ISBN 978-90-833629-0-8. Used with the permission of Smart
+Freight Centre, which is acknowledged as the source. No affiliation with or endorsement by
+Smart Freight Centre is implied. Smart Freight Centre's copyright notice says the publication
+may not be used for resale or any other commercial purpose without its prior written permission.
+Country continents for the GLEC regions (tools/glec/countries.csv) are from OurAirports,
+public domain.
+
 This product includes electricity carbon intensity data
 (pkg/factors/data/grid/ember-owid.json) from Ember, Yearly Electricity Data,
 processed by Our World in Data (https://github.com/owid/energy-data).

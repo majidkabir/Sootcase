@@ -23,6 +23,20 @@ type DistanceFactorProvider interface {
 	LegFactorFor(mode Mode, vehicleType string, km float64) (f Factor, note string, err error)
 }
 
+// Where is a leg end's country (ISO 3166-1 alpha-2, "" if unknown) and
+// coordinates, for factors that depend on the region.
+type Where struct {
+	Country  string
+	Lat, Lon float64
+}
+
+// PlaceFactorProvider is optionally implemented by a FactorProvider whose
+// vehicle types can depend on where a leg is (e.g. GLEC's regional road
+// values or container trade lanes). note says which factor was chosen.
+type PlaceFactorProvider interface {
+	LegFactorAt(mode Mode, vehicleType string, km float64, from, to Where) (f Factor, note string, err error)
+}
+
 // DistanceProvider supplies the distance in km for a leg when it isn't given.
 type DistanceProvider interface {
 	Distance(ctx context.Context, mode Mode, from, to Location) (float64, error)
@@ -263,7 +277,7 @@ func dataType(method string) string {
 }
 
 // DefaultContainerLoad is the container load profile used for TEU given
-// without net tonnes: GLEC Framework v3.2 (Section 1 Chapter 2, p. 21; and
+// without net tonnes: GLEC Framework v3.3 (Section 1 Chapter 2, p. 21; and
 // Chapter 4, sea): when the mass is known only in TEU, an average of 10 t
 // per TEU can be assumed.
 const DefaultContainerLoad = "average"
@@ -408,7 +422,9 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 
 	var f Factor
 	var err error
-	if dp, ok := c.Factors.(DistanceFactorProvider); ok {
+	if pp, ok := c.Factors.(PlaceFactorProvider); ok {
+		f, lr.FactorNote, err = pp.LegFactorAt(leg.Mode, leg.VehicleType, dist, c.where(leg.From), c.where(leg.To))
+	} else if dp, ok := c.Factors.(DistanceFactorProvider); ok {
 		f, lr.FactorNote, err = dp.LegFactorFor(leg.Mode, leg.VehicleType, dist)
 	} else {
 		f, err = c.Factors.LegFactor(leg.Mode, leg.VehicleType)
@@ -430,6 +446,15 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 	lr.TTWKg = adjTkm * f.TTW / 1000
 	lr.WTWKg = adjTkm * f.WTW() / 1000
 	return lr, nil
+}
+
+// where is a location's country, from Places when it can tell.
+func (c Calculator) where(l Location) Where {
+	w := Where{Lat: l.Lat, Lon: l.Lon}
+	if cr, ok := c.Places.(Countrier); ok && !isZero(l) {
+		w.Country = cr.Country(l)
+	}
+	return w
 }
 
 func (c Calculator) fuelLeg(lr LegResult, fu FuelUse) (LegResult, error) {

@@ -2,7 +2,7 @@
 // emissions: road freight to rail, inland waterway or short sea, air freight
 // to sea or rail, another sea port, and fuller loads. Each alternative is a
 // changed copy of the shipment calculated with the same method as the
-// shipment itself (GLEC Framework v3.2, ISO 14083), so the difference comes
+// shipment itself (GLEC Framework v3.3, ISO 14083), so the difference comes
 // only from the route. Results are scenarios, not reported emissions.
 //
 // The rules an alternative must meet are stated defaults with sources, and
@@ -64,7 +64,7 @@ const (
 	TerminalNearest  = "nearest"
 	TerminalBestTrip = "best_trip"
 
-	Label = "Scenario: alternatives recalculated with the same method (GLEC Framework v3.2, ISO 14083), not reported emissions."
+	Label = "Scenario: alternatives recalculated with the same method (GLEC Framework v3.3, ISO 14083), not reported emissions."
 
 	SourceWhitePaper = "Road legs over 300 km: EU Transport White Paper 2011 (Council document 11255/11, II.8): \"30% of road freight over " +
 		"300 km should shift to other modes such as rail or waterborne transport by 2030\""
@@ -353,7 +353,7 @@ func Limitations() []string {
 		"Whether a rail, barge or ferry service actually runs on the lane, how often, and with free capacity is not known: an alternative is possible on the networks, not a booked service.",
 		"Terminals and ports come from UN/LOCODE, which marks rail terminals and ports but not whether they handle containers or trailers.",
 		"Extra transshipments at terminals and ports are not counted yet: there are no hub factors until the Fraunhofer IML REFF 2026 values are added.",
-		"New legs use fleet-average default factors (UK DESNZ 2026, EU MRV 2024, Dutch inland waterway list), not a carrier's own data.",
+		"New legs use fleet-average default factors (GLEC Framework v3.3 default values; UK DESNZ 2026 for ferries, Ro-Ro and non-container ships), not a carrier's own data.",
 		"Combining shipments needs shipping dates, which the shipments file doesn't have: fuller loads use the load you give for every road vehicle.",
 		"Rail and waterway distances are shortest paths on OpenStreetMap; a waterway alternative needs both ends near a navigable river or canal.",
 	}

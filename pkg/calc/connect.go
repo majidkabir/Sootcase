@@ -21,7 +21,7 @@ import (
 //     starts or ends off its network, or an air leg starts or ends away from
 //     an airport. The leg is moved to a nearby port, rail terminal or large
 //     airport (the one that makes the trip shortest) and a road leg is added
-//     between it and the original point. Air: the GLEC Framework v3.2
+//     between it and the original point. Air: the GLEC Framework v3.3
 //     (Section 1 Chapter 4) measures air distance as the great-circle
 //     distance between the origin and destination airports.
 //

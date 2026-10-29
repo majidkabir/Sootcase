@@ -1,9 +1,9 @@
 // Package explain writes out how a shipment's emissions were calculated,
 // step by step, with the numbers used and where each step comes from in
-// the GLEC Framework v3.2 and ISO 14083:2023, so that someone who knows
+// the GLEC Framework v3.3 and ISO 14083:2023, so that someone who knows
 // these can check every figure by hand.
 //
-// The ISO 14083 clause numbers are those the GLEC Framework v3.2 itself
+// The ISO 14083 clause numbers are those the GLEC Framework v3.3 itself
 // lists in its "ISO References" boxes; page numbers are the GLEC PDF's.
 package explain
 
@@ -36,7 +36,7 @@ type Step struct {
 
 // References, as cited in steps.
 const (
-	GLEC = "GLEC Framework v3.2 (Smart Freight Centre, 2025)"
+	GLEC = "GLEC Framework v3.3 (Smart Freight Centre, 2026)"
 	ISO  = "ISO 14083:2023, Greenhouse gases: quantification and reporting of emissions arising from transport chain operations"
 )
 
@@ -44,7 +44,7 @@ const (
 const (
 	bChain     = "ISO 14083 3.1.25 transport chain, 3.1.26 transport chain element (GLEC p.16)"
 	bMass      = "ISO 14083 5.4.2 freight mass (GLEC p.21)"
-	bTEU       = "GLEC pp.21, 41, 51: converting TEU to tonnes when the mass isn't known (10 t average, 6 t light, 14.5 t heavy)"
+	bTEU       = "GLEC pp.21, 41, 50: converting TEU to tonnes when the mass isn't known (10 t average, 6 t light, 14.5 t heavy)"
 	bDistance  = "ISO 14083 3.1.27 transport distance, 3.3.4 (GLEC pp.21–22): shortest feasible distance (SFD) or great-circle distance (GCD)"
 	bChainDist = "ISO 14083 3.3.4 (GLEC p.22): a transport chain's distance runs from where the shipper hands the goods over to the consignee"
 	bDAF       = "GLEC p.22: distance adjustment factor (DAF) between distance types"
@@ -55,8 +55,8 @@ const (
 	bModel     = "ISO 14083 7.2.4 calculation with a model (GLEC p.29)"
 	bPrimary   = "ISO 14083 7.2.3 calculation with primary data (GLEC p.29)"
 	bDataCats  = "ISO 14083 3.3.3 data categories: primary, modelled, default (GLEC p.25)"
-	bLoad      = "GLEC Module 2, p.97: load factors and empty running"
-	bFuelEx    = "GLEC Module 4, p.116: worked example, fuel used × fuel emission factor"
+	bLoad      = "GLEC Module 2, pp.101–103 (Tables 7–9): load factors and empty running"
+	bFuelEx    = "GLEC Module 4, p.121: fuel used × fuel emission factor"
 	bElec      = "ISO 14083 Annex J, GHG emission factors, including electricity (GLEC p.19)"
 	bTCE       = "ISO 14083 clause 10, calculation of GHG emissions for a transport TCE (GLEC p.27)"
 	bHubTCE    = "ISO 14083 clause 11, calculation of GHG emissions for a hub TCE (GLEC p.27); 9.3, 9.5 (GLEC pp.33–34)"

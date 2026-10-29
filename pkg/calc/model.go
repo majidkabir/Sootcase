@@ -78,7 +78,7 @@ type FuelFactor struct {
 	Source string  `json:"source"`
 	Year   int     `json:"year"`
 	// BiogenicCO2 is the CO2 of biological origin released by burning a
-	// unit (kg). It is not part of TTW or WTW: the GLEC Framework v3.2 and
+	// unit (kg). It is not part of TTW or WTW: the GLEC Framework v3.3 and
 	// the GHG Protocol report it separately (GLEC p. 64).
 	BiogenicCO2 float64 `json:"biogenic_co2_kg_per_unit,omitempty"`
 }
@@ -180,7 +180,7 @@ type LegResult struct {
 	IntensityG float64 `json:"intensity_g_per_tkm"`
 	// BiogenicCO2Kg is the biogenic CO2 of the fuel burnt (fuel method with
 	// a fuel that has a biogenic factor), reported separately and not part
-	// of TTW or WTW (GLEC Framework v3.2 p. 64).
+	// of TTW or WTW (GLEC Framework v3.3 p. 64).
 	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
 	Method        string  `json:"method"`
 	// DataType is primary, modelled or default (see Data* constants).
@@ -253,7 +253,7 @@ type Result struct {
 	// IntensityG is transport WTW intensity in g CO2e per tonne-km (hubs excluded).
 	IntensityG float64 `json:"intensity_g_per_tkm"`
 	// BiogenicCO2Kg sums the legs' biogenic CO2: reported separately, not
-	// part of the totals (GLEC Framework v3.2 p. 64). Fleet-average factors
+	// part of the totals (GLEC Framework v3.3 p. 64). Fleet-average factors
 	// don't give it, so only measured fuel contributes.
 	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
 	// GHGProtocol places the emissions in GHG Protocol scopes (see GHGScopes).

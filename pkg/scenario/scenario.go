@@ -72,7 +72,7 @@ const (
 	TerminalBestTrip = "best_trip"
 	SourceEnergy     = "Energy use derived from the leg's diesel emissions and the diesel (average biofuel blend) factor per kWh net CV; " +
 		"modelled calculation (ISO 14083 7.2.4)"
-	SourceBiogenic = "Biofuel factors exclude biogenic CO2, as the GLEC Framework v3.2 asks (p. 64: CO2e excluding biogenic CO2, " +
+	SourceBiogenic = "Biofuel factors exclude biogenic CO2, as the GLEC Framework v3.3 asks (p. 64: CO2e excluding biogenic CO2, " +
 		"reported separately): it is given separately as biogenic_co2_kg, from DESNZ's \"outside of scopes\" factor for the fuel. " +
 		"The biofuel share of the average diesel blend in fleet-average factors isn't counted (the vehicle factors don't give it)"
 )

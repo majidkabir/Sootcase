@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Freight CO2e calculator · Sootcase</title>
 <script>document.documentElement.classList.add("js-loading")</script>
-<meta name="description" content="Calculate a shipment's CO2e by road, rail, sea, inland waterway and air, following the GLEC Framework v3.2 and ISO 14083, with every step and source shown.">
+<meta name="description" content="Calculate a shipment's CO2e by road, rail, sea, inland waterway and air, following the GLEC Framework v3.3 and ISO 14083, with every step and source shown.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F4F3EE'/%3E%3Cpath d='M24 22V17a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v5' fill='none' stroke='%231E1F1C' stroke-width='5'/%3E%3Crect x='8' y='22' width='48' height='34' rx='7' fill='none' stroke='%231E1F1C' stroke-width='5'/%3E%3Ccircle cx='19' cy='46' r='4' fill='%231E1F1C'/%3E%3Ccircle cx='45' cy='32' r='5' fill='%232F8F5B'/%3E%3C/svg%3E">
 <style>
 :root {
@@ -433,12 +433,15 @@ const kg = v => v >= 10000 ? fmt(v / 1000, 2) + " t" : fmt(v, 1) + " kg";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Names people know for the dataset's short vehicle names.
 const vehicleLabels = {
-  hgv: "Truck (HGV), average", hgv_rigid: "Rigid truck", hgv_artic: "Articulated truck", hgv_artic_33t: "Articulated truck over 33 t",
-  hgv_reefer: "Refrigerated truck", van: "Van up to 3.5 t", van_electric: "Electric van", freight_train: "Freight train",
-  container_ship: "Container ship (short or deep sea by distance)", container_ship_short_sea: "Container ship, short sea",
-  container_ship_deep_sea: "Container ship, deep sea", bulk_carrier: "Bulk carrier", general_cargo: "General cargo ship",
-  roro: "RoRo ferry", ropax: "RoPax ferry (freight and passengers)", air_freight: "Air freight", barge: "Barge (bulk)",
-  container_barge: "Container barge" };
+  hgv: "Truck (HGV), regional default", hgv_rigid: "Rigid truck", hgv_artic: "Articulated truck 34–40 t",
+  hgv_artic_33t: "Articulated truck over 33 t", hgv_reefer: "Refrigerated truck", van: "Van up to 3.5 t",
+  van_electric: "Electric van", truck_urban: "Urban truck 3.5–7.5 t", freight_train: "Freight train, regional average",
+  freight_train_diesel: "Freight train, diesel", freight_train_electric: "Freight train, electric",
+  container_ship: "Container ship (by trade lane)", container_ship_reefer: "Container ship, reefer (by trade lane)",
+  container_ship_short_sea: "Container ship, short sea (EU MRV)", container_ship_deep_sea: "Container ship, deep sea (EU MRV)",
+  bulk_carrier: "Bulk carrier", general_cargo: "General cargo ship", roro: "RoRo ferry", ropax: "RoPax ferry (freight and passengers)",
+  air_freight: "Air freight (aircraft unknown)", air_freighter: "Air freight, freighter", air_belly: "Air freight, belly cargo",
+  barge: "Motor vessel 85–110 m", container_barge: "Container barge 110 m" };
 const vehicleLabel = v => vehicleLabels[v] || v;
 const modeName = { road: "Road", rail: "Rail", sea: "Sea", air: "Air", inland_waterway: "Inland waterway" };
 const distName = { given: "given", great_circle: "great-circle", great_circle_adjusted: "great-circle, adjusted",
@@ -699,7 +702,7 @@ function render(req, r) {
     <p class="answer-sub">${fmt(r.weight_kg / 1000, 2)} t over ${fmt(r.tonne_km, 0)} tonne-km:
       ${kg(r.ttw_kg)} from the vehicles, ${kg(r.wtt_kg)} from producing their fuel or electricity,
       ${fmt(r.intensity_g_per_tkm, 1)} g per tonne-km. ${share}% from measured data.${r.biogenic_co2_kg > 0 ? `
-      Biogenic CO₂ ${kg(r.biogenic_co2_kg)}, reported separately and not included (GLEC Framework v3.2).` : ""}</p>
+      Biogenic CO₂ ${kg(r.biogenic_co2_kg)}, reported separately and not included (GLEC Framework v3.3).` : ""}</p>
     <div class="ribbon grow" role="img" aria-label="Share of emissions by leg">${segs}</div>
     <div class="ribbon-labels" aria-hidden="true">${labels}</div>
     <div class="legend"><span><i style="background:var(--ttw)"></i>Vehicle (tank-to-wheel)</span>
@@ -751,7 +754,7 @@ function sheetHTML(sh) {
       ${st.text ? `<p>${esc(st.text)}</p>` : ""}${st.formula ? `<pre class="formula">${esc(st.formula)}</pre>` : ""}
       ${(st.basis || []).length ? `<p class="basis">${st.basis.map(esc).join("<br>")}</p>` : ""}</div>`;
   }).join("");
-  return `<details class="sheet" id="sheet"><summary>Check the calculation step by step (GLEC Framework v3.2, ISO 14083)</summary>
+  return `<details class="sheet" id="sheet"><summary>Check the calculation step by step (GLEC Framework v3.3, ISO 14083)</summary>
     <p class="answer-sub">${esc(sh.summary)} Each step shows the numbers used and where the method comes from, so it can be redone by hand.</p>
     <div class="actions"><button type="button" class="btn" id="sheet-md">Download as Markdown</button>
       <button type="button" class="btn" id="sheet-print">Print or save as PDF</button></div>
@@ -1234,6 +1237,7 @@ loadFactors().then(() => calculate(null, "example"));
 </script>
 <footer class="credits"><span id="dataset"></span> Places: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0), UN/LOCODE (UNECE),
 <a href="https://ourairports.com/">OurAirports</a>. Routing: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>.
-Distance adjustments: GLEC Framework v3.2, &copy; <a href="https://www.smartfreightcentre.org/">Smart Freight Centre</a>.</footer>
+Default values and distance adjustments: GLEC Framework v3.3; source: <a href="https://www.smartfreightcentre.org/">Smart Freight Centre</a>, used with permission.
+Ferries, Ro-Ro, non-container ships, fuels and load models: UK DESNZ 2026 (Open Government Licence v3.0).</footer>
 </body>
 </html>

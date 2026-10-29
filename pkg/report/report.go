@@ -1,6 +1,6 @@
 // Package report aggregates shipment results into an emissions report with
 // the basic content ISO 14083:2023 asks of a report at the level of
-// transport or hub services (see GLEC Framework v3.2, Section 2 Chapter 1):
+// transport or hub services (see GLEC Framework v3.3, Section 2 Chapter 1):
 //
 //   - the transport chains covered and the period;
 //   - total GHG emissions, split into operational (TTW) and energy
@@ -35,7 +35,7 @@ import (
 const ISOStatement = "These calculation results have been established in accordance with ISO 14083:2023."
 
 // MethodStatement is used when conformity is not declared.
-const MethodStatement = "Calculated with Sootcase following the GLEC Framework v3.2 and ISO 14083:2023 methodology. " +
+const MethodStatement = "Calculated with Sootcase following the GLEC Framework v3.3 and ISO 14083:2023 methodology. " +
 	"Conformity with ISO 14083 is not declared by this report."
 
 // Meta describes the report: who, what and when. All fields are optional.

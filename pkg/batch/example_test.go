@@ -36,8 +36,8 @@ C,0,road,hgv,100
 		})
 	fmt.Println(stats.Shipments, "shipments,", stats.Failed, "failed,", err)
 	// Output:
-	// A: 12.71 kg CO2e
-	// B: 51.09 kg CO2e
+	// A: 12.50 kg CO2e
+	// B: 44.70 kg CO2e
 	// C: shipment weight must be > 0
 	// 3 shipments, 1 failed, <nil>
 }

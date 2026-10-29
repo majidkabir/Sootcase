@@ -14,7 +14,7 @@ Source-available freight emissions calculator following the GLEC Framework / ISO
 
 ![The Sootcase web page: a shipment entered leg by leg on the left; on the right its emissions, a bar per leg split into vehicle and fuel-supply emissions, and how each number was made](docs/screenshot.png)
 
-Ships with the **UK DESNZ 2026** conversion factors built in: 127 freight factors (road, rail, sea, air) and 166 fuel factors, each split into tank-to-wheel and well-to-tank.
+Ships with the **GLEC Framework v3.3 default values** built in (Smart Freight Centre, used with permission): road by region, rail, air, inland waterway, container ships by trade lane, other ships by size and fuel, and logistics hubs; plus the **UK DESNZ 2026** conversion factors for fuels, load models, ferries and the rest. Every factor is split into tank-to-wheel and well-to-tank.
 
 ## Quick start
 
@@ -49,7 +49,7 @@ open http://localhost:8080
 | `OSRM_PBF_URL` | Denmark from Geofabrik | any `.osm.pbf`; preparing needs roughly 5–10× its size in RAM |
 | `SEA_RESOLUTION_KM` | `20` | `5`, `10`, `20`, `50` or `100` |
 | `SOOTCASE_PORT` | `8080` | |
-| `SOOTCASE_FACTORS` | `desnz-2026,nl-iww-2026,eu-mrv-2024` | as `-factors` |
+| `SOOTCASE_FACTORS` | `desnz-2026,nl-iww-2026,eu-mrv-2024,glec-3.3` | as `-factors` |
 
 Prepared data is kept in volumes and reused; changing the region re-prepares it. The maritime network (EUPL-1.2) is downloaded on your machine from a pinned SeaRoute commit and checked by SHA-256. A weekly CI job brings the whole stack up on a small region and checks that road and sea legs are actually routed.
 
@@ -119,7 +119,7 @@ This is the capacity-utilisation approach EcoTransIT World and GLEC use, built e
 
 A dataset may also define `distance_adjustments` (`gcd × multiplier + add_km`) to estimate route distance from great-circle for a mode; the result then has no known type.
 
-**Distance adjustment factors (DAF).** Following the GLEC Framework v3.2 and ISO 14083, emissions are `tonne-km × intensity × DAF`. A DAF is needed when the leg's distance type differs from the distance type a factor was built on (`distance_basis`: `sfd`, `gcd` or `actual`). Give the type of a given distance with `distance_type`. Built-in GLEC defaults:
+**Distance adjustment factors (DAF).** Following the GLEC Framework v3.3 and ISO 14083, emissions are `tonne-km × intensity × DAF`. A DAF is needed when the leg's distance type differs from the distance type a factor was built on (`distance_basis`: `sfd`, `gcd` or `actual`). Give the type of a given distance with `distance_type`. Built-in GLEC defaults:
 
 | Mode | From → to | DAF |
 |---|---|---|
@@ -216,7 +216,7 @@ Sootcase isn't certified or verified against ISO 14083. Treat results as calcula
 
 ### Report over many shipments
 
-`sootcase report` (or `POST /v1/report`) turns a set of shipments into a report with the basic content ISO 14083 asks for at the level of transport or hub services (GLEC v3.2, Section 2, Chapter 1):
+`sootcase report` (or `POST /v1/report`) turns a set of shipments into a report with the basic content ISO 14083 asks for at the level of transport or hub services (GLEC v3.3, Section 2, Chapter 1):
 
 - what's covered: period, shipments, legs, hub stops, and the shipments that failed (excluded and listed);
 - total emissions, split into operational (TTW) and energy provision (WTT), and the emission intensity with the types of distance used;
@@ -268,7 +268,7 @@ Fuels are converted with the selected dataset's fuel factors, including `electri
 |---|---|---|
 | `road_to_rail` | Road legs longer than `min_road_km` go by rail for `share` of the cargo; the rail part must be longer than `min_rail_km` in a straight line, with road legs to and from the nearest rail terminal on the network reachable by road (`terminal`: `nearest`, or `best_trip` for the calculator's usual choice). The place list can't tell which terminals handle containers or trailers | 300 km and 30% (EU Transport White Paper 2011: "30% of road freight over 300 km should shift to other modes … by 2030"); 100 km (Directive 92/106/EEC on combined transport, Art. 1) |
 | `electrify` | Matching road legs: no tank-to-wheel emissions, `kwh_per_tkm` × the `country`'s grid factor upstream | none: give `kwh_per_tkm`, `country` and `source` |
-| `fuel_switch` | Matching diesel road legs use `fuel` (`hvo`, `b100`, `biomethane`, `biomethane_lng`, `cng`, `lng` or a dataset fuel id): energy from the leg's diesel emissions and DESNZ's diesel factor per kWh, × `energy_ratio`, × the fuel's factor per GJ (modelled, ISO 14083 7.2.4). Biofuel factors exclude biogenic CO2, which is given separately as `biogenic_co2_kg` (GLEC v3.2 p. 64) | `energy_ratio` 1 (same energy per tonne-km; an assumption, stated in the output) |
+| `fuel_switch` | Matching diesel road legs use `fuel` (`hvo`, `b100`, `biomethane`, `biomethane_lng`, `cng`, `lng` or a dataset fuel id): energy from the leg's diesel emissions and DESNZ's diesel factor per kWh, × `energy_ratio`, × the fuel's factor per GJ (modelled, ISO 14083 7.2.4). Biofuel factors exclude biogenic CO2, which is given separately as `biogenic_co2_kg` (GLEC v3.3 p. 64) | `energy_ratio` 1 (same energy per tonne-km; an assumption, stated in the output) |
 | `load` | The shipment's own matching road legs get `load_tonnes` or `load_factor`, and `empty_trip_factor` | none |
 
 `vehicle_types` limits a change to those road vehicle types (empty: all road legs). `share` applies a change to that share of the cargo on each matching leg: emissions are (1 − share) × before + share × after. Changes apply in order; a later change works on what an earlier one left on diesel. The CSV is the same as for `batch`; up to 2,500 shipments per API request.
@@ -292,9 +292,9 @@ Not taken into account (also in every result): transit times and costs; whether 
 
 ## Inputs
 
-**Biogenic CO2.** Fuels with DESNZ's "outside of scopes" factor (biofuels, and the biofuel share of average diesel and petrol) carry `biogenic_co2_kg_per_unit`. A leg given as measured fuel reports `biogenic_co2_kg`, and results and reports sum it, separately and not in the totals, as the GLEC Framework v3.2 asks (p. 64). Fleet-average vehicle factors don't give it.
+**Biogenic CO2.** Fuels with DESNZ's "outside of scopes" factor (biofuels, and the biofuel share of average diesel and petrol) carry `biogenic_co2_kg_per_unit`. A leg given as measured fuel reports `biogenic_co2_kg`, and results and reports sum it, separately and not in the totals, as the GLEC Framework v3.3 asks (p. 64). Fleet-average vehicle factors don't give it.
 
-**Weight or containers.** Give `weight_kg`, or `teu` plus either `teu_net_tonnes` (net cargo tonnes per TEU) or `container_load`, a profile name from the dataset's `container_loads`. The default dataset has GLEC's: `average` 10 t, `light` 6 t, `heavy` 14.5 t per TEU (GLEC Framework v3.2, Section 1 Chapter 2, for when the mass is known only in TEU); `teu` alone uses `average`. Results show the `weight_kg` used, its `weight_basis` and the `container_load` used. Container tare weight is not added.
+**Weight or containers.** Give `weight_kg`, or `teu` plus either `teu_net_tonnes` (net cargo tonnes per TEU) or `container_load`, a profile name from the dataset's `container_loads`. The default dataset has GLEC's: `average` 10 t, `light` 6 t, `heavy` 14.5 t per TEU (GLEC Framework v3.3, Section 1 Chapter 2, for when the mass is known only in TEU); `teu` alone uses `average`. Results show the `weight_kg` used, its `weight_basis` and the `container_load` used. Container tare weight is not added.
 
 **JSON** — see [`examples/cph-rotterdam.json`](examples/cph-rotterdam.json) and the [OpenAPI spec](internal/api/openapi.yaml).
 
@@ -323,7 +323,7 @@ A bad row fails only its shipment; the rest still calculate. Only failures cause
 
 Below it, **Report** takes a shipments CSV (the `batch` columns), an organisation and a period, and shows the [report](#report-over-many-shipments): totals, modes, hubs, energy carriers, data quality, notes. Download it as Markdown or JSON, and each shipment's full calculation as CSV (a row per leg and hub: distance and how it was found, method, data type, emissions, factor source, notes on added legs) or JSON, all from the one calculation. `POST /v1/report` takes the CSV directly with `Content-Type: text/csv`, report details in the query (`?organisation=...&period_from=...`).
 
-**Check the calculation.** Under each result, "Check the calculation step by step" lays out every step: the cargo mass, each leg's distance and how it was found, the transport activity, the intensity (the factor and its source, the load model's per-km values, the DAF, the fuel or electricity used) and the emissions, then the total and the data quality. Each step shows its arithmetic with the numbers used, and the GLEC Framework v3.2 page and ISO 14083:2023 clause it follows (the clause numbers are those GLEC lists in its "ISO References" boxes), so someone who knows the methods can redo it by hand. Download it as Markdown, or print it to PDF. The API gives the same with `POST /v1/calculate?explain=true`.
+**Check the calculation.** Under each result, "Check the calculation step by step" lays out every step: the cargo mass, each leg's distance and how it was found, the transport activity, the intensity (the factor and its source, the load model's per-km values, the DAF, the fuel or electricity used) and the emissions, then the total and the data quality. Each step shows its arithmetic with the numbers used, and the GLEC Framework v3.3 page and ISO 14083:2023 clause it follows (the clause numbers are those GLEC lists in its "ISO References" boxes), so someone who knows the methods can redo it by hand. Download it as Markdown, or print it to PDF. The API gives the same with `POST /v1/calculate?explain=true`.
 
 Each calculation also shows the legs on a map: the route as routed (road, rail, river, sea), or a dashed straight line where the distance was given or estimated. The map uses the bundled Leaflet and OpenStreetMap's tiles; everything else on the page works offline (no external scripts or fonts), in light or dark mode.
 
@@ -358,16 +358,17 @@ Protections for running it on a network: at most `-max-concurrent` calculation r
 
 ## Factor datasets
 
-`-factors` (or `SOOTCASE_FACTORS`) takes an embedded dataset name or a JSON file, or several separated by commas to layer them: `-factors desnz-2026,my-hubs.json`. Layers are combined; defining the same factor twice is an error, so nothing is silently overridden. The one exception is a short alias (such as `container_ship`) defined again: it then means the later dataset's vehicle type.
+`-factors` (or `SOOTCASE_FACTORS`) takes an embedded dataset name or a JSON file, or several separated by commas to layer them: `-factors desnz-2026,my-hubs.json`. Layers are combined; defining the same factor twice is an error, so nothing is silently overridden. The exceptions are a short alias (such as `container_ship`) or a DAF defined again: it is then the later dataset's.
 
 | Dataset | What |
 |---|---|
+| `glec-3.3` | GLEC Framework v3.3 default values (Section 3 Module 2), built by `tools/glec/build.py` |
 | `desnz-2026` | UK government GHG conversion factors 2026, imported from the official flat file |
 | `nl-iww-2026` | Inland waterway factors from the Dutch [CO2 emission factor list](https://www.co2emissiefactoren.nl/) 2026 (CE Delft STREAM 2020) |
 | `eu-mrv-2024` | Container ship factors from EU MRV data for 2024, published by EMSA |
 | `sample` | Placeholder values, for tests only |
 
-The default is `desnz-2026,nl-iww-2026,eu-mrv-2024`.
+The default is `desnz-2026,nl-iww-2026,eu-mrv-2024,glec-3.3`: GLEC's aliases come last, so they win; the other datasets' vehicle types stay available by their full ids.
 
 A dataset is JSON with `legs` (g CO2e/tkm), `hubs` (g CO2e/t), `fuels` (kg CO2e/unit) and optional `load_models`, `dafs`, `distance_adjustments`, `vehicle_aliases`, `fuel_aliases` and `container_loads`, each factor with a TTW/WTT split, source and year. See [`sample.json`](pkg/factors/data/sample.json) for the shape.
 
@@ -375,14 +376,14 @@ A dataset is JSON with `legs` (g CO2e/tkm), `hubs` (g CO2e/t), `fuels` (kg CO2e/
 
 | Mode | Aliases |
 |---|---|
-| road | `hgv`, `hgv_rigid`, `hgv_artic`, `hgv_artic_33t`, `hgv_reefer`, `van`, `van_electric` |
-| rail | `freight_train` |
-| sea | `container_ship` (EU MRV, short-sea under 2,000 km, deep-sea from 2,000 km), `container_ship_short_sea`, `container_ship_deep_sea`, `bulk_carrier`, `general_cargo`, `roro`, `ropax` |
-| air | `air_freight` (international, without radiative forcing) |
-| inland_waterway | `barge` (1500–3000 t, the Dutch list's average), `container_barge` (208 TEU, likewise) |
+| road | `hgv`, `hgv_rigid`, `hgv_artic`, `hgv_artic_33t`, `hgv_reefer`, `van`, `truck_urban` (GLEC, by region), `van_electric` (DESNZ) |
+| rail | `freight_train` (GLEC, by region), `freight_train_diesel`, `freight_train_electric` (GLEC Europe) |
+| sea | `container_ship`, `container_ship_reefer` (GLEC, by trade lane), `container_ship_short_sea`, `container_ship_deep_sea` (EU MRV), `bulk_carrier`, `general_cargo`, `roro`, `ropax` (DESNZ) |
+| air | `air_freight` (GLEC, aircraft type unknown; short-haul under 1,500 km; within India GLEC's Indian value), `air_freighter`, `air_belly` |
+| inland_waterway | `barge` (GLEC motor vessel 85–110 m), `container_barge` (GLEC container vessel 110 m) |
 | fuel (per litre) | `diesel`, `diesel_mineral`, `petrol`, `hvo`, `marine_gas_oil`, `marine_fuel_oil`, `jet_fuel` |
 
-Road aliases use DESNZ's "average laden" factors.
+**GLEC v3.3 regions and trade lanes.** A regional alias looks at the country of both ends of the leg (from the place list): when both are in the same GLEC region it uses that region's value, otherwise the alias's default (Europe and South America). Road: North America (SmartWay, US and Canada), China, India, Asia (except China and India) and Africa (GLEC's +13% for vans, +22% for heavier vehicles on the Europe and South America values), Europe and South America (with Mexico, Central America and the Caribbean; also used for Oceania, which GLEC doesn't cover). The aliases use GLEC's "starting point" for the vehicle class in each region (e.g. 125 g CO2e/t-km WTW for HGVs in Europe); North America has none in GLEC, so SmartWay TL/Dry Van. `hgv_reefer` adds GLEC's +12% for temperature-controlled freight. GLEC road values include its +5% distance conversion, so they are per shortest feasible distance. `container_ship` picks the Clean Cargo trade lane (GLEC Tables 18–19) from the zones of the two ports (North Europe, Mediterranean/Black Sea, NE Asia, SE Asia, Middle East/India, Africa, North America EC/Gulf and WC, South America, Oceania; the country lists are Sootcase's), per TEU-km ÷ 10 t per TEU, GLEC's average. A leg's note says which region or lane was used. With a load given, the road aliases keep DESNZ's load models. GLEC values without a vehicle-size-free default (non-container ships, Ro-Ro, RoPax) are available by full id (`glec/sea/bulk_carrier/35000-59999_dwt/vlsfo`), and their aliases stay on DESNZ for now.
 
 **Inland waterways** (`nl-iww-2026`): three bulk vessel classes (`barge_bulk_small`/`medium`/`large`, 300 t to 11,000 t) and four container vessels (`barge_container_40teu`, `96teu`, `208teu`, `348teu`). Factors are per *actual* tonne-km and include sailing empty. Give coordinates with [waterway routing](#inland-waterway-routing) set up, or the river distance as `distance_km`; a shortest feasible distance (`distance_type: sfd`) is used as is, since GLEC needs no DAF for inland waterways. Without routing, a leg with only coordinates is refused: a straight line would undercount a river route, and there's no default correction for it. Source: www.co2emissiefactoren.nl, free to use with attribution.
 
@@ -392,15 +393,14 @@ Why: DESNZ's container ship factors (about 20 g CO2e per tonne-km on average, 15
 
 **Notes on DESNZ data:**
 - Air freight comes `with_rf` and `without_rf` (radiative forcing). ISO 14083 reports without RF.
-- No hub factors are included, and none ship by default: the openly published averages we found (Fraunhofer IML's [logistics site values](https://reff.iml.fhg.de/), e.g. per tonne for transhipment and warehousing) carry no reuse licence. Add your own as a layer:
+- Hub factors come from GLEC v3.3 Table 3 (GILA project; Fraunhofer IML, Politecnico di Milano, GreenRouter): `transshipment`, `storage_transshipment`, `warehouse`, `liquid_bulk_terminal`, and `_mixed` for mixed ambient and temperature-controlled sites (kg CO2e per tonne; sample sizes in the source). Intermodal terminals are per container and not included yet. Add your own as a layer:
 
   ```json
   {"name": "my-hubs", "note": "where these values come from",
-   "hubs": [{"hub_type": "transhipment_ambient", "wtw_g_per_tonne": 0, "source": "…", "year": 2024}]}
+   "hubs": [{"hub_type": "my_dc", "wtw_g_per_tonne": 0, "source": "…", "year": 2026}]}
   ```
-  Fill in real values (g CO2e per tonne handled) from a source you're allowed to use.
 - Air factors are marked as great-circle based and road factors as actual-distance based; the GLEC default DAFs above are added. DESNZ sea factors (from IMO 2009) state no distance basis, so no DAF applies to them; GLEC's own sea default values include +15%.
-- GLEC default values aren't included yet. Smart Freight Centre has given permission to use them with acknowledgment of the source ("Global Logistics Emissions Council Framework for Logistics Emissions Accounting and Reporting; v3.2 edition, revised and updated (2025)"); they are planned from its next update. The distance adjustments above are GLEC's, © Smart Freight Centre.
+- GLEC default values: Smart Freight Centre. Global Logistics Emissions Council Framework for Logistics Emissions Accounting and Reporting; v3.3 edition, revised and updated (October 2026). ISBN 978-90-833629-0-8. Used with the permission of Smart Freight Centre, which is acknowledged as the source; no affiliation or endorsement is implied. GLEC's fuel emission factors (Module 1) aren't included yet: fuels use DESNZ.
 
 **Updating DESNZ** each year: download the "flat file" from [gov.uk](https://www.gov.uk/government/collections/government-conversion-factors-for-company-reporting) and run
 
@@ -468,6 +468,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 - [x] Real dataset: UK DESNZ 2026, with importer for future years
 - [x] Dataset-level distance adjustments
 - [x] GLEC v3.2 worked examples as golden tests (Module 4: road, air, bulk sea, hub)
+- [x] GLEC v3.3 default values: regional road, rail and air, container trade lanes, hubs
 - [x] Short aliases for common vehicle types and fuels
 - [x] OSRM road routing
 - [x] Sea routing on a maritime network (SeaRoute)

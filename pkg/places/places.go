@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
 )
@@ -61,6 +62,20 @@ type Index struct {
 
 	latOnce sync.Once
 	byLat   []int32 // place indices sorted by latitude, for Near
+
+	gridOnce  sync.Once
+	grid      map[int32][]int32 // place indices by 1° cell, for Country
+	countries sync.Map          // Country results by rounded coordinates
+	nCached   atomic.Int64
+}
+
+func cell(lat, lon float64) (int, int) {
+	return int(math.Floor(lat)), int(math.Floor(lon))
+}
+
+func cellKey(la, lo int) int32 {
+	lo = ((lo+180)%360+360)%360 - 180
+	return int32((la+90)*360 + lo + 180)
 }
 
 // latWindow returns the indices of the places with latitude within
@@ -364,15 +379,45 @@ func (ix *Index) Country(p calc.Location) string {
 			return q.Country
 		}
 	}
-	best, bestKm := "", 100.0
-	for i := range ix.places {
-		q := &ix.places[i]
-		if math.Abs(q.Lat-p.Lat) > 1 {
+	key := [2]int32{int32(math.Round(p.Lat * 1e4)), int32(math.Round(p.Lon * 1e4))}
+	if c, ok := ix.countries.Load(key); ok {
+		return c.(string)
+	}
+	ix.gridOnce.Do(func() {
+		ix.grid = map[int32][]int32{}
+		for i := range ix.places {
+			la, lo := cell(ix.places[i].Lat, ix.places[i].Lon)
+			k := cellKey(la, lo)
+			ix.grid[k] = append(ix.grid[k], int32(i))
+		}
+	})
+	const maxKm = 100.0
+	la0, lo0 := cell(p.Lat, p.Lon)
+	dLon := 1
+	if c := math.Cos(p.Lat * math.Pi / 180); c > 0.01 {
+		dLon = int(math.Ceil(maxKm / (111.2 * c)))
+	} else {
+		dLon = 180
+	}
+	if dLon > 180 {
+		dLon = 180
+	}
+	best, bestKm := "", maxKm
+	for la := la0 - 1; la <= la0+1; la++ {
+		if la < -90 || la > 89 {
 			continue
 		}
-		if km := haversine(p.Lat, p.Lon, q.Lat, q.Lon); km < bestKm {
-			best, bestKm = q.Country, km
+		for lo := lo0 - dLon; lo <= lo0+dLon; lo++ {
+			for _, j := range ix.grid[cellKey(la, lo)] {
+				q := &ix.places[j]
+				if km := haversine(p.Lat, p.Lon, q.Lat, q.Lon); km < bestKm {
+					best, bestKm = q.Country, km
+				}
+			}
 		}
+	}
+	if ix.nCached.Add(1) <= 500_000 { // bounded: a cache, not a copy of every point seen
+		ix.countries.Store(key, best)
 	}
 	return best
 }
