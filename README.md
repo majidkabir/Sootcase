@@ -477,7 +477,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 - [x] Truck load model (load factor, empty trip factor)
 - [x] Electricity by country (213 grids) for electric rail and trucks
 - [x] Dataset layering (e.g. DESNZ + your own hub factors)
-- [ ] Bundled hub / warehouse factors (needs an openly licensed source)
+- [x] Bundled hub / warehouse factors (GLEC v3.3 Table 3, with Smart Freight Centre's permission)
 - [x] Web page for `sootcase serve`
 - [x] Streaming, parallel batch
 - [x] NDJSON stream mode for pipes and Kafka
