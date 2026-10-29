@@ -366,7 +366,7 @@ LANES = {
     "se_asia_ne_asia": ("SE Asia to-from NE Asia", (19.6, 90.9), (36.1, 167.5)),
     "intra_ne_asia": ("Intra NE Asia", (24.5, 114.0), (45.6, 211.7)),
     "intra_se_asia": ("Intra SE Asia", (22.9, 106.4), (40.6, 188.8)),
-    "north_europe_med_bs": ("North Europe to-from Mediterranean/Black Sea", (20.6, 95.5), (39.1, 181.8)),
+    "north_europe_med_bs": ("North Europe to-from Mediterranean/Black Sea", (20.6, 95.6), (39.1, 181.8)),
     "intra_med_bs": ("Intra Mediterranean/Black Sea", (35.6, 165.5), (68.9, 320.0)),
     "intra_north_europe": ("Intra North Europe", (30.9, 143.8), (54.4, 252.7)),
     "intra_me_india": ("Intra Middle East/India", (26.7, 124.3), (48.5, 225.5)),

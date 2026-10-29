@@ -3740,9 +3740,9 @@
   {
    "mode": "sea",
    "vehicle_type": "glec/sea/container/north_europe_med_bs/dry",
-   "ttw_g_per_tkm": 9.55,
+   "ttw_g_per_tkm": 9.56,
    "wtt_g_per_tkm": 2.06,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North Europe to-from Mediterranean/Black Sea, dry, 20.6 + 95.5 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North Europe to-from Mediterranean/Black Sea, dry, 20.6 + 95.6 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
    "distance_basis": "sfd"
   },
