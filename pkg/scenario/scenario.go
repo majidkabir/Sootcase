@@ -506,7 +506,7 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 		n := 0
 		for j := range in.Legs {
 			l := &in.Legs[j]
-			if l.Mode != calc.Road || l.Fuel != nil || l.EnergyKWhPerTkm != 0 {
+			if l.Mode != calc.Road || l.Fuel != nil || l.EnergyKWhPerTkm != 0 || l.OwnFactor != nil {
 				continue
 			}
 			r := byID[l.ID]
@@ -559,7 +559,7 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 			n := 0
 			for j := range ls.Legs {
 				l := &ls.Legs[j]
-				if l.Mode != calc.Road || l.Fuel != nil || l.EnergyKWhPerTkm != 0 || !ch.matches(l.VehicleType, byID[l.ID].Factor) {
+				if l.Mode != calc.Road || l.Fuel != nil || l.EnergyKWhPerTkm != 0 || l.OwnFactor != nil || !ch.matches(l.VehicleType, byID[l.ID].Factor) {
 					continue
 				}
 				l.LoadTonnes, l.LoadFactor = val(ch.LoadTonnes, 0), val(ch.LoadFactor, 0)

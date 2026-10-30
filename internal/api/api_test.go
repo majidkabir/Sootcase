@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -287,5 +288,26 @@ func TestCalculate_Path(t *testing.T) {
 	resp.Body.Close()
 	if resp, _ := http.Get(srv.URL + "/static/LICENSE"); resp.StatusCode != 404 {
 		t.Error("other files served from static")
+	}
+}
+
+func TestCalculate_OwnFactors(t *testing.T) {
+	srv := newTestServer(t)
+	body := `{"weight_kg":10000,"legs":[{"mode":"road","distance_km":300,"own_factor":{"wtw_g_per_tkm":80,"ttw_g_per_tkm":64,"source":"Carrier X 2025"}},` +
+		`{"mode":"road","vehicle_type":"truck_40t","distance_km":300,"fuel":{"fuel":"hvo","amount":100,"factor":{"unit":"l","wtw_kg_per_unit":0.5,"ttw_kg_per_unit":0.03,"source":"Supplier Y"}}}]}`
+	resp, out := post(t, srv.URL+"/v1/calculate", body)
+	if resp.StatusCode != 200 {
+		t.Fatalf("%d %v", resp.StatusCode, out)
+	}
+	legs := out["legs"].([]any)
+	l0, l1 := legs[0].(map[string]any), legs[1].(map[string]any)
+	if l0["data_type"] != "primary" || math.Abs(l0["wtw_kg"].(float64)-240) > 1e-9 || l1["data_type"] != "primary" || math.Abs(l1["wtw_kg"].(float64)-50) > 1e-9 {
+		t.Errorf("legs: %v %v", l0, l1)
+	}
+	if out["primary_data_share"].(float64) != 1 {
+		t.Errorf("primary share %v", out["primary_data_share"])
+	}
+	if resp, out := post(t, srv.URL+"/v1/calculate", `{"weight_kg":1000,"legs":[{"mode":"road","distance_km":10,"own_factor":{"wtw_g_per_tkm":80}}]}`); resp.StatusCode != 422 && resp.StatusCode != 400 {
+		t.Errorf("no source: %d %v", resp.StatusCode, out)
 	}
 }

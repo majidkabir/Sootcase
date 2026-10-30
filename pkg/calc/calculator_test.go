@@ -362,3 +362,65 @@ func FuzzCalculate_Finite(f *testing.F) {
 		}
 	})
 }
+
+// Own intensity (primary data): no DAF when its basis is the leg's distance;
+// it must have a source, and TTW within WTW.
+func TestCalculate_OwnFactor(t *testing.T) {
+	c := Calculator{Factors: testFactors}
+	leg := Leg{ID: "l1", Mode: Road, DistanceKm: 300, DistanceType: DistSFD, OwnFactor: &OwnFactor{WTW: 80, TTW: 64, Source: "Carrier X, 2025 TOC report"}}
+	r, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000, Legs: []Leg{leg}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	l := r.Legs[0]
+	// 3000 tkm × 80 g = 240 kg WTW, × 64 g = 192 kg TTW.
+	if l.Method != MethodIntensity || l.DataType != DataPrimary || !approx(l.WTWKg, 240) || !approx(l.TTWKg, 192) ||
+		l.Factor.Source != "Own value: Carrier X, 2025 TOC report" || l.Factor.VehicleType != "own" || l.DAF != 0 || r.PrimaryDataShare != 1 {
+		t.Errorf("got %+v %+v", l, l.Factor)
+	}
+	for name, o := range map[string]OwnFactor{
+		"no source":   {WTW: 80, TTW: 64},
+		"ttw > wtw":   {WTW: 80, TTW: 90, Source: "x"},
+		"zero wtw":    {Source: "x"},
+		"bad basis":   {WTW: 80, Source: "x", DistanceBasis: "miles"},
+		"negative tw": {WTW: 80, TTW: -1, Source: "x"},
+	} {
+		l := leg
+		l.OwnFactor = &o
+		if _, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000, Legs: []Leg{l}}); !errors.Is(err, ErrInvalidInput) {
+			t.Errorf("%s: %v", name, err)
+		}
+	}
+	l2 := leg
+	l2.Fuel = &FuelUse{Fuel: "diesel", Amount: 10}
+	if _, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000, Legs: []Leg{l2}}); err == nil {
+		t.Error("own_factor with fuel accepted")
+	}
+}
+
+// A fuel supplier's own emission factor replaces the dataset's.
+func TestCalculate_OwnFuelFactor(t *testing.T) {
+	c := Calculator{Factors: testFactors}
+	fu := FuelUse{Fuel: "HVO from supplier Y", Amount: 100, Factor: &OwnFuelFactor{Unit: "l", WTW: 0.5, TTW: 0.03, Source: "Supplier Y, 2026", BiogenicCO2: 2.4}}
+	r, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000, Legs: []Leg{{ID: "l1", Mode: Road, DistanceKm: 300, Fuel: &fu}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	l := r.Legs[0]
+	if l.Method != MethodFuel || l.DataType != DataPrimary || !approx(l.WTWKg, 50) || !approx(l.TTWKg, 3) || !approx(l.BiogenicCO2Kg, 240) ||
+		l.FuelFactor.Source != "Own value: Supplier Y, 2026" || l.FuelFactor.Unit != "l" {
+		t.Errorf("got %+v %+v", l, l.FuelFactor)
+	}
+	for name, o := range map[string]OwnFuelFactor{
+		"no source": {Unit: "l", WTW: 1},
+		"no unit":   {WTW: 1, Source: "x"},
+		"ttw > wtw": {Unit: "l", WTW: 1, TTW: 2, Source: "x"},
+		"zero wtw":  {Unit: "l", Source: "x"},
+	} {
+		f := fu
+		f.Factor = &o
+		if _, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000, Legs: []Leg{{ID: "l1", Mode: Road, DistanceKm: 300, Fuel: &f}}}); !errors.Is(err, ErrInvalidFuel) {
+			t.Errorf("%s: %v", name, err)
+		}
+	}
+}

@@ -16,6 +16,10 @@
 //	load_factor or load_tonnes, empty_trip_factor   leg, load model method
 //	repositioning_km                                leg, empty km for this trip (trucks)
 //	energy_kwh_per_tkm, country                     leg, energy method
+//	own_wtw_g_per_tkm, own_ttw_g_per_tkm, own_factor_source, own_distance_basis
+//	                                                leg, the carrier's or your own intensity (primary data)
+//	fuel_unit, fuel_wtw_kg_per_unit, fuel_ttw_kg_per_unit, fuel_factor_source, fuel_biogenic_co2_kg_per_unit
+//	                                                leg, the supplier's or your own fuel emission factor
 //	hub_id, hub_type                                hub stop
 //	hub_containers                                  hub stop, containers handled (per-container hub types)
 package csvio
@@ -263,6 +267,14 @@ func addRow(s *calc.Shipment, row rowReader) error {
 	leg.Country = row.str("country")
 	if fuel := row.str("fuel"); fuel != "" {
 		leg.Fuel = &calc.FuelUse{Fuel: fuel, Amount: get("fuel_amount"), VehicleTonneKm: get("vehicle_tonne_km")}
+		if src, wtw := row.str("fuel_factor_source"), get("fuel_wtw_kg_per_unit"); src != "" || wtw != 0 {
+			leg.Fuel.Factor = &calc.OwnFuelFactor{Unit: row.str("fuel_unit"), WTW: wtw, TTW: get("fuel_ttw_kg_per_unit"), Source: src,
+				BiogenicCO2: get("fuel_biogenic_co2_kg_per_unit")}
+		}
+	}
+	if src, wtw := row.str("own_factor_source"), get("own_wtw_g_per_tkm"); src != "" || wtw != 0 {
+		leg.OwnFactor = &calc.OwnFactor{WTW: wtw, TTW: get("own_ttw_g_per_tkm"), Source: src,
+			DistanceBasis: strings.ToLower(row.str("own_distance_basis"))}
 	}
 	if err := errors.Join(errs...); err != nil {
 		return err

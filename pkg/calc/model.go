@@ -59,6 +59,9 @@ type Leg struct {
 	// electricity per tonne-km times the country's grid intensity.
 	EnergyKWhPerTkm float64 `json:"energy_kwh_per_tkm,omitempty"`
 	Country         string  `json:"country,omitempty"`
+	// OwnFactor is the carrier's or your own intensity for this leg, used
+	// instead of a default value (primary data, ISO 14083 7.2.3).
+	OwnFactor *OwnFactor `json:"own_factor,omitempty"`
 	// AtTerminals (rail, inland waterway, sea) makes the leg start and end
 	// at a rail terminal or port: an end that isn't at one moves to the
 	// nearest one, with a road leg to it, even when the end is on the
@@ -76,6 +79,32 @@ type FuelUse struct {
 	// allocate fuel to this shipment by tonne-km share. 0 means the whole
 	// trip belongs to this shipment.
 	VehicleTonneKm float64 `json:"vehicle_tonne_km,omitempty"`
+	// Factor is the fuel supplier's or your own emission factor for this
+	// fuel, used instead of the dataset's (Fuel is then just its name).
+	Factor *OwnFuelFactor `json:"factor,omitempty"`
+}
+
+// OwnFactor is an intensity from the carrier or your own measurements, in
+// grams CO2e per tonne-km.
+type OwnFactor struct {
+	WTW    float64 `json:"wtw_g_per_tkm"` // well-to-wheel
+	TTW    float64 `json:"ttw_g_per_tkm"` // tank-to-wheel, part of WTW
+	Source string  `json:"source"`        // who measured it, and for what
+	// DistanceBasis is the distance type the intensity is per tonne-km of:
+	// sfd, gcd or actual. Empty: the same as the leg's distance, so no
+	// distance adjustment factor.
+	DistanceBasis string `json:"distance_basis,omitempty"`
+}
+
+// OwnFuelFactor is a fuel's emission factor from the supplier or your own
+// data, in kg CO2e per unit of fuel.
+type OwnFuelFactor struct {
+	Unit   string  `json:"unit"`            // e.g. "l", "kg", "kWh"
+	WTW    float64 `json:"wtw_kg_per_unit"` // well-to-wheel
+	TTW    float64 `json:"ttw_kg_per_unit"` // tank-to-wheel, part of WTW
+	Source string  `json:"source"`
+	// BiogenicCO2 is biogenic CO2 per unit, reported apart (optional).
+	BiogenicCO2 float64 `json:"biogenic_co2_kg_per_unit,omitempty"`
 }
 
 // FuelFactor converts fuel to emissions, in kg CO2e per unit of fuel.

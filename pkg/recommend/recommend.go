@@ -1150,7 +1150,7 @@ func (a *analyser) loads() {
 	n := 0
 	for j := range s.Legs {
 		l := &s.Legs[j]
-		if l.Mode != calc.Road || l.Fuel != nil || l.EnergyKWhPerTkm != 0 {
+		if l.Mode != calc.Road || l.Fuel != nil || l.EnergyKWhPerTkm != 0 || l.OwnFactor != nil {
 			continue
 		}
 		if a.set.LoadVehicle != "" {

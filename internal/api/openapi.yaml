@@ -352,6 +352,28 @@ components:
         vehicle_tonne_km:
           type: number
           description: Total tonne-km on the vehicle trip, for allocation. 0 or absent = whole trip.
+        factor:
+          type: object
+          description: The fuel supplier's or your own emission factor, used instead of the dataset's (fuel is then just its name).
+          required: [unit, wtw_kg_per_unit, source]
+          properties:
+            unit: { type: string, example: l }
+            wtw_kg_per_unit: { type: number, exclusiveMinimum: 0, description: Well-to-wheel kg CO2e per unit }
+            ttw_kg_per_unit: { type: number, minimum: 0, description: Tank-to-wheel kg CO2e per unit, part of WTW }
+            source: { type: string, description: Who gives the factor, and for what }
+            biogenic_co2_kg_per_unit: { type: number, minimum: 0, description: Reported apart, not in WTW }
+    OwnFactor:
+      type: object
+      description: The carrier's or your own intensity for a leg (primary data, ISO 14083 7.2.3), used instead of a default value.
+      required: [wtw_g_per_tkm, source]
+      properties:
+        wtw_g_per_tkm: { type: number, exclusiveMinimum: 0 }
+        ttw_g_per_tkm: { type: number, minimum: 0, description: Part of WTW; the rest is WTT }
+        source: { type: string, description: Who measured it, and for what (e.g. the carrier's TOC report and year) }
+        distance_basis:
+          type: string
+          enum: [sfd, gcd, actual]
+          description: Distance type the intensity is per tonne-km of. Absent = the leg's own distance type, so no DAF.
     Leg:
       type: object
       required: [mode]
@@ -408,6 +430,7 @@ components:
         country:
           type: string
           description: ISO 3166-1 alpha-3 country whose grid powers the leg, e.g. DNK
+        own_factor: { $ref: "#/components/schemas/OwnFactor" }
     HubStop:
       type: object
       required: [hub_type]

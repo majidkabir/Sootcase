@@ -460,13 +460,16 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 			leg.LoadTonnes = tonnes // a dedicated truck: the shipment is its whole load
 		}
 	}
-	for _, set := range []bool{leg.Fuel != nil, leg.LoadFactor != 0 || leg.LoadTonnes != 0, leg.EnergyKWhPerTkm != 0} {
+	for _, set := range []bool{leg.Fuel != nil, leg.LoadFactor != 0 || leg.LoadTonnes != 0, leg.EnergyKWhPerTkm != 0, leg.OwnFactor != nil} {
 		if set {
 			methods++
 		}
 	}
 	if methods > 1 {
-		return LegResult{}, fmt.Errorf("leg uses more than one of fuel, load_factor and energy_kwh_per_tkm")
+		return LegResult{}, fmt.Errorf("leg uses more than one of fuel, load_factor, energy_kwh_per_tkm and own_factor")
+	}
+	if leg.OwnFactor != nil {
+		return c.ownLeg(lr, leg, tonnes, dist, dtype)
 	}
 	if leg.Country != "" && leg.EnergyKWhPerTkm == 0 {
 		return LegResult{}, fmt.Errorf("%w: country is only used with energy_kwh_per_tkm", ErrInvalidEnergy)
@@ -528,6 +531,51 @@ func (c Calculator) where(l Location) Where {
 	return w
 }
 
+// ownLeg calculates a leg with the carrier's or the user's own intensity:
+// primary data (ISO 14083 7.2.3), with a DAF when its distance basis
+// differs from the leg's distance.
+func (c Calculator) ownLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype string) (LegResult, error) {
+	o := *leg.OwnFactor
+	switch {
+	case !(o.WTW > 0) || math.IsInf(o.WTW, 0):
+		return LegResult{}, fmt.Errorf("%w: own_factor.wtw_g_per_tkm must be > 0", ErrInvalidInput)
+	case !(o.TTW >= 0) || o.TTW > o.WTW:
+		return LegResult{}, fmt.Errorf("%w: own_factor.ttw_g_per_tkm must be between 0 and wtw_g_per_tkm", ErrInvalidInput)
+	case strings.TrimSpace(o.Source) == "":
+		return LegResult{}, fmt.Errorf("%w: own_factor needs a source: who measured it, and for what", ErrInvalidInput)
+	}
+	basis := o.DistanceBasis
+	switch basis {
+	case "":
+		basis = dtype
+	case DistSFD, DistGCD, DistActual:
+	default:
+		return LegResult{}, fmt.Errorf("%w: own_factor.distance_basis must be sfd, gcd or actual", ErrInvalidInput)
+	}
+	vt := leg.VehicleType
+	if vt == "" {
+		vt = "own"
+	}
+	f := Factor{Mode: leg.Mode, VehicleType: vt, TTW: o.TTW, WTT: o.WTW - o.TTW, Source: "Own value: " + strings.TrimSpace(o.Source),
+		DataType: DataPrimary, DistanceBasis: basis}
+	adjKm, daf, err := c.adjust(leg.Mode, dtype, f.DistanceBasis, dist)
+	if err != nil {
+		return LegResult{}, err
+	}
+	if daf != nil && dist > 0 {
+		lr.DAF, lr.DAFSource = adjKm/dist, daf.Source
+	}
+	adjTkm := tonnes * adjKm
+	lr.Method = MethodIntensity
+	lr.Factor = &f
+	lr.TTWKg = adjTkm * f.TTW / 1000
+	lr.WTWKg = adjTkm * f.WTW() / 1000
+	if leg.CargoType != "" {
+		lr.FactorNote = fmt.Sprintf("Cargo type %q isn't applied here: it chooses default values, and this leg uses its own intensity.", leg.CargoType)
+	}
+	return lr, nil
+}
+
 func (c Calculator) fuelLeg(lr LegResult, fu FuelUse, from, to Where) (LegResult, error) {
 	if fu.Amount < 0 || fu.VehicleTonneKm < 0 {
 		return LegResult{}, fmt.Errorf("%w: amount and vehicle_tonne_km must be >= 0", ErrInvalidFuel)
@@ -542,7 +590,20 @@ func (c Calculator) fuelLeg(lr LegResult, fu FuelUse, from, to Where) (LegResult
 	}
 	var ff FuelFactor
 	var err error
-	if pf, ok := c.Factors.(PlaceFuelProvider); ok {
+	if o := fu.Factor; o != nil {
+		switch {
+		case !(o.WTW > 0) || math.IsInf(o.WTW, 0):
+			return LegResult{}, fmt.Errorf("%w: fuel.factor.wtw_kg_per_unit must be > 0", ErrInvalidFuel)
+		case !(o.TTW >= 0) || o.TTW > o.WTW:
+			return LegResult{}, fmt.Errorf("%w: fuel.factor.ttw_kg_per_unit must be between 0 and wtw_kg_per_unit", ErrInvalidFuel)
+		case !(o.BiogenicCO2 >= 0):
+			return LegResult{}, fmt.Errorf("%w: fuel.factor.biogenic_co2_kg_per_unit must be >= 0", ErrInvalidFuel)
+		case strings.TrimSpace(o.Source) == "" || strings.TrimSpace(o.Unit) == "":
+			return LegResult{}, fmt.Errorf("%w: fuel.factor needs a unit and a source", ErrInvalidFuel)
+		}
+		ff = FuelFactor{Fuel: fu.Fuel, Unit: o.Unit, TTW: o.TTW, WTT: o.WTW - o.TTW, Source: "Own value: " + strings.TrimSpace(o.Source),
+			BiogenicCO2: o.BiogenicCO2}
+	} else if pf, ok := c.Factors.(PlaceFuelProvider); ok {
 		ff, lr.FactorNote, err = pf.FuelFactorAt(fu.Fuel, from, to)
 	} else {
 		ff, err = c.Factors.FuelFactor(fu.Fuel)

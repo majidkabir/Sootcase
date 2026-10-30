@@ -227,3 +227,25 @@ func TestRead_Repositioning(t *testing.T) {
 		t.Fatalf("%v %+v", err, items)
 	}
 }
+
+func TestRead_OwnFactors(t *testing.T) {
+	in := "shipment_id,weight_kg,mode,vehicle_type,distance_km,own_wtw_g_per_tkm,own_ttw_g_per_tkm,own_factor_source,own_distance_basis,fuel,fuel_amount,fuel_unit,fuel_wtw_kg_per_unit,fuel_ttw_kg_per_unit,fuel_factor_source,fuel_biogenic_co2_kg_per_unit\n" +
+		"S,1000,road,hgv,100,70,56,Carrier X,ACTUAL,,,,,,,\n" +
+		"S,1000,road,hgv,100,,,,,hvo,30,l,0.5,0.03,Supplier Y,2.4\n" +
+		"S,1000,road,hgv,100,,,,,diesel,30,,,,,\n"
+	items, err := Read(strings.NewReader(in))
+	if err != nil || len(items) != 1 || items[0].Err != nil {
+		t.Fatalf("%v %+v", err, items)
+	}
+	legs := items[0].Shipment.Legs
+	if o := legs[0].OwnFactor; o == nil || o.WTW != 70 || o.TTW != 56 || o.Source != "Carrier X" || o.DistanceBasis != "actual" || legs[0].Fuel != nil {
+		t.Errorf("own factor: %+v", legs[0])
+	}
+	if f := legs[1].Fuel; f == nil || f.Factor == nil || f.Factor.Unit != "l" || f.Factor.WTW != 0.5 || f.Factor.TTW != 0.03 ||
+		f.Factor.Source != "Supplier Y" || f.Factor.BiogenicCO2 != 2.4 || legs[1].OwnFactor != nil {
+		t.Errorf("fuel factor: %+v", legs[1].Fuel)
+	}
+	if f := legs[2].Fuel; f == nil || f.Factor != nil {
+		t.Errorf("dataset fuel: %+v", legs[2].Fuel)
+	}
+}

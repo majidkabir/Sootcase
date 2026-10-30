@@ -17,6 +17,7 @@
   --blue: #1F5E8C;
   --ttw: #3A4F63;
   --wtt: #6FA8B6;
+  --hub: #A9853A;
   --signal: #F2B705;
   --error: #B42318;
   --font: "Bahnschrift", "DIN Alternate", "D-DIN", "DIN 2014", "Barlow Semi Condensed", "Roboto Condensed",
@@ -32,6 +33,7 @@
     --blue: #7FB4DD;
     --ttw: #8FA6BC;
     --wtt: #4E8A99;
+    --hub: #C9A85C;
     --error: #FF8A80;
   }
 }
@@ -105,7 +107,7 @@ input:hover, select:hover { border-color: var(--muted); }
 .seg:last-child { border-right: 0; }
 .seg .t { background: var(--ttw); }
 .seg .w { background: var(--wtt); }
-.seg.hub .w { background: repeating-linear-gradient(135deg, var(--wtt) 0 6px, color-mix(in srgb, var(--wtt) 60%, var(--sheet)) 6px 12px); }
+.seg .h { background: repeating-linear-gradient(135deg, var(--hub) 0 6px, color-mix(in srgb, var(--hub) 60%, var(--sheet)) 6px 12px); }
 .ribbon-labels { display: flex; margin-top: 6px; font-size: .85rem; }
 .ribbon-labels span { min-width: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-right: 6px; color: var(--muted); }
 .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 14px 0 24px; font-size: .85rem; color: var(--muted); }
@@ -648,13 +650,15 @@ function legInfo(req, l) {
 function render(req, r) {
   const parts = [
     ...r.legs.map(l => ({ label: `${legInfo(req, l).name}, ${(modeName[l.mode] || l.mode).toLowerCase()}`, ttw: l.ttw_kg, wtt: l.wtt_kg, wtw: l.wtw_kg })),
-    ...(r.hubs || []).map(h => ({ label: h.hub_type, ttw: 0, wtt: h.wtw_kg, wtw: h.wtw_kg, hub: true })),
+    // Hub factors are well-to-wheel totals with no TTW/WTT split (GLEC v3.3 Table 3): drawn as a total.
+    ...(r.hubs || []).map(h => ({ label: h.hub_type, ttw: 0, wtt: 0, wtw: h.wtw_kg, hub: true })),
   ];
   const total = r.wtw_kg || 1;
   const segs = parts.map(p => {
     const w = Math.max(p.wtw / total * 100, 0.6);
     const t = p.wtw ? p.ttw / p.wtw * 100 : 0;
-    return `<div class="seg${p.hub ? " hub" : ""}" style="flex:0 0 ${w}%" title="${esc(p.label)}: ${kg(p.wtw)}">
+    return p.hub ? `<div class="seg hub" style="flex:0 0 ${w}%" title="${esc(p.label)}: ${kg(p.wtw)} (well-to-wheel, no split)"><div class="h" style="flex:1"></div></div>`
+      : `<div class="seg" style="flex:0 0 ${w}%" title="${esc(p.label)}: ${kg(p.wtw)}">
       <div class="t" style="flex:0 0 ${t}%"></div><div class="w" style="flex:1"></div></div>`;
   }).join("");
   const labels = parts.map(p => `<span style="flex:0 0 ${Math.max(p.wtw / total * 100, 0.6)}%">${esc(p.label)}</span>`).join("");
@@ -705,13 +709,15 @@ function render(req, r) {
     ${added ? `<p class="warn">${added === 1 ? "A road leg was" : `${added} road legs were`} added to join up the trip; they are marked <em>added</em> below and included in the total.</p>` : ""}
     ${warnings ? `<div class="warn">Check these, they may make the result too low:<ul>${warnings}</ul></div>` : ""}
     <p class="answer-sub">${fmt(r.weight_kg / 1000, 2)} t over ${fmt(r.tonne_km, 0)} tonne-km:
-      ${kg(r.ttw_kg)} from the vehicles, ${kg(r.wtt_kg)} from producing their fuel or electricity,
+      ${kg(r.ttw_kg)} from the vehicles, ${kg(r.wtt_kg)} from producing their fuel or electricity,${(r.hubs || []).length ?
+      ` ${kg(r.hubs.reduce((a, h) => a + h.wtw_kg, 0))} at hubs (well-to-wheel, no split),` : ""}
       ${fmt(r.intensity_g_per_tkm, 1)} g per tonne-km. ${share}% from measured data.${r.biogenic_co2_kg > 0 ? `
       Biogenic CO₂ ${kg(r.biogenic_co2_kg)}, reported separately and not included (GLEC Framework v3.3).` : ""}</p>
     <div class="ribbon grow" role="img" aria-label="Share of emissions by leg">${segs}</div>
     <div class="ribbon-labels" aria-hidden="true">${labels}</div>
     <div class="legend"><span><i style="background:var(--ttw)"></i>Vehicle (tank-to-wheel)</span>
-      <span><i style="background:var(--wtt)"></i>Fuel and electricity supply (well-to-tank)</span></div>
+      <span><i style="background:var(--wtt)"></i>Fuel and electricity supply (well-to-tank)</span>${(r.hubs || []).length ?
+      `<span><i style="background:var(--hub)"></i>Hubs (well-to-wheel total; GLEC gives no split)</span>` : ""}</div>
     <div id="map" class="map" hidden></div>
     <div id="map-legend" class="legend map-legend" hidden></div>
     <h3 style="font-size:1rem;margin-bottom:8px">How each number was made</h3>
@@ -1195,7 +1201,7 @@ const changeName = { road_to_rail: "Road to rail", electrify: "Electric trucks",
 function renderScenario(r) {
   const b = r.base, sc = r.scenario, max = Math.max(b.wtw_kg, sc.wtw_kg) || 1;
   const bar = t => `<div class="track" role="img" aria-label="${esc(kg(t.wtw_kg))}: ${esc(kg(t.ttw_kg))} vehicles, ${esc(kg(t.wtt_kg))} energy provision">
-    <span style="width:${t.ttw_kg / max * 100}%;background:var(--ttw)"></span><span style="width:${t.wtt_kg / max * 100}%;background:var(--wtt)"></span></div>`;
+    <span style="width:${t.ttw_kg / max * 100}%;background:var(--ttw)"></span><span style="width:${t.wtt_kg / max * 100}%;background:var(--wtt)"></span><span style="width:${Math.max(t.wtw_kg - t.ttw_kg - t.wtt_kg, 0) / max * 100}%;background:var(--hub)"></span></div>`;
   const down = r.diff_kg < 0;
   const changes = (r.changes || []).map(c => `<li><strong>${esc(changeName[c.type] || c.type)}</strong>, ${fmt(c.share * 100, 0)}% of the cargo:
     ${c.shipments_affected} shipments, ${legs(c.legs_affected)}.
