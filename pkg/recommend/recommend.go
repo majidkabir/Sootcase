@@ -934,7 +934,13 @@ func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.
 			}
 		}
 	}
-	hubs, hubText, err := a.addTerminals(cc, &r, main)
+	// The new legs' ends where the shipment starts or ends were on a truck
+	// before, except for another port: the sea leg was a sea leg already.
+	edges := main
+	if kind == OtherPort {
+		edges = nil
+	}
+	hubs, hubText, err := a.addTerminals(cc, &r, edges)
 	if err != nil {
 		a.note("%s: not possible: %v", kindName(kind), shortErr(err))
 		return false

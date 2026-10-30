@@ -241,6 +241,9 @@ func TestOtherPort(t *testing.T) {
 		if o.SavedKg <= 0 {
 			t.Errorf("listed without a saving: %+v", o)
 		}
+		if len(o.Terminals) != 0 {
+			t.Errorf("another port adds no terminal handling: %+v", o.Terminals)
+		}
 	}
 	for i := 1; i < len(sr.Options); i++ {
 		if sr.Options[i].SavedKg > sr.Options[i-1].SavedKg {
