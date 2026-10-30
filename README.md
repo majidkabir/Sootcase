@@ -287,6 +287,11 @@ Fuels are converted with the selected dataset's fuel factors, including `electri
 | `air_to_sea`, `air_to_rail` | Each air leg, with the road legs next to it, as one sea or rail leg from where the cargo starts to where it ends |
 | `other_port` | The large sea ports within `port_radius_km` of each port used now, with the leg on the land side going there |
 | `fuller_loads` | The shipment's road vehicles at `load_tonnes` or `load_factor` (and `empty_trip_factor`, `load_vehicle`); only when you give a load |
+| `larger_truck` | Same route, rigid trucks as articulated 34–40 t (GLEC default value) |
+| `electric_truck` | Same route, electric truck or van (GLEC v3.3 Tables 10–11; Europe, China, India) |
+| `bio_lng_truck` | Same route, bio-LNG articulated truck 34–40 t (GLEC v3.3 Table 8; Europe, South America, Asia, Africa) |
+
+Kinds are grouped by the GLEC Framework's five reduction areas (v3.3, Section 1 Chapter 2, Figure 2; results' `areas` and each option's `area`): optimize freight transport modes (the route changes), increase asset utilization (fuller loads), improve fleet energy efficiency (larger truck), reduce carbon content of energy (electric and bio-LNG trucks). The fifth, reduce freight transport demand, needs business data and has no kind.
 
 Rules (defaults, with sources, all settable): road legs over 300 km (EU Transport White Paper 2011); the rail, waterway or sea part over 100 km in a straight line, road to and from a waterway or sea port within 150 km of it, and road to the nearest rail terminal (Council Directive 92/106/EEC, Article 1). Sea and waterway alternatives need their networks loaded.
 

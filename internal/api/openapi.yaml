@@ -717,7 +717,7 @@ components:
       properties:
         kinds:
           type: array
-          items: { type: string, enum: [road_to_rail, road_to_waterway, road_to_short_sea, air_to_sea, air_to_rail, other_port, fuller_loads] }
+          items: { type: string, enum: [road_to_rail, road_to_waterway, road_to_short_sea, air_to_sea, air_to_rail, other_port, fuller_loads, larger_truck, electric_truck, bio_lng_truck] }
           description: Kinds to try; empty means all (fuller_loads only with a load)
         min_road_km: { type: number, description: "Road legs longer than this are tried on rail, waterway and short sea (default 300)" }
         min_main_km: { type: number, description: "The rail, waterway or sea part must be longer than this in a straight line (default 100)" }
@@ -759,7 +759,8 @@ components:
         best: { $ref: "#/components/schemas/ScenarioTotals" }
         saved_kg: { type: number }
         saved_pct: { type: number }
-        kinds: { type: array, items: { type: object } }
+        kinds: { type: array, items: { type: object }, description: "Per kind: shipments, saved_kg, best_for and its GLEC reduction area" }
+        areas: { type: array, items: { type: object }, description: "GLEC v3.3's five reduction areas (id, name, kinds tried in each)" }
         lanes: { type: array, items: { type: object } }
         sources: { type: array, items: { type: string } }
         limitations: { type: array, items: { type: string } }

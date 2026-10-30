@@ -375,3 +375,49 @@ func TestTerminalsCount(t *testing.T) {
 		t.Errorf("door to door: %d, want 2", got)
 	}
 }
+
+// Vehicle changes on the same route, with GLEC v3.3 default values, and
+// the GLEC reduction area of each kind.
+func TestVehicleChanges(t *testing.T) {
+	c := setup(t)
+	ctx := context.Background()
+	s := calc.Shipment{ID: "s", WeightKg: 20000, Legs: []calc.Leg{road("r", hamburg, munich, 780)}}
+	res, err := Run(ctx, c, []calc.Shipment{s}, Settings{Kinds: []string{LargerTruck, ElectricTruck, BioLNGTruck}}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sr := res.Shipments[0]
+	base, _ := c.Calculate(ctx, s)
+	for _, k := range []struct{ kind, alias, area string }{
+		{LargerTruck, "hgv_artic", "energy_efficiency"}, {ElectricTruck, "truck_electric", "carbon_content"}, {BioLNGTruck, "truck_bio_lng", "carbon_content"}} {
+		o := option(sr, k.kind)
+		if o == nil {
+			t.Errorf("%s: no option (%v)", k.kind, sr.Notes)
+			continue
+		}
+		want := s
+		want.Legs = []calc.Leg{road("r", hamburg, munich, 780)}
+		want.Legs[0].VehicleType = k.alias
+		r, err := c.Calculate(ctx, want)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if o.Area != k.area || len(o.Legs) != 1 || o.Legs[0].VehicleType != k.alias || !near(o.SavedKg, base.WTWKg-r.WTWKg) ||
+			o.DistanceKm != base.Legs[0].DistanceKm || !strings.Contains(o.Summary, "same route") {
+			t.Errorf("%s: %+v", k.kind, o)
+		}
+	}
+	if len(res.Areas) != 5 || res.Areas[0].ID != "reduce_demand" || len(res.Areas[0].Kinds) != 0 || res.Areas[4].ID != "carbon_content" ||
+		len(res.Areas[4].Kinds) != 2 || res.Kinds[0].Area != "energy_efficiency" {
+		t.Errorf("areas %+v kinds %+v", res.Areas, res.Kinds)
+	}
+	if !strings.Contains(strings.Join(res.Sources, "|"), "Beyond reporting") || !strings.Contains(strings.Join(res.Sources, "|"), "Electric truck") {
+		t.Errorf("sources %v", res.Sources)
+	}
+	// No GLEC electric or bio-LNG value in North America: said, not offered.
+	us := calc.Shipment{ID: "us", WeightKg: 20000, Legs: []calc.Leg{road("r", calc.Location{Lat: 41.88, Lon: -87.63}, calc.Location{Lat: 40.71, Lon: -74.0}, 1300)}}
+	res, _ = Run(ctx, c, []calc.Shipment{us}, Settings{Kinds: []string{ElectricTruck, BioLNGTruck}}, 1)
+	if o := res.Shipments[0].Options; len(o) != 0 || !strings.Contains(strings.Join(res.Shipments[0].Notes, "|"), "not possible") {
+		t.Errorf("US: %+v %v", o, res.Shipments[0].Notes)
+	}
+}

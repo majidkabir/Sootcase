@@ -23,6 +23,13 @@
 // when it is on the network (same Article: combined transport is road to
 // and from the nearest suitable station or port; calc.Leg.AtTerminals).
 //
+// Vehicle changes keep the route and change the vehicle of road legs on a
+// fleet-average default value, with GLEC v3.3 default values: rigid to
+// articulated truck 34-40 t (larger_truck), electric truck or van
+// (electric_truck: Europe, China, India), bio-LNG articulated truck
+// (bio_lng_truck: Europe, South America, Asia and Africa). Kinds are grouped
+// by GLEC's five reduction areas (Areas).
+//
 // Extra transshipments: each terminal handling an alternative adds (a change
 // of mode at a rail, waterway or container-ship terminal, and the ends of
 // the new legs where the shipment starts or ends, as the cargo was on a
@@ -42,6 +49,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -59,12 +67,62 @@ const (
 	AirToRail = "air_to_rail"
 	OtherPort = "other_port"
 	Load      = "fuller_loads"
+	// Vehicle changes on the same route (GLEC default values).
+	LargerTruck   = "larger_truck"
+	ElectricTruck = "electric_truck"
+	BioLNGTruck   = "bio_lng_truck"
 )
 
 // Kinds lists every kind of route change, in the order they are tried.
 func Kinds() []string {
-	return []string{Rail, Waterway, ShortSea, AirToSea, AirToRail, OtherPort, Load}
+	return []string{Rail, Waterway, ShortSea, AirToSea, AirToRail, OtherPort, Load, LargerTruck, ElectricTruck, BioLNGTruck}
 }
+
+// Area is one of the GLEC Framework's five areas for reducing freight
+// emissions (GLEC v3.3, Section 1 Chapter 2, Figure 2: McKinnon 2018 and
+// GLEC). Freight demand (supply chain restructuring) needs business data
+// Sootcase doesn't have, so no kind falls in it.
+type Area struct {
+	ID    string   `json:"id"`
+	Name  string   `json:"name"`
+	Kinds []string `json:"kinds"`
+}
+
+// Areas are GLEC's five reduction areas and the kinds in each, in GLEC's
+// order.
+func Areas() []Area {
+	return []Area{
+		{"reduce_demand", "Reduce freight transport demand", nil},
+		{"transport_modes", "Optimize freight transport modes", []string{Rail, Waterway, ShortSea, AirToSea, AirToRail, OtherPort}},
+		{"asset_utilization", "Increase asset utilization", []string{Load}},
+		{"energy_efficiency", "Improve fleet energy efficiency", []string{LargerTruck}},
+		{"carbon_content", "Reduce carbon content of energy", []string{ElectricTruck, BioLNGTruck}},
+	}
+}
+
+// AreaOf is the GLEC reduction area of a kind.
+func AreaOf(kind string) string {
+	for _, a := range Areas() {
+		for _, k := range a.Kinds {
+			if k == kind {
+				return a.ID
+			}
+		}
+	}
+	return ""
+}
+
+// SourceAreas names where the five reduction areas come from.
+const SourceAreas = "Reduction areas: GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 2 \"Beyond reporting\", " +
+	"Figure 2, Areas and approaches for reducing emissions in freight transport (McKinnon 2018 and GLEC)"
+
+// Vehicle aliases the vehicle changes use (GLEC v3.3 default values).
+const (
+	vehArtic       = "hgv_artic"
+	vehElectric    = "truck_electric"
+	vehElectricVan = "van_electric"
+	vehBioLNG      = "truck_bio_lng"
+)
 
 // Defaults and their sources.
 const (
@@ -293,7 +351,9 @@ type Route struct {
 
 // Option is one alternative for a shipment.
 type Option struct {
-	Kind    string `json:"kind"`
+	Kind string `json:"kind"`
+	// Area is the kind's GLEC reduction area (Areas).
+	Area    string `json:"area"`
 	Summary string `json:"summary"`
 	Route
 	SavedKg  float64 `json:"saved_kg"`  // now − alternative, WTW
@@ -324,6 +384,8 @@ type ShipmentResult struct {
 // KindSummary totals one kind of route change over the shipments.
 type KindSummary struct {
 	Kind string `json:"kind"`
+	// Area is the kind's GLEC reduction area (Areas).
+	Area string `json:"area"`
 	// Shipments that have an alternative of this kind with lower emissions.
 	Shipments int `json:"shipments"`
 	// SavedKg is the saving if every such shipment took its best
@@ -347,19 +409,21 @@ type Lane struct {
 
 // Result is the recommendations for all shipments.
 type Result struct {
-	Label       string            `json:"label"`
-	Settings    Settings          `json:"settings"`
-	Skipped     map[string]string `json:"skipped,omitempty"`
-	Now         Totals            `json:"now"`
-	Best        Totals            `json:"best"` // every shipment on its best alternative (or as now)
-	SavedKg     float64           `json:"saved_kg"`
-	SavedPct    float64           `json:"saved_pct"`
-	Kinds       []KindSummary     `json:"kinds"`
-	Lanes       []Lane            `json:"lanes"`
-	Sources     []string          `json:"sources"`
-	Limitations []string          `json:"limitations"`
-	Shipments   []ShipmentResult  `json:"shipments"`
-	Failed      int               `json:"failed"`
+	Label    string            `json:"label"`
+	Settings Settings          `json:"settings"`
+	Skipped  map[string]string `json:"skipped,omitempty"`
+	Now      Totals            `json:"now"`
+	Best     Totals            `json:"best"` // every shipment on its best alternative (or as now)
+	SavedKg  float64           `json:"saved_kg"`
+	SavedPct float64           `json:"saved_pct"`
+	Kinds    []KindSummary     `json:"kinds"`
+	// Areas are GLEC's five reduction areas with the kinds tried in each.
+	Areas       []Area           `json:"areas"`
+	Lanes       []Lane           `json:"lanes"`
+	Sources     []string         `json:"sources"`
+	Limitations []string         `json:"limitations"`
+	Shipments   []ShipmentResult `json:"shipments"`
+	Failed      int              `json:"failed"`
 }
 
 // Limitations are what the recommendations don't take into account.
@@ -369,6 +433,7 @@ func Limitations() []string {
 		"Whether a rail, barge or ferry service actually runs on the lane, how often, and with free capacity is not known: an alternative is possible on the networks, not a booked service.",
 		"Terminals and ports come from UN/LOCODE, which marks rail terminals and ports but not whether they handle containers or trailers.",
 		"New rail, waterway and sea legs run between rail terminals or ports (from UN/LOCODE), with road to and from the nearest one. Each terminal handling this adds (truck to train, barge or container ship and back) counts GLEC v3.3's intermodal terminal value (Table 3: 18.2 kg CO2e per container, 21.4 temperature-controlled). Containers = the shipment's TEU, or its tonnes ÷ GLEC's tonnes per TEU (10; light 6, heavy 14.5); Table 3 gives no container size, so one container = one TEU. Airports, Ro-Ro and bulk terminals have no GLEC value and are not counted.",
+		"Vehicle changes (larger, electric and bio-LNG trucks) keep the route and use GLEC's default value for that vehicle at GLEC's average load, in the regions GLEC gives one. They don't check range and charging, fuel availability, or whether the cargo can be consolidated into a larger truck.",
 		"New legs use fleet-average default factors (GLEC Framework v3.3 default values; UK DESNZ 2026 for ferries, Ro-Ro and non-container ships), not a carrier's own data.",
 		"Combining shipments needs shipping dates, which the shipments file doesn't have: fuller loads use the load you give for every road vehicle.",
 		"Rail and waterway distances are shortest paths on OpenStreetMap; a waterway alternative needs both ends near a navigable river or canal.",
@@ -582,6 +647,17 @@ func sources(f calc.FactorProvider, set Settings) []string {
 			s = append(s, fmt.Sprintf("%s (%s): %s", v.what, v.vehicle, lf.Source))
 		}
 	}
+	for _, v := range []struct{ kind, alias, what string }{
+		{LargerTruck, vehArtic, "Larger truck (rigid to articulated)"}, {ElectricTruck, vehElectric, "Electric truck"},
+		{ElectricTruck, vehElectricVan, "Electric van"}, {BioLNGTruck, vehBioLNG, "Bio-LNG truck"}} {
+		if !set.has(v.kind) {
+			continue
+		}
+		if lf, err := f.LegFactor(calc.Road, v.alias); err == nil {
+			s = append(s, fmt.Sprintf("%s (%s): %s", v.what, v.alias, lf.Source))
+		}
+	}
+	s = append(s, SourceAreas)
 	if set.has(Load) {
 		l := "Fuller loads: the calculator's load model for each road vehicle"
 		if set.Source != "" {
@@ -734,6 +810,33 @@ func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settin
 	}
 	if set.has(Load) {
 		a.loads()
+	}
+	if set.has(LargerTruck) {
+		a.vehicles(LargerTruck, func(l calc.Leg, r calc.LegResult) string {
+			if r.Factor != nil && strings.Contains(r.Factor.VehicleType, "/rigid_") && !strings.Contains(r.Factor.VehicleType, "temperature_controlled") {
+				return vehArtic
+			}
+			return ""
+		})
+	}
+	if set.has(ElectricTruck) {
+		a.vehicles(ElectricTruck, func(l calc.Leg, r calc.LegResult) string {
+			switch vt := r.Factor.VehicleType; {
+			case strings.Contains(vt, "electric"):
+				return ""
+			case strings.Contains(vt, "/van"):
+				return vehElectricVan
+			}
+			return vehElectric
+		})
+	}
+	if set.has(BioLNGTruck) {
+		a.vehicles(BioLNGTruck, func(l calc.Leg, r calc.LegResult) string {
+			if vt := r.Factor.VehicleType; strings.Contains(vt, "/van") || strings.Contains(vt, "electric") || strings.Contains(vt, "bio_lng") {
+				return ""
+			}
+			return vehBioLNG
+		})
 	}
 	sort.SliceStable(sr.Options, func(i, j int) bool { return sr.Options[i].SavedKg > sr.Options[j].SavedKg })
 	return sr
@@ -893,7 +996,7 @@ func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.
 	}
 	rt := route(cc, r)
 	rt.Terminals = hubs
-	o := Option{Kind: kind, Route: rt, SavedKg: saved, Legs: explicit(s.Legs, r), Summary: summary(r)}
+	o := Option{Kind: kind, Area: AreaOf(kind), Route: rt, SavedKg: saved, Legs: explicit(s.Legs, r), Summary: summary(r)}
 	if hubText != "" {
 		o.Summary += "; " + hubText
 	}
@@ -940,6 +1043,12 @@ func kindName(k string) string {
 		return "Other port"
 	case Load:
 		return "Fuller loads"
+	case LargerTruck:
+		return "Larger truck"
+	case ElectricTruck:
+		return "Electric truck"
+	case BioLNGTruck:
+		return "Bio-LNG truck"
 	}
 	return k
 }
@@ -1186,7 +1295,7 @@ func (a *analyser) loads() {
 		return
 	}
 	rt := route(a.c, r)
-	o := Option{Kind: Load, Route: rt, SavedKg: saved, Legs: s.Legs, Summary: fmt.Sprintf("%d road legs at %s", n, load)}
+	o := Option{Kind: Load, Area: AreaOf(Load), Route: rt, SavedKg: saved, Legs: s.Legs, Summary: fmt.Sprintf("%d road legs at %s", n, load)}
 	if n == 1 {
 		o.Summary = "1 road leg at " + load
 	}
@@ -1199,11 +1308,88 @@ func (a *analyser) loads() {
 	a.sr.Options = append(a.sr.Options, o)
 }
 
+// vehicles tries the shipment's road legs, on a fleet-average default value,
+// with the vehicle type pick gives (GLEC v3.3 default values; "" leaves a
+// leg as it is), on the same route. Legs where the new vehicle has no GLEC
+// value for the region are left as they are; if none is left, it says why.
+func (a *analyser) vehicles(kind string, pick func(calc.Leg, calc.LegResult) string) {
+	type cand struct {
+		j  int
+		vt string
+	}
+	var cands []cand
+	for j, l := range a.s.Legs {
+		r, ok := a.own[l.ID]
+		if l.Mode != calc.Road || !ok || r.Method != calc.MethodIntensity || r.DataType != calc.DataDefault || r.Factor == nil ||
+			l.Fuel != nil || l.OwnFactor != nil || l.EnergyKWhPerTkm != 0 || l.LoadFactor != 0 || l.LoadTonnes != 0 {
+			continue
+		}
+		if vt := pick(l, r); vt != "" {
+			cands = append(cands, cand{j, vt})
+		}
+	}
+	if len(cands) == 0 {
+		return
+	}
+	calcWith := func(cs []cand) (calc.Shipment, calc.Result, error) {
+		s := a.s
+		s.Legs = append([]calc.Leg(nil), a.s.Legs...)
+		for _, c := range cs {
+			s.Legs[c.j].VehicleType = c.vt
+		}
+		r, err := a.c.Calculate(a.ctx, s)
+		return s, r, err
+	}
+	s, r, err := calcWith(cands)
+	if err != nil && len(cands) > 1 {
+		var good []cand
+		for _, c := range cands {
+			if _, _, err1 := calcWith([]cand{c}); err1 == nil {
+				good = append(good, c)
+			}
+		}
+		if len(good) > 0 {
+			cands = good
+			s, r, err = calcWith(cands)
+		}
+	}
+	if err != nil {
+		a.note("%s: not possible: %v", kindName(kind), shortErr(err))
+		return
+	}
+	saved := a.base.WTWKg - r.WTWKg
+	if !(saved > 1e-9) {
+		a.note("%s: possible, but not lower than now", kindName(kind))
+		return
+	}
+	var vts []string
+	for _, l := range r.Legs {
+		for _, c := range cands {
+			if l.LegID == a.s.Legs[c.j].ID && l.Factor != nil && !slices.Contains(vts, l.Factor.VehicleType) {
+				vts = append(vts, l.Factor.VehicleType)
+			}
+		}
+	}
+	what := "road legs"
+	if len(cands) == 1 {
+		what = "road leg"
+	}
+	o := Option{Kind: kind, Area: AreaOf(kind), Route: route(a.c, r), SavedKg: saved, Legs: s.Legs,
+		Summary: fmt.Sprintf("%d %s, same route: %s (GLEC default value)", len(cands), what, strings.Join(vts, ", "))}
+	if a.base.WTWKg > 0 {
+		o.SavedPct = saved / a.base.WTWKg * 100
+	}
+	if a.now.DistanceKm > 0 {
+		o.ExtraKmPct = (o.Route.DistanceKm - a.now.DistanceKm) / a.now.DistanceKm * 100
+	}
+	a.sr.Options = append(a.sr.Options, o)
+}
+
 // summarise fills in the totals, kinds and lanes.
 func summarise(res *Result) {
 	kinds := map[string]*KindSummary{}
 	for _, k := range res.Settings.Kinds {
-		kinds[k] = &KindSummary{Kind: k}
+		kinds[k] = &KindSummary{Kind: k, Area: AreaOf(k)}
 	}
 	type laneAcc struct {
 		Lane
@@ -1257,6 +1443,16 @@ func summarise(res *Result) {
 	}
 	for _, k := range res.Settings.Kinds {
 		res.Kinds = append(res.Kinds, *kinds[k])
+	}
+	for _, a := range Areas() {
+		var ks []string
+		for _, k := range a.Kinds {
+			if kinds[k] != nil {
+				ks = append(ks, k)
+			}
+		}
+		a.Kinds = ks
+		res.Areas = append(res.Areas, a)
 	}
 	for _, key := range order {
 		la := lanes[key]

@@ -775,6 +775,11 @@ aliases += [
                  "in": "glec/road/in/artic_55t/electricity"}, "only_regions": True,
      "note": "GLEC electric truck: Europe Table 11 artic 34-40 t, average/mixed load, × GLEC's European average electricity; "
              "China and India their own tables. Elsewhere give energy_kwh_per_tkm with the charging country."},
+    {"mode": "road", "alias": "truck_bio_lng", "vehicle_type": "glec/road/eu_sa/artic_34_40t_si/bio_lng", "region_set": "land",
+     "regions": {"eu_sa": "glec/road/eu_sa/artic_34_40t_si/bio_lng", "asia_africa": "glec/road/asia_africa/artic_34_40t_si/bio_lng"},
+     "only_regions": True,
+     "note": "GLEC bio-LNG truck: Table 8 artic 34-40 t SI engine, average/mixed load (Europe and South America; Asia and Africa "
+             "with their uplift). GLEC gives no bio-LNG value for North America, China or India."},
     {"mode": "rail", "alias": "freight_train_reefer", "vehicle_type": "glec/rail/eu/temperature_controlled/average_traction_unknown",
      "region_set": "land", "regions": {"in": "glec/rail/in/temperature_controlled/average"}, "unavailable_regions": ["na"],
      "note": "GLEC's regional rail average + 12% for temperature-controlled freight (not given for North America)."},
