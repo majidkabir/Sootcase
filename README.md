@@ -493,6 +493,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 - [x] ISO 14083 style reports (`sootcase report`, `/v1/report`)
 - [x] What-if scenarios (`sootcase scenario`, `/v1/scenario`): road to rail, electric trucks, other fuels, loads
 - [x] Recommendations (`sootcase recommend`, `/v1/recommend`): road to rail, waterway or short sea, air to sea or rail, other ports, fuller loads
+- [x] Terminal handlings in recommendations and scenarios: new rail, waterway and sea legs between terminals, GLEC v3.3 intermodal terminal value per container
 - [x] Missing road legs: gaps between legs, first and last mile to ports, rail terminals and airports
 - [x] Cargo-type presets (GLEC v3.3's cargo and load categories)
 
