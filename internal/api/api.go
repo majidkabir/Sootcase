@@ -253,8 +253,13 @@ func (s *Server) calculate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	if v := r.URL.Query().Get("path"); v == "true" || v == "1" {
-		ctx = calc.WithPath(ctx) // each leg's route for a map; single calculations only
+	if v := r.URL.Query().Get("path"); v != "" && v != "false" && v != "0" {
+		d, err := calc.ParsePathDetail(v)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, err)
+			return
+		}
+		ctx = calc.WithPathDetail(ctx, d) // each leg's route for a map; single calculations only
 	}
 	res, err := s.Calc.CalculateRetrying(ctx, sh)
 	if err != nil {

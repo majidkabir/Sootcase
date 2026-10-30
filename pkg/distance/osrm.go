@@ -132,8 +132,12 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 		steps, limit = "true", maxStepsResponse
 	}
 	overview, geometries := "false", "polyline"
+	detail := calc.PathDetailOf(ctx)
 	if withPath {
 		overview, geometries, limit = "simplified", "geojson", maxStepsResponse
+		if detail != calc.PathSimplified {
+			overview = "full"
+		}
 	}
 	u := fmt.Sprintf("%s/route/v1/%s/%s?overview=%s&alternatives=false&steps=%s&geometries=%s",
 		o.BaseURL, url.PathEscape(profile), key, overview, steps, geometries)
@@ -207,6 +211,9 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	r := calc.Route{Km: body.Routes[0].Distance / 1000}
 	if withPath {
 		r.Path = body.Routes[0].Geometry.Coordinates
+		if detail == calc.PathDetailed {
+			r.Path = calc.ThinPath(r.Path, calc.MaxDetailedPoints)
+		}
 	}
 	for _, leg := range body.Routes[0].Legs {
 		for _, st := range leg.Steps {

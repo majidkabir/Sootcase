@@ -2,7 +2,12 @@ package distance
 
 import (
 	"context"
+	"fmt"
 	"math"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 
@@ -51,5 +56,46 @@ func TestOSRM_Path(t *testing.T) {
 	}
 	if r, _ := o.Route(ctx, calc.Road, copenhagen, hamburg); len(r.Path) != 3 || atomic.LoadInt32(&calls) != 3 {
 		t.Fatalf("path route served from cache: calls %d", calls)
+	}
+}
+
+// Path detail: simplified asks OSRM for its simplified line, detailed and
+// full for the full one; detailed is thinned to calc.MaxDetailedPoints.
+func TestOSRM_PathDetail(t *testing.T) {
+	var coords strings.Builder
+	coords.WriteString("[")
+	for i := 0; i < 5000; i++ {
+		if i > 0 {
+			coords.WriteString(",")
+		}
+		fmt.Fprintf(&coords, "[%g,%g]", 10+float64(i)*0.0005, 55-float64(i)*0.0003)
+	}
+	coords.WriteString("]")
+	var mu sync.Mutex
+	var query string
+	body := `{"code":"Ok","routes":[{"distance":1000,"geometry":{"type":"LineString","coordinates":` + coords.String() + `}}]}`
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		query = r.URL.RawQuery
+		mu.Unlock()
+		_, _ = w.Write([]byte(body))
+	}))
+	t.Cleanup(srv.Close)
+	o, _ := NewOSRM(srv.URL)
+	for _, c := range []struct {
+		d        calc.PathDetail
+		overview string
+		points   int
+	}{{calc.PathSimplified, "overview=simplified", 5000}, {calc.PathDetailed, "overview=full", calc.MaxDetailedPoints}, {calc.PathFull, "overview=full", 5000}} {
+		r, err := o.Route(calc.WithPathDetail(context.Background(), c.d), calc.Road, copenhagen, hamburg)
+		mu.Lock()
+		q := query
+		mu.Unlock()
+		if err != nil || len(r.Path) != c.points || !strings.Contains(q, c.overview) || r.Km != 1 {
+			t.Errorf("%s: %d points, %v, asked %q", c.d, len(r.Path), err, q)
+		}
+		if len(r.Path) > 0 && (r.Path[0] != [2]float64{10, 55} || r.Path[len(r.Path)-1][0] != 10+4999*0.0005) {
+			t.Errorf("%s: ends %v %v", c.d, r.Path[0], r.Path[len(r.Path)-1])
+		}
 	}
 }

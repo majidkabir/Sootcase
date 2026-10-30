@@ -70,8 +70,8 @@ paths:
             v3.3 pages and ISO 14083:2023 clauses each step follows, so that it can be checked by hand.
         - name: path
           in: query
-          schema: { type: boolean, default: false }
-          description: Add each leg's route as GeoJSON [lon, lat] points (legs[].path), for a map. Two points mean a straight line (distance given or estimated).
+          schema: { type: string, enum: ["false", "true", simplified, detailed, full], default: "false" }
+          description: "Add each leg's route as GeoJSON [lon, lat] points (legs[].path), for a map: true or simplified (the router's simplified line, a few dozen points), detailed (the full line thinned to at most 1,000 points) or full (every point; a long road route can have tens of thousands). Distances are the same at every level. Two points mean a straight line (distance given or estimated)."
       requestBody:
         required: true
         content:

@@ -272,6 +272,14 @@ func TestCalculate_Path(t *testing.T) {
 	if _, ok := out["legs"].([]any)[0].(map[string]any)["path"]; ok {
 		t.Error("path without asking")
 	}
+	for _, d := range []string{"simplified", "detailed", "full"} {
+		if _, out = post(t, srv.URL+"/v1/calculate?path="+d, body); out["legs"].([]any)[0].(map[string]any)["path"] == nil {
+			t.Errorf("path=%s: no path", d)
+		}
+	}
+	if resp, out := post(t, srv.URL+"/v1/calculate?path=huge", body); resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("path=huge: %d %v", resp.StatusCode, out)
+	}
 	resp, err := http.Get(srv.URL + "/static/leaflet.js")
 	if err != nil || resp.StatusCode != 200 || !strings.Contains(resp.Header.Get("Content-Type"), "javascript") {
 		t.Fatalf("leaflet.js: %v %v", resp, err)

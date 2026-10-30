@@ -346,7 +346,7 @@ Each output line is `{"line": n, "shipment_id": "...", "result": {...}}`, or `{"
 
 | Method | Path | |
 |---|---|---|
-| `POST` | `/v1/calculate` | one shipment; `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`) |
+| `POST` | `/v1/calculate` | one shipment; `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point) |
 | `POST` | `/v1/calculate/batch` | `{"shipments": [...]}`, up to 10,000 |
 | `POST` | `/v1/report` | `{"organisation", "period_from", "period_to", "shipments": [...]}`, JSON or `?format=md` |
 | `GET` | `/v1/places?q=rotterdam&kind=port` | find places by name, UN/LOCODE or IATA code |
