@@ -18,9 +18,15 @@
 //     Article); road to and from rail goes to the nearest rail terminal on
 //     the network (same Article: "the nearest suitable rail loading station").
 //
+// Extra transshipments: each change of mode an alternative adds at a rail,
+// waterway or container-ship terminal adds GLEC Framework v3.3's default
+// value for intermodal terminals (Module 2, Table 3, p. 97, per container),
+// for the shipment's containers: its TEU, or its tonnes ÷ GLEC's tonnes per
+// TEU (Section 1 Chapter 4, logistics hubs). There is no GLEC default for
+// airports or Ro-Ro and bulk terminals, so those are not counted.
+//
 // What it doesn't know, and says so (Limitations): transit times, costs,
-// whether a service runs on the lane, and the emissions of the extra
-// transshipments (no hub factors yet).
+// and whether a service runs on the lane.
 package recommend
 
 import (
@@ -273,6 +279,9 @@ type Route struct {
 	Transfers int      `json:"transfers"`
 	Modes     []string `json:"modes"`
 	Steps     []Step   `json:"steps"`
+	// Terminals are the terminal handlings an alternative adds to now
+	// (included in the totals).
+	Terminals []calc.HubResult `json:"terminals,omitempty"`
 }
 
 // Option is one alternative for a shipment.
@@ -352,7 +361,7 @@ func Limitations() []string {
 		"No transit times or costs: there is no standard source for them, so alternatives are compared on emissions and distance only.",
 		"Whether a rail, barge or ferry service actually runs on the lane, how often, and with free capacity is not known: an alternative is possible on the networks, not a booked service.",
 		"Terminals and ports come from UN/LOCODE, which marks rail terminals and ports but not whether they handle containers or trailers.",
-		"Extra transshipments at terminals and ports are not counted yet: there are no hub factors until the Fraunhofer IML REFF 2026 values are added.",
+		"Extra terminal handlings: each change of mode an alternative adds at a rail, waterway or container-ship terminal counts GLEC v3.3's intermodal terminal value (Table 3: 18.2 kg CO2e per container, 21.4 temperature-controlled). Containers = the shipment's TEU, or its tonnes ÷ GLEC's tonnes per TEU (10; light 6, heavy 14.5); Table 3 gives no container size, so one container = one TEU. Airports, Ro-Ro and bulk terminals have no GLEC value and are not counted.",
 		"New legs use fleet-average default factors (GLEC Framework v3.3 default values; UK DESNZ 2026 for ferries, Ro-Ro and non-container ships), not a carrier's own data.",
 		"Combining shipments needs shipping dates, which the shipments file doesn't have: fuller loads use the load you give for every road vehicle.",
 		"Rail and waterway distances are shortest paths on OpenStreetMap; a waterway alternative needs both ends near a navigable river or canal.",
@@ -512,6 +521,14 @@ func (r Route) scale(k float64) Route {
 		s.WTWKg *= k
 		out.Steps[i] = s
 	}
+	if r.Terminals != nil {
+		out.Terminals = make([]calc.HubResult, len(r.Terminals))
+		for i, h := range r.Terminals {
+			h.WTWKg *= k
+			h.Containers *= k
+			out.Terminals[i] = h
+		}
+	}
 	return out
 }
 
@@ -580,6 +597,109 @@ type analyser struct {
 	now  Route
 	own  map[string]calc.LegResult // the shipment's own legs as calculated
 	sr   *ShipmentResult
+	// nowTerminals counts the terminal changes of mode now; containers is
+	// the shipment's containers for terminal handlings (0: not counted,
+	// for the reason in noTerminals) and containerRule how it was set.
+	nowTerminals  int
+	containers    float64
+	containerRule string
+	noTerminals   string
+}
+
+// IntermodalTerminal is the hub type added for an extra change of mode.
+const IntermodalTerminal = "intermodal_terminal"
+
+// unitised says whether a leg's cargo goes through an intermodal terminal
+// when the mode changes: road and rail always; waterway and sea only on
+// container vessels (GLEC has no default for Ro-Ro or bulk terminals, and
+// excludes self-driving cargo at Ro-Ro terminals: Section 1 Chapter 4,
+// logistics hubs). Air: no GLEC default for airports.
+func unitised(l calc.LegResult) bool {
+	switch l.Mode {
+	case calc.Road, calc.Rail:
+		return true
+	case calc.InlandWaterway, calc.Sea:
+		vt := l.VehicleType
+		if l.Factor != nil {
+			vt += " " + l.Factor.VehicleType
+		}
+		return strings.Contains(strings.ToLower(vt), "container")
+	}
+	return false
+}
+
+// terminals counts the changes of mode at an intermodal terminal.
+func terminals(r calc.Result) int {
+	n := 0
+	for i := 1; i < len(r.Legs); i++ {
+		a, b := r.Legs[i-1], r.Legs[i]
+		if a.Mode != b.Mode && unitised(a) && unitised(b) {
+			n++
+		}
+	}
+	return n
+}
+
+// setContainers works out the shipment's containers for terminal
+// handlings: its TEU, or its tonnes ÷ GLEC's tonnes per TEU for its cargo
+// type (light, heavy) or the average.
+func (a *analyser) setContainers() {
+	if _, err := a.c.Factors.HubFactor(IntermodalTerminal); err != nil {
+		a.noTerminals = "the factor set has no intermodal terminal value"
+		return
+	}
+	if a.s.TEU > 0 {
+		a.containers, a.containerRule = a.s.TEU, "the shipment's TEU"
+		return
+	}
+	clp, ok := a.c.Factors.(calc.ContainerLoadProvider)
+	if !ok {
+		a.noTerminals = "the factor set has no tonnes per TEU"
+		return
+	}
+	profile := calc.DefaultContainerLoad
+	if ct := a.s.CargoType; ct == "light" || ct == "heavy" {
+		profile = ct
+	}
+	perTEU, err := clp.ContainerLoad(profile)
+	if err != nil || perTEU <= 0 {
+		a.noTerminals = "the factor set has no tonnes per TEU"
+		return
+	}
+	a.containers = a.base.WeightKg / 1000 / perTEU
+	a.containerRule = fmt.Sprintf("TEU = tonnes ÷ %g, GLEC %s", perTEU, profile)
+}
+
+// addTerminals adds to r the terminal handlings it has beyond now, and
+// says so in a few words ("" if none).
+func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result) ([]calc.HubResult, string, error) {
+	extra := terminals(*r) - a.nowTerminals
+	if extra <= 0 {
+		return nil, "", nil
+	}
+	if a.containers <= 0 {
+		return nil, fmt.Sprintf("%d extra terminal handlings not counted: %s", extra, a.noTerminals), nil
+	}
+	var hs []calc.HubResult
+	kg := 0.0
+	for k := range extra {
+		h, err := cc.Hub(calc.HubStop{ID: fmt.Sprintf("added-terminal-%d", k+1), HubType: IntermodalTerminal, Containers: a.containers},
+			a.s.CargoType, r.WeightKg/1000)
+		if err != nil {
+			return nil, "", err
+		}
+		hs = append(hs, h)
+		kg += h.WTWKg
+	}
+	r.Hubs = append(r.Hubs, hs...)
+	r.WTWKg += kg
+	what := "terminal handlings"
+	if extra == 1 {
+		what = "terminal handling"
+	}
+	// No weight-dependent numbers here: results of shipments with the same
+	// legs are scaled by weight (rescale); the numbers are in Terminals.
+	return hs, fmt.Sprintf("%d extra %s (GLEC intermodal terminal, per TEU; %s)", extra, what, a.containerRule), nil
 }
 
 func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settings) ShipmentResult {
@@ -603,6 +723,8 @@ func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settin
 		}
 	}
 	a.now = route(c, base)
+	a.nowTerminals = terminals(base)
+	a.setContainers()
 	sr.Now = a.now
 	sr.Legs = s.Legs
 	sr.Lane = a.lane()
@@ -768,13 +890,22 @@ func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.
 			}
 		}
 	}
+	hubs, hubText, err := a.addTerminals(cc, &r)
+	if err != nil {
+		a.note("%s: not possible: %v", kindName(kind), shortErr(err))
+		return false
+	}
 	saved := a.base.WTWKg - r.WTWKg
 	if !(saved > 1e-9) {
 		a.note("%s: possible, but not lower than now", kindName(kind))
 		return false
 	}
 	rt := route(cc, r)
+	rt.Terminals = hubs
 	o := Option{Kind: kind, Route: rt, SavedKg: saved, Legs: s.Legs, Summary: summary(r)}
+	if hubText != "" {
+		o.Summary += "; " + hubText
+	}
 	if a.base.WTWKg > 0 {
 		o.SavedPct = saved / a.base.WTWKg * 100
 	}

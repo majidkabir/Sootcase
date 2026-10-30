@@ -248,30 +248,9 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 	}
 
 	for _, h := range s.Hubs {
-		hubType, cargoNote := h.HubType, ""
-		if cp, ok := c.Factors.(CargoProvider); ok && s.CargoType != "" {
-			var err error
-			if hubType, cargoNote, err = cp.HubCargo(h.HubType, s.CargoType); err != nil {
-				return Result{}, fmt.Errorf("hub %q: %w", h.ID, err)
-			}
-		}
-		hf, err := c.Factors.HubFactor(hubType)
+		hr, err := c.Hub(h, s.CargoType, tonnes)
 		if err != nil {
-			return Result{}, fmt.Errorf("hub %q: %w", h.ID, err)
-		}
-		if h.Containers < 0 || math.IsNaN(h.Containers) || math.IsInf(h.Containers, 0) {
-			return Result{}, fmt.Errorf("%w: hub %q: containers must be >= 0", ErrInvalidInput, h.ID)
-		}
-		hr := HubResult{HubID: h.ID, HubType: hubType, WTWKg: tonnes * hf.WTWPerTonneG / 1000,
-			DataType: DataDefault, Source: hf.Source, Note: cargoNote}
-		if hf.WTWPerContainerG > 0 {
-			if h.Containers == 0 {
-				return Result{}, fmt.Errorf("%w: hub %q: %s is per container handled; give containers", ErrInvalidInput, h.ID, h.HubType)
-			}
-			hr.Containers, hr.WTWKg = h.Containers, h.Containers*hf.WTWPerContainerG/1000
-		}
-		if hf.DataType != "" {
-			hr.DataType = hf.DataType
+			return Result{}, err
 		}
 		res.Hubs = append(res.Hubs, hr)
 		res.WTWKg += hr.WTWKg
@@ -329,6 +308,38 @@ func dataType(method string) string {
 // Chapter 4, sea): when the mass is known only in TEU, an average of 10 t
 // per TEU can be assumed.
 const DefaultContainerLoad = "average"
+
+// Hub calculates one hub stop for tonnes of cargo of the given cargo type
+// ("" for none): per tonne, or per container for hub types whose factor is
+// per container.
+func (c Calculator) Hub(h HubStop, cargoType string, tonnes float64) (HubResult, error) {
+	hubType, cargoNote := h.HubType, ""
+	if cp, ok := c.Factors.(CargoProvider); ok && cargoType != "" {
+		var err error
+		if hubType, cargoNote, err = cp.HubCargo(h.HubType, cargoType); err != nil {
+			return HubResult{}, fmt.Errorf("hub %q: %w", h.ID, err)
+		}
+	}
+	hf, err := c.Factors.HubFactor(hubType)
+	if err != nil {
+		return HubResult{}, fmt.Errorf("hub %q: %w", h.ID, err)
+	}
+	if h.Containers < 0 || math.IsNaN(h.Containers) || math.IsInf(h.Containers, 0) {
+		return HubResult{}, fmt.Errorf("%w: hub %q: containers must be >= 0", ErrInvalidInput, h.ID)
+	}
+	hr := HubResult{HubID: h.ID, HubType: hubType, WTWKg: tonnes * hf.WTWPerTonneG / 1000,
+		DataType: DataDefault, Source: hf.Source, Note: cargoNote}
+	if hf.WTWPerContainerG > 0 {
+		if h.Containers == 0 {
+			return HubResult{}, fmt.Errorf("%w: hub %q: %s is per container handled; give containers", ErrInvalidInput, h.ID, h.HubType)
+		}
+		hr.Containers, hr.WTWKg = h.Containers, h.Containers*hf.WTWPerContainerG/1000
+	}
+	if hf.DataType != "" {
+		hr.DataType = hf.DataType
+	}
+	return hr, nil
+}
 
 // weight returns the cargo weight in kg, how it was determined, and the
 // container load profile used ("" if none).

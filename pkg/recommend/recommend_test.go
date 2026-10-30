@@ -267,3 +267,81 @@ func TestFailedShipment(t *testing.T) {
 		t.Errorf("failed: %+v", res)
 	}
 }
+
+// An alternative's extra changes of mode at a rail, waterway or container
+// terminal count GLEC v3.3's intermodal terminal value per container
+// (Table 3: 18.2 kg CO2e, 21.4 temperature-controlled), containers = the
+// shipment's TEU or its tonnes ÷ 10 t per TEU.
+func TestExtraTerminals(t *testing.T) {
+	c := setup(t)
+	ctx := context.Background()
+	set, _, err := Settings{}.Validate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	try := func(s calc.Shipment) *Option {
+		t.Helper()
+		base, err := c.Calculate(ctx, s)
+		if err != nil {
+			t.Fatal(err)
+		}
+		sr := &ShipmentResult{}
+		a := &analyser{ctx: ctx, c: c, set: set, s: s, base: base, now: route(c, base), sr: sr}
+		a.nowTerminals = terminals(base)
+		a.setContainers()
+		alt := s
+		alt.Legs = []calc.Leg{road("r1", hamburg, kiel, 0),
+			{ID: "r2", Mode: calc.Rail, VehicleType: "freight_train", From: kiel, To: munich}}
+		if !a.try(Rail, alt, c, calc.Rail, map[string]bool{"r2": true}, false, func(calc.Result) string { return "rail" }) {
+			t.Fatalf("no option: %v", sr.Notes)
+		}
+		return &sr.Options[0]
+	}
+	s := calc.Shipment{ID: "s", WeightKg: 20000, Legs: []calc.Leg{road("r", hamburg, munich, 0)}}
+	o := try(s)
+	steps := 0.0
+	for _, st := range o.Steps {
+		steps += st.WTWKg
+	}
+	if len(o.Terminals) != 1 || o.Terminals[0].HubType != IntermodalTerminal || !near(o.Terminals[0].Containers, 2) ||
+		!near(o.Terminals[0].WTWKg, 2*18.2) || !near(o.WTWKg, steps+2*18.2) || !strings.Contains(o.Summary, "1 extra terminal handling") {
+		t.Errorf("terminal: %+v, steps %v", o, steps)
+	}
+	s.CargoType = "temperature_controlled"
+	if o := try(s); len(o.Terminals) != 1 || !near(o.Terminals[0].WTWKg, 2*21.4) {
+		t.Errorf("temperature-controlled: %+v", o.Terminals)
+	}
+	s.CargoType = "heavy"
+	if o := try(s); len(o.Terminals) != 1 || !near(o.Terminals[0].Containers, 20/14.5) {
+		t.Errorf("heavy: %+v", o.Terminals)
+	}
+	s.CargoType, s.WeightKg, s.TEU = "", 0, 3
+	if o := try(s); len(o.Terminals) != 1 || !near(o.Terminals[0].Containers, 3) {
+		t.Errorf("TEU: %+v", o.Terminals)
+	}
+	// Grouped shipments are scaled by weight, terminals too.
+	r := Route{Terminals: []calc.HubResult{{WTWKg: 36.4, Containers: 2}}}.scale(1.5)
+	if !near(r.Terminals[0].WTWKg, 54.6) || !near(r.Terminals[0].Containers, 3) {
+		t.Errorf("scaled: %+v", r.Terminals)
+	}
+}
+
+func TestTerminalsCount(t *testing.T) {
+	leg := func(m calc.Mode, vt string) calc.LegResult { return calc.LegResult{Mode: m, VehicleType: vt} }
+	for _, c := range []struct {
+		legs []calc.LegResult
+		want int
+	}{
+		{[]calc.LegResult{leg(calc.Road, "hgv"), leg(calc.Rail, "freight_train"), leg(calc.Road, "hgv")}, 2},
+		{[]calc.LegResult{leg(calc.Road, "hgv"), leg(calc.Sea, "container_ship"), leg(calc.Road, "hgv")}, 2},
+		{[]calc.LegResult{leg(calc.Road, "hgv"), leg(calc.Sea, "roro"), leg(calc.Road, "hgv")}, 0},
+		{[]calc.LegResult{leg(calc.Road, "hgv"), leg(calc.Air, "air_freight"), leg(calc.Road, "hgv")}, 0},
+		{[]calc.LegResult{leg(calc.Road, "hgv"), leg(calc.InlandWaterway, "barge")}, 0},
+		{[]calc.LegResult{leg(calc.Rail, "freight_train"), leg(calc.InlandWaterway, "container_barge")}, 1},
+		{[]calc.LegResult{leg(calc.Road, "hgv"), leg(calc.Road, "van")}, 0},
+	} {
+		if got := terminals(calc.Result{Legs: c.legs}); got != c.want {
+			t.Errorf("%+v: %d, want %d", c.legs, got, c.want)
+		}
+	}
+}

@@ -288,7 +288,7 @@ Fuels are converted with the selected dataset's fuel factors, including `electri
 
 Rules (defaults, with sources, all settable): road legs over 300 km (EU Transport White Paper 2011); the rail, waterway or sea part over 100 km in a straight line, road to and from a waterway or sea port within 150 km of it, and road to the nearest rail terminal (Council Directive 92/106/EEC, Article 1). Sea and waterway alternatives need their networks loaded.
 
-Not taken into account (also in every result): transit times and costs; whether a service runs on the lane; terminal equipment; emissions at the extra transshipments (no hub factors yet); combining shipments (the CSV has no dates). Up to 1,000 shipments per API request; shipments with the same legs are calculated once and scaled by weight.
+Not taken into account (also in every result): transit times and costs; whether a service runs on the lane; terminal equipment; combining shipments (the CSV has no dates). Each extra change of mode at a rail, waterway or container-ship terminal adds GLEC v3.3's intermodal terminal value per container (Table 3; containers = TEU given, or tonnes ÷ GLEC's tonnes per TEU); airports, Ro-Ro and bulk terminals have no GLEC value and are not counted. Up to 1,000 shipments per API request; shipments with the same legs are calculated once and scaled by weight.
 
 ## Inputs
 

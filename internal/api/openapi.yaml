@@ -720,6 +720,10 @@ components:
         transfers: { type: integer, description: Changes of mode along the route }
         modes: { type: array, items: { type: string } }
         steps: { type: array, items: { type: object } }
+        terminals:
+          type: array
+          description: "Alternatives only: the terminal handlings the alternative adds to now (GLEC v3.3 intermodal terminal, per container; included in the totals). Same fields as a result's hubs."
+          items: { type: object }
     RecommendResult:
       type: object
       properties:
