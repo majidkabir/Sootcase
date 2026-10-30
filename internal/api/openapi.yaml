@@ -203,7 +203,9 @@ paths:
         and returns both totals, the difference, and per change what it
         affected and the sources of its values. Defaults for road_to_rail:
         legs over 300 km, 30% of the cargo (EU Transport White Paper 2011),
-        rail part over 100 km in a straight line (Directive 92/106/EEC).
+        rail part over 100 km in a straight line (Directive 92/106/EEC), road
+        to and from the nearest rail terminal, and each terminal handling at
+        GLEC v3.3's intermodal terminal value per container.
         Results are scenarios, not reported emissions. Send JSON, or a
         shipments CSV (text/csv) with the plan as JSON in the plan query
         parameter.

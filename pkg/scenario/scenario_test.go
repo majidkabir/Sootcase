@@ -73,9 +73,12 @@ func TestRoadToRail(t *testing.T) {
 	}
 	base, _ := c.Calculate(ctx, long)
 	rail, _ := c.Calculate(ctx, calc.Shipment{WeightKg: 20000, Legs: []calc.Leg{{ID: "r", Mode: calc.Rail, VehicleType: "freight_train", From: hamburg, To: munich}}})
+	// Rail plus a terminal handling at each end (GLEC v3.3 intermodal
+	// terminal, 18.2 kg CO2e per container; 20 t = 2 TEU at 10 t per TEU).
+	railKg := rail.WTWKg + 2*2*18.2
 	l := res.Shipments[0]
-	if !near(l.Scenario.WTWKg, 0.7*base.WTWKg+0.3*rail.WTWKg) || !near(l.Base.WTWKg, base.WTWKg) {
-		t.Errorf("long: base %v scenario %v; want %v", l.Base.WTWKg, l.Scenario.WTWKg, 0.7*base.WTWKg+0.3*rail.WTWKg)
+	if !near(l.Scenario.WTWKg, 0.7*base.WTWKg+0.3*railKg) || !near(l.Base.WTWKg, base.WTWKg) {
+		t.Errorf("long: base %v scenario %v; want %v", l.Base.WTWKg, l.Scenario.WTWKg, 0.7*base.WTWKg+0.3*railKg)
 	}
 	if s := res.Shipments[1]; s.DiffKg != 0 {
 		t.Errorf("a 250 km leg must stay on road: diff %v", s.DiffKg)

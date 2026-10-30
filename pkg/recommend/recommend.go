@@ -613,50 +613,10 @@ type analyser struct {
 	noTerminals   string
 }
 
-// IntermodalTerminal is the hub type added for an extra change of mode.
-const IntermodalTerminal = "intermodal_terminal"
+// IntermodalTerminal is the hub type added for an extra terminal handling.
+const IntermodalTerminal = calc.IntermodalTerminal
 
-// unitised says whether a leg's cargo goes through an intermodal terminal
-// when the mode changes: road and rail always; waterway and sea only on
-// container vessels (GLEC has no default for Ro-Ro or bulk terminals, and
-// excludes self-driving cargo at Ro-Ro terminals: Section 1 Chapter 4,
-// logistics hubs). Air: no GLEC default for airports.
-func unitised(l calc.LegResult) bool {
-	switch l.Mode {
-	case calc.Road, calc.Rail:
-		return true
-	case calc.InlandWaterway, calc.Sea:
-		vt := l.VehicleType
-		if l.Factor != nil {
-			vt += " " + l.Factor.VehicleType
-		}
-		return strings.Contains(strings.ToLower(vt), "container")
-	}
-	return false
-}
-
-// terminals counts the changes of mode at an intermodal terminal, and the
-// ends of the new legs (main) where the shipment starts or ends: the cargo
-// was on a truck there before, so it is handled at the terminal from or to
-// the truck even when the road to it is too short to count (GapKm).
-func terminals(r calc.Result, main map[string]bool) int {
-	n := 0
-	for i := 1; i < len(r.Legs); i++ {
-		a, b := r.Legs[i-1], r.Legs[i]
-		if a.Mode != b.Mode && unitised(a) && unitised(b) {
-			n++
-		}
-	}
-	if k := len(r.Legs); k > 0 {
-		if l := r.Legs[0]; main[l.LegID] && l.Mode != calc.Road && unitised(l) {
-			n++
-		}
-		if l := r.Legs[k-1]; main[l.LegID] && l.Mode != calc.Road && unitised(l) {
-			n++
-		}
-	}
-	return n
-}
+func terminals(r calc.Result, main map[string]bool) int { return calc.TerminalHandlings(r, main) }
 
 // explicit is r's route as legs to calculate again (map, download): the
 // shipment's legs (in) with their ends as calculated, and the added road
@@ -685,33 +645,14 @@ func explicit(in []calc.Leg, r calc.Result) []calc.Leg {
 }
 
 // setContainers works out the shipment's containers for terminal
-// handlings: its TEU, or its tonnes ÷ GLEC's tonnes per TEU for its cargo
-// type (light, heavy) or the average.
+// handlings (calc.Calculator.Containers).
 func (a *analyser) setContainers() {
-	if _, err := a.c.Factors.HubFactor(IntermodalTerminal); err != nil {
-		a.noTerminals = "the factor set has no intermodal terminal value"
+	n, rule, err := a.c.Containers(a.s, a.base.WeightKg)
+	if err != nil {
+		a.noTerminals = err.Error()
 		return
 	}
-	if a.s.TEU > 0 {
-		a.containers, a.containerRule = a.s.TEU, "the shipment's TEU"
-		return
-	}
-	clp, ok := a.c.Factors.(calc.ContainerLoadProvider)
-	if !ok {
-		a.noTerminals = "the factor set has no tonnes per TEU"
-		return
-	}
-	profile := calc.DefaultContainerLoad
-	if ct := a.s.CargoType; ct == "light" || ct == "heavy" {
-		profile = ct
-	}
-	perTEU, err := clp.ContainerLoad(profile)
-	if err != nil || perTEU <= 0 {
-		a.noTerminals = "the factor set has no tonnes per TEU"
-		return
-	}
-	a.containers = a.base.WeightKg / 1000 / perTEU
-	a.containerRule = fmt.Sprintf("TEU = tonnes ÷ %g, GLEC %s", perTEU, profile)
+	a.containers, a.containerRule = n, rule
 }
 
 // addTerminals adds to r the terminal handlings it has beyond now, and

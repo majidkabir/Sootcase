@@ -266,7 +266,7 @@ Fuels are converted with the selected dataset's fuel factors, including `electri
 
 | Change | What it does | Defaults (source) |
 |---|---|---|
-| `road_to_rail` | Road legs longer than `min_road_km` go by rail for `share` of the cargo; the rail part must be longer than `min_rail_km` in a straight line, with road legs to and from the nearest rail terminal on the network reachable by road (`terminal`: `nearest`, or `best_trip` for the calculator's usual choice). The place list can't tell which terminals handle containers or trailers | 300 km and 30% (EU Transport White Paper 2011: "30% of road freight over 300 km should shift to other modes … by 2030"); 100 km (Directive 92/106/EEC on combined transport, Art. 1) |
+| `road_to_rail` | Road legs longer than `min_road_km` go by rail for `share` of the cargo; the rail part must be longer than `min_rail_km` in a straight line, with road legs to and from the nearest rail terminal on the network reachable by road (`terminal`: `nearest`, or `best_trip` for the calculator's usual choice), and each terminal handling counted with GLEC v3.3's intermodal terminal value per container. The place list can't tell which terminals handle containers or trailers | 300 km and 30% (EU Transport White Paper 2011: "30% of road freight over 300 km should shift to other modes … by 2030"); 100 km (Directive 92/106/EEC on combined transport, Art. 1) |
 | `electrify` | Matching road legs: no tank-to-wheel emissions, `kwh_per_tkm` × the `country`'s grid factor upstream | none: give `kwh_per_tkm`, `country` and `source` |
 | `fuel_switch` | Matching diesel road legs use `fuel` (`hvo`, `b100`, `biomethane`, `biomethane_lng`, `cng`, `lng` or a dataset fuel id): energy from the leg's diesel emissions and DESNZ's diesel factor per kWh, × `energy_ratio`, × the fuel's factor per GJ (modelled, ISO 14083 7.2.4). Biofuel factors exclude biogenic CO2, which is given separately as `biogenic_co2_kg` (GLEC v3.3 p. 64) | `energy_ratio` 1 (same energy per tonne-km; an assumption, stated in the output) |
 | `load` | The shipment's own matching road legs get `load_tonnes` or `load_factor`, and `empty_trip_factor` | none |
@@ -279,7 +279,7 @@ Fuels are converted with the selected dataset's fuel factors, including `electri
 
 | Kind | What it tries |
 |---|---|
-| `road_to_rail` | Road legs over `min_road_km` by rail, with road to and from the nearest rail terminal |
+| `road_to_rail` | Road legs over `min_road_km` by rail, with road to and from the nearest rail terminal and a terminal handling at each end |
 | `road_to_waterway` | The same legs by inland waterway (`waterway_vehicle`, default `container_barge`) |
 | `road_to_short_sea` | The same legs by sea (`short_sea_vehicle`, default `roro`) |
 | `air_to_sea`, `air_to_rail` | Each air leg, with the road legs next to it, as one sea or rail leg from where the cargo starts to where it ends |

@@ -16,7 +16,10 @@
 //     92/106/EEC on combined transport, Article 1), with road legs to and
 //     from the nearest rail terminal on the network that can be reached by
 //     road (the Directive's "nearest suitable rail station"; terminal
-//     "best_trip" uses the calculator's usual choice instead).
+//     "best_trip" uses the calculator's usual choice instead), also when the
+//     leg's end is on the rail network but not at a terminal. Each terminal
+//     handling this adds counts GLEC v3.3's intermodal terminal value per
+//     container (calc.TerminalHandlings, calc.Calculator.Containers).
 //   - electrify: matching road legs run on electricity: no tank-to-wheel
 //     emissions, and kwh_per_tkm × the country's grid factor upstream (as
 //     the calculator's energy method). kwh_per_tkm, country and source are
@@ -688,17 +691,20 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 		return railVariant{}, 0, nil, false
 	}
 	var notes []string
+	terminalNote := ""
 	try := func(js []int) (railVariant, bool) {
 		rs := s
 		rs.Legs = append([]calc.Leg(nil), s.Legs...)
 		cc := c
 		cc.NearestTerminal = ch.Terminal != TerminalBestTrip
+		ids := map[string]bool{}
 		for _, j := range js {
 			l := s.Legs[j]
 			if cc.RoadVehicle == "" {
 				cc.RoadVehicle = l.VehicleType
 			}
-			rs.Legs[j] = calc.Leg{ID: l.ID, Mode: calc.Rail, VehicleType: ch.RailVehicle, From: l.From, To: l.To}
+			rs.Legs[j] = calc.Leg{ID: l.ID, Mode: calc.Rail, VehicleType: ch.RailVehicle, From: l.From, To: l.To, AtTerminals: true}
+			ids[l.ID] = true
 		}
 		r, err := cc.Calculate(ctx, rs)
 		if err != nil {
@@ -718,9 +724,24 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 				}
 			}
 		}
+		// The terminal handlings rail adds (calc.TerminalHandlings), as hubs.
+		if extra := calc.TerminalHandlings(r, ids) - calc.TerminalHandlings(before, nil); extra > 0 {
+			n, _, err := cc.Containers(s, before.WeightKg)
+			if err != nil {
+				terminalNote = fmt.Sprintf("terminal handlings at the rail terminals not counted: %v", err)
+			} else {
+				rs.Hubs = append([]calc.HubStop(nil), s.Hubs...)
+				for k := range extra {
+					rs.Hubs = append(rs.Hubs, calc.HubStop{ID: fmt.Sprintf("added-terminal-%d", k+1), HubType: calc.IntermodalTerminal, Containers: n})
+				}
+			}
+		}
 		return railVariant{rs, cc}, true
 	}
 	if v, ok := try(cands); ok {
+		if terminalNote != "" {
+			notes = append(notes, terminalNote)
+		}
 		return v, len(cands), notes, true
 	}
 	// Some legs can't go by rail: keep the ones that can.
@@ -736,6 +757,9 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 		return railVariant{}, 0, notes, false
 	}
 	v, ok := try(good)
+	if ok && terminalNote != "" {
+		notes = append(notes, terminalNote)
+	}
 	return v, len(good), notes, ok
 }
 
