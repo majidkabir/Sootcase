@@ -403,6 +403,24 @@ footer.credits a { color: var(--blue); }
         <div><label>Amount</label><input name="fuel_amount" type="number" min="0" step="any"></div>
         <div><label>Vehicle tonne-km (shared trip)</label><input name="vehicle_tonne_km" type="number" min="0" step="any"></div>
       </div>
+      <p class="hint">Optional: the fuel supplier's own emission factor, instead of the default for this fuel.</p>
+      <div class="row">
+        <div><label>Unit (l, kg, kWh)</label><input name="fuel_unit" placeholder="l" autocomplete="off"></div>
+        <div><label>Well-to-wheel (kg CO₂e per unit)</label><input name="fuel_wtw" type="number" min="0" step="any"></div>
+        <div><label>Tank-to-wheel (kg CO₂e per unit)</label><input name="fuel_ttw" type="number" min="0" step="any"></div>
+        <div><label>Source</label><input name="fuel_source" placeholder="Supplier, product, year" autocomplete="off"></div>
+      </div>
+    </details>
+    <details><summary>Carrier's own intensity</summary>
+      <p class="hint">The carrier's or your own measured g CO₂e per tonne-km for this leg, instead of a default value (primary data, ISO 14083).
+        Give its source. Leave the distance basis as it is unless the figure is per actual km or great-circle km.</p>
+      <div class="row">
+        <div><label>Well-to-wheel (g per tonne-km)</label><input name="own_wtw" type="number" min="0" step="any"></div>
+        <div><label>Tank-to-wheel (g per tonne-km)</label><input name="own_ttw" type="number" min="0" step="any"></div>
+        <div><label>Source</label><input name="own_source" placeholder="Carrier, report, year" autocomplete="off"></div>
+        <div><label>Distance basis</label><select name="own_basis"><option value="">Same as the leg</option>
+          <option value="sfd">Shortest feasible</option><option value="actual">Actual km</option><option value="gcd">Great circle</option></select></div>
+      </div>
     </details>
     <details class="only-road-rail"><summary>Electric (energy per tonne-km)</summary>
       <div class="row">
@@ -606,7 +624,19 @@ function buildShipment() {
     const country = f("country").value.trim();
     if (country && keys.includes("energy_kwh_per_tkm")) l.country = country.toUpperCase();
     const fuel = f("fuel").value.trim();
-    if (fuel) l.fuel = { fuel, amount: num(f("fuel_amount")) || 0, vehicle_tonne_km: num(f("vehicle_tonne_km")) };
+    if (fuel) {
+      l.fuel = { fuel, amount: num(f("fuel_amount")) || 0, vehicle_tonne_km: num(f("vehicle_tonne_km")) };
+      const fw = num(f("fuel_wtw"));
+      if (fw !== undefined || f("fuel_source").value.trim()) {
+        l.fuel.factor = { unit: f("fuel_unit").value.trim(), wtw_kg_per_unit: fw || 0, ttw_kg_per_unit: num(f("fuel_ttw")) || 0,
+          source: f("fuel_source").value.trim() };
+      }
+    }
+    const ow = num(f("own_wtw"));
+    if (ow !== undefined || f("own_source").value.trim()) {
+      l.own_factor = { wtw_g_per_tkm: ow || 0, ttw_g_per_tkm: num(f("own_ttw")) || 0, source: f("own_source").value.trim() };
+      if (f("own_basis").value) l.own_factor.distance_basis = f("own_basis").value;
+    }
     s.legs.push(l);
   });
   if (!$("#roadlegs").checked) s.add_road_legs = false;
