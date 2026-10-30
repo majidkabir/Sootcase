@@ -18,12 +18,19 @@
 //     Article); road to and from rail goes to the nearest rail terminal on
 //     the network (same Article: "the nearest suitable rail loading station").
 //
-// Extra transshipments: each change of mode an alternative adds at a rail,
-// waterway or container-ship terminal adds GLEC Framework v3.3's default
-// value for intermodal terminals (Module 2, Table 3, p. 97, per container),
-// for the shipment's containers: its TEU, or its tonnes ÷ GLEC's tonnes per
-// TEU (Section 1 Chapter 4, logistics hubs). There is no GLEC default for
-// airports or Ro-Ro and bulk terminals, so those are not counted.
+// New rail, waterway and sea legs run between rail terminals or ports: an
+// end that isn't at one moves to the nearest, with a road leg to it, even
+// when it is on the network (same Article: combined transport is road to
+// and from the nearest suitable station or port; calc.Leg.AtTerminals).
+//
+// Extra transshipments: each terminal handling an alternative adds (a change
+// of mode at a rail, waterway or container-ship terminal, and the ends of
+// the new legs where the shipment starts or ends, as the cargo was on a
+// truck there) adds GLEC Framework v3.3's default value for intermodal
+// terminals (Module 2, Table 3, p. 97, per container), for the shipment's
+// containers: its TEU, or its tonnes ÷ GLEC's tonnes per TEU (Section 1
+// Chapter 4, logistics hubs). There is no GLEC default for airports or
+// Ro-Ro and bulk terminals, so those are not counted.
 //
 // What it doesn't know, and says so (Limitations): transit times, costs,
 // and whether a service runs on the lane.
@@ -361,7 +368,7 @@ func Limitations() []string {
 		"No transit times or costs: there is no standard source for them, so alternatives are compared on emissions and distance only.",
 		"Whether a rail, barge or ferry service actually runs on the lane, how often, and with free capacity is not known: an alternative is possible on the networks, not a booked service.",
 		"Terminals and ports come from UN/LOCODE, which marks rail terminals and ports but not whether they handle containers or trailers.",
-		"Extra terminal handlings: each change of mode an alternative adds at a rail, waterway or container-ship terminal counts GLEC v3.3's intermodal terminal value (Table 3: 18.2 kg CO2e per container, 21.4 temperature-controlled). Containers = the shipment's TEU, or its tonnes ÷ GLEC's tonnes per TEU (10; light 6, heavy 14.5); Table 3 gives no container size, so one container = one TEU. Airports, Ro-Ro and bulk terminals have no GLEC value and are not counted.",
+		"New rail, waterway and sea legs run between rail terminals or ports (from UN/LOCODE), with road to and from the nearest one. Each terminal handling this adds (truck to train, barge or container ship and back) counts GLEC v3.3's intermodal terminal value (Table 3: 18.2 kg CO2e per container, 21.4 temperature-controlled). Containers = the shipment's TEU, or its tonnes ÷ GLEC's tonnes per TEU (10; light 6, heavy 14.5); Table 3 gives no container size, so one container = one TEU. Airports, Ro-Ro and bulk terminals have no GLEC value and are not counted.",
 		"New legs use fleet-average default factors (GLEC Framework v3.3 default values; UK DESNZ 2026 for ferries, Ro-Ro and non-container ships), not a carrier's own data.",
 		"Combining shipments needs shipping dates, which the shipments file doesn't have: fuller loads use the load you give for every road vehicle.",
 		"Rail and waterway distances are shortest paths on OpenStreetMap; a waterway alternative needs both ends near a navigable river or canal.",
@@ -628,8 +635,11 @@ func unitised(l calc.LegResult) bool {
 	return false
 }
 
-// terminals counts the changes of mode at an intermodal terminal.
-func terminals(r calc.Result) int {
+// terminals counts the changes of mode at an intermodal terminal, and the
+// ends of the new legs (main) where the shipment starts or ends: the cargo
+// was on a truck there before, so it is handled at the terminal from or to
+// the truck even when the road to it is too short to count (GapKm).
+func terminals(r calc.Result, main map[string]bool) int {
 	n := 0
 	for i := 1; i < len(r.Legs); i++ {
 		a, b := r.Legs[i-1], r.Legs[i]
@@ -637,7 +647,41 @@ func terminals(r calc.Result) int {
 			n++
 		}
 	}
+	if k := len(r.Legs); k > 0 {
+		if l := r.Legs[0]; main[l.LegID] && l.Mode != calc.Road && unitised(l) {
+			n++
+		}
+		if l := r.Legs[k-1]; main[l.LegID] && l.Mode != calc.Road && unitised(l) {
+			n++
+		}
+	}
 	return n
+}
+
+// explicit is r's route as legs to calculate again (map, download): the
+// shipment's legs (in) with their ends as calculated, and the added road
+// legs.
+func explicit(in []calc.Leg, r calc.Result) []calc.Leg {
+	byID := map[string]calc.Leg{}
+	for _, l := range in {
+		byID[l.ID] = l
+	}
+	out := make([]calc.Leg, 0, len(r.Legs))
+	for _, lr := range r.Legs {
+		l, ok := byID[lr.LegID]
+		if !ok || lr.Added != "" {
+			l = calc.Leg{ID: lr.LegID, Mode: lr.Mode, VehicleType: lr.VehicleType}
+		}
+		if lr.From != nil {
+			l.From = *lr.From
+		}
+		if lr.To != nil {
+			l.To = *lr.To
+		}
+		l.AtTerminals = false
+		out = append(out, l)
+	}
+	return out
 }
 
 // setContainers works out the shipment's containers for terminal
@@ -672,8 +716,8 @@ func (a *analyser) setContainers() {
 
 // addTerminals adds to r the terminal handlings it has beyond now, and
 // says so in a few words ("" if none).
-func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result) ([]calc.HubResult, string, error) {
-	extra := terminals(*r) - a.nowTerminals
+func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result, main map[string]bool) ([]calc.HubResult, string, error) {
+	extra := terminals(*r, main) - a.nowTerminals
 	if extra <= 0 {
 		return nil, "", nil
 	}
@@ -723,7 +767,7 @@ func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settin
 		}
 	}
 	a.now = route(c, base)
-	a.nowTerminals = terminals(base)
+	a.nowTerminals = terminals(base, nil)
 	a.setContainers()
 	sr.Now = a.now
 	sr.Legs = s.Legs
@@ -890,7 +934,7 @@ func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.
 			}
 		}
 	}
-	hubs, hubText, err := a.addTerminals(cc, &r)
+	hubs, hubText, err := a.addTerminals(cc, &r, main)
 	if err != nil {
 		a.note("%s: not possible: %v", kindName(kind), shortErr(err))
 		return false
@@ -902,7 +946,7 @@ func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.
 	}
 	rt := route(cc, r)
 	rt.Terminals = hubs
-	o := Option{Kind: kind, Route: rt, SavedKg: saved, Legs: s.Legs, Summary: summary(r)}
+	o := Option{Kind: kind, Route: rt, SavedKg: saved, Legs: explicit(s.Legs, r), Summary: summary(r)}
 	if hubText != "" {
 		o.Summary += "; " + hubText
 	}
@@ -1009,7 +1053,7 @@ func (a *analyser) roadShift(kind string, m calc.Mode, vehicle string) {
 			}
 			from, _ := a.loc(l, true)
 			to, _ := a.loc(l, false)
-			s.Legs[j] = calc.Leg{ID: l.ID, Mode: m, VehicleType: vehicle, From: from, To: to}
+			s.Legs[j] = calc.Leg{ID: l.ID, Mode: m, VehicleType: vehicle, From: from, To: to, AtTerminals: true}
 			main[l.ID] = true
 		}
 		return s, cc, main
@@ -1073,7 +1117,7 @@ func (a *analyser) airShift(kind string, m calc.Mode, vehicle string) {
 				}
 			}
 		}
-		out = append(out, calc.Leg{ID: l.ID, Mode: m, VehicleType: vehicle, From: from, To: to})
+		out = append(out, calc.Leg{ID: l.ID, Mode: m, VehicleType: vehicle, From: from, To: to, AtTerminals: true})
 		main[l.ID] = true
 		j = end
 	}

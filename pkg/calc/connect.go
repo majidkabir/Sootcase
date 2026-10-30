@@ -149,8 +149,53 @@ type planned struct {
 
 // moved is a leg end moved to a port or terminal.
 type moved struct {
-	to    Location
-	offKm float64 // how far the original point is from the network
+	to       Location
+	offKm    float64 // how far the original point is from the network
+	terminal bool    // moved though on the network (Leg.AtTerminals)
+}
+
+// why says why an end of a leg in mode m was moved.
+func (mv *moved) why(m Mode) string {
+	if mv.terminal {
+		return fmt.Sprintf("not at a %s, and %s runs between them (road to the nearest, Council Directive 92/106/EEC)", terminalName(m), network(m))
+	}
+	return fmt.Sprintf("%.0f km from %s", mv.offKm, awayFrom(m))
+}
+
+// whichIs is why for a note on the moved leg itself.
+func (mv *moved) whichIs(m Mode) string {
+	if mv.terminal {
+		return mv.why(m)
+	}
+	return "which is " + mv.why(m)
+}
+
+func terminalName(m Mode) string {
+	if m == Rail {
+		return "rail terminal"
+	}
+	return "port"
+}
+
+// atTerminal says whether p is at a rail terminal (rail) or port (inland
+// waterway, sea): within GapKm of one, or at a sea port as atSeaPort says.
+// True when it can't tell.
+func (c Calculator) atTerminal(m Mode, p Location) bool {
+	f, ok := c.Places.(PlaceFinder)
+	if !ok {
+		return true
+	}
+	switch m {
+	case Rail:
+		return len(f.Near(p, []string{KindRail}, GapKm, 1)) > 0
+	case InlandWaterway:
+		return len(f.Near(p, []string{KindPort}, GapKm, 1)) > 0
+	case Sea:
+		if s, ok := c.Distances.(Snapper); ok {
+			return c.atSeaPort(s, p)
+		}
+	}
+	return true
 }
 
 // plan returns the legs to calculate: the shipment's, with the added road
@@ -178,23 +223,25 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 		if err != nil {
 			return nil, nil, err
 		}
-		if offFrom > 0 && add {
+		termFrom := l.AtTerminals && l.Mode != Air && offFrom == 0 && !c.atTerminal(l.Mode, l.From)
+		termTo := l.AtTerminals && l.Mode != Air && offTo == 0 && !c.atTerminal(l.Mode, l.To)
+		if (offFrom > 0 || termFrom) && add {
 			p, ok, err := c.accessPoint(ctx, l.Mode, l.From, l.To, true)
 			if err != nil {
 				return nil, nil, err
 			}
 			if ok {
-				from[i] = &moved{to: p, offKm: offFrom}
+				from[i] = &moved{to: p, offKm: offFrom, terminal: termFrom}
 				l.From = p
 			}
 		}
-		if offTo > 0 && add {
+		if (offTo > 0 || termTo) && add {
 			p, ok, err := c.accessPoint(ctx, l.Mode, l.To, l.From, false)
 			if err != nil {
 				return nil, nil, err
 			}
 			if ok {
-				to[i] = &moved{to: p, offKm: offTo}
+				to[i] = &moved{to: p, offKm: offTo, terminal: termTo}
 				l.To = p
 			}
 		}
@@ -260,12 +307,12 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 			if d := gcKm(prev, l.From); d > GapKm {
 				var why []string
 				if prevMoved != nil {
-					why = append(why, fmt.Sprintf("leg %s ends at %s instead of %s, %.0f km from %s",
-						legID(legs[i-1], i-1), place(prev), place(legs[i-1].To), prevMoved.offKm, awayFrom(legs[i-1].Mode)))
+					why = append(why, fmt.Sprintf("leg %s ends at %s instead of %s, %s",
+						legID(legs[i-1], i-1), place(prev), place(legs[i-1].To), prevMoved.why(legs[i-1].Mode)))
 				}
 				if from[i] != nil {
-					why = append(why, fmt.Sprintf("leg %s starts at %s instead of %s, %.0f km from %s",
-						legID(legs[i], i), place(l.From), place(legs[i].From), from[i].offKm, awayFrom(l.Mode)))
+					why = append(why, fmt.Sprintf("leg %s starts at %s instead of %s, %s",
+						legID(legs[i], i), place(l.From), place(legs[i].From), from[i].why(l.Mode)))
 				}
 				kind := AddedAccess
 				if len(why) == 0 {
@@ -282,12 +329,12 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 		p := planned{Leg: l}
 		var notes []string
 		if from[i] != nil {
-			notes = append(notes, fmt.Sprintf("Starts at %s instead of %s, which is %.0f km from %s.",
-				place(l.From), place(legs[i].From), from[i].offKm, awayFrom(l.Mode)))
+			notes = append(notes, fmt.Sprintf("Starts at %s instead of %s, %s.",
+				place(l.From), place(legs[i].From), from[i].whichIs(l.Mode)))
 		}
 		if to[i] != nil {
-			notes = append(notes, fmt.Sprintf("Ends at %s instead of %s, which is %.0f km from %s.",
-				place(l.To), place(legs[i].To), to[i].offKm, awayFrom(l.Mode)))
+			notes = append(notes, fmt.Sprintf("Ends at %s instead of %s, %s.",
+				place(l.To), place(legs[i].To), to[i].whichIs(l.Mode)))
 		}
 		if len(notes) > 0 {
 			p.note = strings.Join(notes, " ")
@@ -295,8 +342,8 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 		out = append(out, p)
 	}
 	if last := len(fixed) - 1; last >= 0 && to[last] != nil {
-		road(fixed[last].To, legs[last].To, AddedAccess, fmt.Sprintf("Added road from %s to %s: leg %s ends at %s instead of %s, %.0f km from %s.",
-			place(fixed[last].To), place(legs[last].To), legID(legs[last], last), place(fixed[last].To), place(legs[last].To), to[last].offKm, awayFrom(legs[last].Mode)))
+		road(fixed[last].To, legs[last].To, AddedAccess, fmt.Sprintf("Added road from %s to %s: leg %s ends at %s instead of %s, %s.",
+			place(fixed[last].To), place(legs[last].To), legID(legs[last], last), place(fixed[last].To), place(legs[last].To), to[last].why(legs[last].Mode)))
 	}
 	return out, warnings, nil
 }

@@ -112,15 +112,19 @@ func TestRoadToRail(t *testing.T) {
 		t.Fatal(err)
 	}
 	base, _ := c.Calculate(ctx, long)
-	rail, _ := c.Calculate(ctx, calc.Shipment{WeightKg: 20000, Legs: []calc.Leg{{ID: "r", Mode: calc.Rail, VehicleType: "freight_train", From: hamburg, To: munich}}})
 	o := option(res.Shipments[0], Rail)
 	if o == nil {
 		t.Fatalf("no rail option: %+v", res.Shipments[0])
 	}
-	if !near(o.SavedKg, base.WTWKg-rail.WTWKg) || !near(res.Shipments[0].Now.WTWKg, base.WTWKg) || o.SavedPct <= 0 {
-		t.Errorf("rail saving %v, want %v", o.SavedKg, base.WTWKg-rail.WTWKg)
+	// Rail from the rail terminal (Hamburg is 6 km from DEHAM), the road to
+	// it, and a terminal handling at each end of the rail leg.
+	rail, _ := c.Calculate(ctx, calc.Shipment{WeightKg: 20000, Legs: o.Legs})
+	want := base.WTWKg - rail.WTWKg - 2*2*18.2
+	if !near(o.SavedKg, want) || !near(res.Shipments[0].Now.WTWKg, base.WTWKg) || o.SavedPct <= 0 || len(o.Terminals) != 2 {
+		t.Errorf("rail saving %v, want %v", o.SavedKg, want)
 	}
-	if len(o.Legs) != 1 || o.Legs[0].Mode != calc.Rail || o.Modes[0] != "rail" || !strings.Contains(o.Summary, "rail") {
+	if len(o.Legs) != 2 || o.Legs[0].Mode != calc.Road || o.Legs[0].To.Code != "DEHAM" || o.Legs[1].Mode != calc.Rail || o.Legs[1].From.Code != "DEHAM" ||
+		o.Legs[1].To.Name != "Munich" || !strings.Contains(o.Summary, "rail") {
 		t.Errorf("rail option: %+v", o)
 	}
 	if s := res.Shipments[1]; len(s.Options) != 0 || len(s.Notes) == 0 || !strings.Contains(s.Notes[0], "300 km") {
@@ -190,9 +194,22 @@ func TestAirToSeaAndRail(t *testing.T) {
 			t.Errorf("%s: no option (%v)", k.kind, sr.Notes)
 			continue
 		}
-		// One leg from Suzhou to Munich in the new mode.
-		if len(o.Legs) != 1 || o.Legs[0].Mode != k.mode || o.Legs[0].ID != "fly" || o.Legs[0].From.Name != "Suzhou" || o.Legs[0].To.Name != "Munich" {
+		// From Suzhou to Munich in the new mode, between ports or rail
+		// terminals, with road to them where needed.
+		var main *calc.Leg
+		for i := range o.Legs {
+			if o.Legs[i].ID == "fly" {
+				main = &o.Legs[i]
+			}
+		}
+		first, last := o.Legs[0], o.Legs[len(o.Legs)-1]
+		if main == nil || main.Mode != k.mode || first.From.Name != "Suzhou" || last.To.Name != "Munich" {
 			t.Errorf("%s legs: %+v", k.kind, o.Legs)
+		}
+		for i := 1; i < len(o.Legs); i++ {
+			if o.Legs[i].From != o.Legs[i-1].To {
+				t.Errorf("%s legs don't join: %+v", k.kind, o.Legs)
+			}
 		}
 		if o.SavedPct < 50 {
 			t.Errorf("%s: saved only %.0f%%", k.kind, o.SavedPct)
@@ -287,7 +304,7 @@ func TestExtraTerminals(t *testing.T) {
 		}
 		sr := &ShipmentResult{}
 		a := &analyser{ctx: ctx, c: c, set: set, s: s, base: base, now: route(c, base), sr: sr}
-		a.nowTerminals = terminals(base)
+		a.nowTerminals = terminals(base, nil)
 		a.setContainers()
 		alt := s
 		alt.Legs = []calc.Leg{road("r1", hamburg, kiel, 0),
@@ -303,20 +320,21 @@ func TestExtraTerminals(t *testing.T) {
 	for _, st := range o.Steps {
 		steps += st.WTWKg
 	}
-	if len(o.Terminals) != 1 || o.Terminals[0].HubType != IntermodalTerminal || !near(o.Terminals[0].Containers, 2) ||
-		!near(o.Terminals[0].WTWKg, 2*18.2) || !near(o.WTWKg, steps+2*18.2) || !strings.Contains(o.Summary, "1 extra terminal handling") {
+	// Road → rail at Kiel, and rail → truck at Munich, where the shipment ends.
+	if len(o.Terminals) != 2 || o.Terminals[0].HubType != IntermodalTerminal || !near(o.Terminals[0].Containers, 2) ||
+		!near(o.Terminals[0].WTWKg, 2*18.2) || !near(o.WTWKg, steps+4*18.2) || !strings.Contains(o.Summary, "2 extra terminal handlings") {
 		t.Errorf("terminal: %+v, steps %v", o, steps)
 	}
 	s.CargoType = "temperature_controlled"
-	if o := try(s); len(o.Terminals) != 1 || !near(o.Terminals[0].WTWKg, 2*21.4) {
+	if o := try(s); len(o.Terminals) != 2 || !near(o.Terminals[0].WTWKg, 2*21.4) {
 		t.Errorf("temperature-controlled: %+v", o.Terminals)
 	}
 	s.CargoType = "heavy"
-	if o := try(s); len(o.Terminals) != 1 || !near(o.Terminals[0].Containers, 20/14.5) {
+	if o := try(s); len(o.Terminals) != 2 || !near(o.Terminals[0].Containers, 20/14.5) {
 		t.Errorf("heavy: %+v", o.Terminals)
 	}
 	s.CargoType, s.WeightKg, s.TEU = "", 0, 3
-	if o := try(s); len(o.Terminals) != 1 || !near(o.Terminals[0].Containers, 3) {
+	if o := try(s); len(o.Terminals) != 2 || !near(o.Terminals[0].Containers, 3) {
 		t.Errorf("TEU: %+v", o.Terminals)
 	}
 	// Grouped shipments are scaled by weight, terminals too.
@@ -340,8 +358,17 @@ func TestTerminalsCount(t *testing.T) {
 		{[]calc.LegResult{leg(calc.Rail, "freight_train"), leg(calc.InlandWaterway, "container_barge")}, 1},
 		{[]calc.LegResult{leg(calc.Road, "hgv"), leg(calc.Road, "van")}, 0},
 	} {
-		if got := terminals(calc.Result{Legs: c.legs}); got != c.want {
+		if got := terminals(calc.Result{Legs: c.legs}, nil); got != c.want {
 			t.Errorf("%+v: %d, want %d", c.legs, got, c.want)
 		}
+	}
+	// A new rail leg where the shipment starts or ends: handled there too.
+	r := calc.Result{Legs: []calc.LegResult{{LegID: "m", Mode: calc.Rail}, {LegID: "x", Mode: calc.Road}}}
+	if got := terminals(r, map[string]bool{"m": true}); got != 2 {
+		t.Errorf("start edge: %d, want 2", got)
+	}
+	r = calc.Result{Legs: []calc.LegResult{{LegID: "m", Mode: calc.Rail}}}
+	if got := terminals(r, map[string]bool{"m": true}); got != 2 {
+		t.Errorf("door to door: %d, want 2", got)
 	}
 }

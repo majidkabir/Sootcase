@@ -321,3 +321,29 @@ func TestRoadLegs_NearestTerminal(t *testing.T) {
 		t.Errorf("nearest: rail to %s, want South terminal", r.Legs[0].To.Name)
 	}
 }
+
+// AtTerminals: an end on the network that isn't at a rail terminal moves
+// to the nearest one, with a road leg; an end at one stays.
+func TestRoadLegs_AtTerminals(t *testing.T) {
+	dest := Location{Name: "Dest", Lat: 50.0, Lon: 12.0}
+	south := Location{Name: "South terminal", Lat: 49.64, Lon: 12.0}
+	w := world{rail: []Location{berlin, dest, south}} // Dest is on the network
+	places := gazetteer{{berlin, []string{KindRail}}, {south, []string{KindRail}}}
+	s := Shipment{ID: "s", WeightKg: 1000, Legs: []Leg{{ID: "r", Mode: Rail, VehicleType: "train", From: berlin, To: dest}}}
+	c := Calculator{Factors: connectFactors, Distances: w, Places: places, NearestTerminal: true}
+	r, err := c.Calculate(context.Background(), s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Legs) != 1 {
+		t.Fatalf("without AtTerminals: %d legs", len(r.Legs))
+	}
+	s.Legs[0].AtTerminals = true
+	if r, err = c.Calculate(context.Background(), s); err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Legs) != 2 || r.Legs[0].From.Name != "Berlin" || r.Legs[0].To.Name != "South terminal" || r.Legs[1].Mode != Road ||
+		r.Legs[1].Added != AddedAccess || !strings.Contains(r.Legs[0].Note, "not at a rail terminal") {
+		t.Errorf("legs: %+v", r.Legs)
+	}
+}

@@ -59,6 +59,13 @@ type Leg struct {
 	// electricity per tonne-km times the country's grid intensity.
 	EnergyKWhPerTkm float64 `json:"energy_kwh_per_tkm,omitempty"`
 	Country         string  `json:"country,omitempty"`
+	// AtTerminals (rail, inland waterway, sea) makes the leg start and end
+	// at a rail terminal or port: an end that isn't at one moves to the
+	// nearest one, with a road leg to it, even when the end is on the
+	// network (combined transport: road to and from the nearest suitable
+	// station or port, Council Directive 92/106/EEC, Article 1).
+	// Recommendations set it on their new legs; not part of the API.
+	AtTerminals bool `json:"-"`
 }
 
 // FuelUse is measured fuel for the vehicle trip a leg is part of.
