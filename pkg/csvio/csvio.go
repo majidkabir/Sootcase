@@ -5,7 +5,7 @@
 // grouped into shipments by shipment_id: anywhere in the file for Read,
 // next to each other for the streaming Reader.
 //
-//	shipment_id                                     required
+//	shipment_id                                     required (rows of empty cells are skipped)
 //	weight_kg, or teu with teu_net_tonnes or container_load   cargo
 //	cargo_type                                      shipment, e.g. container, temperature_controlled (optional)
 //	leg_id, mode, vehicle_type, distance_km         leg
@@ -35,6 +35,17 @@ import (
 
 	"github.com/majidkabir/sootcase/pkg/calc"
 )
+
+// blank reports a row whose cells are all empty: spreadsheets export such
+// rows (",,,,") below the data when cells there hold formulas or formatting.
+func blank(rec []string) bool {
+	for _, v := range rec {
+		if strings.TrimSpace(v) != "" {
+			return false
+		}
+	}
+	return true
+}
 
 // Item is a parsed shipment, or the error that stopped it from parsing.
 type Item struct {
@@ -66,6 +77,9 @@ func Read(r io.Reader) ([]Item, error) {
 		}
 		if err != nil {
 			return nil, fmt.Errorf("line %d: %w", line, err)
+		}
+		if blank(rec) {
+			continue
 		}
 		row := rowReader{rec: rec, col: col}
 		id := row.str("shipment_id")
@@ -171,6 +185,9 @@ func (r *Reader) Next() (Item, error) {
 			return it, nil
 		}
 
+		if blank(rec) {
+			continue // a row of empty cells, as spreadsheets export below the data
+		}
 		row := rowReader{rec: rec, col: r.col}
 		id := row.str("shipment_id")
 		if id == "" {

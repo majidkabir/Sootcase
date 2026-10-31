@@ -249,3 +249,30 @@ func TestRead_OwnFactors(t *testing.T) {
 		t.Errorf("dataset fuel: %+v", legs[2].Fuel)
 	}
 }
+
+// Spreadsheets export rows of empty cells below the data; both readers skip them.
+func TestBlankRowsSkipped(t *testing.T) {
+	in := "shipment_id,weight_kg,mode,vehicle_type,distance_km\nA,1000,road,hgv,100\n,,,,\n , , , ,\nB,2000,road,hgv,50\n,,,,\n"
+	items, err := Read(strings.NewReader(in))
+	if err != nil || len(items) != 2 || items[0].Err != nil || items[1].Err != nil {
+		t.Fatalf("Read: %v %+v", err, items)
+	}
+	r, err := NewReader(strings.NewReader(in))
+	if err != nil {
+		t.Fatal(err)
+	}
+	n := 0
+	for {
+		it, err := r.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil || it.Err != nil {
+			t.Fatalf("Next: %v %v", err, it.Err)
+		}
+		n++
+	}
+	if n != 2 {
+		t.Fatalf("Reader: %d shipments", n)
+	}
+}
