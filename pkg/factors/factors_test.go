@@ -557,7 +557,7 @@ func TestBiogenicCO2(t *testing.T) {
 }
 
 // GLEC v3.3 inland waterway defaults: per shortest feasible distance, with no
-// DAF for an actual distance (GLEC Section 1 Chapter 4, p. 44), and a
+// DAF for an actual distance (GLEC Section 1 Chapter 4, p. 43), and a
 // straight line from coordinates refused.
 func TestInlandWaterway_GLEC33(t *testing.T) {
 	ds, err := Open(Default)
