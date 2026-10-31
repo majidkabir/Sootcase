@@ -1,7 +1,7 @@
 // Package scenario recalculates shipments with changed inputs, to compare
 // "what if" cases with how they are: road freight moved to rail, electric
 // trucks, other fuels, other loads. It uses the same calculation (GLEC
-// Framework v3.2, ISO 14083) for both, so the difference comes only from the
+// Framework v3.3, ISO 14083) for both, so the difference comes only from the
 // changes. Results are scenarios, not reported emissions.
 //
 // Every value a change uses is either given by the user (with its source)
@@ -147,7 +147,7 @@ type Totals struct {
 	WTTKg float64 `json:"wtt_kg"`
 	WTWKg float64 `json:"wtw_kg"`
 	// BiogenicCO2Kg is reported separately, not part of the totals (GLEC
-	// Framework v3.2 p. 64): from biofuels a change switches to, and from
+	// Framework v3.3 p. 64): from biofuels a change switches to, and from
 	// legs given as measured biofuel use.
 	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
 }

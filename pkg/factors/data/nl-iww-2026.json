@@ -23,6 +23,6 @@
   ],
   "dafs": [
     { "mode": "inland_waterway", "from": "sfd", "to": "actual", "multiplier": 1,
-      "source": "GLEC Framework v3.2 (Smart Freight Centre, 2025), Section 1 Chapter 4 (inland waterways): the network leaves little room for deviation between actual distance and SFD, so no DAF is needed" }
+      "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (inland waterways): the network leaves little room for deviation between actual distance and SFD, so no DAF is needed" }
   ]
 }

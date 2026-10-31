@@ -306,7 +306,7 @@ type Totals struct {
 	WTTKg float64 `json:"wtt_kg"`
 	WTWKg float64 `json:"wtw_kg"`
 	// BiogenicCO2Kg is reported separately, not part of the totals (GLEC
-	// Framework v3.2 p. 64).
+	// Framework v3.3 p. 64).
 	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
 }
 

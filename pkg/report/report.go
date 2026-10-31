@@ -184,7 +184,7 @@ type Total struct {
 	TonneKm    float64 `json:"tonne_km"`
 	IntensityG float64 `json:"intensity_g_per_tkm"` // transport WTW
 	// BiogenicCO2Kg is reported separately and not included above (GLEC
-	// Framework v3.2 p. 64); only measured fuel with a biogenic factor.
+	// Framework v3.3 p. 64); only measured fuel with a biogenic factor.
 	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
 	// DistanceTypes is the share of tonne-km per distance type (sfd, gcd,
 	// actual, or "unspecified").

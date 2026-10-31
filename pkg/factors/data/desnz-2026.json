@@ -2575,7 +2575,7 @@
       "from": "sfd",
       "to": "actual",
       "multiplier": 1.05,
-      "source": "GLEC Framework v3.2 (Smart Freight Centre, 2025), Section 1 Chapter 4 (road): when the emission intensity is based on actual distance, a DAF must be applied; 5% as in GLEC's own road default values (Section 3 Module 2), which include a +5% distance conversion between actual and shortest feasible distance"
+      "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (road): when the emission intensity is based on actual distance, a DAF must be applied; 5% as in GLEC's own road default values (Section 3 Module 2), which include a +5% distance conversion between actual and shortest feasible distance"
     },
     {
       "mode": "sea",

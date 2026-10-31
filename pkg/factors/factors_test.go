@@ -73,7 +73,7 @@ func TestOpen(t *testing.T) {
 	if err != nil || f.TTW != 25.83 || f.WTT != 6.91 || f.Year != 2026 {
 		t.Errorf("rail freight = %+v, %v", f, err)
 	}
-	// GLEC v3.2: air is measured on great-circle distance, with no +95 km on
+	// GLEC v3.3: air is measured on great-circle distance, with no +95 km on
 	// top; 95 km is only the default DAF from actual flown distance.
 	if _, adjusted := ds.Distances().Adjust[calc.Air]; adjusted {
 		t.Error("air distances must not be adjusted on top of great-circle")
@@ -447,7 +447,7 @@ func TestShortAlias(t *testing.T) {
 	}
 }
 
-// GLEC v3.2 Section 1 Chapter 4 (road): DESNZ road factors are per km
+// GLEC v3.3 Section 1 Chapter 4 (road): DESNZ road factors are per km
 // actually driven, so a routed (shortest feasible) road distance gets the
 // +5% DAF, for fleet averages and load models alike; measured fuel needs no
 // distance, and a great-circle road distance has no DAF and is refused.
@@ -510,7 +510,7 @@ func TestRoadDAF_GLEC(t *testing.T) {
 	}
 }
 
-// GLEC v3.2 (Section 1 Chapter 2, p. 21): TEU without a known mass is 10 t
+// GLEC v3.3 (Section 1 Chapter 2, p. 21): TEU without a known mass is 10 t
 // per TEU on average, 6 t light, 14.5 t heavy.
 func TestContainerLoads_GLEC(t *testing.T) {
 	ds, err := Open("")
@@ -531,7 +531,7 @@ func TestContainerLoads_GLEC(t *testing.T) {
 }
 
 // DESNZ "outside of scopes": biogenic CO2 per unit, kept out of the totals
-// and reported separately (GLEC Framework v3.2 p. 64).
+// and reported separately (GLEC Framework v3.3 p. 64).
 func TestBiogenicCO2(t *testing.T) {
 	ds, err := Open("")
 	if err != nil {
