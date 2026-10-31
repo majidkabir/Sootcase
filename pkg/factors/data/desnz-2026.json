@@ -2568,21 +2568,21 @@
       "from": "actual",
       "to": "gcd",
       "add_km": -95,
-      "source": "GLEC Framework v3.2 (Smart Freight Centre, 2025), Section 1 Chapter 4 (air): without specific data, DAF = GCD / (GCD + 95 km), i.e. actual flown distance minus 95 km"
+      "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (air): without specific data, DAF = GCD / (GCD + 95 km), i.e. actual flown distance minus 95 km"
     },
     {
       "mode": "road",
       "from": "sfd",
       "to": "actual",
       "multiplier": 1.05,
-      "source": "GLEC Framework v3.2 (Smart Freight Centre, 2025), Section 1 Chapter 4 (road): when the emission intensity is based on actual distance, a DAF must be applied; 5% as in GLEC's own road default values (Section 3 Module 2), which include a +5% distance conversion between actual and shortest feasible distance"
+      "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (road): when the emission intensity is based on actual distance, a DAF must be applied; 5% as in GLEC's own road default values (Section 3 Module 2), which include a +5% distance conversion between actual and shortest feasible distance"
     },
     {
       "mode": "sea",
       "from": "sfd",
       "to": "actual",
       "multiplier": 1.15,
-      "source": "GLEC Framework v3.2 (Smart Freight Centre, 2025), Section 1 Chapter 4 (sea), citing Clean Cargo: actual container distances average 15% above the shortest feasible route"
+      "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (sea), citing Clean Cargo: actual container distances average 15% above the shortest feasible route"
     }
   ],
   "load_models": [

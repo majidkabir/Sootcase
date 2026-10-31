@@ -247,7 +247,7 @@ func TestRoadLegs_GivenDistancesUntouched(t *testing.T) {
 	}
 }
 
-// GLEC v3.2 Section 1 Chapter 4 (air): the distance is the great circle
+// GLEC v3.3 Section 1 Chapter 4 (air): the distance is the great circle
 // between the origin and destination airports, so an air leg from a city is
 // moved to a large airport, with the road to it added.
 func TestRoadLegs_AirFromCity(t *testing.T) {

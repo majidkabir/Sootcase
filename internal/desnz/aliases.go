@@ -38,19 +38,19 @@ var fuelAliases = map[string]string{
 	"jet_fuel":        "liquid_fuels/aviation_turbine_fuel/litres",
 }
 
-// dafs are GLEC Framework v3.2 default distance adjustment factors, used
+// dafs are GLEC Framework v3.3 default distance adjustment factors, used
 // only when a leg's distance type differs from a factor's distance basis.
 var dafs = []calc.DAF{
 	{Mode: calc.Air, From: calc.DistActual, To: calc.DistGCD, AddKm: -95,
-		Source: "GLEC Framework v3.2 (Smart Freight Centre, 2025), Section 1 Chapter 4 (air): without specific data, DAF = GCD / (GCD + 95 km), i.e. actual flown distance minus 95 km"},
+		Source: "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (air): without specific data, DAF = GCD / (GCD + 95 km), i.e. actual flown distance minus 95 km"},
 	{Mode: calc.Road, From: calc.DistSFD, To: calc.DistActual, Multiplier: 1.05,
-		Source: "GLEC Framework v3.2 (Smart Freight Centre, 2025), Section 1 Chapter 4 (road): when the emission intensity is based on actual distance, a DAF must be applied; 5% as in GLEC's own road default values (Section 3 Module 2), which include a +5% distance conversion between actual and shortest feasible distance"},
+		Source: "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (road): when the emission intensity is based on actual distance, a DAF must be applied; 5% as in GLEC's own road default values (Section 3 Module 2), which include a +5% distance conversion between actual and shortest feasible distance"},
 	{Mode: calc.Sea, From: calc.DistSFD, To: calc.DistActual, Multiplier: 1.15,
-		Source: "GLEC Framework v3.2 (Smart Freight Centre, 2025), Section 1 Chapter 4 (sea), citing Clean Cargo: actual container distances average 15% above the shortest feasible route"},
+		Source: "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (sea), citing Clean Cargo: actual container distances average 15% above the shortest feasible route"},
 }
 
 // addAliases attaches the aliases whose targets exist in ds.
-// containerLoads are the GLEC Framework v3.2 net tonnes per TEU for when
+// containerLoads are the GLEC Framework v3.3 net tonnes per TEU for when
 // the cargo mass is known only in TEU (Section 1 Chapter 2, p. 21).
 var containerLoads = map[string]float64{"average": 10, "light": 6, "heavy": 14.5}
 
