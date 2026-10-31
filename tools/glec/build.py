@@ -563,7 +563,7 @@ hubs = [{"hub_type": h, "wtw_g_per_tonne": kg * 1000, "year": YEAR,
 
 dafs = [
     {"mode": "inland_waterway", "from": "actual", "to": "sfd", "multiplier": 1,
-     "source": f"{GLEC}, Section 1 Chapter 4 (inland waterways, p. 44): there is little opportunity for deviation between the "
+     "source": f"{GLEC}, Section 1 Chapter 4 (inland waterways, p. 43): there is little opportunity for deviation between the "
                f"actual distance and the shortest feasible distance, so no DAF is applied"},
     {"mode": "road", "from": "actual", "to": "sfd", "multiplier": 1 / 1.05,
      "source": f"{GLEC}, Section 3 Module 2: GLEC road values include a +5% distance conversion between actual and shortest "

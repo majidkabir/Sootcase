@@ -79,7 +79,7 @@ func Kinds() []string {
 }
 
 // Area is one of the GLEC Framework's five areas for reducing freight
-// emissions (GLEC v3.3, Section 1 Chapter 2, Figure 2: McKinnon 2018 and
+// emissions (GLEC v3.3, Section 2 Chapter 2, Figure 2, p. 67: McKinnon 2018 and
 // GLEC). Freight demand (supply chain restructuring) needs business data
 // Sootcase doesn't have, so no kind falls in it.
 type Area struct {
@@ -113,7 +113,7 @@ func AreaOf(kind string) string {
 }
 
 // SourceAreas names where the five reduction areas come from.
-const SourceAreas = "Reduction areas: GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 2 \"Beyond reporting\", " +
+const SourceAreas = "Reduction areas: GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 2 Chapter 2 \"Beyond reporting\" (p. 67), " +
 	"Figure 2, Areas and approaches for reducing emissions in freight transport (McKinnon 2018 and GLEC)"
 
 // Vehicle aliases the vehicle changes use (GLEC v3.3 default values).

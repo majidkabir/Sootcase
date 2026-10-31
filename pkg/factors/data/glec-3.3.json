@@ -8762,7 +8762,7 @@
    "from": "actual",
    "to": "sfd",
    "multiplier": 1,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (inland waterways, p. 44): there is little opportunity for deviation between the actual distance and the shortest feasible distance, so no DAF is applied"
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (inland waterways, p. 43): there is little opportunity for deviation between the actual distance and the shortest feasible distance, so no DAF is applied"
   },
   {
    "mode": "road",
