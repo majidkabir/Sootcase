@@ -70,3 +70,10 @@ jobs:
           for i in $(seq 1 20); do curl -fs localhost:8080/healthz && break; sleep 0.5; done
           curl -fs -X POST localhost:8080/v1/calculate --data @examples/cph-rotterdam.json
           docker rm -f sootcase
+      - name: Licence and notices in the image
+        run: |
+          docker create --name files sootcase:ci
+          docker cp files:/usr/share/doc/sootcase/ ./imagedoc
+          docker rm files
+          cmp imagedoc/LICENSE LICENSE
+          cmp imagedoc/NOTICE NOTICE

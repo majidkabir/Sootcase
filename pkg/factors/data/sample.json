@@ -1,6 +1,6 @@
 {
   "name": "sample",
-  "note": "ILLUSTRATIVE PLACEHOLDER VALUES for development and tests only. Replace with GLEC Framework default factors or UK DEFRA conversion factors before real use.",
+  "note": "ILLUSTRATIVE PLACEHOLDER VALUES for development and tests only. Not used by default; the default datasets are desnz-2026, nl-iww-2026, eu-mrv-2024 and glec-3.3.",
   "legs": [
     { "mode": "road", "vehicle_type": "truck_40t", "ttw_g_per_tkm": 60, "wtt_g_per_tkm": 15, "source": "placeholder", "year": 2026 },
     { "mode": "road", "vehicle_type": "van_3_5t", "ttw_g_per_tkm": 400, "wtt_g_per_tkm": 100, "source": "placeholder", "year": 2026 },
