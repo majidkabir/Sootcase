@@ -12,7 +12,9 @@ Source-available freight emissions calculator following the GLEC Framework / ISO
 
 **Try it at [sootcase.org](https://sootcase.org)**: a free test service with worldwide road, rail, inland waterway and sea routing. Sign in with your email to use the calculator and get an API key.
 
-![The Sootcase web page: a shipment entered leg by leg on the left; on the right its emissions, a bar per leg split into vehicle and fuel-supply emissions, and how each number was made](docs/screenshot.png)
+![The Sootcase web page: a shipment entered leg by leg on the left; on the right its emissions, a bar per leg split into vehicle and fuel-supply emissions, and the route on a map](docs/screenshot.png)
+
+<sub>The calculator on sootcase.org, 2 November 2026, GLEC Framework v3.3 default values. Map: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.</sub>
 
 Ships with the **GLEC Framework v3.3 default values** built in (Smart Freight Centre, used with permission): road by region, rail, air, inland waterway, container ships by trade lane, other ships by size and fuel, and logistics hubs; GLEC's fuel emission factors (Module 1) for measured fuel; plus the **UK DESNZ 2026** conversion factors for load models, ferries and the rest. Every factor is split into tank-to-wheel and well-to-tank.
 
