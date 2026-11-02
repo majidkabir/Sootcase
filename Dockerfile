@@ -11,6 +11,11 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
 
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /out/sootcase /sootcase
+# The licence and the data sources' terms and credits travel with the image.
+COPY LICENSE NOTICE /usr/share/doc/sootcase/
+LABEL org.opencontainers.image.source="https://github.com/majidkabir/sootcase" \
+      org.opencontainers.image.licenses="PolyForm-Noncommercial-1.0.0" \
+      org.opencontainers.image.description="Sootcase freight CO2e calculator. Bundled data keeps its own terms: see /usr/share/doc/sootcase/NOTICE."
 EXPOSE 8080
 ENTRYPOINT ["/sootcase"]
 CMD ["serve"]
