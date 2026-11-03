@@ -6,8 +6,12 @@
 //
 // Without -fetch it reads -in, the ne_10m_admin_0_countries.geojson file.
 // Countries are keyed by ISO_A2_EH (ISO 3166-1 alpha-2, with Natural
-// Earth's fixes for France, Norway and Kosovo); areas without one use
-// ADM0_A3. Features with the same code are merged.
+// Earth's fixes for France, Norway and Kosovo, which gets the widely used
+// user-assigned code XK). An area without one counts for the country ISO
+// puts it in (ADM0_ISO: Northern Cyprus and the UN buffer zone are CY,
+// Somaliland SO); the rest, with no ISO code at all (the UK's bases in
+// Cyprus, disputed areas such as the Siachen Glacier), keep Natural
+// Earth's three-letter ADM0_A3. Features with the same code are merged.
 //
 // With -key, features are keyed by that property instead. This builds
 // pkg/borders/data/regions.bin.gz, the regions within countries, from the
@@ -101,13 +105,26 @@ func build(raw []byte, key string) ([]borders.Country, error) {
 	if err := json.Unmarshal(raw, &fc); err != nil {
 		return nil, err
 	}
+	// ISO 3166-1 alpha-3 to alpha-2, for areas that ISO counts as part of
+	// another country (ADM0_ISO).
+	alpha2 := map[string]string{}
+	for _, f := range fc.Features {
+		a3, _ := f.Properties["ISO_A3_EH"].(string)
+		a2, _ := f.Properties["ISO_A2_EH"].(string)
+		if len(a3) == 3 && a3 != "-99" && len(a2) == 2 {
+			alpha2[a3] = a2
+		}
+	}
 	byCode := map[string]*borders.Country{}
 	for _, f := range fc.Features {
 		var code string
 		if key != "" {
 			code, _ = f.Properties[key].(string)
 		} else if code, _ = f.Properties["ISO_A2_EH"].(string); code == "" || code == "-99" {
-			code, _ = f.Properties["ADM0_A3"].(string)
+			iso, _ := f.Properties["ADM0_ISO"].(string)
+			if code = alpha2[iso]; code == "" {
+				code, _ = f.Properties["ADM0_A3"].(string)
+			}
 		}
 		if code == "" {
 			return nil, fmt.Errorf("feature %v has no code", f.Properties["NAME"])
@@ -135,6 +152,11 @@ func build(raw []byte, key string) ([]borders.Country, error) {
 		for _, p := range polys {
 			var pp borders.Polygon
 			for _, r := range p {
+				for _, pt := range r {
+					if math.Abs(pt[0]) > 180 || math.Abs(pt[1]) > 90 {
+						return nil, fmt.Errorf("%s: point %v out of range", code, pt)
+					}
+				}
 				if r = clean(r); len(r) >= 4 {
 					pp = append(pp, r)
 				}

@@ -45,10 +45,11 @@ type OSRM struct {
 	// (calc.WithCountryKm). Nil: routes have no CountryKm.
 	Countries CountrySplitter
 
-	mu      sync.Mutex
-	cache   map[string]calc.Route
-	semOnce sync.Once
-	sem     chan struct{}
+	mu         sync.Mutex
+	cache      map[string]calc.Route
+	splitCache map[string]calc.Route // routes split by country (WantCountryKm)
+	semOnce    sync.Once
+	sem        chan struct{}
 }
 
 // CountrySplitter splits a line of [lon, lat] points into km by country
@@ -58,9 +59,10 @@ type CountrySplitter interface {
 }
 
 // RegionSplitter is a CountrySplitter that also splits the km in some
-// countries by region (ISO 3166-2 code, "" for none). *borders.Index
-// implements it; routes then get RegionKm.
+// countries by region (ISO 3166-2 code). *borders.Index implements it;
+// routes then get RegionKm.
 type RegionSplitter interface {
+	CountrySplitter
 	SplitKmRegions(line [][2]float64) (countries, regions map[string]float64)
 }
 
@@ -99,8 +101,13 @@ var RailParts = map[string]string{
 	"cycling": calc.PartElectrificationUnknown,
 }
 
-// maxCacheEntries bounds the per-process route cache.
-const maxCacheEntries = 50_000
+// maxCacheEntries bounds the per-process route cache;
+// maxSplitCacheEntries the cache of routes split by country, which are
+// bigger and asked for less often.
+const (
+	maxCacheEntries      = 50_000
+	maxSplitCacheEntries = 10_000
+)
 
 // NewOSRM validates baseURL and returns a provider.
 func NewOSRM(baseURL string) (*OSRM, error) {
@@ -130,16 +137,16 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	// Routes split by country need each step's geometry; they are cached
 	// apart from plain routes.
 	withCountries := calc.WantCountryKm(ctx) && o.Countries != nil
-	cacheAs := key
-	if withCountries {
-		cacheAs += "|countries"
-	}
 	// Routes with a path (single calculations, for a map) skip the cache:
 	// cached routes have no path.
 	withPath := calc.WantPath(ctx)
 	if !withPath {
 		o.mu.Lock()
-		if r, ok := o.cache[cacheAs]; ok {
+		cache := o.cache
+		if withCountries {
+			cache = o.splitCache
+		}
+		if r, ok := cache[key]; ok {
 			o.mu.Unlock()
 			return r, nil
 		}
@@ -201,11 +208,7 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 			Distance float64      `json:"distance"` // metres
 			Geometry lineGeometry `json:"geometry"`
 			Legs     []struct {
-				Steps []struct {
-					Distance float64      `json:"distance"`
-					Mode     string       `json:"mode"`
-					Geometry lineGeometry `json:"geometry"`
-				} `json:"steps"`
+				Steps []osrmStep `json:"steps"`
 			} `json:"legs"`
 		} `json:"routes"`
 		Waypoints []struct {
@@ -256,76 +259,139 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 		r.Parts[k] = math.Min(v, r.Km)
 	}
 	if withCountries {
-		var ferryKm float64
-		ck, rk := map[string]float64{}, map[string]float64{}
-		rs, _ := o.Countries.(RegionSplitter)
+		var steps []osrmStep
 		for _, leg := range body.Routes[0].Legs {
-			for _, st := range leg.Steps {
-				if st.Distance <= 0 {
-					continue
-				}
-				if st.Mode == "ferry" || o.PartModes[st.Mode] == calc.PartFerry {
-					ferryKm += st.Distance / 1000
-					continue
-				}
-				// Each step's km is shared out in proportion to its
-				// line's length in each country.
-				var split, regions map[string]float64
-				if rs != nil {
-					split, regions = rs.SplitKmRegions(st.Geometry.Coordinates)
-				} else {
-					split = o.Countries.SplitKm(st.Geometry.Coordinates)
-				}
-				var lineKm float64
-				for _, v := range split {
-					lineKm += v
-				}
-				if lineKm <= 0 {
-					continue
-				}
-				for c, v := range split {
-					if c == "" {
-						c = calc.CountryUnknown
-					}
-					ck[c] += v / lineKm * st.Distance / 1000
-				}
-				for c, v := range regions {
-					if c == "" {
-						c = calc.CountryUnknown
-					}
-					rk[c] += v / lineKm * st.Distance / 1000
-				}
-			}
+			steps = append(steps, leg.Steps...)
 		}
-		// Step distances are rounded: scale to the route's km on land.
-		var sum float64
-		for _, v := range ck {
-			sum += v
-		}
-		if land := r.Km - math.Min(ferryKm, r.Km); sum > 0 && land > 0 {
-			for c := range ck {
-				ck[c] *= land / sum
-			}
-			r.CountryKm = ck
-			for c := range rk {
-				rk[c] *= land / sum // as their countries' km
-			}
-			if len(rk) > 0 {
-				r.RegionKm = rk
-			}
-		}
+		o.splitByCountry(&r, steps)
 	}
 
 	if withPath {
 		return r, nil
 	}
 	o.mu.Lock()
-	if o.cache == nil || len(o.cache) >= maxCacheEntries {
-		o.cache = make(map[string]calc.Route)
+	cache, maxEntries := &o.cache, maxCacheEntries
+	if withCountries { // apart, so that split routes don't push plain ones out
+		cache, maxEntries = &o.splitCache, maxSplitCacheEntries
 	}
-	o.cache[cacheAs] = r
+	if *cache == nil || len(*cache) >= maxEntries {
+		*cache = make(map[string]calc.Route)
+	}
+	(*cache)[key] = r
 	o.mu.Unlock()
 	return r, nil
+}
+
+// osrmStep is a route step as OSRM sends it. Geometry is GeoJSON when
+// asked for (geometries=geojson), else a polyline string; it is only read
+// to split a route by country.
+type osrmStep struct {
+	Distance float64         `json:"distance"` // metres
+	Mode     string          `json:"mode"`
+	Geometry json.RawMessage `json:"geometry"`
+}
+
+// splitByCountry sets r's CountryKm (and RegionKm, when o.Countries has
+// regions) from the steps' lines: each step's km is shared out in
+// proportion to its line's length in each country and region. Ferry parts
+// are left out (they are in r.Parts); a step without a line counts as
+// unknown. Step distances are rounded, so the km are scaled to the
+// route's km on land, then rounded to 0.1 m with the rounding on the
+// largest entry, so that countries add up to the km on land and regions
+// to their country.
+func (o *OSRM) splitByCountry(r *calc.Route, steps []osrmStep) {
+	ck, rk := map[string]float64{}, map[string]float64{}
+	rs, _ := o.Countries.(RegionSplitter)
+	for _, st := range steps {
+		if st.Distance <= 0 || o.PartModes[st.Mode] == calc.PartFerry {
+			continue
+		}
+		km := st.Distance / 1000
+		var g lineGeometry
+		_ = json.Unmarshal(st.Geometry, &g) // a polyline or nothing: no line
+		var countries, regions map[string]float64
+		if rs != nil {
+			countries, regions = rs.SplitKmRegions(g.Coordinates)
+		} else {
+			countries = o.Countries.SplitKm(g.Coordinates)
+		}
+		var lineKm float64
+		for _, v := range countries {
+			lineKm += v
+		}
+		if lineKm <= 0 {
+			ck[calc.CountryUnknown] += km
+			continue
+		}
+		for c, v := range countries {
+			ck[unknownIfEmpty(c)] += v / lineKm * km
+		}
+		for c, v := range regions {
+			rk[unknownIfEmpty(c)] += v / lineKm * km
+		}
+	}
+	land := r.Km - math.Min(r.Parts[calc.PartFerry], r.Km)
+	if land <= 0 {
+		return
+	}
+	var sum float64
+	for _, v := range ck {
+		sum += v
+	}
+	if sum <= 0 {
+		return
+	}
+	for c := range ck {
+		ck[c] *= land / sum
+	}
+	for c := range rk {
+		rk[c] *= land / sum // as their countries' km
+	}
+	r.CountryKm = roundKm(ck, land)
+	if len(rk) > 0 {
+		// Each country's regions add up to its rounded km.
+		byCountry := map[string]map[string]float64{}
+		for c, v := range rk {
+			cc, _, _ := strings.Cut(c, "-")
+			if byCountry[cc] == nil {
+				byCountry[cc] = map[string]float64{}
+			}
+			byCountry[cc][c] = v
+		}
+		r.RegionKm = map[string]float64{}
+		for cc, m := range byCountry {
+			for c, v := range roundKm(m, r.CountryKm[cc]) {
+				r.RegionKm[c] = v
+			}
+		}
+	}
+}
+
+func unknownIfEmpty(code string) string {
+	if code == "" {
+		return calc.CountryUnknown
+	}
+	return code
+}
+
+// roundKm rounds each value to 0.1 m and puts what rounding lost or added
+// on the largest, so that they add up to total (itself rounded).
+func roundKm(m map[string]float64, total float64) map[string]float64 {
+	round := func(v float64) float64 { return math.Round(v*1e4) / 1e4 }
+	out := make(map[string]float64, len(m))
+	var sum float64
+	largest := ""
+	for c, v := range m {
+		out[c] = round(v)
+		sum += out[c]
+		if largest == "" || v > m[largest] || (v == m[largest] && c < largest) {
+			largest = c
+		}
+	}
+	if largest != "" {
+		out[largest] = round(out[largest] + round(total) - sum)
+	}
+	return out
 }
 
 // DistanceMethod implements calc.DistanceMethoder.

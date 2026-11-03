@@ -83,6 +83,9 @@ func main() {
 
 // common holds flags shared by all subcommands.
 type common struct {
+	// countryKm loads the borders, to split routes by country when a
+	// calculation asks for it (?country_km=true; serve only).
+	countryKm                                      bool
 	factorFile, osrmURL, waterwayURL, railURL      string
 	roadRegions                                    string
 	seaNetwork, seaAvoid, seaOpen                  string
@@ -143,7 +146,7 @@ func (c *common) calculator() (calc.Calculator, *factors.Dataset, error) {
 	}
 	routed := map[calc.Mode]calc.DistanceProvider{}
 	var countries distance.CountrySplitter
-	if c.roadRegions != "" || c.osrmURL != "" || c.railURL != "" {
+	if c.countryKm && (c.roadRegions != "" || c.osrmURL != "" || c.railURL != "") {
 		ix, err := borders.Default()
 		if err != nil {
 			return calc.Calculator{}, nil, err

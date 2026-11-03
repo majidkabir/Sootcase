@@ -143,3 +143,16 @@ func TestCalculate_CountryKm(t *testing.T) {
 		t.Error("WithCountryKm / WantCountryKm")
 	}
 }
+
+// Region km can't add up to more than their countries' km.
+func TestKmWithin(t *testing.T) {
+	if _, err := kmWithin(map[string]float64{"BE-VLG": 60, "BE-WAL": 50}, 100, "region", "km by country"); err == nil {
+		t.Error("110 km of regions in 100 km accepted")
+	}
+	if _, err := kmWithin(map[string]float64{"DK": -1}, 100, "country", "route"); err == nil {
+		t.Error("negative km accepted")
+	}
+	if sum, err := kmWithin(map[string]float64{"DK": 60.00004, "DE": 40}, 100, "country", "route"); err != nil || sum != 100.00004 {
+		t.Errorf("within rounding: %v, %v", sum, err)
+	}
+}
