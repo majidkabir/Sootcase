@@ -258,30 +258,41 @@ func (c Calculator) moveEnds(ctx context.Context, legs []Leg, add bool) (fixed [
 				l.To = p
 			}
 		}
-		if l.Mode == Sea || l.Mode == Air {
-			for _, e := range []struct {
-				km    float64
-				fixed bool
-				end   string
-				p     Location
-			}{{offFrom, from[i] != nil, "starts", legs[i].From}, {offTo, to[i] != nil, "ends", legs[i].To}} {
-				if e.km > 0 && !e.fixed {
-					if l.Mode == Air {
-						warnings = append(warnings, fmt.Sprintf("leg %s %s at %s, %.0f km from an airport; the GLEC Framework measures air distance between airports, so give the airports",
-							legID(legs[i], i), e.end, place(e.p), e.km))
-					} else {
-						warnings = append(warnings, fmt.Sprintf("leg %s %s at %s, %.0f km from the sea network; that part is counted as sea distance",
-							legID(legs[i], i), e.end, place(e.p), e.km))
-					}
-				}
-			}
-		}
+		warnings = append(warnings, offNetworkWarnings(legs[i], i, offFrom, offTo, from[i] != nil, to[i] != nil)...)
 		if (from[i] != nil || to[i] != nil) && gcKm(l.From, l.To) <= GapKm {
 			// The ends met at one port: no sea, rail or waterway left.
 			fixed[i], from[i], to[i] = legs[i], nil, nil
 		}
 	}
 	return fixed, from, to, warnings, nil
+}
+
+// offNetworkWarnings warns about the ends of a sea or air leg that stay
+// away from the sea network or an airport (movedFrom, movedTo: the end was
+// moved). Rail and waterway ends off the network get road legs instead.
+func offNetworkWarnings(l Leg, i int, offFrom, offTo float64, movedFrom, movedTo bool) []string {
+	if l.Mode != Sea && l.Mode != Air {
+		return nil
+	}
+	var out []string
+	for _, e := range []struct {
+		km    float64
+		moved bool
+		end   string
+		p     Location
+	}{{offFrom, movedFrom, "starts", l.From}, {offTo, movedTo, "ends", l.To}} {
+		if e.km <= 0 || e.moved {
+			continue
+		}
+		if l.Mode == Air {
+			out = append(out, fmt.Sprintf("leg %s %s at %s, %.0f km from an airport; the GLEC Framework measures air distance between airports, so give the airports",
+				legID(l, i), e.end, place(e.p), e.km))
+		} else {
+			out = append(out, fmt.Sprintf("leg %s %s at %s, %.0f km from the sea network; that part is counted as sea distance",
+				legID(l, i), e.end, place(e.p), e.km))
+		}
+	}
+	return out
 }
 
 // join returns the legs to calculate: road legs added where one leg ends
