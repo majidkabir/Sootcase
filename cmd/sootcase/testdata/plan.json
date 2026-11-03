@@ -1,0 +1,1 @@
+{"name": "test", "changes": [{"type": "fuel_switch", "fuel": "hvo", "share": 0.5}, {"type": "load", "load_factor": 0.8}]}
