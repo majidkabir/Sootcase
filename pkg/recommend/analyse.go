@@ -295,7 +295,7 @@ func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.
 		return false
 	}
 	if len(r.Warnings) > len(a.base.Warnings) {
-		a.note("%s: not possible: %s", kindName(kind), r.Warnings[len(r.Warnings)-1])
+		a.note("%s: not possible: %s", kindName(kind), r.Warnings[len(r.Warnings)-1].Text)
 		return false
 	}
 	for _, l := range r.Legs {

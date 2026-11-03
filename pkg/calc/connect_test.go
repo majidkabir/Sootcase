@@ -143,7 +143,7 @@ func TestRoadLegs_Gap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(r.Legs) != 2 || len(r.Warnings) != 1 || !strings.Contains(r.Warnings[0], "isn't counted") {
+	if len(r.Legs) != 2 || len(r.Warnings) != 1 || r.Warnings[0].Code != WarnGapNotCounted || !strings.Contains(r.Warnings[0].Text, "isn't counted") {
 		t.Errorf("off: legs %d, warnings %q", len(r.Legs), r.Warnings)
 	}
 	// Off by context, unless the shipment says.
@@ -190,7 +190,7 @@ func TestRoadLegs_SeaFromInland(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(r.Legs) != 1 || len(r.Warnings) != 1 || !strings.Contains(r.Warnings[0], "from the sea network") {
+	if len(r.Legs) != 1 || len(r.Warnings) != 1 || r.Warnings[0].Code != WarnSeaInland || !strings.Contains(r.Warnings[0].Text, "from the sea network") {
 		t.Errorf("off: %+v %q", r.Legs, r.Warnings)
 	}
 }
@@ -230,7 +230,7 @@ func TestRoadLegs_AddedLegFails(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(r.Legs) != 2 || len(r.Warnings) != 1 || !strings.Contains(r.Warnings[0], "isn't counted") {
+	if len(r.Legs) != 2 || len(r.Warnings) != 1 || r.Warnings[0].Code != WarnGapNotCounted || !strings.Contains(r.Warnings[0].Text, "isn't counted") {
 		t.Errorf("want the added leg dropped with a warning, got %d legs, %q", len(r.Legs), r.Warnings)
 	}
 }
@@ -290,7 +290,7 @@ func TestRoadLegs_AirFromCity(t *testing.T) {
 	off := false
 	s = Shipment{ID: "s", WeightKg: 1000, AddRoadLegs: &off, Legs: []Leg{{ID: "fly", Mode: Air, VehicleType: "air", From: munich, To: ham}}}
 	if r, err = c.Calculate(context.Background(), s); err != nil || len(r.Legs) != 1 || len(r.Warnings) != 1 ||
-		!strings.Contains(r.Warnings[0], "from an airport") {
+		r.Warnings[0].Code != WarnAirportFar || !strings.Contains(r.Warnings[0].Text, "from an airport") {
 		t.Errorf("off: %+v %q %v", r.Legs, r.Warnings, err)
 	}
 }

@@ -358,7 +358,7 @@ func (w *Writer) Write(id string, r calc.Result, err error) error {
 		}
 	}
 	return w.cw.Write([]string{id, num(r.WeightKg), num(r.TonneKm), num(r.TTWKg), num(r.WTTKg), num(r.WTWKg),
-		num(r.IntensityG), num(r.PrimaryDataShare), r.Dataset, "", strconv.Itoa(added), strings.Join(r.Warnings, " | "),
+		num(r.IntensityG), num(r.PrimaryDataShare), r.Dataset, "", strconv.Itoa(added), strings.Join(calc.WarningTexts(r.Warnings), " | "),
 		num(r.GHGProtocol.OperatorScope1Kg), num(r.GHGProtocol.OperatorScope2Kg), num(r.GHGProtocol.OperatorScope3Cat3Kg), num(r.GHGProtocol.HubsKg)})
 }
 
