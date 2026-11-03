@@ -294,27 +294,7 @@ func (s Settings) Validate() (Settings, map[string]string, error) {
 func (s Settings) has(kind string) bool { return slices.Contains(s.Kinds, kind) }
 
 // Totals are emissions in kg CO2e.
-type Totals struct {
-	TTWKg float64 `json:"ttw_kg"`
-	WTTKg float64 `json:"wtt_kg"`
-	WTWKg float64 `json:"wtw_kg"`
-	// BiogenicCO2Kg is reported separately, not part of the totals (GLEC
-	// Framework v3.3 p. 64).
-	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
-}
-
-func totals(r calc.Result) Totals { return Totals{r.TTWKg, r.WTTKg, r.WTWKg, r.BiogenicCO2Kg} }
-
-func (t Totals) scale(k float64) Totals {
-	return Totals{t.TTWKg * k, t.WTTKg * k, t.WTWKg * k, t.BiogenicCO2Kg * k}
-}
-
-func (t *Totals) add(o Totals) {
-	t.TTWKg += o.TTWKg
-	t.WTTKg += o.WTTKg
-	t.WTWKg += o.WTWKg
-	t.BiogenicCO2Kg += o.BiogenicCO2Kg
-}
+type Totals = calc.Emissions
 
 // Step is one leg of a route as calculated.
 type Step struct {
@@ -580,7 +560,7 @@ func rescale(r ShipmentResult, s calc.Shipment) ShipmentResult {
 
 func (r Route) scale(k float64) Route {
 	out := r
-	out.Totals = r.Totals.scale(k)
+	out.Totals = r.Totals.Scaled(k)
 	out.Steps = make([]Step, len(r.Steps))
 	for i, s := range r.Steps {
 		s.WTWKg *= k
@@ -914,7 +894,7 @@ func placeName(c calc.Calculator, p calc.Location) string {
 }
 
 func route(c calc.Calculator, r calc.Result) Route {
-	rt := Route{Totals: totals(r)}
+	rt := Route{Totals: r.Emissions()}
 	var last calc.Mode
 	for i, l := range r.Legs {
 		st := Step{Mode: l.Mode, VehicleType: l.VehicleType, DistanceKm: l.DistanceKm, WTWKg: l.WTWKg, Added: l.Added != ""}
@@ -1395,13 +1375,13 @@ func summarise(res *Result) {
 			res.Failed++
 			continue
 		}
-		res.Now.add(sr.Now.Totals)
+		res.Now.Add(sr.Now.Totals, 1)
 		best := sr.Now.Totals
 		bestKind := ""
 		if len(sr.Options) > 0 {
 			best, bestKind = sr.Options[0].Totals, sr.Options[0].Kind
 		}
-		res.Best.add(best)
+		res.Best.Add(best, 1)
 		seen := map[string]bool{}
 		for _, o := range sr.Options {
 			if k := kinds[o.Kind]; k != nil && !seen[o.Kind] {

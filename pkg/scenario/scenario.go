@@ -141,23 +141,9 @@ type Plan struct {
 	Changes []Change `json:"changes"`
 }
 
-// Totals are emissions in kg CO2e.
-type Totals struct {
-	TTWKg float64 `json:"ttw_kg"`
-	WTTKg float64 `json:"wtt_kg"`
-	WTWKg float64 `json:"wtw_kg"`
-	// BiogenicCO2Kg is reported separately, not part of the totals (GLEC
-	// Framework v3.3 p. 64): from biofuels a change switches to, and from
-	// legs given as measured biofuel use.
-	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
-}
-
-func (t *Totals) add(o Totals, w float64) {
-	t.TTWKg += w * o.TTWKg
-	t.WTTKg += w * o.WTTKg
-	t.WTWKg += w * o.WTWKg
-	t.BiogenicCO2Kg += w * o.BiogenicCO2Kg
-}
+// Totals are emissions in kg CO2e. Biogenic CO2 comes from biofuels a
+// change switches to, and from legs given as measured biofuel use.
+type Totals = calc.Emissions
 
 // ShipmentResult compares one shipment.
 type ShipmentResult struct {
@@ -447,8 +433,8 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 		if sr.Error != "" {
 			res.Failed++
 		} else {
-			res.Base.add(sr.Base, 1)
-			res.Scenario.add(sr.Scenario, 1)
+			res.Base.Add(sr.Base, 1)
+			res.Scenario.Add(sr.Scenario, 1)
 			for i, r := range o.reps {
 				reports[i].LegsAffected += r.LegsAffected
 				reports[i].ShipmentsAffected += r.ShipmentsAffected
@@ -464,7 +450,6 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 	return res, nil
 }
 
-func totals(r calc.Result) Totals { return Totals{r.TTWKg, r.WTTKg, r.WTWKg, r.BiogenicCO2Kg} }
 
 // runOne compares one shipment.
 func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []Change, dieselPerGJ float64,
@@ -481,7 +466,7 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 		sr.Error = err.Error()
 		return sr
 	}
-	sr.Base = totals(base)
+	sr.Base = base.Emissions()
 	touched := make([]bool, len(changes))
 	touch := func(i, legs int) {
 		if legs > 0 {
@@ -585,11 +570,11 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 			sr.Error = "scenario: " + err.Error()
 			return sr
 		}
-		t := totals(r)
+		t := r.Emissions()
 		n := make([]int, len(changes))
 		for _, l := range r.Legs {
 			d, legs := legChanges(l, changes, dieselPerGJ, fuels, grids, touched)
-			t.add(d, 1)
+			t.Add(d, 1)
 			for i, hit := range legs {
 				if hit {
 					n[i]++
@@ -599,7 +584,7 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 		for i := range n {
 			most[i] = max(most[i], n[i])
 		}
-		sr.Scenario.add(t, v.w)
+		sr.Scenario.Add(t, v.w)
 	}
 	for i, n := range most {
 		reports[i].LegsAffected += n
@@ -640,14 +625,14 @@ func legChanges(l calc.LegResult, changes []Change, dieselPerGJ float64, fuels m
 		switch ch.Type {
 		case Electrify:
 			newWTT := tkm * ch.KWhPerTkm * grids[i] / 1000
-			d.add(Totals{TTWKg: -ttw, WTTKg: newWTT - wtt, WTWKg: newWTT - ttw - wtt}, p)
+			d.Add(Totals{TTWKg: -ttw, WTTKg: newWTT - wtt, WTWKg: newWTT - ttw - wtt}, p)
 		case FuelSwitch:
 			if !diesel || dieselPerGJ <= 0 {
 				continue
 			}
 			gj := ttw / dieselPerGJ * *ch.EnergyRatio
 			nt, nw := gj*fuels[i][0], gj*fuels[i][1]
-			d.add(Totals{TTWKg: nt - ttw, WTTKg: nw - wtt, WTWKg: nt + nw - ttw - wtt, BiogenicCO2Kg: gj * fuels[i][2]}, p)
+			d.Add(Totals{TTWKg: nt - ttw, WTTKg: nw - wtt, WTWKg: nt + nw - ttw - wtt, BiogenicCO2Kg: gj * fuels[i][2]}, p)
 		default:
 			continue
 		}
