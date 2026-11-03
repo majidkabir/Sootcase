@@ -4,7 +4,10 @@ package api
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"embed"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +15,7 @@ import (
 	"mime"
 	"net/http"
 	"path"
+	"regexp"
 	"runtime"
 	"runtime/debug"
 	"strconv"
@@ -29,8 +33,36 @@ import (
 //go:embed openapi.yaml
 var openAPISpec []byte
 
-//go:embed web/index.html
-var indexHTML []byte
+// The calculator page: index.html with its script and styles. index.html
+// asks for static/app.js and static/app.css; they are served with a version
+// (?v=) taken from their content, so browsers can keep them a week and
+// still get a new version at once.
+var (
+	//go:embed web/index.html
+	indexSource []byte
+	//go:embed web/app.js
+	appJS []byte
+	//go:embed web/app.css
+	appCSS              []byte
+	indexHTML, indexCSP = page(indexSource, appJS, appCSS)
+)
+
+// page versions the asset links of index.html and returns it with its
+// Content-Security-Policy: scripts only from the site, plus the one inline
+// script in the page's head, allowed by its hash. Styles stay allowed
+// inline: the page sets style attributes.
+func page(html, js, css []byte) ([]byte, string) {
+	ver := func(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:4]) }
+	html = bytes.Replace(html, []byte(`"static/app.js"`), []byte(`"static/app.js?v=`+ver(js)+`"`), 1)
+	html = bytes.Replace(html, []byte(`"static/app.css"`), []byte(`"static/app.css?v=`+ver(css)+`"`), 1)
+	script := "'self'"
+	if m := regexp.MustCompile(`<script>([^<]*)</script>`).FindSubmatch(html); m != nil {
+		h := sha256.Sum256(m[1])
+		script += " 'sha256-" + base64.StdEncoding.EncodeToString(h[:]) + "'"
+	}
+	return html, "default-src 'self'; script-src " + script + "; style-src 'self' 'unsafe-inline'; connect-src 'self'; " +
+		"img-src 'self' data: https://tile.openstreetmap.org"
+}
 
 // Leaflet 1.9.4 (BSD-2-Clause, web/leaflet/LICENSE) draws routes on a map.
 //
@@ -107,16 +139,22 @@ func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Header().Set("Content-Security-Policy",
-			"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; "+
-				"img-src 'self' data: https://tile.openstreetmap.org")
+		w.Header().Set("Content-Security-Policy", indexCSP)
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		_, _ = w.Write(indexHTML)
 	})
 	mux.HandleFunc("GET /static/{file}", func(w http.ResponseWriter, r *http.Request) {
 		name := r.PathValue("file")
-		b, err := leafletFS.ReadFile("web/leaflet/" + name)
-		if err != nil || (name != "leaflet.js" && name != "leaflet.css") {
+		var b []byte
+		switch name {
+		case "app.js":
+			b = appJS
+		case "app.css":
+			b = appCSS
+		case "leaflet.js", "leaflet.css":
+			b, _ = leafletFS.ReadFile("web/leaflet/" + name)
+		}
+		if b == nil {
 			http.NotFound(w, r)
 			return
 		}

@@ -339,3 +339,35 @@ func TestNoShipments(t *testing.T) {
 		}
 	}
 }
+
+// The page's script and styles come from versioned files, and its policy
+// allows no inline script but the one in its head.
+func TestPageAssets(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	page, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	csp := resp.Header.Get("Content-Security-Policy")
+	if !strings.Contains(csp, "script-src 'self' 'sha256-") || strings.Contains(csp, "script-src 'self' 'unsafe-inline'") {
+		t.Errorf("policy %q", csp)
+	}
+	if n := strings.Count(string(page), "<script>"); n != 1 {
+		t.Errorf("%d inline scripts, want only the one in the head", n)
+	}
+	for _, f := range []string{"app.js", "app.css"} {
+		i := strings.Index(string(page), "static/"+f+"?v=")
+		if i < 0 {
+			t.Fatalf("page doesn't link %s with a version", f)
+		}
+		link := string(page)[i:]
+		link = link[:strings.IndexByte(link, '"')]
+		r, err := http.Get(srv.URL + "/" + link)
+		if err != nil || r.StatusCode != http.StatusOK || r.ContentLength == 0 {
+			t.Errorf("%s: %v %v", link, err, r.StatusCode)
+		}
+		r.Body.Close()
+	}
+}
