@@ -97,7 +97,7 @@ func (c *common) register(fs *flag.FlagSet) {
 			"or several comma-separated to layer them (e.g. "+factors.Default+",my-hubs.json); "+
 			"also $SOOTCASE_FACTORS (default "+factors.Default+")")
 	fs.StringVar(&c.osrmURL, "osrm", env("OSRM_URL"),
-		"OSRM server URL for road distances, also $SOOTCASE_OSRM_URL (default: adjusted great-circle)")
+		"OSRM server URL for road distances, also $SOOTCASE_OSRM_URL (default: none; road legs then need distance_km)")
 	fs.StringVar(&c.roadRegions, "osrm-regions", env("OSRM_REGIONS"),
 		"road OSRM servers by region, \"name=url@minlon,minlat,maxlon,maxlat;...\"; a route uses the smallest region "+
 			"holding both ends; replaces -osrm. Also $SOOTCASE_OSRM_REGIONS")

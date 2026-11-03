@@ -40,6 +40,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 
@@ -153,6 +154,9 @@ type ShipmentResult struct {
 	DiffKg     float64  `json:"diff_kg"` // scenario − base, WTW
 	Notes      []string `json:"notes,omitempty"`
 	Error      string   `json:"error,omitempty"`
+	// Retryable marks an error that is temporary (a routing service that
+	// didn't answer): the same request can succeed later.
+	Retryable bool `json:"retryable,omitempty"`
 }
 
 // ChangeReport says what a change did and what it is based on.
@@ -457,9 +461,9 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 			s.Legs[i].ID = fmt.Sprintf("leg-%d", i+1)
 		}
 	}
-	base, err := c.Calculate(ctx, s)
+	base, err := c.CalculateRetrying(ctx, s)
 	if err != nil {
-		sr.Error = err.Error()
+		sr.Error, sr.Retryable = err.Error(), calc.Temporary(err)
 		return sr
 	}
 	sr.Base = base.Emissions()
@@ -480,8 +484,17 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 			byID[l.LegID] = l
 		}
 	}
+	// A load below the shipment's own weight isn't possible (load_tonnes
+	// is all cargo on the vehicle, this shipment's included).
+	tooHeavy := func(ch Change) bool {
+		if ch.LoadTonnes == nil || base.WeightKg/1000 <= *ch.LoadTonnes {
+			return false
+		}
+		sr.Notes = appendNew(sr.Notes, fmt.Sprintf("load not applied: the shipment's %g t is more than load_tonnes %g t", base.WeightKg/1000, *ch.LoadTonnes))
+		return true
+	}
 	for i, ch := range changes {
-		if ch.Type != LoadChange || *ch.Share != 1 {
+		if ch.Type != LoadChange || *ch.Share != 1 || tooHeavy(ch) {
 			continue
 		}
 		n := 0
@@ -515,25 +528,32 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 			continue
 		}
 		var next []variant
+		most := 0 // legs moved, the most in any variant
 		for _, v := range variants {
-			rail, n, notes, ok := toRail(ctx, v.c, v.s, ch)
-			sr.Notes = append(sr.Notes, notes...)
+			rail, n, notes, ok, err := toRail(ctx, v.c, v.s, ch)
+			if err != nil {
+				sr.Error, sr.Retryable = "scenario: "+err.Error(), calc.Temporary(err)
+				return sr
+			}
+			sr.Notes = appendNew(sr.Notes, notes...)
 			if !ok {
 				next = append(next, v)
 				continue
 			}
-			touch(i, n)
+			most = max(most, n)
 			next = append(next, variant{v.w * (1 - *ch.Share), v.s, v.c}, variant{v.w * *ch.Share, rail.s, rail.c})
 		}
+		touch(i, most)
 		variants = next
 	}
 
 	// Partial loads are a mixture too.
 	for i, ch := range changes {
-		if ch.Type != LoadChange || *ch.Share == 1 {
+		if ch.Type != LoadChange || *ch.Share == 1 || tooHeavy(ch) {
 			continue
 		}
 		var next []variant
+		most := 0 // legs changed, the most in any variant
 		for _, v := range variants {
 			ls := v.s
 			ls.Legs = append([]calc.Leg(nil), v.s.Legs...)
@@ -553,23 +573,25 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 				next = append(next, v)
 				continue
 			}
-			touch(i, n)
+			most = max(most, n)
 			next = append(next, variant{v.w * (1 - *ch.Share), v.s, v.c}, variant{v.w * *ch.Share, ls, v.c})
 		}
+		touch(i, most)
 		variants = next
 	}
 
 	most := make([]int, len(changes)) // legs hit by post-calculation changes, the most in any variant
 	for _, v := range variants {
-		r, err := v.c.Calculate(ctx, v.s)
+		r, err := v.c.CalculateRetrying(ctx, v.s)
 		if err != nil {
-			sr.Error = "scenario: " + err.Error()
+			sr.Error, sr.Retryable = "scenario: "+err.Error(), calc.Temporary(err)
 			return sr
 		}
 		t := r.Emissions()
 		n := make([]int, len(changes))
 		for _, l := range r.Legs {
-			d, legs := legChanges(l, changes, fx, touched)
+			d, legs, notes := legChanges(l, changes, fx, touched)
+			sr.Notes = appendNew(sr.Notes, notes...)
 			t.Add(d, 1)
 			for i, hit := range legs {
 				if hit {
@@ -607,14 +629,16 @@ type resolved struct {
 type fuelPerGJ struct{ TTW, WTT, BiogenicCO2 float64 }
 
 // legChanges returns the change in a leg's emissions from the
-// post-calculation changes (electrify, fuel_switch), and which changes hit.
-func legChanges(l calc.LegResult, changes []Change, fx resolved, touched []bool) (Totals, []bool) {
+// post-calculation changes (electrify, fuel_switch), which changes hit,
+// and notes on legs a change matched but couldn't apply to.
+func legChanges(l calc.LegResult, changes []Change, fx resolved, touched []bool) (Totals, []bool, []string) {
+	var notes []string
 	hit := make([]bool, len(changes))
 	if l.Mode != calc.Road {
-		return Totals{}, hit
+		return Totals{}, hit, nil
 	}
 	if l.Method != calc.MethodIntensity && l.Method != calc.MethodLoadModel {
-		return Totals{}, hit // measured fuel or electricity: the user's own data
+		return Totals{}, hit, nil // measured fuel or electricity: the user's own data
 	}
 	// The road part of the leg (without a ferry crossing).
 	ttw, wtt, tkm := l.TTWKg, l.WTTKg, l.TonneKm
@@ -635,6 +659,13 @@ func legChanges(l calc.LegResult, changes []Change, fx resolved, touched []bool)
 			d.Add(Totals{TTWKg: -ttw, WTTKg: newWTT - wtt, WTWKg: newWTT - ttw - wtt}, p)
 		case FuelSwitch:
 			if !diesel || fx.dieselPerGJ <= 0 {
+				switch {
+				case diesel || l.Factor == nil:
+				case l.Factor.DataType == calc.DataPrimary:
+					notes = append(notes, fmt.Sprintf("fuel_switch not applied to leg %s: its own intensity doesn't say the vehicle's fuel", l.LegID))
+				default:
+					notes = append(notes, fmt.Sprintf("fuel_switch not applied to leg %s: its factor (%s) isn't given for diesel vehicles", l.LegID, l.Factor.VehicleType))
+				}
 				continue
 			}
 			gj := ttw / fx.dieselPerGJ * *ch.EnergyRatio // energy of the diesel replaced
@@ -648,7 +679,7 @@ func legChanges(l calc.LegResult, changes []Change, fx resolved, touched []bool)
 		hit[i] = true
 		touched[i] = true
 	}
-	return d, hit
+	return d, hit, notes
 }
 
 type railVariant struct {
@@ -657,11 +688,16 @@ type railVariant struct {
 }
 
 // toRail returns the shipment with its long road legs as rail legs, the
-// number moved, and notes. ok is false when no leg could move.
-func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) (railVariant, int, []string, bool) {
-	before, err := c.Calculate(ctx, s)
+// number moved, and notes. ok is false when no leg could move; err is a
+// temporary failure (a routing service that didn't answer), which makes
+// the shipment fail rather than stay on road.
+func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) (rv railVariant, moved int, notes []string, ok bool, err error) {
+	before, err := c.CalculateRetrying(ctx, s)
 	if err != nil {
-		return railVariant{}, 0, nil, false
+		if calc.Temporary(err) {
+			return railVariant{}, 0, nil, false, err
+		}
+		return railVariant{}, 0, nil, false, nil
 	}
 	byID := map[string]calc.LegResult{}
 	for _, l := range before.Legs {
@@ -681,10 +717,10 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 		cands = append(cands, j)
 	}
 	if len(cands) == 0 {
-		return railVariant{}, 0, nil, false
+		return railVariant{}, 0, nil, false, nil
 	}
-	var notes []string
 	terminalNote := ""
+	var temporary error
 	try := func(js []int) (railVariant, bool) {
 		rs := s
 		rs.Legs = append([]calc.Leg(nil), s.Legs...)
@@ -696,11 +732,22 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 			if cc.RoadVehicle == "" {
 				cc.RoadVehicle = l.VehicleType
 			}
-			rs.Legs[j] = calc.Leg{ID: l.ID, Mode: calc.Rail, VehicleType: ch.RailVehicle, From: l.From, To: l.To, AtTerminals: true}
+			rs.Legs[j] = calc.Leg{ID: l.ID, Mode: calc.Rail, VehicleType: ch.RailVehicle, CargoType: l.CargoType, From: l.From, To: l.To, AtTerminals: true}
 			ids[l.ID] = true
 		}
-		r, err := cc.Calculate(ctx, rs)
+		r, err := cc.CalculateRetrying(ctx, rs)
 		if err != nil {
+			if calc.Temporary(err) {
+				temporary = err
+			}
+			return railVariant{}, false
+		}
+		// A road leg to or from a rail terminal that couldn't be
+		// calculated would be left out: then the leg can't move.
+		if failed := warnings(r, calc.WarnAddedLegFailed) - warnings(before, calc.WarnAddedLegFailed); failed > 0 {
+			if len(js) == 1 && !hasNote(notes, s.Legs[js[0]].ID) {
+				notes = append(notes, fmt.Sprintf("leg %s stays on road: the road leg to or from the rail terminal couldn't be calculated", s.Legs[js[0]].ID))
+			}
 			return railVariant{}, false
 		}
 		for _, j := range js {
@@ -735,25 +782,54 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 		if terminalNote != "" {
 			notes = append(notes, terminalNote)
 		}
-		return v, len(cands), notes, true
+		return v, len(cands), notes, true, nil
+	}
+	if temporary != nil {
+		return railVariant{}, 0, nil, false, temporary
 	}
 	// Some legs can't go by rail: keep the ones that can.
 	var good []int
 	for _, j := range cands {
 		if _, ok := try([]int{j}); ok {
 			good = append(good, j)
+		} else if temporary != nil {
+			return railVariant{}, 0, nil, false, temporary
 		} else if !hasNote(notes, s.Legs[j].ID) {
 			notes = append(notes, fmt.Sprintf("leg %s stays on road: no rail route", s.Legs[j].ID))
 		}
 	}
 	if len(good) == 0 {
-		return railVariant{}, 0, notes, false
+		return railVariant{}, 0, notes, false, nil
 	}
 	v, ok := try(good)
+	if temporary != nil {
+		return railVariant{}, 0, nil, false, temporary
+	}
 	if ok && terminalNote != "" {
 		notes = append(notes, terminalNote)
 	}
-	return v, len(good), notes, ok
+	return v, len(good), notes, ok, nil
+}
+
+// warnings counts a result's warnings with the given code.
+func warnings(r calc.Result, code string) int {
+	n := 0
+	for _, w := range r.Warnings {
+		if w.Code == code {
+			n++
+		}
+	}
+	return n
+}
+
+// appendNew appends the notes that aren't in list yet.
+func appendNew(list []string, notes ...string) []string {
+	for _, n := range notes {
+		if !slices.Contains(list, n) {
+			list = append(list, n)
+		}
+	}
+	return list
 }
 
 func hasNote(notes []string, id string) bool {

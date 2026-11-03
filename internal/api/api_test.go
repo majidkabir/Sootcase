@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -369,5 +370,52 @@ func TestPageAssets(t *testing.T) {
 			t.Errorf("%s: %v %v", link, err, r.StatusCode)
 		}
 		r.Body.Close()
+	}
+}
+
+// Inputs that would otherwise be silently misread are refused.
+func TestStrictInputs(t *testing.T) {
+	srv := newTestServer(t)
+	leg := `{"mode":"road","vehicle_type":"truck_40t","distance_km":500}`
+	ship := `{"id":"s","weight_kg":1000,"legs":[` + leg + `]}`
+	csv := "shipment_id,weight_kg,mode,vehicle_type,distance_km\ns,1000,road,truck_40t,500\n"
+	for name, c := range map[string]struct{ path, ct, body string }{
+		"trailing data":     {"/v1/calculate", "application/json", ship + ` x`},
+		"second value":      {"/v1/calculate/batch", "application/json", `{"shipments":[` + ship + `]} {}`},
+		"plan typo":         {"/v1/scenario?plan=" + url.QueryEscape(`{"changes":[{"type":"road_to_rail","min_road_kms":10}]}`), "text/csv", csv},
+		"settings typo":     {"/v1/recommend?settings=" + url.QueryEscape(`{"kindz":["rail"]}`), "text/csv", csv},
+		"results flag typo": {"/v1/report?results=yes", "application/json", `{"shipments":[` + ship + `]}`},
+		"explain flag typo": {"/v1/calculate?explain=yes", "application/json", ship},
+	} {
+		resp, err := http.Post(srv.URL+c.path, c.ct, strings.NewReader(c.body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("%s: %d %s", name, resp.StatusCode, b)
+		}
+	}
+	resp, err := http.Get(srv.URL + "/v1/places?q=rotterdam&limit=abc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("places limit=abc: %d", resp.StatusCode)
+	}
+}
+
+// Report results keep every shipment, also without ids or with repeats.
+func TestReport_ResultsWithoutIDs(t *testing.T) {
+	srv := newTestServer(t)
+	ship := `{"weight_kg":1000,"legs":[{"mode":"road","vehicle_type":"truck_40t","distance_km":500}]}`
+	resp, out := post(t, srv.URL+"/v1/report?results=true", `{"shipments":[`+ship+`,`+ship+`,`+ship+`]}`)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d: %v", resp.StatusCode, out)
+	}
+	if n := len(out["results"].([]any)); n != 3 {
+		t.Errorf("results: %d, want 3", n)
 	}
 }

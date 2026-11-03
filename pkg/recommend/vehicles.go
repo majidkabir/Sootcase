@@ -40,7 +40,7 @@ func (a *analyser) loads() {
 		load += ", " + a.set.LoadVehicle
 	}
 	s.AddRoadLegs = a.s.AddRoadLegs
-	r, err := a.c.Calculate(a.ctx, s)
+	r, err := a.calc(a.c, s)
 	if err != nil {
 		a.note("Fuller loads: not possible: %v", shortErr(err))
 		return
@@ -93,7 +93,7 @@ func (a *analyser) vehicles(kind string, pick func(calc.Leg, calc.LegResult) str
 		for _, c := range cs {
 			s.Legs[c.j].VehicleType = c.vt
 		}
-		r, err := a.c.Calculate(a.ctx, s)
+		r, err := a.calc(a.c, s)
 		return s, r, err
 	}
 	s, r, err := calcWith(cands)

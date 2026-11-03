@@ -67,6 +67,9 @@ func Run(ctx context.Context, c calc.Calculator, shipments []calc.Shipment, set 
 	byKey := map[string]*group{}
 	for i, s := range shipments {
 		key, ok := groupKey(s)
+		if set.has(Load) && set.LoadTonnes != nil && s.WeightKg/1000 > *set.LoadTonnes {
+			key += "|over load" // fuller loads aren't possible for these
+		}
 		if g := byKey[key]; ok && g != nil {
 			g.all = append(g.all, i)
 			continue
@@ -113,22 +116,29 @@ func Run(ctx context.Context, c calc.Calculator, shipments []calc.Shipment, set 
 }
 
 // groupKey is a shipment's legs and cargo basis without the weight; ok is
-// false when emissions aren't proportional to weight (measured fuel) or the
-// cargo isn't given by weight.
+// false when emissions aren't proportional to weight: measured fuel, a
+// dedicated truck (repositioning without a load), hubs with a fixed number
+// of containers, or cargo not given by weight.
 func groupKey(s calc.Shipment) (string, bool) {
 	if s.WeightKg <= 0 || s.TEU != 0 || s.TEUNetTonnes != 0 || s.ContainerLoad != "" {
 		return "", false
 	}
 	for _, l := range s.Legs {
-		if l.Fuel != nil {
+		if l.Fuel != nil || (l.RepositioningKm > 0 && l.LoadFactor == 0 && l.LoadTonnes == 0) {
+			return "", false
+		}
+	}
+	for _, h := range s.Hubs {
+		if h.Containers > 0 {
 			return "", false
 		}
 	}
 	b, err := json.Marshal(struct {
-		Legs []calc.Leg
-		Hubs []calc.HubStop
-		Add  *bool
-	}{s.Legs, s.Hubs, s.AddRoadLegs})
+		Cargo string
+		Legs  []calc.Leg
+		Hubs  []calc.HubStop
+		Add   *bool
+	}{s.CargoType, s.Legs, s.Hubs, s.AddRoadLegs})
 	if err != nil {
 		return "", false
 	}

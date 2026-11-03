@@ -119,7 +119,7 @@ This is the capacity-utilisation approach EcoTransIT World and GLEC use, built e
 | rail | an OSRM server built with the rail profile, with `-osrm-rail URL` | shortest feasible (`sfd`) |
 | inland waterway | an OSRM server built with the barge profile, with `-osrm-waterway URL` | shortest feasible (`sfd`) |
 | air, and rail or inland waterway without a server | great-circle | great-circle (`gcd`) |
-| road without a server | great-circle, refused for DESNZ factors (see DAF below) | great-circle (`gcd`) |
+| road without a server | great-circle, refused when no DAF converts it to the factor's distance basis (all built-in road factors: give `distance_km`, see DAF below) | great-circle (`gcd`) |
 
 A dataset may also define `distance_adjustments` (`gcd × multiplier + add_km`) to estimate route distance from great-circle for a mode; the result then has no known type.
 

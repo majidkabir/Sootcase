@@ -56,6 +56,9 @@ func runRecommend(args []string) error {
 	if err != nil {
 		return err
 	}
+	if len(items) == 0 {
+		return errNoShipments
+	}
 	var shipments []calc.Shipment
 	var bad []recommend.ShipmentResult
 	for _, it := range items {

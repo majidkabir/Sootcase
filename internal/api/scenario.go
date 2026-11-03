@@ -1,10 +1,10 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
 	"github.com/majidkabir/sootcase/pkg/csvio"
@@ -28,7 +28,7 @@ func (s *Server) scenarioRun(w http.ResponseWriter, r *http.Request) {
 	var req ScenarioRequest
 	var parseErrs []csvio.Item
 	if isCSV(r) {
-		if err := json.Unmarshal([]byte(r.URL.Query().Get("plan")), &req.Plan); err != nil {
+		if err := decodeStrict(strings.NewReader(r.URL.Query().Get("plan")), &req.Plan); err != nil {
 			writeError(w, http.StatusBadRequest, fmt.Errorf("plan query parameter: invalid JSON: %w", err))
 			return
 		}

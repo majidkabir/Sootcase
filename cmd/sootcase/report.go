@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -17,6 +18,9 @@ import (
 
 // runReport calculates a shipments CSV and prints an ISO 14083 style
 // report over all of it.
+// errNoShipments refuses an input with no shipments, as the API does.
+var errNoShipments = errors.New("no shipments in the file")
+
 func runReport(args []string) error {
 	fs := flag.NewFlagSet("report", flag.ExitOnError)
 	var c common
@@ -82,6 +86,9 @@ func runReport(args []string) error {
 		})
 	if err != nil {
 		return err
+	}
+	if stats.Shipments == 0 {
+		return errNoShipments
 	}
 	fmt.Fprintf(os.Stderr, "%d shipments, %d failed\n", stats.Shipments, stats.Failed)
 	rep := b.Report()

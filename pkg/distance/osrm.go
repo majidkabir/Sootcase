@@ -153,8 +153,10 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	if err != nil {
 		return calc.Route{}, fmt.Errorf("osrm: %w", err)
 	}
+	// The slot is held until the response is read: OSRM is still sending
+	// it (MaxInFlight limits the requests the server works on).
+	defer release()
 	resp, err := client.Do(req)
-	release()
 	if err != nil {
 		if ctx.Err() != nil {
 			return calc.Route{}, fmt.Errorf("osrm: %w", ctx.Err())
