@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"mime"
 	"net/http"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
@@ -28,29 +27,16 @@ type ScenarioRequest struct {
 func (s *Server) scenarioRun(w http.ResponseWriter, r *http.Request) {
 	var req ScenarioRequest
 	var parseErrs []csvio.Item
-	if ct, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type")); ct == "text/csv" {
+	if isCSV(r) {
 		if err := json.Unmarshal([]byte(r.URL.Query().Get("plan")), &req.Plan); err != nil {
 			writeError(w, http.StatusBadRequest, fmt.Errorf("plan query parameter: invalid JSON: %w", err))
 			return
 		}
-		r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
-		items, err := csvio.Read(r.Body)
-		if err != nil {
-			var tooBig *http.MaxBytesError
-			if errors.As(err, &tooBig) {
-				writeError(w, http.StatusRequestEntityTooLarge, err)
-			} else {
-				writeError(w, http.StatusBadRequest, err)
-			}
+		items, ok := readCSV(w, r)
+		if !ok {
 			return
 		}
-		for _, it := range items {
-			if it.Err != nil {
-				parseErrs = append(parseErrs, it)
-			} else {
-				req.Shipments = append(req.Shipments, it.Shipment)
-			}
-		}
+		req.Shipments, parseErrs = split(items)
 	} else if !s.decode(w, r, &req) {
 		return
 	}
@@ -58,20 +44,20 @@ func (s *Server) scenarioRun(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusRequestEntityTooLarge, fmt.Errorf("%d shipments, max is %d for a scenario", n, maxScenarioItems))
 		return
 	}
+	if len(req.Shipments)+len(parseErrs) == 0 {
+		writeError(w, http.StatusBadRequest, errNoShipments)
+		return
+	}
 	if _, err := req.Plan.Validate(); err != nil {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
 	ctx := r.Context()
-	if len(req.Shipments) >= s.Limits.BigBatch/4 {
-		select {
-		case s.big <- struct{}{}:
-			defer func() { <-s.big }()
-		case <-ctx.Done():
-			writeError(w, http.StatusServiceUnavailable, errors.New("other big files are being calculated and this one didn't get its turn in time; try again in a few minutes"))
-			return
-		}
+	release, ok := s.bigTurn(ctx, w, len(req.Shipments), s.Limits.BigBatch/4)
+	if !ok {
+		return
 	}
+	defer release()
 	var valid []calc.Shipment
 	var sizeErrs []scenario.ShipmentResult
 	for _, sh := range req.Shipments {

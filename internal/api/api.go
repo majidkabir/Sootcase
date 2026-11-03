@@ -383,16 +383,11 @@ func (s *Server) each(w http.ResponseWriter, r *http.Request, shipments []calc.S
 		return false
 	}
 	ctx := r.Context()
-	if len(shipments) >= s.Limits.BigBatch {
-		// Wait for a turn: big batches run BigConcurrent at a time.
-		select {
-		case s.big <- struct{}{}:
-			defer func() { <-s.big }()
-		case <-ctx.Done():
-			writeError(w, http.StatusServiceUnavailable, fmt.Errorf("other big files are being calculated and this one didn't get its turn in time; try again in a few minutes"))
-			return false
-		}
+	release, ok := s.bigTurn(ctx, w, len(shipments), s.Limits.BigBatch)
+	if !ok {
+		return false
 	}
+	defer release()
 	type out struct {
 		res  calc.Result
 		err  error
@@ -472,7 +467,7 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 	var req ReportRequest
 	var parseErrs []csvio.Item // CSV shipments that failed to parse
 	var csvOrder []string      // CSV shipment ids in file order
-	if ct, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type")); ct == "text/csv" {
+	if isCSV(r) {
 		// A shipments CSV as the body, report details in the query.
 		q := r.URL.Query()
 		req.Meta = report.Meta{Title: q.Get("title"), Organisation: q.Get("organisation"),
@@ -484,15 +479,8 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 				req.Meta.Scope3Category = -1 // refused below
 			}
 		}
-		r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
-		items, err := csvio.Read(r.Body)
-		if err != nil {
-			var tooBig *http.MaxBytesError
-			if errors.As(err, &tooBig) {
-				writeError(w, http.StatusRequestEntityTooLarge, err)
-			} else {
-				writeError(w, http.StatusBadRequest, err)
-			}
+		items, ok := readCSV(w, r)
+		if !ok {
 			return
 		}
 		if len(items) > maxBatchItems {
@@ -502,13 +490,13 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		}
 		for _, it := range items {
 			csvOrder = append(csvOrder, it.Shipment.ID)
-			if it.Err != nil {
-				parseErrs = append(parseErrs, it)
-			} else {
-				req.Shipments = append(req.Shipments, it.Shipment)
-			}
 		}
+		req.Shipments, parseErrs = split(items)
 	} else if !s.decode(w, r, &req) {
+		return
+	}
+	if len(req.Shipments)+len(parseErrs) == 0 {
+		writeError(w, http.StatusBadRequest, errNoShipments)
 		return
 	}
 	m := req.Meta

@@ -311,3 +311,31 @@ func TestCalculate_OwnFactors(t *testing.T) {
 		t.Errorf("no source: %d %v", resp.StatusCode, out)
 	}
 }
+
+// A report, scenario or recommendation needs at least one shipment, as CSV
+// or JSON.
+func TestNoShipments(t *testing.T) {
+	srv := newTestServer(t)
+	header := "shipment_id,weight_kg,mode,vehicle_type,distance_km\n"
+	for _, path := range []string{"/v1/report", "/v1/scenario?plan=%7B%22changes%22%3A%5B%5D%7D", "/v1/recommend"} {
+		resp, err := http.Post(srv.URL+path, "text/csv", strings.NewReader(header))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest || !strings.Contains(string(b), "no shipments") {
+			t.Errorf("%s with no rows: %d %s", path, resp.StatusCode, b)
+		}
+	}
+	for _, path := range []string{"/v1/report", "/v1/scenario", "/v1/recommend"} {
+		body := `{"shipments":[]}`
+		if path == "/v1/scenario" {
+			body = `{"shipments":[],"plan":{"changes":[]}}`
+		}
+		resp, _ := post(t, srv.URL+path, body)
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("%s with no shipments (JSON): %d", path, resp.StatusCode)
+		}
+	}
+}
