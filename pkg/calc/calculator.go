@@ -728,25 +728,12 @@ func (c Calculator) distance(ctx context.Context, leg Leg) (rt Route, method, dt
 			return Route{}, "", "", fmt.Errorf("distance: route part %s of %v km in a %v km route", k, v, d)
 		}
 	}
-	var countries float64
-	for k, v := range rt.CountryKm {
-		if !(v >= 0) {
-			return Route{}, "", "", fmt.Errorf("distance: %v km in country %s", v, k)
-		}
-		countries += v
+	countries, err := kmWithin(rt.CountryKm, d, "country", "route")
+	if err != nil {
+		return Route{}, "", "", err
 	}
-	if countries > d*(1+1e-6) {
-		return Route{}, "", "", fmt.Errorf("distance: %v km by country in a %v km route", countries, d)
-	}
-	var regions float64
-	for k, v := range rt.RegionKm {
-		if !(v >= 0) {
-			return Route{}, "", "", fmt.Errorf("distance: %v km in region %s", v, k)
-		}
-		regions += v
-	}
-	if regions > countries*(1+1e-6) {
-		return Route{}, "", "", fmt.Errorf("distance: %v km by region of %v km by country", regions, countries)
+	if _, err := kmWithin(rt.RegionKm, countries, "region", "km by country"); err != nil {
+		return Route{}, "", "", err
 	}
 	if dm, ok := c.Distances.(DistanceMethoder); ok {
 		method = dm.DistanceMethod(leg.Mode)
@@ -758,6 +745,23 @@ func (c Calculator) distance(ctx context.Context, leg Leg) (rt Route, method, dt
 }
 
 func round3(v float64) float64 { return math.Round(v*1000) / 1000 }
+
+// kmWithin checks a split of km (by country or region): no negative or
+// NaN parts, adding up to at most total (within rounding). It returns
+// their sum.
+func kmWithin(km map[string]float64, total float64, what, of string) (float64, error) {
+	var sum float64
+	for k, v := range km {
+		if !(v >= 0) {
+			return 0, fmt.Errorf("distance: %v km in %s %s", v, what, k)
+		}
+		sum += v
+	}
+	if sum > total*(1+1e-6)+1e-3 {
+		return 0, fmt.Errorf("distance: %v km by %s in %v %s", sum, what, total, of)
+	}
+	return sum, nil
+}
 
 func repoText(km float64) string {
 	if km <= 0 {

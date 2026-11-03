@@ -4,8 +4,10 @@
 // so lookups need no outside service.
 //
 // Countries are keyed by ISO 3166-1 alpha-2 code (Natural Earth's
-// ISO_A2_EH). Areas without one (e.g. Northern Cyprus) use Natural
-// Earth's ADM0_A3 code instead, which has three letters.
+// ISO_A2_EH; XK for Kosovo). Areas without one count for the country ISO
+// puts them in (Northern Cyprus: CY); the few with no ISO code at all
+// (the UK's bases in Cyprus, disputed areas) keep Natural Earth's
+// three-letter ADM0_A3 code.
 //
 // The 1:10m borders are accurate to about a kilometre, which is the
 // accuracy of a split of a route by country.
@@ -38,6 +40,10 @@ var embeddedRegions []byte
 
 // Source describes the embedded data, for notices and results.
 const Source = "Natural Earth 1:10m admin-0 countries v5.1.2 (public domain)"
+
+// UnknownRegion is the region part of the code for km in a country with
+// regions but in none of them: "BE-unknown".
+const UnknownRegion = "unknown"
 
 // RegionSource describes the embedded regions, for notices and results.
 const RegionSource = "Belgian regions: Statbel (Statistics Belgium), statistical sectors 2026, situation 1 January 2026, CC BY 4.0"
@@ -179,6 +185,9 @@ func Decode(b []byte) ([]Country, error) {
 					}
 					x, y = x+dx, y+dy
 					r[k] = [2]float64{float64(x) / scale, float64(y) / scale}
+					if math.Abs(r[k][0]) > 180 || math.Abs(r[k][1]) > 90 {
+						return nil, fmt.Errorf("borders: %s: point %v out of range", c.Code, r[k])
+					}
 				}
 				p = append(p, r)
 			}
@@ -432,10 +441,8 @@ func (ix *Index) nearest(lon, lat, maxKm float64) int {
 						if !overlaps(r.box, near) {
 							continue
 						}
-						for k := 0; k+1 < len(r.pts); k++ {
-							if d := segDistKm(lon, lat, cosLat, r.pts[k], r.pts[k+1]); d < bestD {
-								best, bestD = int(ci), d
-							}
+						if d := r.nearestKm(lon, lat, cosLat, near); d < bestD {
+							best, bestD = int(ci), d
 						}
 					}
 				}
@@ -444,6 +451,32 @@ func (ix *Index) nearest(lon, lat, maxKm float64) int {
 	}
 	if bestD > maxKm {
 		return -1
+	}
+	return best
+}
+
+// nearestKm is the distance from the point to the ring's nearest edge
+// that may cross box (+Inf if none). Big rings look only at the edges of
+// box's latitude bands, so a coastline of thousands of points isn't
+// searched edge by edge.
+func (r *ring) nearestKm(lon, lat, cosLat float64, box bbox) float64 {
+	best := math.Inf(1)
+	edge := func(k int) {
+		if d := segDistKm(lon, lat, cosLat, r.pts[k], r.pts[k+1]); d < best {
+			best = d
+		}
+	}
+	if r.slabs == nil {
+		for k := 0; k+1 < len(r.pts); k++ {
+			edge(k)
+		}
+		return best
+	}
+	lo, hi := max(band(box.minLat)-r.slab0, 0), min(band(box.maxLat)-r.slab0, len(r.slabs)-1)
+	for s := lo; s <= hi; s++ {
+		for _, k := range r.slabs[s] {
+			edge(int(k)) // an edge spanning several bands is measured again: harmless
+		}
 	}
 	return best
 }
@@ -484,8 +517,9 @@ func (ix *Index) SplitKm(line [][2]float64) map[string]float64 {
 // regions split by region (ISO 3166-2 code) as well: each segment counts
 // for the region its midpoint is in, else the nearest region within
 // NearestKm (the regions and the countries come from different sources
-// and their outer borders differ by up to about a kilometre), else "".
-// The regions of a country add up to its km.
+// and their outer borders differ by up to about a kilometre), else the
+// country code, a hyphen and UnknownRegion ("BE-unknown"). The regions of
+// a country add up to its km.
 func (ix *Index) SplitKmRegions(line [][2]float64) (countries, regions map[string]float64) {
 	return ix.split(line, true)
 }
@@ -524,7 +558,7 @@ func (ix *Index) split(line [][2]float64, withRegions bool) (countries, regions 
 					r = ix.regions.nearest(mLon, mLat, NearestKm)
 				}
 			}
-			rc := ""
+			rc := code + "-" + UnknownRegion
 			if r >= 0 {
 				rc, rhint = ix.regions.countries[r].code, r
 			}

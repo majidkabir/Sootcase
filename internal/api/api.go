@@ -312,7 +312,7 @@ func (s *Server) calculate(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
-	ctx, ok := withCountryKm(w, r, ctx)
+	ctx, ok := withCountryKm(ctx, w, r)
 	if !ok {
 		return
 	}
@@ -441,7 +441,7 @@ func (s *Server) each(w http.ResponseWriter, r *http.Request, shipments []calc.S
 			fmt.Errorf("batch has %d shipments, max is %d", len(shipments), maxBatchItems))
 		return false
 	}
-	ctx, ok := withCountryKm(w, r, r.Context())
+	ctx, ok := withCountryKm(r.Context(), w, r)
 	if !ok {
 		return false
 	}
@@ -694,7 +694,7 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 
 // withCountryKm reads the country_km query parameter: true asks for each
 // road and rail leg's distance by country. It writes a 400 for a bad value.
-func withCountryKm(w http.ResponseWriter, r *http.Request, ctx context.Context) (context.Context, bool) {
+func withCountryKm(ctx context.Context, w http.ResponseWriter, r *http.Request) (context.Context, bool) {
 	on, err := boolParam(r.URL.Query(), "country_km")
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err)

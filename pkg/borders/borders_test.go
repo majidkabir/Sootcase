@@ -190,3 +190,80 @@ func densify(line [][2]float64, step float64) [][2]float64 {
 	}
 	return out
 }
+
+// Areas Natural Earth gives no ISO code: those ISO counts in a country
+// get that country's code; Kosovo is XK.
+func TestCodesWithoutISO(t *testing.T) {
+	ix := index(t)
+	for _, tc := range []struct {
+		name     string
+		lon, lat float64
+		want     string
+	}{
+		{"Northern Cyprus (Kyrenia)", 33.3190, 35.3360, "CY"},
+		{"Nicosia, south", 33.3600, 35.1600, "CY"},
+		{"Pristina", 21.1655, 42.6629, "XK"},
+		{"Hargeisa (Somaliland)", 44.0650, 9.5600, "SO"},
+	} {
+		if got := ix.Country(tc.lon, tc.lat); got != tc.want {
+			t.Errorf("%s: %q, want %q", tc.name, got, tc.want)
+		}
+	}
+}
+
+// The nearest-border search by latitude band finds what a search of
+// every edge finds.
+func TestNearestMatchesFullSearch(t *testing.T) {
+	ix := index(t)
+	full := func(lon, lat, maxKm float64) int {
+		cosLat := math.Max(math.Cos(lat*math.Pi/180), 0.01)
+		best, bestD := -1, math.Inf(1)
+		for ci, c := range ix.countries {
+			for _, p := range c.polys {
+				for _, r := range p.rings {
+					for k := 0; k+1 < len(r.pts); k++ {
+						if d := segDistKm(lon, lat, cosLat, r.pts[k], r.pts[k+1]); d < bestD {
+							best, bestD = ci, d
+						}
+					}
+				}
+			}
+		}
+		if bestD > maxKm {
+			return -1
+		}
+		return best
+	}
+	// Harbours, fjords, straits and open sea.
+	for _, p := range [][2]float64{{5.32, 60.39}, {12.335, 45.437}, {28.98, 41.02}, {-123.12, 49.29}, {30.31, 59.94},
+		{12.5683, 55.6761}, {12.75, 55.57}, {-5.6, 36.0}, {1.5, 51.0}, {-30, 40}} {
+		if got, want := ix.nearest(p[0], p[1], NearestKm), full(p[0], p[1], NearestKm); got != want {
+			t.Errorf("%v: nearest %d, full search %d", p, got, want)
+		}
+	}
+}
+
+// A borders file with a point out of range is refused.
+func TestDecodeOutOfRange(t *testing.T) {
+	var buf bytes.Buffer
+	if err := Encode(&buf, []Country{{Code: "AA", Polygons: []Polygon{{{{0, 0}, {20000, 0}, {1, 1}, {0, 0}}}}}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Decode(buf.Bytes()); err == nil {
+		t.Error("a longitude of 20,000 degrees was accepted")
+	}
+}
+
+// Km in a country with regions but in none of them count for
+// "<country>-unknown".
+func TestUnknownRegion(t *testing.T) {
+	sq := func(x0, y0, x1, y1 float64) Polygon {
+		return Polygon{{{x0, y0}, {x1, y0}, {x1, y1}, {x0, y1}, {x0, y0}}}
+	}
+	ix := NewIndex([]Country{{Code: "AA", Polygons: []Polygon{sq(0, 0, 10, 10)}}}).
+		WithRegions([]Country{{Code: "AA-X", Polygons: []Polygon{sq(0, 0, 1, 1)}}})
+	_, regions := ix.SplitKmRegions([][2]float64{{0.4, 0.5}, {0.6, 0.5}, {8, 8}, {8.2, 8}})
+	if regions["AA-X"] <= 0 || regions["AA-"+UnknownRegion] <= 0 || len(regions) != 2 {
+		t.Errorf("regions %v, want AA-X and AA-unknown", regions)
+	}
+}

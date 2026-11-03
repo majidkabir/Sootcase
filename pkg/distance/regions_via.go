@@ -239,33 +239,33 @@ func (rs Regions) routeVia(ctx context.Context, m calc.Mode, from, to calc.Locat
 	if err != nil {
 		return calc.Route{}, err
 	}
-	r := calc.Route{Km: r1.Km + r2.Km}
-	for _, part := range []map[string]float64{r1.Parts, r2.Parts} {
-		for k, v := range part {
-			if r.Parts == nil {
-				r.Parts = map[string]float64{}
-			}
-			r.Parts[k] += v
-		}
-	}
-	for _, ck := range []map[string]float64{r1.CountryKm, r2.CountryKm} {
-		for k, v := range ck {
-			if r.CountryKm == nil {
-				r.CountryKm = map[string]float64{}
-			}
-			r.CountryKm[k] += v
-		}
-	}
-	for _, rk := range []map[string]float64{r1.RegionKm, r2.RegionKm} {
-		for k, v := range rk {
-			if r.RegionKm == nil {
-				r.RegionKm = map[string]float64{}
-			}
-			r.RegionKm[k] += v
-		}
+	r := calc.Route{Km: r1.Km + r2.Km,
+		Parts:     addKm(r1.Parts, r2.Parts, false),
+		CountryKm: addKm(r1.CountryKm, r2.CountryKm, true),
+		RegionKm:  addKm(r1.RegionKm, r2.RegionKm, true),
 	}
 	if len(r1.Path) > 0 || len(r2.Path) > 0 {
 		r.Path = append(append([][2]float64{}, r1.Path...), r2.Path...)
 	}
 	return r, nil
+}
+
+// addKm adds two routes' km by key, nil if both have none. round rounds
+// the sums to 0.1 m, as the halves were.
+func addKm(a, b map[string]float64, round bool) map[string]float64 {
+	if len(a) == 0 && len(b) == 0 {
+		return nil
+	}
+	out := make(map[string]float64, len(a)+len(b))
+	for _, m := range []map[string]float64{a, b} {
+		for k, v := range m {
+			out[k] += v
+		}
+	}
+	if round {
+		for k, v := range out {
+			out[k] = math.Round(v*1e4) / 1e4
+		}
+	}
+	return out
 }

@@ -162,6 +162,10 @@ paths:
           in: query
           schema: { type: boolean, default: false }
           description: Also return each shipment's full result (results[], as in a batch, in input order)
+        - name: country_km
+          in: query
+          schema: { type: boolean, default: false }
+          description: "With results=true: each result's road and rail legs get country_km and region_km, as in /v1/calculate. Routing takes longer; the report itself doesn't use them."
         - name: markdown
           in: query
           schema: { type: boolean, default: false }
@@ -552,11 +556,11 @@ components:
         country_km:
           type: object
           additionalProperties: { type: number }
-          description: "With ?country_km=true only. Routed km on land by country (ISO 3166-1 alpha-2, e.g. DK, DE); ferry crossings are in route_parts_km, not here. \"unknown\" is distance in no country's borders."
+          description: "With ?country_km=true only. Routed km on land by country (ISO 3166-1 alpha-2, e.g. DK, DE; XK for Kosovo, a widely used user-assigned code; areas ISO counts in a country, such as Northern Cyprus, under that country; the few with no ISO code at all, such as the UK bases in Cyprus (ESB, WSB), under Natural Earth's three-letter code). Ferry crossings are in route_parts_km, not here. \"unknown\" is distance in no country's borders. Values are rounded to 0.1 m and add up to distance_km minus the ferry km."
         region_km:
           type: object
           additionalProperties: { type: number }
-          description: "With ?country_km=true only, for legs in a country split into regions where road charges differ: Belgium's Flanders (BE-VLG), Wallonia (BE-WAL) and Brussels-Capital (BE-BRU), ISO 3166-2. A country's regions add up to its country_km. \"unknown\" is km in the country but in no region."
+          description: "With ?country_km=true only, for legs in a country split into regions where road charges differ: Belgium's Flanders (BE-VLG), Wallonia (BE-WAL) and Brussels-Capital (BE-BRU), ISO 3166-2. A country's regions add up to its country_km. \"BE-unknown\" is km in Belgium but in no region."
         path:
           type: array
           description: With ?path=true only. The leg's route as GeoJSON [lon, lat] points; two points mean a straight line.

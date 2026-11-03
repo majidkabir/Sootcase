@@ -366,3 +366,53 @@ func TestOSRM_RegionKm(t *testing.T) {
 		t.Errorf("RegionKm %v without regions", r.RegionKm)
 	}
 }
+
+// A step with distance but no line counts as unknown, not for the other
+// steps' countries; a ferry step that isn't a route part (no PartModes)
+// stays in the split; values are rounded to 0.1 m and add up exactly.
+func TestOSRM_CountryKmGaps(t *testing.T) {
+	var calls int32
+	var path string
+	body := `{"code":"Ok","routes":[{"distance":100000.04,"legs":[{"steps":[
+		{"distance":33333.33,"mode":"driving","geometry":{"coordinates":[[12.5,55.6],[11.9,54.7]]}},
+		{"distance":33333.33,"mode":"driving","geometry":"_p~iF~ps|U"},
+		{"distance":33333.38,"mode":"ferry","geometry":{"coordinates":[[10.9,54.4],[10.0,53.5]]}}]}]}]}`
+	srv := fakeOSRM(t, body, 200, &calls, &path)
+	o, _ := NewOSRM(srv.URL)
+	o.Countries = splitByLon{} // no PartModes: the ferry is an ordinary step
+	r, err := o.Route(calc.WithCountryKm(context.Background()), calc.Road, copenhagen, hamburg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var sum float64
+	for k, v := range r.CountryKm {
+		if v != math.Round(v*1e4)/1e4 {
+			t.Errorf("CountryKm[%s] = %v, want rounded to 0.1 m", k, v)
+		}
+		sum += v
+	}
+	// Each line: 2/3 its country, 1/3 unknown; the step without a line all unknown.
+	if math.Abs(sum-100.00004) > 1e-4 || math.Abs(r.CountryKm["DK"]-22.2222) > 1e-3 || math.Abs(r.CountryKm["DE"]-22.2223) > 1e-3 ||
+		math.Abs(r.CountryKm[calc.CountryUnknown]-55.5556) > 1e-3 {
+		t.Errorf("CountryKm %v (sum %v)", r.CountryKm, sum)
+	}
+}
+
+// Split routes have a cache of their own: they don't push plain ones out.
+func TestOSRM_SplitCacheApart(t *testing.T) {
+	var calls int32
+	var path string
+	body := `{"code":"Ok","routes":[{"distance":1000,"legs":[{"steps":[{"distance":1000,"mode":"driving","geometry":{"coordinates":[[12.5,55.6],[12.4,55.5]]}}]}]}]}`
+	srv := fakeOSRM(t, body, 200, &calls, &path)
+	o, _ := NewOSRM(srv.URL)
+	o.Countries = splitByLon{}
+	split := calc.WithCountryKm(context.Background())
+	for _, ctx := range []context.Context{context.Background(), split, context.Background(), split} {
+		if _, err := o.Route(ctx, calc.Road, copenhagen, hamburg); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if calls != 2 || len(o.cache) != 1 || len(o.splitCache) != 1 {
+		t.Errorf("calls %d, plain cache %d, split cache %d: want 2, 1, 1", calls, len(o.cache), len(o.splitCache))
+	}
+}

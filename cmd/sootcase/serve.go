@@ -28,6 +28,7 @@ func runServe(args []string) error {
 	bigConcurrent := fs.Int("big-concurrent", 2, "big batches calculated at once; the rest wait in line")
 	_ = fs.Parse(args)
 
+	c.countryKm = true // the API's ?country_km=true
 	calculator, ds, err := c.calculator()
 	if err != nil {
 		return err
