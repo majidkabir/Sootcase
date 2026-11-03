@@ -332,65 +332,100 @@ func Parse(r io.Reader) (*Dataset, error) {
 	if err := json.NewDecoder(r).Decode(&d); err != nil {
 		return nil, fmt.Errorf("parse dataset: %w", err)
 	}
-	d.legIdx = make(map[string]calc.Factor, len(d.Legs))
-	for _, f := range d.Legs {
+	// In this order: aliases point at indexed factors, cargo variants and
+	// fuel regions at aliases too.
+	steps := []func() error{d.indexLegs, d.indexHubs, d.indexFuels, d.checkDistanceAdjustments, d.indexVehicleAliases,
+		d.indexDAFs, d.indexLoadModels, d.indexGrids, d.checkContainerLoads, d.indexFuelAliases, d.indexCargoVariants,
+		d.checkHubCargoVariants, d.indexFuelRegions}
+	for _, step := range steps {
+		if err := step(); err != nil {
+			return nil, err
+		}
+	}
+	return &d, nil
+}
+
+// index maps each item by its key after check, refusing a key twice
+// (duplicate is the error's format, given the key).
+func index[T any](items []T, key func(T) string, check func(T) error, duplicate string) (map[string]T, error) {
+	m := make(map[string]T, len(items))
+	for _, it := range items {
+		if check != nil {
+			if err := check(it); err != nil {
+				return nil, err
+			}
+		}
+		k := key(it)
+		if _, dup := m[k]; dup {
+			return nil, fmt.Errorf(duplicate, k)
+		}
+		m[k] = it
+	}
+	return m, nil
+}
+
+func (d *Dataset) indexLegs() (err error) {
+	d.legIdx, err = index(d.Legs, func(f calc.Factor) string { return legKey(f.Mode, f.VehicleType) }, func(f calc.Factor) error {
 		if f.TTW < 0 || f.WTT < 0 {
-			return nil, fmt.Errorf("negative factor for %s/%s", f.Mode, f.VehicleType)
+			return fmt.Errorf("negative factor for %s/%s", f.Mode, f.VehicleType)
 		}
 		switch f.DistanceBasis {
 		case "", calc.DistSFD, calc.DistGCD, calc.DistActual:
-		default:
-			return nil, fmt.Errorf("factor %s/%s: distance_basis must be sfd, gcd or actual", f.Mode, f.VehicleType)
+			return nil
 		}
-		k := legKey(f.Mode, f.VehicleType)
-		if _, dup := d.legIdx[k]; dup {
-			return nil, fmt.Errorf("duplicate factor for %s", k)
-		}
-		d.legIdx[k] = f
-	}
-	d.hubIdx = make(map[string]calc.HubFactor, len(d.Hubs))
-	for _, h := range d.Hubs {
+		return fmt.Errorf("factor %s/%s: distance_basis must be sfd, gcd or actual", f.Mode, f.VehicleType)
+	}, "duplicate factor for %s")
+	return err
+}
+
+func (d *Dataset) indexHubs() (err error) {
+	d.hubIdx, err = index(d.Hubs, func(h calc.HubFactor) string { return h.HubType }, func(h calc.HubFactor) error {
 		if h.WTWPerContainerG < 0 || h.WTWPerContainerG > 0 && h.WTWPerTonneG != 0 {
-			return nil, fmt.Errorf("hub factor for %s: give wtw_g_per_tonne or wtw_g_per_container (>= 0), not both", h.HubType)
+			return fmt.Errorf("hub factor for %s: give wtw_g_per_tonne or wtw_g_per_container (>= 0), not both", h.HubType)
 		}
 		if h.WTWPerTonneG < 0 {
-			return nil, fmt.Errorf("negative hub factor for %s", h.HubType)
+			return fmt.Errorf("negative hub factor for %s", h.HubType)
 		}
-		if _, dup := d.hubIdx[h.HubType]; dup {
-			return nil, fmt.Errorf("duplicate hub factor for %s", h.HubType)
-		}
-		d.hubIdx[h.HubType] = h
-	}
-	d.fuelIdx = make(map[string]calc.FuelFactor, len(d.Fuels))
-	for _, f := range d.Fuels {
+		return nil
+	}, "duplicate hub factor for %s")
+	return err
+}
+
+func (d *Dataset) indexFuels() (err error) {
+	d.fuelIdx, err = index(d.Fuels, func(f calc.FuelFactor) string { return f.Fuel }, func(f calc.FuelFactor) error {
 		if f.TTW < 0 || f.WTT < 0 {
-			return nil, fmt.Errorf("negative fuel factor for %s", f.Fuel)
+			return fmt.Errorf("negative fuel factor for %s", f.Fuel)
 		}
-		if _, dup := d.fuelIdx[f.Fuel]; dup {
-			return nil, fmt.Errorf("duplicate fuel factor for %s", f.Fuel)
-		}
-		d.fuelIdx[f.Fuel] = f
-	}
-	if _, err := distance.NewGreatCircle(d.DistanceAdjustments); err != nil {
-		return nil, err
-	}
+		return nil
+	}, "duplicate fuel factor for %s")
+	return err
+}
+
+func (d *Dataset) checkDistanceAdjustments() error {
+	_, err := distance.NewGreatCircle(d.DistanceAdjustments)
+	return err
+}
+
+// indexVehicleAliases adds the aliases to the leg index, with the
+// distance-dependent ones (short_vehicle_type) and place aliases.
+func (d *Dataset) indexVehicleAliases() error {
 	for _, a := range d.VehicleAliases {
 		k := legKey(a.Mode, a.Alias)
 		target, ok := d.legIdx[legKey(a.Mode, a.VehicleType)]
 		if !ok {
-			return nil, fmt.Errorf("vehicle alias %s points to unknown %s", k, a.VehicleType)
+			return fmt.Errorf("vehicle alias %s points to unknown %s", k, a.VehicleType)
 		}
 		if _, clash := d.legIdx[k]; clash {
-			return nil, fmt.Errorf("vehicle alias %s clashes with an existing vehicle type", k)
+			return fmt.Errorf("vehicle alias %s clashes with an existing vehicle type", k)
 		}
 		d.legIdx[k] = target
 		if err := d.indexPlaceAlias(a); err != nil {
-			return nil, err
+			return err
 		}
 		if a.ShortVehicleType != "" || a.ShortBelowKm != 0 {
 			short, ok := d.legIdx[legKey(a.Mode, a.ShortVehicleType)]
 			if !ok || a.ShortBelowKm <= 0 {
-				return nil, fmt.Errorf("vehicle alias %s: short_vehicle_type must name a vehicle type and short_below_km be > 0", k)
+				return fmt.Errorf("vehicle alias %s: short_vehicle_type must name a vehicle type and short_below_km be > 0", k)
 			}
 			if d.shortIdx == nil {
 				d.shortIdx = map[string]shortAlias{}
@@ -398,65 +433,76 @@ func Parse(r io.Reader) (*Dataset, error) {
 			d.shortIdx[k] = shortAlias{alias: a.Alias, belowKm: a.ShortBelowKm, short: short, long: target}
 		}
 	}
-	d.dafIdx = make(map[string]calc.DAF, len(d.DAFs))
-	for _, x := range d.DAFs {
-		if err := x.Validate(); err != nil {
-			return nil, err
-		}
-		k := dafKey(x.Mode, x.From, x.To)
-		if _, dup := d.dafIdx[k]; dup {
-			return nil, fmt.Errorf("duplicate DAF %s", k)
-		}
-		d.dafIdx[k] = x
-	}
-	d.loadIdx = make(map[string]calc.LoadModel, len(d.LoadModels))
-	for _, m := range d.LoadModels {
-		if err := m.Validate(); err != nil {
-			return nil, err
-		}
-		k := legKey(m.Mode, m.VehicleType)
-		if _, dup := d.loadIdx[k]; dup {
-			return nil, fmt.Errorf("duplicate load model for %s", k)
-		}
-		d.loadIdx[k] = m
-	}
+	return nil
+}
+
+func (d *Dataset) indexDAFs() (err error) {
+	d.dafIdx, err = index(d.DAFs, func(x calc.DAF) string { return dafKey(x.Mode, x.From, x.To) },
+		func(x calc.DAF) error { return x.Validate() }, "duplicate DAF %s")
+	return err
+}
+
+func (d *Dataset) indexLoadModels() (err error) {
+	d.loadIdx, err = index(d.LoadModels, func(m calc.LoadModel) string { return legKey(m.Mode, m.VehicleType) },
+		func(m calc.LoadModel) error { return m.Validate() }, "duplicate load model for %s")
+	return err
+}
+
+// indexGrids indexes the electricity grid factors by ISO alpha-3 country,
+// the embedded Ember set when the dataset has none.
+func (d *Dataset) indexGrids() (err error) {
 	if len(d.Grids) == 0 {
 		g, note, err := defaultGrids()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		d.Grids, d.GridNote = g, note
 	}
-	d.gridIdx = make(map[string]calc.GridFactor, len(d.Grids))
-	for _, g := range d.Grids {
-		c := strings.ToUpper(g.Country)
-		if len(c) != 3 || g.G < 0 {
-			return nil, fmt.Errorf("grid factor %q: need ISO alpha-3 country and g_per_kwh >= 0", g.Country)
+	d.gridIdx, err = index(d.Grids, func(g calc.GridFactor) string { return strings.ToUpper(g.Country) }, func(g calc.GridFactor) error {
+		if len(g.Country) != 3 || g.G < 0 {
+			return fmt.Errorf("grid factor %q: need ISO alpha-3 country and g_per_kwh >= 0", g.Country)
 		}
-		if _, dup := d.gridIdx[c]; dup {
-			return nil, fmt.Errorf("duplicate grid factor for %s", c)
-		}
-		d.gridIdx[c] = g
-	}
+		return nil
+	}, "duplicate grid factor for %s")
+	return err
+}
+
+func (d *Dataset) checkContainerLoads() error {
 	for name, t := range d.ContainerLoads {
 		if t <= 0 {
-			return nil, fmt.Errorf("container load %q must be > 0 tonnes per TEU", name)
+			return fmt.Errorf("container load %q must be > 0 tonnes per TEU", name)
 		}
 	}
+	return nil
+}
+
+func (d *Dataset) indexFuelAliases() error {
 	for alias, id := range d.FuelAliases {
 		target, ok := d.fuelIdx[id]
 		if !ok {
-			return nil, fmt.Errorf("fuel alias %s points to unknown %s", alias, id)
+			return fmt.Errorf("fuel alias %s points to unknown %s", alias, id)
 		}
 		if _, clash := d.fuelIdx[alias]; clash {
-			return nil, fmt.Errorf("fuel alias %s clashes with an existing fuel", alias)
+			return fmt.Errorf("fuel alias %s clashes with an existing fuel", alias)
 		}
 		d.fuelIdx[alias] = target
 	}
+	return nil
+}
+
+// cargoTypes is the set of the dataset's cargo type names.
+func (d *Dataset) cargoTypes() map[string]bool {
 	cargo := map[string]bool{}
 	for _, ct := range d.CargoTypes {
 		cargo[ct.Name] = true
 	}
+	return cargo
+}
+
+// indexCargoVariants maps a vehicle type and cargo type to the factor
+// GLEC gives for that cargo on the same vehicle.
+func (d *Dataset) indexCargoVariants() error {
+	cargo := d.cargoTypes()
 	for vt, m := range d.CargoVariants {
 		var mode calc.Mode
 		for _, f := range d.Legs {
@@ -465,12 +511,12 @@ func Parse(r io.Reader) (*Dataset, error) {
 			}
 		}
 		if mode == "" {
-			return nil, fmt.Errorf("cargo_variants: unknown vehicle type %s", vt)
+			return fmt.Errorf("cargo_variants: unknown vehicle type %s", vt)
 		}
 		for c, t := range m {
 			f, ok := d.legIdx[legKey(mode, t)]
 			if !ok || !cargo[c] {
-				return nil, fmt.Errorf("cargo_variants %s: cargo type %q or vehicle type %s unknown", vt, c, t)
+				return fmt.Errorf("cargo_variants %s: cargo type %q or vehicle type %s unknown", vt, c, t)
 			}
 			if d.cargoIdx == nil {
 				d.cargoIdx = map[string]map[string]calc.Factor{}
@@ -482,16 +528,26 @@ func Parse(r io.Reader) (*Dataset, error) {
 			d.cargoIdx[k][c] = f
 		}
 	}
+	return nil
+}
+
+func (d *Dataset) checkHubCargoVariants() error {
+	cargo := d.cargoTypes()
 	for ht, m := range d.HubCargoVariants {
 		for c, t := range m {
 			if _, ok := d.hubIdx[t]; !ok || !cargo[c] {
-				return nil, fmt.Errorf("hub_cargo_variants %s: cargo type %q or hub type %s unknown", ht, c, t)
+				return fmt.Errorf("hub_cargo_variants %s: cargo type %q or hub type %s unknown", ht, c, t)
 			}
 		}
 	}
+	return nil
+}
+
+// indexFuelRegions maps a fuel alias and a region to the region's fuel.
+func (d *Dataset) indexFuelRegions() error {
 	for alias, fr := range d.FuelRegions {
 		if _, ok := d.fuelIdx[alias]; !ok {
-			return nil, fmt.Errorf("fuel_regions %s: no fuel or fuel alias of that name", alias)
+			return fmt.Errorf("fuel_regions %s: no fuel or fuel alias of that name", alias)
 		}
 		known := map[string]bool{}
 		for _, r := range d.Regions {
@@ -503,7 +559,7 @@ func Parse(r io.Reader) (*Dataset, error) {
 		for region, id := range fr.Regions {
 			f, ok := d.fuelIdx[id]
 			if !ok || !known[region] {
-				return nil, fmt.Errorf("fuel_regions %s: region %q in set %q or fuel %s unknown", alias, region, fr.RegionSet, id)
+				return fmt.Errorf("fuel_regions %s: region %q in set %q or fuel %s unknown", alias, region, fr.RegionSet, id)
 			}
 			m[region] = f
 		}
@@ -512,7 +568,7 @@ func Parse(r io.Reader) (*Dataset, error) {
 		}
 		d.fuelReg[alias] = m
 	}
-	return &d, nil
+	return nil
 }
 
 func legKey(m calc.Mode, vt string) string { return string(m) + "/" + vt }
