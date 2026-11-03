@@ -188,26 +188,34 @@ func (s *Server) Handler() http.Handler {
 // limited applies the concurrency cap and request timeout.
 func (s *Server) limited(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		sl := &slot{}
 		select {
 		case s.sem <- struct{}{}:
-			defer func() { <-s.sem }()
+			sl.held = true
+			defer func() {
+				if sl.held {
+					<-s.sem
+				}
+			}()
 		default:
 			w.Header().Set("Retry-After", "1")
 			writeError(w, http.StatusServiceUnavailable, errors.New("server busy, retry shortly"))
 			return
 		}
-		ctx, cancel := context.WithTimeout(r.Context(), s.Limits.Timeout)
+		ctx, cancel := context.WithTimeout(context.WithValue(r.Context(), slotKey{}, sl), s.Limits.Timeout)
 		defer cancel()
 		w.Header().Set("Cache-Control", "no-store")
 		// ?add_road_legs=false: no road legs added for shipments that don't
 		// say (see calc.Shipment.AddRoadLegs).
-		switch r.URL.Query().Get("add_road_legs") {
-		case "", "true", "1":
-		case "false", "0":
-			ctx = calc.WithoutRoadLegs(ctx)
-		default:
-			writeError(w, http.StatusBadRequest, errors.New("add_road_legs must be true or false"))
-			return
+		if v := r.URL.Query().Get("add_road_legs"); v != "" {
+			add, err := boolParam(r.URL.Query(), "add_road_legs")
+			if err != nil {
+				writeError(w, http.StatusBadRequest, err)
+				return
+			}
+			if !add {
+				ctx = calc.WithoutRoadLegs(ctx)
+			}
 		}
 		h(w, r.WithContext(ctx))
 	}
@@ -299,12 +307,17 @@ func (s *Server) calculate(w http.ResponseWriter, r *http.Request) {
 		}
 		ctx = calc.WithPathDetail(ctx, d) // each leg's route for a map; single calculations only
 	}
+	explained, err := boolParam(r.URL.Query(), "explain")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err)
+		return
+	}
 	res, err := s.Calc.CalculateRetrying(ctx, sh)
 	if err != nil {
 		writeError(w, calcStatus(err), err)
 		return
 	}
-	if v := r.URL.Query().Get("explain"); v == "true" || v == "1" {
+	if explained {
 		sheet := explain.Shipment(sh, res, s.Calc.Factors)
 		writeJSON(w, http.StatusOK, ExplainedResult{Result: res, Explanation: &sheet})
 		return
@@ -348,10 +361,14 @@ func (s *Server) places(w http.ResponseWriter, r *http.Request) {
 			kinds = append(kinds, k)
 		}
 	}
-	limit, _ := strconv.Atoi(q.Get("limit"))
-	limit = max(1, min(limit, 50))
-	if q.Get("limit") == "" {
-		limit = 10
+	limit := 10
+	if v := q.Get("limit"); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, errors.New("limit must be a whole number"))
+			return
+		}
+		limit = max(1, min(n, 50))
 	}
 	res := ix.Search(q.Get("q"), kinds, limit)
 	if res == nil {
@@ -502,6 +519,10 @@ type ReportResponse struct {
 const maxMetaLen = 1000
 
 func (s *Server) report(w http.ResponseWriter, r *http.Request) {
+	flags, ok := boolParams(w, r.URL.Query(), "results", "markdown", "declare_iso")
+	if !ok {
+		return
+	}
 	var req ReportRequest
 	var parseErrs []csvio.Item // CSV shipments that failed to parse
 	var csvOrder []string      // CSV shipment ids in file order
@@ -510,7 +531,7 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		req.Meta = report.Meta{Title: q.Get("title"), Organisation: q.Get("organisation"),
 			PeriodFrom: q.Get("period_from"), PeriodTo: q.Get("period_to"), Reference: q.Get("reference"),
-			DeclareISO: q.Get("declare_iso") == "true"}
+			DeclareISO: flags["declare_iso"]}
 		if v := q.Get("scope3_category"); v != "" {
 			req.Meta.Scope3Category, _ = strconv.Atoi(v)
 			if req.Meta.Scope3Category == 0 {
@@ -556,8 +577,8 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 	}
 	b := report.New(m)
 	q := r.URL.Query()
-	withResults := q.Get("results") == "true"
-	byID := map[string]BatchItem{}
+	withResults := flags["results"]
+	var items []BatchItem // in the order added: CSV parse failures, then input order
 	add := func(id string, res calc.Result, err error) {
 		b.Add(id, res, err)
 		if !withResults {
@@ -569,7 +590,7 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		} else {
 			item.Result = &res
 		}
-		byID[id] = item
+		items = append(items, item)
 	}
 	for _, it := range parseErrs {
 		add(it.Shipment.ID, calc.Result{}, it.Err)
@@ -578,9 +599,9 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rep := b.Report()
-	if q.Get("format") != "md" && (withResults || q.Get("markdown") == "true") {
+	if q.Get("format") != "md" && (withResults || flags["markdown"]) {
 		resp := ReportResponse{Report: rep}
-		if q.Get("markdown") == "true" {
+		if flags["markdown"] {
 			var buf bytes.Buffer
 			if err := report.WriteMarkdown(&buf, rep); err != nil {
 				writeError(w, http.StatusInternalServerError, err)
@@ -589,20 +610,21 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 			resp.Markdown = buf.String()
 		}
 		if withResults {
-			// In input order: the CSV's (failed rows included), or the JSON's.
-			ids := make([]string, 0, len(byID))
+			// In input order: the JSON's as added (ids may be empty or
+			// repeat), the CSV's by id (failed rows included; rows with
+			// the same id are one shipment).
+			resp.Results = items
 			if len(csvOrder) > 0 {
-				ids = csvOrder
-			} else {
-				for _, sh := range req.Shipments {
-					ids = append(ids, sh.ID)
+				byID := make(map[string]BatchItem, len(items))
+				for _, it := range items {
+					byID[it.ShipmentID] = it
 				}
-			}
-			resp.Results = make([]BatchItem, 0, len(ids))
-			for _, id := range ids {
-				if it, ok := byID[id]; ok {
-					resp.Results = append(resp.Results, it)
-					delete(byID, id) // a repeated id once
+				resp.Results = make([]BatchItem, 0, len(csvOrder))
+				for _, id := range csvOrder {
+					if it, ok := byID[id]; ok {
+						resp.Results = append(resp.Results, it)
+						delete(byID, id)
+					}
 				}
 			}
 		}
@@ -625,9 +647,7 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 // decode reads a JSON body into v, writing a 4xx and returning false on failure.
 func (s *Server) decode(w http.ResponseWriter, r *http.Request, v any) bool {
 	r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(v); err != nil {
+	if err := decodeStrict(r.Body, v); err != nil {
 		var tooBig *http.MaxBytesError
 		if errors.As(err, &tooBig) {
 			writeError(w, http.StatusRequestEntityTooLarge, err)

@@ -61,6 +61,9 @@ type ShipmentResult struct {
 	// Notes say why route changes that were tried don't apply.
 	Notes []string `json:"notes,omitempty"`
 	Error string   `json:"error,omitempty"`
+	// Retryable marks an error that is temporary (a routing service that
+	// didn't answer): the same request can succeed later.
+	Retryable bool `json:"retryable,omitempty"`
 }
 
 // KindSummary totals one kind of route change over the shipments.

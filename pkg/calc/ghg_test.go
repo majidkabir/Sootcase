@@ -21,4 +21,17 @@ func TestGHGScopes(t *testing.T) {
 	if bev.OperatorScope2Kg != 5 || bev.OperatorScope1Kg != 0 {
 		t.Errorf("battery electric: %+v", bev)
 	}
+	for id, want := range map[string]bool{
+		"glec/road/europe/electric/artic_34_40t":                        true,
+		"glec/road/cn/truck_12t/electricity":                            true,
+		"glec/rail/eu/electric/container":                               true,
+		"glec/rail/eu/temperature_controlled/electric/cars":             true,
+		"vans/average_up_to_3_5_tonnes/plug_in_hybrid_electric_vehicle": false,
+		"glec/rail/eu/diesel/container":                                 false,
+		"glec/road/europe/artic_34_40t":                                 false,
+	} {
+		if got := electricFactor(id); got != want {
+			t.Errorf("electricFactor(%q) = %v, want %v", id, got, want)
+		}
+	}
 }

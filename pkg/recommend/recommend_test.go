@@ -3,9 +3,11 @@ package recommend
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
 	"github.com/majidkabir/sootcase/pkg/distance"
@@ -167,6 +169,66 @@ func TestGroupsScaleByWeight(t *testing.T) {
 	alone, _ := Run(context.Background(), c, []calc.Shipment{b}, Settings{Kinds: []string{Rail}}, 1)
 	if !near(alone.Shipments[0].Options[0].SavedKg, rb.Options[0].SavedKg) {
 		t.Errorf("grouped %v, alone %v", rb.Options[0].SavedKg, alone.Shipments[0].Options[0].SavedKg)
+	}
+}
+
+// Shipments whose emissions aren't proportional to weight aren't grouped:
+// each gets the same "now" as when calculated on its own.
+func TestGroupsOnlyProportional(t *testing.T) {
+	c := setup(t)
+	ctx := context.Background()
+	base := calc.Shipment{WeightKg: 2000, Legs: []calc.Leg{road("r", hamburg, munich, 780)}}
+	reefer := base
+	reefer.CargoType = "temperature_controlled"
+	dedicated := base
+	dedicated.Legs = []calc.Leg{base.Legs[0]}
+	dedicated.Legs[0].RepositioningKm = 50
+	hub := base
+	hub.Hubs = []calc.HubStop{{ID: "h", HubType: calc.IntermodalTerminal, Containers: 1}}
+	for name, s := range map[string]calc.Shipment{"cargo type": reefer, "repositioning": dedicated, "hub containers": hub} {
+		first := base
+		if name != "cargo type" {
+			first = s
+		}
+		first.ID = "first"
+		other := s
+		other.ID, other.WeightKg = "other", 20000
+		res, err := Run(ctx, c, []calc.Shipment{first, other}, Settings{Kinds: []string{Rail}}, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		alone, err := c.Calculate(ctx, other)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := res.Shipments[1].Now.WTWKg; !near(got, alone.WTWKg) {
+			t.Errorf("%s: now %v, alone %v", name, got, alone.WTWKg)
+		}
+	}
+}
+
+// noRail is a distance provider whose rail routing is temporarily down.
+type noRail struct{ calc.DistanceProvider }
+
+func (n noRail) Distance(ctx context.Context, m calc.Mode, from, to calc.Location) (float64, error) {
+	if m == calc.Rail {
+		return 0, fmt.Errorf("rail router: %w", calc.ErrTemporary)
+	}
+	return n.DistanceProvider.Distance(ctx, m, from, to)
+}
+
+// A temporary routing failure makes the shipment fail as retryable rather
+// than report rail as not possible.
+func TestTemporaryFailure(t *testing.T) {
+	c := setup(t)
+	c.Distances, c.RetryWaits = noRail{c.Distances}, []time.Duration{}
+	s := calc.Shipment{ID: "s", WeightKg: 20000, Legs: []calc.Leg{road("r", hamburg, munich, 780)}}
+	res, err := Run(context.Background(), c, []calc.Shipment{s}, Settings{Kinds: []string{Rail}}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sr := res.Shipments[0]; sr.Error == "" || !sr.Retryable {
+		t.Errorf("want a retryable failure: %+v", sr)
 	}
 }
 

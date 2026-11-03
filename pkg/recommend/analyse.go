@@ -27,6 +27,19 @@ type analyser struct {
 	containers    float64
 	containerRule string
 	noTerminals   string
+	// temporary is a temporary failure of an alternative's calculation
+	// (a routing service that didn't answer): the shipment then fails as
+	// retryable, rather than reporting the alternative as not possible.
+	temporary error
+}
+
+// calc calculates s with cc, trying again after a temporary failure.
+func (a *analyser) calc(cc calc.Calculator, s calc.Shipment) (calc.Result, error) {
+	r, err := cc.CalculateRetrying(a.ctx, s)
+	if calc.Temporary(err) && a.temporary == nil {
+		a.temporary = err
+	}
+	return r, err
 }
 
 // IntermodalTerminal is the hub type added for an extra terminal handling.
@@ -111,9 +124,9 @@ func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settin
 			s.Legs[i].ID = fmt.Sprintf("leg-%d", i+1)
 		}
 	}
-	base, err := c.Calculate(ctx, s)
+	base, err := c.CalculateRetrying(ctx, s)
 	if err != nil {
-		sr.Error = err.Error()
+		sr.Error, sr.Retryable = err.Error(), calc.Temporary(err)
 		return sr
 	}
 	sr.WeightKg = base.WeightKg
@@ -177,6 +190,9 @@ func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settin
 			}
 			return vehBioLNG
 		})
+	}
+	if a.temporary != nil {
+		return ShipmentResult{ShipmentID: s.ID, WeightKg: sr.WeightKg, Error: a.temporary.Error(), Retryable: true}
 	}
 	sort.SliceStable(sr.Options, func(i, j int) bool { return sr.Options[i].SavedKg > sr.Options[j].SavedKg })
 	return sr
@@ -289,7 +305,7 @@ func route(c calc.Calculator, r calc.Result) Route {
 // min_main_km in a straight line; portRoad limits the added road legs.
 func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.Mode, main map[string]bool, portRoad bool, summary func(calc.Result) string) bool {
 	s.AddRoadLegs = ptr(true)
-	r, err := cc.Calculate(a.ctx, s)
+	r, err := a.calc(cc, s)
 	if err != nil {
 		a.note("%s: not possible: %v", kindName(kind), shortErr(err))
 		return false

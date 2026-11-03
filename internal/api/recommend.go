@@ -1,10 +1,10 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
 	"github.com/majidkabir/sootcase/pkg/csvio"
@@ -29,7 +29,7 @@ func (s *Server) recommendRun(w http.ResponseWriter, r *http.Request) {
 	var parseErrs []csvio.Item
 	if isCSV(r) {
 		if q := r.URL.Query().Get("settings"); q != "" {
-			if err := json.Unmarshal([]byte(q), &req.Settings); err != nil {
+			if err := decodeStrict(strings.NewReader(q), &req.Settings); err != nil {
 				writeError(w, http.StatusBadRequest, fmt.Errorf("settings query parameter: invalid JSON: %w", err))
 				return
 			}

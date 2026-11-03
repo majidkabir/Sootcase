@@ -209,7 +209,11 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 			return Result{}, err
 		}
 	}
+	own := 0 // the shipment's own legs so far, to name an unnamed one
 	for _, p := range legs {
+		if p.added == "" {
+			own++
+		}
 		if p.Leg.CargoType == "" {
 			p.Leg.CargoType = s.CargoType
 		}
@@ -221,6 +225,9 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 			continue
 		}
 		if err != nil {
+			if p.ID == "" && p.added == "" {
+				return Result{}, fmt.Errorf("leg %d: %w", own, err)
+			}
 			return Result{}, fmt.Errorf("leg %q: %w", p.ID, err)
 		}
 		lr.Added, lr.Note = p.added, p.note
@@ -655,6 +662,10 @@ func (c Calculator) loadLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype s
 		// MaxLoadFactor.
 		if !(leg.LoadTonnes > 0) {
 			return LegResult{}, fmt.Errorf("%w: load_tonnes must be > 0, got %v", ErrInvalidLoad, leg.LoadTonnes)
+		}
+		if leg.LoadTonnes < tonnes*(1-1e-9) {
+			return LegResult{}, fmt.Errorf("%w: load_tonnes %g t is less than the shipment's own %g t: it is all cargo on the vehicle, this shipment's included",
+				ErrInvalidLoad, leg.LoadTonnes, round3(tonnes))
 		}
 		lf = leg.LoadTonnes / m.PayloadT
 		if lf > MaxLoadFactor {

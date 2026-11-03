@@ -164,6 +164,7 @@ var warningKinds = map[string]string{
 	calc.WarnGapNotCounted:  "legs don't join up; the distance between them isn't counted (adding road legs is off)",
 	calc.WarnSeaInland:      "a sea leg starts or ends inland; that part is counted as sea distance",
 	calc.WarnAddedLegFailed: "a road leg to add couldn't be calculated, so it isn't counted",
+	calc.WarnAirportFar:     "an air leg starts or ends away from an airport; give the airports",
 }
 
 // warningKind turns a warning into its kind for counting.
@@ -354,8 +355,12 @@ func (b *Builder) Add(id string, r calc.Result, err error) {
 		if b.warnings == nil {
 			b.warnings = map[string]int{}
 		}
+		seen := map[string]bool{} // counted once per shipment
 		for _, w := range r.Warnings {
-			b.warnings[warningKind(w)]++
+			if k := warningKind(w); !seen[k] {
+				seen[k] = true
+				b.warnings[k]++
+			}
 		}
 	}
 	if r.Dataset != "" {

@@ -35,8 +35,21 @@ func electricLeg(l LegResult) bool {
 		return true
 	case l.FuelFactor != nil && strings.HasPrefix(l.FuelFactor.Fuel, "electricity"):
 		return true
-	case l.Factor != nil && strings.Contains(l.Factor.VehicleType, "battery_electric"):
+	case l.Factor != nil && electricFactor(l.Factor.VehicleType):
 		return true
+	}
+	return false
+}
+
+// electricFactor says whether a factor id is for vehicles that run on
+// electricity only: DESNZ battery electric vans, GLEC's electric road and
+// rail rows (".../electric/...", ".../electricity"). Hybrids are not.
+func electricFactor(id string) bool {
+	for _, part := range strings.Split(id, "/") {
+		switch part {
+		case "electric", "electricity", "battery_electric_vehicle":
+			return true
+		}
 	}
 	return false
 }
