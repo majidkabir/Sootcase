@@ -156,9 +156,12 @@ func TestOSRM_Waterway(t *testing.T) {
 func TestOSRM_RouteParts(t *testing.T) {
 	var calls int32
 	var path string
+	// Steps as OSRM sends them with geometries=polyline: each step's
+	// geometry is an encoded string.
 	body := `{"code":"Ok","routes":[{"distance":120000,"legs":[
-		{"steps":[{"distance":50000,"mode":"driving"},{"distance":19000,"mode":"ferry"},{"distance":0,"mode":"ferry"}]},
-		{"steps":[{"distance":1500,"mode":"ferry"},{"distance":49500,"mode":"driving"}]}]}]}`
+		{"steps":[{"distance":50000,"mode":"driving","geometry":"_p~iF~ps|U_ulLnnqC"},{"distance":19000,"mode":"ferry","geometry":"_mqNvxq@"},
+			{"distance":0,"mode":"ferry","geometry":"??"}]},
+		{"steps":[{"distance":1500,"mode":"ferry","geometry":"??"},{"distance":49500,"mode":"driving","geometry":"_p~iF~ps|U"}]}]}]}`
 	srv := fakeOSRM(t, body, 200, &calls, &path)
 	o, _ := NewOSRM(srv.URL)
 	o.PartModes = RoadParts

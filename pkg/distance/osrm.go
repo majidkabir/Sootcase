@@ -191,17 +191,13 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 		Code    string `json:"code"`
 		Message string `json:"message"`
 		Routes  []struct {
-			Distance float64 `json:"distance"` // metres
-			Geometry struct {
-				Coordinates [][2]float64 `json:"coordinates"`
-			} `json:"geometry"`
-			Legs []struct {
+			Distance float64      `json:"distance"` // metres
+			Geometry lineGeometry `json:"geometry"`
+			Legs     []struct {
 				Steps []struct {
-					Distance float64 `json:"distance"`
-					Mode     string  `json:"mode"`
-					Geometry struct {
-						Coordinates [][2]float64 `json:"coordinates"`
-					} `json:"geometry"`
+					Distance float64      `json:"distance"`
+					Mode     string       `json:"mode"`
+					Geometry lineGeometry `json:"geometry"`
 				} `json:"steps"`
 			} `json:"legs"`
 		} `json:"routes"`
@@ -377,4 +373,21 @@ func (b ByMode) DistanceMethod(m calc.Mode) string {
 		return dm.DistanceMethod(m)
 	}
 	return ""
+}
+
+// lineGeometry is a route's or step's geometry: GeoJSON's coordinates when
+// asked for with geometries=geojson. OSRM sends other geometries (the
+// default polyline) as an encoded string, which is not needed here and is
+// skipped.
+type lineGeometry struct {
+	Coordinates [][2]float64 `json:"coordinates"`
+}
+
+func (g *lineGeometry) UnmarshalJSON(b []byte) error {
+	if len(b) > 0 && b[0] == '"' {
+		*g = lineGeometry{}
+		return nil
+	}
+	type plain lineGeometry
+	return json.Unmarshal(b, (*plain)(g))
 }
