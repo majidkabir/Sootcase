@@ -204,12 +204,24 @@ func (c Calculator) atTerminal(m Mode, p Location) bool {
 // A temporary failure (ErrTemporary) while looking stops it: the result
 // would depend on it.
 func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, []string, error) {
-	var warnings []string
-	out := make([]planned, 0, len(legs))
-	fixed := make([]Leg, len(legs))
+	fixed, from, to, warnings, err := c.moveEnds(ctx, legs, add)
+	if err != nil {
+		return nil, nil, err
+	}
+	out, more := c.join(legs, fixed, from, to, add)
+	return out, append(warnings, more...), nil
+}
+
+// moveEnds moves the ends of sea, rail, waterway and air legs that are off
+// their network (or, for Leg.AtTerminals, not at a terminal) to the nearest
+// suitable port, terminal or airport when add is set. It returns the legs
+// with their ends moved, which ends moved (nil: not moved), and warnings
+// for ends that stay off the network.
+func (c Calculator) moveEnds(ctx context.Context, legs []Leg, add bool) (fixed []Leg, from, to []*moved, warnings []string, err error) {
+	fixed = make([]Leg, len(legs))
 	copy(fixed, legs)
-	from := make([]*moved, len(legs))
-	to := make([]*moved, len(legs))
+	from = make([]*moved, len(legs))
+	to = make([]*moved, len(legs))
 	for i := range fixed {
 		l := &fixed[i]
 		if l.DistanceKm > 0 || isZero(l.From) || isZero(l.To) {
@@ -222,14 +234,14 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 		}
 		offFrom, offTo, err := c.offNetwork(ctx, *l)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		termFrom := l.AtTerminals && l.Mode != Air && offFrom == 0 && !c.atTerminal(l.Mode, l.From)
 		termTo := l.AtTerminals && l.Mode != Air && offTo == 0 && !c.atTerminal(l.Mode, l.To)
 		if (offFrom > 0 || termFrom) && add {
 			p, ok, err := c.accessPoint(ctx, l.Mode, l.From, l.To, true)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, nil, err
 			}
 			if ok {
 				from[i] = &moved{to: p, offKm: offFrom, terminal: termFrom}
@@ -239,7 +251,7 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 		if (offTo > 0 || termTo) && add {
 			p, ok, err := c.accessPoint(ctx, l.Mode, l.To, l.From, false)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, nil, err
 			}
 			if ok {
 				to[i] = &moved{to: p, offKm: offTo, terminal: termTo}
@@ -269,16 +281,16 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 			fixed[i], from[i], to[i] = legs[i], nil, nil
 		}
 	}
+	return fixed, from, to, warnings, nil
+}
 
-	vehicle := c.RoadVehicle
-	for _, l := range legs {
-		if vehicle == "" && l.Mode == Road && l.VehicleType != "" {
-			vehicle = l.VehicleType
-		}
-	}
-	if vehicle == "" {
-		vehicle = DefaultRoadVehicle
-	}
+// join returns the legs to calculate: road legs added where one leg ends
+// away from where the next starts (or, with add off, warnings instead),
+// with notes on moved ends.
+func (c Calculator) join(legs, fixed []Leg, from, to []*moved, add bool) ([]planned, []string) {
+	var warnings []string
+	out := make([]planned, 0, len(legs))
+	vehicle := c.addedRoadVehicle(legs)
 	ids := map[string]bool{}
 	for _, l := range legs {
 		ids[l.ID] = true
@@ -346,7 +358,22 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 		road(fixed[last].To, legs[last].To, AddedAccess, fmt.Sprintf("Added road from %s to %s: leg %s ends at %s instead of %s, %s.",
 			place(fixed[last].To), place(legs[last].To), legID(legs[last], last), place(fixed[last].To), place(legs[last].To), to[last].why(legs[last].Mode)))
 	}
-	return out, warnings, nil
+	return out, warnings
+}
+
+// addedRoadVehicle is the vehicle type of added road legs: the
+// calculator's RoadVehicle, else the shipment's first road leg's, else
+// DefaultRoadVehicle.
+func (c Calculator) addedRoadVehicle(legs []Leg) string {
+	if c.RoadVehicle != "" {
+		return c.RoadVehicle
+	}
+	for _, l := range legs {
+		if l.Mode == Road && l.VehicleType != "" {
+			return l.VehicleType
+		}
+	}
+	return DefaultRoadVehicle
 }
 
 // offNetwork says how far each end of a sea, rail or waterway leg is off
