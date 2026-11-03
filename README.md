@@ -359,7 +359,7 @@ Each output line is `{"line": n, "shipment_id": "...", "result": {...}}`, or `{"
 
 | Method | Path | |
 |---|---|---|
-| `POST` | `/v1/calculate` | one shipment; `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point); `?country_km=true` adds each road and rail leg's km by country (`legs[].country_km`, ISO 3166 alpha-2; ferry km stay in `route_parts_km`) |
+| `POST` | `/v1/calculate` | one shipment; `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point); `?country_km=true` adds each road and rail leg's km by country (`legs[].country_km`, ISO 3166 alpha-2; ferry km stay in `route_parts_km`), and in Belgium by region (`legs[].region_km`: `BE-VLG`, `BE-WAL`, `BE-BRU`, ISO 3166-2; from Statbel's statistical sectors, CC BY 4.0) |
 | `POST` | `/v1/calculate/batch` | `{"shipments": [...]}`, up to 10,000; `?country_km=true` as for one shipment |
 | `POST` | `/v1/report` | `{"organisation", "period_from", "period_to", "shipments": [...]}`, JSON or `?format=md` |
 | `GET` | `/v1/places?q=rotterdam&kind=port` | find places by name, UN/LOCODE or IATA code |

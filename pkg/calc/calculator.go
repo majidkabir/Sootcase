@@ -436,7 +436,7 @@ func (c Calculator) leg(ctx context.Context, tonnes float64, leg Leg) (LegResult
 	lr.DistanceKm, lr.DistanceMethod, lr.DistanceType = dist, method, dtype
 	lr.TonneKm = tonnes * dist
 	lr.RouteParts = routeParts
-	lr.CountryKm = rt.CountryKm
+	lr.CountryKm, lr.RegionKm = rt.CountryKm, rt.RegionKm
 	lr.Path = rt.Path
 	if WantPath(ctx) && len(lr.Path) == 0 && !isZero(leg.From) && !isZero(leg.To) {
 		lr.Path = [][2]float64{{leg.From.Lon, leg.From.Lat}, {leg.To.Lon, leg.To.Lat}}
@@ -737,6 +737,16 @@ func (c Calculator) distance(ctx context.Context, leg Leg) (rt Route, method, dt
 	}
 	if countries > d*(1+1e-6) {
 		return Route{}, "", "", fmt.Errorf("distance: %v km by country in a %v km route", countries, d)
+	}
+	var regions float64
+	for k, v := range rt.RegionKm {
+		if !(v >= 0) {
+			return Route{}, "", "", fmt.Errorf("distance: %v km in region %s", v, k)
+		}
+		regions += v
+	}
+	if regions > countries*(1+1e-6) {
+		return Route{}, "", "", fmt.Errorf("distance: %v km by region of %v km by country", regions, countries)
 	}
 	if dm, ok := c.Distances.(DistanceMethoder); ok {
 		method = dm.DistanceMethod(leg.Mode)

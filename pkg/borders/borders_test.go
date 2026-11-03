@@ -120,3 +120,73 @@ func BenchmarkSplitKm(b *testing.B) {
 		ix.SplitKm(line)
 	}
 }
+
+// Belgium's regions: points in each, and lines that cross them.
+func TestRegions(t *testing.T) {
+	ix := index(t)
+	for _, tc := range []struct {
+		name     string
+		lon, lat float64
+		want     string
+	}{
+		{"Brussels, Grand-Place", 4.3525, 50.8467, "BE-BRU"},
+		{"Uccle (Brussels)", 4.3333, 50.8000, "BE-BRU"},
+		{"Drogenbos (Flanders, beside Brussels)", 4.3150, 50.7870, "BE-VLG"},
+		{"Zaventem, Brussels Airport (Flanders)", 4.4844, 50.9010, "BE-VLG"},
+		{"Antwerp", 4.4025, 51.2194, "BE-VLG"},
+		{"Namur", 4.8719, 50.4674, "BE-WAL"},
+		{"Liège", 5.5797, 50.6326, "BE-WAL"},
+		{"Waterloo (Walloon Brabant)", 4.3990, 50.7150, "BE-WAL"},
+		{"Voeren (Flemish exclave)", 5.7700, 50.7550, "BE-VLG"},
+		{"Comines (Walloon exclave)", 2.9990, 50.7680, "BE-WAL"},
+	} {
+		if r, _ := ix.regions.find(tc.lon, tc.lat, -1); r < 0 || ix.regions.countries[r].code != tc.want {
+			got := ""
+			if r >= 0 {
+				got = ix.regions.countries[r].code
+			}
+			t.Errorf("%s: region %q, want %q", tc.name, got, tc.want)
+		}
+	}
+
+	// Antwerp to Brussels to Namur, and on into France: the regions add up
+	// to Belgium's km, and France has none.
+	// Points every ~100 m, as route geometry is: each short segment counts
+	// for the region of its midpoint.
+	line := densify([][2]float64{{4.4025, 51.2194}, {4.3525, 50.8467}, {4.8719, 50.4674}, {4.0300, 50.2600}, {3.9700, 50.1000}}, 0.001)
+	countries, regions := ix.SplitKmRegions(line)
+	if countries["BE"] <= 0 || countries["FR"] <= 0 {
+		t.Fatalf("countries %v, want BE and FR", countries)
+	}
+	var sum float64
+	for code, km := range regions {
+		if code != "BE-VLG" && code != "BE-WAL" && code != "BE-BRU" {
+			t.Errorf("region %q (%v km): want only Belgian regions", code, km)
+		}
+		sum += km
+	}
+	if regions["BE-VLG"] <= 0 || regions["BE-WAL"] <= 0 || regions["BE-BRU"] <= 0 || math.Abs(sum-countries["BE"]) > 1e-9 {
+		t.Errorf("regions %v (sum %v), want all three adding up to BE %v", regions, sum, countries["BE"])
+	}
+	if c := ix.SplitKm(line); math.Abs(c["BE"]-countries["BE"]) > 1e-9 || math.Abs(c["FR"]-countries["FR"]) > 1e-9 {
+		t.Errorf("SplitKm %v, SplitKmRegions %v: want the same countries", c, countries)
+	}
+	// A line outside regioned countries has no regions.
+	if _, r := ix.SplitKmRegions([][2]float64{{12.55, 55.68}, {9.9937, 53.5511}}); len(r) != 0 {
+		t.Errorf("Copenhagen-Hamburg regions %v, want none", r)
+	}
+}
+
+// densify adds points along each segment, step degrees apart.
+func densify(line [][2]float64, step float64) [][2]float64 {
+	out := [][2]float64{line[0]}
+	for k := 0; k+1 < len(line); k++ {
+		a, b := line[k], line[k+1]
+		n := int(math.Ceil(math.Hypot(b[0]-a[0], b[1]-a[1]) / step))
+		for i := 1; i <= n; i++ {
+			f := float64(i) / float64(n)
+			out = append(out, [2]float64{a[0] + f*(b[0]-a[0]), a[1] + f*(b[1]-a[1])})
+		}
+	}
+	return out
+}

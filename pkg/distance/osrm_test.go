@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -317,5 +318,51 @@ func TestOSRM_CountryKm(t *testing.T) {
 	// The split route is cached apart from the plain one.
 	if _, err := o.Route(ctx, calc.Road, copenhagen, hamburg); err != nil || calls != 2 {
 		t.Errorf("calls = %d, err = %v; want the split route cached", calls, err)
+	}
+}
+
+// splitRegions puts each line 2/3 in Belgium (3/4 of it Flanders, 1/4
+// Brussels) and 1/3 in no country.
+type splitRegions struct{ splitByLon }
+
+func (splitRegions) SplitKmRegions(line [][2]float64) (map[string]float64, map[string]float64) {
+	if len(line) < 2 {
+		return nil, nil
+	}
+	return map[string]float64{"BE": 2, "": 1}, map[string]float64{"BE-VLG": 1.5, "BE-BRU": 0.5}
+}
+
+func TestOSRM_RegionKm(t *testing.T) {
+	var calls int32
+	var path string
+	body := `{"code":"Ok","routes":[{"distance":90000,"legs":[{"steps":[
+		{"distance":60000,"mode":"driving","geometry":{"coordinates":[[4.4,51.2],[4.35,50.85]]}},
+		{"distance":30000,"mode":"driving","geometry":{"coordinates":[[4.35,50.85],[4.87,50.47]]}}]}]}]}`
+	srv := fakeOSRM(t, body, 200, &calls, &path)
+	o, _ := NewOSRM(srv.URL)
+	o.PartModes, o.Countries = RoadParts, splitRegions{}
+	r, err := o.Route(calc.WithCountryKm(context.Background()), calc.Road, copenhagen, hamburg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 90 km: BE 60 (Flanders 45, Brussels 15), unknown 30.
+	for k, v := range map[string]float64{"BE": 60, calc.CountryUnknown: 30} {
+		if math.Abs(r.CountryKm[k]-v) > 1e-9 {
+			t.Errorf("CountryKm[%s] = %v, want %v (%v)", k, r.CountryKm[k], v, r.CountryKm)
+		}
+	}
+	for k, v := range map[string]float64{"BE-VLG": 45, "BE-BRU": 15} {
+		if math.Abs(r.RegionKm[k]-v) > 1e-9 {
+			t.Errorf("RegionKm[%s] = %v, want %v (%v)", k, r.RegionKm[k], v, r.RegionKm)
+		}
+	}
+	if len(r.RegionKm) != 2 {
+		t.Errorf("RegionKm %v", r.RegionKm)
+	}
+	// A splitter without regions gives none.
+	o2, _ := NewOSRM(srv.URL)
+	o2.PartModes, o2.Countries = RoadParts, splitByLon{}
+	if r, _ := o2.Route(calc.WithCountryKm(context.Background()), calc.Road, copenhagen, hamburg); r.RegionKm != nil {
+		t.Errorf("RegionKm %v without regions", r.RegionKm)
 	}
 }

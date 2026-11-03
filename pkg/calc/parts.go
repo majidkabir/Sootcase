@@ -15,6 +15,10 @@ type Route struct {
 	// CountryKm is the km on land by country (ISO 3166-1 alpha-2), without
 	// ferry parts, when asked for (WithCountryKm).
 	CountryKm map[string]float64
+	// RegionKm is the km of CountryKm in countries split into regions
+	// (Belgium), by region (ISO 3166-2, e.g. BE-VLG); the regions of a
+	// country add up to its CountryKm.
+	RegionKm map[string]float64
 }
 
 // CountryUnknown is the CountryKm key for distance that is in no

@@ -261,6 +261,11 @@ type LegResult struct {
 	// leg with a ferry it adds up to the distance less the ferry km.
 	// CountryUnknown is distance the borders can't place.
 	CountryKm map[string]float64 `json:"country_km,omitempty"`
+	// RegionKm splits CountryKm further where road charges differ by
+	// region: Belgium's Flanders (BE-VLG), Wallonia (BE-WAL) and
+	// Brussels-Capital (BE-BRU), by ISO 3166-2 code. A country's regions add
+	// up to its CountryKm. Only with CountryKm, for legs in such a country.
+	RegionKm map[string]float64 `json:"region_km,omitempty"`
 	// Path is the leg's route as GeoJSON [lon, lat] points, when asked for
 	// (single calculations only). Two points mean a straight line: the
 	// distance was given or estimated, not routed.

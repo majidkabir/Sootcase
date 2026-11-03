@@ -57,6 +57,13 @@ type CountrySplitter interface {
 	SplitKm(line [][2]float64) map[string]float64
 }
 
+// RegionSplitter is a CountrySplitter that also splits the km in some
+// countries by region (ISO 3166-2 code, "" for none). *borders.Index
+// implements it; routes then get RegionKm.
+type RegionSplitter interface {
+	SplitKmRegions(line [][2]float64) (countries, regions map[string]float64)
+}
+
 // DefaultMaxInFlight is OSRM.MaxInFlight's default.
 const DefaultMaxInFlight = 32
 
@@ -250,7 +257,8 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	}
 	if withCountries {
 		var ferryKm float64
-		ck := map[string]float64{}
+		ck, rk := map[string]float64{}, map[string]float64{}
+		rs, _ := o.Countries.(RegionSplitter)
 		for _, leg := range body.Routes[0].Legs {
 			for _, st := range leg.Steps {
 				if st.Distance <= 0 {
@@ -262,7 +270,12 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 				}
 				// Each step's km is shared out in proportion to its
 				// line's length in each country.
-				split := o.Countries.SplitKm(st.Geometry.Coordinates)
+				var split, regions map[string]float64
+				if rs != nil {
+					split, regions = rs.SplitKmRegions(st.Geometry.Coordinates)
+				} else {
+					split = o.Countries.SplitKm(st.Geometry.Coordinates)
+				}
 				var lineKm float64
 				for _, v := range split {
 					lineKm += v
@@ -276,6 +289,12 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 					}
 					ck[c] += v / lineKm * st.Distance / 1000
 				}
+				for c, v := range regions {
+					if c == "" {
+						c = calc.CountryUnknown
+					}
+					rk[c] += v / lineKm * st.Distance / 1000
+				}
 			}
 		}
 		// Step distances are rounded: scale to the route's km on land.
@@ -288,6 +307,12 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 				ck[c] *= land / sum
 			}
 			r.CountryKm = ck
+			for c := range rk {
+				rk[c] *= land / sum // as their countries' km
+			}
+			if len(rk) > 0 {
+				r.RegionKm = rk
+			}
 		}
 	}
 
