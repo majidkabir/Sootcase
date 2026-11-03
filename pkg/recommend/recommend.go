@@ -291,14 +291,7 @@ func (s Settings) Validate() (Settings, map[string]string, error) {
 	return s, skipped, nil
 }
 
-func (s Settings) has(kind string) bool {
-	for _, k := range s.Kinds {
-		if k == kind {
-			return true
-		}
-	}
-	return false
-}
+func (s Settings) has(kind string) bool { return slices.Contains(s.Kinds, kind) }
 
 // Totals are emissions in kg CO2e.
 type Totals struct {

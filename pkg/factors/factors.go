@@ -19,10 +19,12 @@ import (
 	"github.com/majidkabir/sootcase/pkg/distance"
 )
 
-// Default is the embedded dataset used when none is chosen: UK DESNZ for
-// road, rail, sea, air and hubs, layered with Dutch inland waterway factors
-// and a container ship factor from EU MRV data (which "container_ship"
-// then means).
+// Default is the embedded dataset used when none is chosen: UK DESNZ 2026,
+// Dutch inland waterway factors, EU MRV container ship factors and the GLEC
+// Framework v3.3 default values. Layers later in the list win where they
+// define the same alias, so the short vehicle types (hgv_artic, freight_train,
+// container_ship, ...) mean GLEC's values; the other datasets' vehicle types
+// stay available by their full ids.
 const Default = "desnz-2026,nl-iww-2026,eu-mrv-2024,glec-3.3"
 
 //go:embed data/*.json data/grid/*.json

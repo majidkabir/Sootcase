@@ -137,12 +137,11 @@ func open(r io.Reader) (*csv.Reader, map[string]int, error) {
 // (as when the file is sorted or grouped by shipment_id); a shipment_id
 // that reappears after another shipment is returned as an error Item.
 type Reader struct {
-	cr      *csv.Reader
-	col     map[string]int
-	line    int
-	cur     *Item
-	curLine int
-	next    []string // a row read ahead that starts the next shipment
+	cr   *csv.Reader
+	col  map[string]int
+	line int
+	cur  *Item
+	next []string // a row read ahead that starts the next shipment
 	// seen maps a 64-bit hash of each finished shipment_id to its first
 	// line, to catch ungrouped files without keeping every id in memory.
 	seen map[uint64]int

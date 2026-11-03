@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -481,7 +482,7 @@ func (c Calculator) accessPoint(ctx context.Context, m Mode, p, other Location, 
 		}
 		sort.SliceStable(ports, func(i, j int) bool { return guess(ports[i]) < guess(ports[j]) })
 		for _, q := range ports[:min(8, len(ports))] {
-			if !contains(cands, q) {
+			if !slices.ContainsFunc(cands, func(l Location) bool { return l.Lat == q.Lat && l.Lon == q.Lon }) {
 				cands = append(cands, q)
 			}
 		}
@@ -562,15 +563,6 @@ func nearest(f PlaceFinder, p Location, kinds []string, maxKm float64, n int) []
 		}
 	}
 	return f.Near(p, kinds, maxKm, n)
-}
-
-func contains(ls []Location, q Location) bool {
-	for _, l := range ls {
-		if l.Lat == q.Lat && l.Lon == q.Lon {
-			return true
-		}
-	}
-	return false
 }
 
 func legID(l Leg, i int) string {
