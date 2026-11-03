@@ -357,24 +357,22 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 	}
 	f := c.Factors
 	// Resolve the factors the post-calculation changes need, once.
-	var dieselPerGJ float64
-	fuels := map[int][3]float64{} // change index -> TTW, WTT, biogenic CO2 kg per GJ
-	grids := map[int]float64{}    // change index -> g per kWh
+	fx := resolved{fuels: map[int]fuelPerGJ{}, grids: map[int]float64{}}
 	for i, ch := range changes {
 		switch ch.Type {
 		case FuelSwitch:
-			if dieselPerGJ == 0 {
+			if fx.dieselPerGJ == 0 {
 				d, err := f.FuelFactor(DieselFuel)
 				if err != nil {
 					return Result{}, fmt.Errorf("%w: the dataset has no diesel factor per kWh (%s)", ErrInvalidPlan, DieselFuel)
 				}
-				dieselPerGJ = d.TTW * kWhPerGJ
+				fx.dieselPerGJ = d.TTW * kWhPerGJ
 			}
 			nf, m, err := energyFactor(f, ch.Fuel)
 			if err != nil {
 				return Result{}, err
 			}
-			fuels[i] = [3]float64{nf.TTW * m, nf.WTT * m, nf.BiogenicCO2 * m}
+			fx.fuels[i] = fuelPerGJ{TTW: nf.TTW * m, WTT: nf.WTT * m, BiogenicCO2: nf.BiogenicCO2 * m}
 		case Electrify:
 			gp, ok := f.(calc.GridProvider)
 			if !ok {
@@ -384,7 +382,7 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 			if err != nil {
 				return Result{}, fmt.Errorf("%w: %v", ErrInvalidPlan, err)
 			}
-			grids[i] = g.G
+			fx.grids[i] = g.G
 		case RoadToRail:
 			if _, err := f.LegFactor(calc.Rail, ch.RailVehicle); err != nil {
 				return Result{}, fmt.Errorf("%w: rail_vehicle: %v", ErrInvalidPlan, err)
@@ -413,7 +411,7 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 			defer wg.Done()
 			for i := range jobs {
 				reps := make([]ChangeReport, len(changes))
-				outs[i] = out{runOne(ctx, c, shipments[i], changes, dieselPerGJ, fuels, grids, reps), reps}
+				outs[i] = out{runOne(ctx, c, shipments[i], changes, fx, reps), reps}
 			}
 		}()
 	}
@@ -450,10 +448,8 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 	return res, nil
 }
 
-
 // runOne compares one shipment.
-func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []Change, dieselPerGJ float64,
-	fuels map[int][3]float64, grids map[int]float64, reports []ChangeReport) ShipmentResult {
+func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []Change, fx resolved, reports []ChangeReport) ShipmentResult {
 	sr := ShipmentResult{ShipmentID: s.ID}
 	s.Legs = append([]calc.Leg(nil), s.Legs...)
 	for i := range s.Legs {
@@ -573,7 +569,7 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 		t := r.Emissions()
 		n := make([]int, len(changes))
 		for _, l := range r.Legs {
-			d, legs := legChanges(l, changes, dieselPerGJ, fuels, grids, touched)
+			d, legs := legChanges(l, changes, fx, touched)
 			t.Add(d, 1)
 			for i, hit := range legs {
 				if hit {
@@ -598,10 +594,21 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 	return sr
 }
 
+// resolved holds the factors the post-calculation changes need, looked up
+// once per run: diesel's TTW per GJ, and per change index the new fuel's
+// factors per GJ (fuel_switch) and the grid's g per kWh (electrify).
+type resolved struct {
+	dieselPerGJ float64
+	fuels       map[int]fuelPerGJ
+	grids       map[int]float64
+}
+
+// fuelPerGJ is a fuel's emissions per GJ, kg CO2e (biogenic CO2 apart).
+type fuelPerGJ struct{ TTW, WTT, BiogenicCO2 float64 }
+
 // legChanges returns the change in a leg's emissions from the
 // post-calculation changes (electrify, fuel_switch), and which changes hit.
-func legChanges(l calc.LegResult, changes []Change, dieselPerGJ float64, fuels map[int][3]float64,
-	grids map[int]float64, touched []bool) (Totals, []bool) {
+func legChanges(l calc.LegResult, changes []Change, fx resolved, touched []bool) (Totals, []bool) {
 	hit := make([]bool, len(changes))
 	if l.Mode != calc.Road {
 		return Totals{}, hit
@@ -624,15 +631,16 @@ func legChanges(l calc.LegResult, changes []Change, dieselPerGJ float64, fuels m
 		p := left * *ch.Share
 		switch ch.Type {
 		case Electrify:
-			newWTT := tkm * ch.KWhPerTkm * grids[i] / 1000
+			newWTT := tkm * ch.KWhPerTkm * fx.grids[i] / 1000
 			d.Add(Totals{TTWKg: -ttw, WTTKg: newWTT - wtt, WTWKg: newWTT - ttw - wtt}, p)
 		case FuelSwitch:
-			if !diesel || dieselPerGJ <= 0 {
+			if !diesel || fx.dieselPerGJ <= 0 {
 				continue
 			}
-			gj := ttw / dieselPerGJ * *ch.EnergyRatio
-			nt, nw := gj*fuels[i][0], gj*fuels[i][1]
-			d.Add(Totals{TTWKg: nt - ttw, WTTKg: nw - wtt, WTWKg: nt + nw - ttw - wtt, BiogenicCO2Kg: gj * fuels[i][2]}, p)
+			gj := ttw / fx.dieselPerGJ * *ch.EnergyRatio // energy of the diesel replaced
+			nf := fx.fuels[i]
+			nt, nw := gj*nf.TTW, gj*nf.WTT
+			d.Add(Totals{TTWKg: nt - ttw, WTTKg: nw - wtt, WTWKg: nt + nw - ttw - wtt, BiogenicCO2Kg: gj * nf.BiogenicCO2}, p)
 		default:
 			continue
 		}
