@@ -42,8 +42,6 @@ func (b box) contains(lon, lat float64) bool {
 	return lon >= b.minLon && lon <= b.maxLon && lat >= b.minLat && lat <= b.maxLat
 }
 
-func (r Region) box() box { return box{r.MinLon, r.MinLat, r.MaxLon, r.MaxLat} }
-
 // overlap returns the part two regions share, or false when they share no
 // area (regions that only touch along a line don't count).
 func overlap(a, b Region) (box, bool) {

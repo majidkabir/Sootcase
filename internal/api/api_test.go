@@ -311,3 +311,63 @@ func TestCalculate_OwnFactors(t *testing.T) {
 		t.Errorf("no source: %d %v", resp.StatusCode, out)
 	}
 }
+
+// A report, scenario or recommendation needs at least one shipment, as CSV
+// or JSON.
+func TestNoShipments(t *testing.T) {
+	srv := newTestServer(t)
+	header := "shipment_id,weight_kg,mode,vehicle_type,distance_km\n"
+	for _, path := range []string{"/v1/report", "/v1/scenario?plan=%7B%22changes%22%3A%5B%5D%7D", "/v1/recommend"} {
+		resp, err := http.Post(srv.URL+path, "text/csv", strings.NewReader(header))
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest || !strings.Contains(string(b), "no shipments") {
+			t.Errorf("%s with no rows: %d %s", path, resp.StatusCode, b)
+		}
+	}
+	for _, path := range []string{"/v1/report", "/v1/scenario", "/v1/recommend"} {
+		body := `{"shipments":[]}`
+		if path == "/v1/scenario" {
+			body = `{"shipments":[],"plan":{"changes":[]}}`
+		}
+		resp, _ := post(t, srv.URL+path, body)
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("%s with no shipments (JSON): %d", path, resp.StatusCode)
+		}
+	}
+}
+
+// The page's script and styles come from versioned files, and its policy
+// allows no inline script but the one in its head.
+func TestPageAssets(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	page, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	csp := resp.Header.Get("Content-Security-Policy")
+	if !strings.Contains(csp, "script-src 'self' 'sha256-") || strings.Contains(csp, "script-src 'self' 'unsafe-inline'") {
+		t.Errorf("policy %q", csp)
+	}
+	if n := strings.Count(string(page), "<script>"); n != 1 {
+		t.Errorf("%d inline scripts, want only the one in the head", n)
+	}
+	for _, f := range []string{"app.js", "app.css"} {
+		i := strings.Index(string(page), "static/"+f+"?v=")
+		if i < 0 {
+			t.Fatalf("page doesn't link %s with a version", f)
+		}
+		link := string(page)[i:]
+		link = link[:strings.IndexByte(link, '"')]
+		r, err := http.Get(srv.URL + "/" + link)
+		if err != nil || r.StatusCode != http.StatusOK || r.ContentLength == 0 {
+			t.Errorf("%s: %v %v", link, err, r.StatusCode)
+		}
+		r.Body.Close()
+	}
+}

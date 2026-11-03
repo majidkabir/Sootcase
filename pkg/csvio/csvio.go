@@ -137,12 +137,11 @@ func open(r io.Reader) (*csv.Reader, map[string]int, error) {
 // (as when the file is sorted or grouped by shipment_id); a shipment_id
 // that reappears after another shipment is returned as an error Item.
 type Reader struct {
-	cr      *csv.Reader
-	col     map[string]int
-	line    int
-	cur     *Item
-	curLine int
-	next    []string // a row read ahead that starts the next shipment
+	cr   *csv.Reader
+	col  map[string]int
+	line int
+	cur  *Item
+	next []string // a row read ahead that starts the next shipment
 	// seen maps a 64-bit hash of each finished shipment_id to its first
 	// line, to catch ungrouped files without keeping every id in memory.
 	seen map[uint64]int
@@ -359,7 +358,7 @@ func (w *Writer) Write(id string, r calc.Result, err error) error {
 		}
 	}
 	return w.cw.Write([]string{id, num(r.WeightKg), num(r.TonneKm), num(r.TTWKg), num(r.WTTKg), num(r.WTWKg),
-		num(r.IntensityG), num(r.PrimaryDataShare), r.Dataset, "", strconv.Itoa(added), strings.Join(r.Warnings, " | "),
+		num(r.IntensityG), num(r.PrimaryDataShare), r.Dataset, "", strconv.Itoa(added), strings.Join(calc.WarningTexts(r.Warnings), " | "),
 		num(r.GHGProtocol.OperatorScope1Kg), num(r.GHGProtocol.OperatorScope2Kg), num(r.GHGProtocol.OperatorScope3Cat3Kg), num(r.GHGProtocol.HubsKg)})
 }
 

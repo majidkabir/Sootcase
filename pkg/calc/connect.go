@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -202,13 +203,25 @@ func (c Calculator) atTerminal(m Mode, p Location) bool {
 // legs and moved ends when add is set, and the warnings.
 // A temporary failure (ErrTemporary) while looking stops it: the result
 // would depend on it.
-func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, []string, error) {
-	var warnings []string
-	out := make([]planned, 0, len(legs))
-	fixed := make([]Leg, len(legs))
+func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, []Warning, error) {
+	fixed, from, to, warnings, err := c.moveEnds(ctx, legs, add)
+	if err != nil {
+		return nil, nil, err
+	}
+	out, more := c.join(legs, fixed, from, to, add)
+	return out, append(warnings, more...), nil
+}
+
+// moveEnds moves the ends of sea, rail, waterway and air legs that are off
+// their network (or, for Leg.AtTerminals, not at a terminal) to the nearest
+// suitable port, terminal or airport when add is set. It returns the legs
+// with their ends moved, which ends moved (nil: not moved), and warnings
+// for ends that stay off the network.
+func (c Calculator) moveEnds(ctx context.Context, legs []Leg, add bool) (fixed []Leg, from, to []*moved, warnings []Warning, err error) {
+	fixed = make([]Leg, len(legs))
 	copy(fixed, legs)
-	from := make([]*moved, len(legs))
-	to := make([]*moved, len(legs))
+	from = make([]*moved, len(legs))
+	to = make([]*moved, len(legs))
 	for i := range fixed {
 		l := &fixed[i]
 		if l.DistanceKm > 0 || isZero(l.From) || isZero(l.To) {
@@ -221,14 +234,14 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 		}
 		offFrom, offTo, err := c.offNetwork(ctx, *l)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		termFrom := l.AtTerminals && l.Mode != Air && offFrom == 0 && !c.atTerminal(l.Mode, l.From)
 		termTo := l.AtTerminals && l.Mode != Air && offTo == 0 && !c.atTerminal(l.Mode, l.To)
 		if (offFrom > 0 || termFrom) && add {
 			p, ok, err := c.accessPoint(ctx, l.Mode, l.From, l.To, true)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, nil, err
 			}
 			if ok {
 				from[i] = &moved{to: p, offKm: offFrom, terminal: termFrom}
@@ -238,46 +251,57 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 		if (offTo > 0 || termTo) && add {
 			p, ok, err := c.accessPoint(ctx, l.Mode, l.To, l.From, false)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, nil, err
 			}
 			if ok {
 				to[i] = &moved{to: p, offKm: offTo, terminal: termTo}
 				l.To = p
 			}
 		}
-		if l.Mode == Sea || l.Mode == Air {
-			for _, e := range []struct {
-				km    float64
-				fixed bool
-				end   string
-				p     Location
-			}{{offFrom, from[i] != nil, "starts", legs[i].From}, {offTo, to[i] != nil, "ends", legs[i].To}} {
-				if e.km > 0 && !e.fixed {
-					if l.Mode == Air {
-						warnings = append(warnings, fmt.Sprintf("leg %s %s at %s, %.0f km from an airport; the GLEC Framework measures air distance between airports, so give the airports",
-							legID(legs[i], i), e.end, place(e.p), e.km))
-					} else {
-						warnings = append(warnings, fmt.Sprintf("leg %s %s at %s, %.0f km from the sea network; that part is counted as sea distance",
-							legID(legs[i], i), e.end, place(e.p), e.km))
-					}
-				}
-			}
-		}
+		warnings = append(warnings, offNetworkWarnings(legs[i], i, offFrom, offTo, from[i] != nil, to[i] != nil)...)
 		if (from[i] != nil || to[i] != nil) && gcKm(l.From, l.To) <= GapKm {
 			// The ends met at one port: no sea, rail or waterway left.
 			fixed[i], from[i], to[i] = legs[i], nil, nil
 		}
 	}
+	return fixed, from, to, warnings, nil
+}
 
-	vehicle := c.RoadVehicle
-	for _, l := range legs {
-		if vehicle == "" && l.Mode == Road && l.VehicleType != "" {
-			vehicle = l.VehicleType
+// offNetworkWarnings warns about the ends of a sea or air leg that stay
+// away from the sea network or an airport (movedFrom, movedTo: the end was
+// moved). Rail and waterway ends off the network get road legs instead.
+func offNetworkWarnings(l Leg, i int, offFrom, offTo float64, movedFrom, movedTo bool) []Warning {
+	if l.Mode != Sea && l.Mode != Air {
+		return nil
+	}
+	var out []Warning
+	for _, e := range []struct {
+		km    float64
+		moved bool
+		end   string
+		p     Location
+	}{{offFrom, movedFrom, "starts", l.From}, {offTo, movedTo, "ends", l.To}} {
+		if e.km <= 0 || e.moved {
+			continue
+		}
+		if l.Mode == Air {
+			out = append(out, Warning{WarnAirportFar, fmt.Sprintf("leg %s %s at %s, %.0f km from an airport; the GLEC Framework measures air distance between airports, so give the airports",
+				legID(l, i), e.end, place(e.p), e.km)})
+		} else {
+			out = append(out, Warning{WarnSeaInland, fmt.Sprintf("leg %s %s at %s, %.0f km from the sea network; that part is counted as sea distance",
+				legID(l, i), e.end, place(e.p), e.km)})
 		}
 	}
-	if vehicle == "" {
-		vehicle = DefaultRoadVehicle
-	}
+	return out
+}
+
+// join returns the legs to calculate: road legs added where one leg ends
+// away from where the next starts (or, with add off, warnings instead),
+// with notes on moved ends.
+func (c Calculator) join(legs, fixed []Leg, from, to []*moved, add bool) ([]planned, []Warning) {
+	var warnings []Warning
+	out := make([]planned, 0, len(legs))
+	vehicle := c.addedRoadVehicle(legs)
 	ids := map[string]bool{}
 	for _, l := range legs {
 		ids[l.ID] = true
@@ -322,7 +346,7 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 				if add {
 					road(prev, l.From, kind, fmt.Sprintf("Added road from %s to %s: %s.", place(prev), place(l.From), strings.Join(why, "; ")))
 				} else {
-					warnings = append(warnings, why[0]+"; that distance isn't counted (adding road legs is off)")
+					warnings = append(warnings, Warning{WarnGapNotCounted, why[0] + "; that distance isn't counted (adding road legs is off)"})
 				}
 			}
 		}
@@ -345,7 +369,22 @@ func (c Calculator) plan(ctx context.Context, legs []Leg, add bool) ([]planned, 
 		road(fixed[last].To, legs[last].To, AddedAccess, fmt.Sprintf("Added road from %s to %s: leg %s ends at %s instead of %s, %s.",
 			place(fixed[last].To), place(legs[last].To), legID(legs[last], last), place(fixed[last].To), place(legs[last].To), to[last].why(legs[last].Mode)))
 	}
-	return out, warnings, nil
+	return out, warnings
+}
+
+// addedRoadVehicle is the vehicle type of added road legs: the
+// calculator's RoadVehicle, else the shipment's first road leg's, else
+// DefaultRoadVehicle.
+func (c Calculator) addedRoadVehicle(legs []Leg) string {
+	if c.RoadVehicle != "" {
+		return c.RoadVehicle
+	}
+	for _, l := range legs {
+		if l.Mode == Road && l.VehicleType != "" {
+			return l.VehicleType
+		}
+	}
+	return DefaultRoadVehicle
 }
 
 // offNetwork says how far each end of a sea, rail or waterway leg is off
@@ -481,7 +520,7 @@ func (c Calculator) accessPoint(ctx context.Context, m Mode, p, other Location, 
 		}
 		sort.SliceStable(ports, func(i, j int) bool { return guess(ports[i]) < guess(ports[j]) })
 		for _, q := range ports[:min(8, len(ports))] {
-			if !contains(cands, q) {
+			if !slices.ContainsFunc(cands, func(l Location) bool { return l.Lat == q.Lat && l.Lon == q.Lon }) {
 				cands = append(cands, q)
 			}
 		}
@@ -562,15 +601,6 @@ func nearest(f PlaceFinder, p Location, kinds []string, maxKm float64, n int) []
 		}
 	}
 	return f.Near(p, kinds, maxKm, n)
-}
-
-func contains(ls []Location, q Location) bool {
-	for _, l := range ls {
-		if l.Lat == q.Lat && l.Lon == q.Lon {
-			return true
-		}
-	}
-	return false
 }
 
 func legID(l Leg, i int) string {

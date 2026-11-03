@@ -476,6 +476,7 @@ components:
         source: { type: string }
         year: { type: integer }
         distance_basis: { $ref: "#/components/schemas/DistanceType" }
+        data_type: { type: string, description: "primary for factors built from the operator's own measurements (transport operation categories); else left out" }
     FuelFactor:
       type: object
       properties:
@@ -494,6 +495,7 @@ components:
         wtw_g_per_container: { type: number, description: "Set instead of wtw_g_per_tonne for per-container hub types" }
         source: { type: string }
         year: { type: integer }
+        data_type: { type: string, description: "primary for hub factors built from the operator's own energy use; else left out" }
     LegResult:
       type: object
       properties:
@@ -547,6 +549,7 @@ components:
           type: array
           description: Parts calculated separately and included in the leg's totals
           items: { $ref: "#/components/schemas/LegPart" }
+        repositioning_km: { type: number, description: "Empty km given for the leg (included in the empty trip factor)" }
     LegPart:
       type: object
       properties:
@@ -661,6 +664,17 @@ components:
               multiplier: { type: number }
               add_km: { type: number }
               source: { type: string }
+        vehicle_aliases:
+          type: array
+          description: Short vehicle types (hgv_artic, container_ship, ...) and what they mean, regional ones by the regions of the leg's ends
+          items: { type: object }
+        fuel_aliases: { type: object, additionalProperties: { type: string }, description: Short fuel names and the fuel ids they mean }
+        fuel_regions: { type: object, description: "Fuel aliases that mean a region's fuel when both ends of the leg are in it" }
+        cargo_types: { type: array, items: { type: object }, description: "GLEC cargo or load categories (cargo_type)" }
+        cargo_variants: { type: object, description: "Per vehicle type, the vehicle type GLEC gives for each cargo type" }
+        hub_cargo_variants: { type: object, description: "Per hub type, the hub type for each cargo type" }
+        load_models: { type: array, items: { type: object }, description: Load-dependent emissions per vehicle class (load_tonnes, load_factor) }
+        regions: { type: array, items: { type: object }, description: The regions and sea zones regional aliases choose by }
     Report:
       type: object
       description: See pkg/report for every field. Emissions in kg CO2e.
@@ -712,6 +726,7 @@ components:
         data_quality: { type: object }
         distance_adjustments: { type: array, items: { type: object } }
         notes: { type: array, items: { type: string } }
+        ghg_protocol: { type: object, description: "The totals by GHG Protocol scope: the shipper's scope 3 category, and the operator's scopes 1, 2 and 3 category 3" }
     RecommendSettings:
       type: object
       properties:

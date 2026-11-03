@@ -39,8 +39,9 @@ Usage:
   sootcase health  [-addr :8080]                        check a running server (for healthchecks)
   sootcase version
 
-Use "-" as the file name to read stdin. The default datasets are UK DESNZ 2026
-and Dutch inland waterway factors 2026.
+Use "-" as the file name to read stdin. The default datasets are UK DESNZ 2026,
+the Dutch inland waterway list 2026, EU MRV 2024 container ships and the GLEC
+Framework v3.3 default values (desnz-2026,nl-iww-2026,eu-mrv-2024,glec-3.3).
 calc, batch, report and serve also take -osrm URL (road routing),
 -osrm-rail URL, -osrm-waterway URL and -sea-network file.geojson (sea
 routing); see "sootcase calc -h".`

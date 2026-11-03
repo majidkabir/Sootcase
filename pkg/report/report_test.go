@@ -239,9 +239,9 @@ func TestAddedRoadLegsAndWarnings(t *testing.T) {
 		{Mode: calc.Sea, DistanceKm: 1000, TonneKm: 1000, WTWKg: 10},
 	}}, nil)
 	b.Add("b", calc.Result{WeightKg: 1000, Legs: []calc.LegResult{{Mode: calc.Sea, DistanceKm: 1000, TonneKm: 1000, WTWKg: 10}},
-		Warnings: []string{`leg "x" starts at Munich, 298 km from the sea network; that part is counted as sea distance`}}, nil)
+		Warnings: []calc.Warning{{Code: calc.WarnSeaInland, Text: `leg "x" starts at Munich, 298 km from the sea network; that part is counted as sea distance`}}}, nil)
 	b.Add("c", calc.Result{WeightKg: 1000, Legs: []calc.LegResult{{Mode: calc.Sea, DistanceKm: 1000, TonneKm: 1000, WTWKg: 10}},
-		Warnings: []string{`leg "y" starts at Vienna, 346 km from the sea network; that part is counted as sea distance`}}, nil)
+		Warnings: []calc.Warning{{Code: calc.WarnSeaInland, Text: `leg "y" starts at Vienna, 346 km from the sea network; that part is counted as sea distance`}}}, nil)
 	r := b.Report()
 	c := r.Coverage
 	if c.AddedRoadLegs != 1 || c.AddedShipments != 1 || c.AddedRoadKm != 120.4 || c.Warned != 2 ||

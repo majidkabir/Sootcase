@@ -158,18 +158,20 @@ func reason(e string) string {
 	return b.String()
 }
 
-// warningKind turns a warning into its kind: without the leg ids, places
-// and numbers.
-func warningKind(w string) string {
-	switch {
-	case strings.Contains(w, "isn't counted (adding road legs is off)"):
-		return "legs don't join up; the distance between them isn't counted (adding road legs is off)"
-	case strings.Contains(w, "counted as sea distance"):
-		return "a sea leg starts or ends inland; that part is counted as sea distance"
-	case strings.Contains(w, "couldn't be calculated, so it isn't counted"):
-		return "a road leg to add couldn't be calculated, so it isn't counted"
+// warningKinds describe each warning code in a report, without the leg
+// ids, places and numbers of the warnings themselves.
+var warningKinds = map[string]string{
+	calc.WarnGapNotCounted:  "legs don't join up; the distance between them isn't counted (adding road legs is off)",
+	calc.WarnSeaInland:      "a sea leg starts or ends inland; that part is counted as sea distance",
+	calc.WarnAddedLegFailed: "a road leg to add couldn't be calculated, so it isn't counted",
+}
+
+// warningKind turns a warning into its kind for counting.
+func warningKind(w calc.Warning) string {
+	if k, ok := warningKinds[w.Code]; ok {
+		return k
 	}
-	return reason(w)
+	return reason(w.Text)
 }
 
 // Total is the whole covered transport chain.

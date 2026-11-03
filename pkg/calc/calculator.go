@@ -217,7 +217,7 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 		if err != nil && p.added != "" && !Temporary(err) {
 			// An added leg that can't be calculated is left out, as it
 			// would have been without adding it.
-			res.Warnings = append(res.Warnings, fmt.Sprintf("%s It couldn't be calculated, so it isn't counted: %v", p.note, err))
+			res.Warnings = append(res.Warnings, Warning{WarnAddedLegFailed, fmt.Sprintf("%s It couldn't be calculated, so it isn't counted: %v", p.note, err)})
 			continue
 		}
 		if err != nil {

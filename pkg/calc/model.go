@@ -316,7 +316,7 @@ type Result struct {
 	Dataset string `json:"dataset,omitempty"`
 	// Warnings are things left as given that may make the result too low:
 	// gaps between legs not covered, sea legs starting or ending inland.
-	Warnings []string `json:"warnings,omitempty"`
+	Warnings []Warning `json:"warnings,omitempty"`
 }
 
 // DatasetNamer is optionally implemented by a FactorProvider.

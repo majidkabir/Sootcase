@@ -80,7 +80,7 @@ func TestWriter(t *testing.T) {
 	}
 	_ = w.Write("S1", calc.Result{WeightKg: 10000, TonneKm: 5000, TTWKg: 300, WTTKg: 75, WTWKg: 375, IntensityG: 75,
 		PrimaryDataShare: 0.5, Dataset: "d", Legs: []calc.LegResult{{Added: calc.AddedGap}, {}},
-		Warnings: []string{"w1", "w2"}, GHGProtocol: calc.GHGScopes{Scope3Kg: 375, OperatorScope1Kg: 300, OperatorScope3Cat3Kg: 75}}, nil)
+		Warnings: []calc.Warning{{Text: "w1"}, {Text: "w2"}}, GHGProtocol: calc.GHGScopes{Scope3Kg: 375, OperatorScope1Kg: 300, OperatorScope3Cat3Kg: 75}}, nil)
 	_ = w.Write("S2", calc.Result{}, errors.New("boom"))
 	if err := w.Flush(); err != nil {
 		t.Fatal(err)

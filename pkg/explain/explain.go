@@ -148,7 +148,7 @@ func Shipment(s calc.Shipment, r calc.Result, f calc.FactorProvider) Sheet {
 			n(g.Scope3Kg, 3), n(g.OperatorScope1Kg, 3), n(g.OperatorScope2Kg, 3), n(g.OperatorScope3Cat3Kg, 3), n(g.HubsKg, 3)),
 		Basis: []string{bGHGP}})
 	for _, w := range r.Warnings {
-		sh.Steps = append(sh.Steps, Step{Group: "Total", Title: "Warning", Text: w})
+		sh.Steps = append(sh.Steps, Step{Group: "Total", Title: "Warning", Text: w.Text})
 	}
 	sh.Note = "Sootcase calculates with full precision; the numbers here are rounded for reading, so redoing a step by hand " +
 		"can differ in the last digit. Factors and their sources are those of the dataset named above."

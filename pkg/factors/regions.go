@@ -2,6 +2,7 @@ package factors
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -57,16 +58,7 @@ func (l Lane) matches(za, zb string) bool {
 	if l.Any {
 		return true
 	}
-	return contains(l.A, za) && contains(l.B, zb) || contains(l.A, zb) && contains(l.B, za)
-}
-
-func contains(xs []string, x string) bool {
-	for _, y := range xs {
-		if y == x {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(l.A, za) && slices.Contains(l.B, zb) || slices.Contains(l.A, zb) && slices.Contains(l.B, za)
 }
 
 type placeLane struct {
