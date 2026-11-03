@@ -230,7 +230,7 @@ func TestRoadLegs_AddedLegFails(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(r.Legs) != 2 || len(r.Warnings) != 1 || r.Warnings[0].Code != WarnGapNotCounted || !strings.Contains(r.Warnings[0].Text, "isn't counted") {
+	if len(r.Legs) != 2 || len(r.Warnings) != 1 || r.Warnings[0].Code != WarnAddedLegFailed || !strings.Contains(r.Warnings[0].Text, "isn't counted") {
 		t.Errorf("want the added leg dropped with a warning, got %d legs, %q", len(r.Legs), r.Warnings)
 	}
 }
