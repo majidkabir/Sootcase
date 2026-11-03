@@ -8,6 +8,12 @@
 // Countries are keyed by ISO_A2_EH (ISO 3166-1 alpha-2, with Natural
 // Earth's fixes for France, Norway and Kosovo); areas without one use
 // ADM0_A3. Features with the same code are merged.
+//
+// With -key, features are keyed by that property instead. This builds
+// pkg/borders/data/regions.bin.gz, the regions within countries, from the
+// GeoJSON that tools/borders/regions.py writes:
+//
+//	go run ./tools/borders -in be_regions.geojson -key code -out pkg/borders/data/regions.bin.gz
 package main
 
 import (
@@ -32,6 +38,7 @@ func main() {
 	fetch := flag.Bool("fetch", false, "download the GeoJSON from "+source)
 	in := flag.String("in", "ne_10m_admin_0_countries.geojson", "GeoJSON file (without -fetch)")
 	out := flag.String("out", "pkg/borders/data/borders.bin.gz", "output file")
+	key := flag.String("key", "", "property that holds each feature's code (default: Natural Earth's ISO_A2_EH, else ADM0_A3)")
 	flag.Parse()
 
 	var raw []byte
@@ -44,7 +51,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cs, err := build(raw)
+	cs, err := build(raw, *key)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,7 +70,7 @@ func main() {
 			}
 		}
 	}
-	fmt.Fprintf(os.Stderr, "%d countries, %d points, %d bytes -> %s\n", len(cs), pts, buf.Len(), *out)
+	fmt.Fprintf(os.Stderr, "%d areas, %d points, %d bytes -> %s\n", len(cs), pts, buf.Len(), *out)
 }
 
 func get(u string) ([]byte, error) {
@@ -87,7 +94,7 @@ type feature struct {
 	} `json:"geometry"`
 }
 
-func build(raw []byte) ([]borders.Country, error) {
+func build(raw []byte, key string) ([]borders.Country, error) {
 	var fc struct {
 		Features []feature `json:"features"`
 	}
@@ -96,8 +103,10 @@ func build(raw []byte) ([]borders.Country, error) {
 	}
 	byCode := map[string]*borders.Country{}
 	for _, f := range fc.Features {
-		code, _ := f.Properties["ISO_A2_EH"].(string)
-		if code == "" || code == "-99" {
+		var code string
+		if key != "" {
+			code, _ = f.Properties[key].(string)
+		} else if code, _ = f.Properties["ISO_A2_EH"].(string); code == "" || code == "-99" {
 			code, _ = f.Properties["ADM0_A3"].(string)
 		}
 		if code == "" {

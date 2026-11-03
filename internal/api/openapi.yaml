@@ -75,7 +75,7 @@ paths:
         - name: country_km
           in: query
           schema: { type: boolean, default: false }
-          description: "Add each road and rail leg's routed distance by country (legs[].country_km), e.g. for per-country road tolls. Borders are Natural Earth 1:10m (about 1 km accurate). Routing takes longer."
+          description: "Add each road and rail leg's routed distance by country (legs[].country_km), and in Belgium by region (legs[].region_km), e.g. for road tolls. Borders are Natural Earth 1:10m (about 1 km accurate); Belgium's regions are Statbel's statistical sectors (1:10,000, CC BY 4.0). Routing takes longer."
       requestBody:
         required: true
         content:
@@ -105,7 +105,7 @@ paths:
         - name: country_km
           in: query
           schema: { type: boolean, default: false }
-          description: "Add each road and rail leg's routed distance by country (legs[].country_km), e.g. for per-country road tolls. Borders are Natural Earth 1:10m (about 1 km accurate). Routing takes longer."
+          description: "Add each road and rail leg's routed distance by country (legs[].country_km), and in Belgium by region (legs[].region_km), e.g. for road tolls. Borders are Natural Earth 1:10m (about 1 km accurate); Belgium's regions are Statbel's statistical sectors (1:10,000, CC BY 4.0). Routing takes longer."
       requestBody:
         required: true
         content:
@@ -553,6 +553,10 @@ components:
           type: object
           additionalProperties: { type: number }
           description: "With ?country_km=true only. Routed km on land by country (ISO 3166-1 alpha-2, e.g. DK, DE); ferry crossings are in route_parts_km, not here. \"unknown\" is distance in no country's borders."
+        region_km:
+          type: object
+          additionalProperties: { type: number }
+          description: "With ?country_km=true only, for legs in a country split into regions where road charges differ: Belgium's Flanders (BE-VLG), Wallonia (BE-WAL) and Brussels-Capital (BE-BRU), ISO 3166-2. A country's regions add up to its country_km. \"unknown\" is km in the country but in no region."
         path:
           type: array
           description: With ?path=true only. The leg's route as GeoJSON [lon, lat] points; two points mean a straight line.

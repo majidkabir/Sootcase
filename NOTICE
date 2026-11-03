@@ -61,6 +61,14 @@ This product includes place data (pkg/places/data/places.tsv.gz):
 Country borders (pkg/borders/data/borders.bin.gz, built by tools/borders) are Natural
 Earth's 1:10m admin-0 countries, v5.1.2 (https://www.naturalearthdata.com), public domain.
 
+Belgium's regions (pkg/borders/data/regions.bin.gz, built by tools/borders/regions.py and
+tools/borders): source Statbel (Directorate-General Statistics - Statistics Belgium),
+statistical sectors 2026, situation 1 January 2026
+(https://statbel.fgov.be/en/open-data/statistical-sectors-2026), licensed under CC BY 4.0
+(https://creativecommons.org/licenses/by/4.0/). Changed: the sectors are merged into the
+three regions, simplified to 2 m and converted to WGS 84. This use does not imply any
+endorsement by Statbel.
+
 Map tiles and routing data: (c) OpenStreetMap contributors, under the Open Database
 License (https://www.openstreetmap.org/copyright). They are not bundled; the map tiles are
 loaded from openstreetmap.org and the routing graphs are built where Sootcase is deployed.

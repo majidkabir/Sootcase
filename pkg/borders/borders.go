@@ -9,6 +9,11 @@
 //
 // The 1:10m borders are accurate to about a kilometre, which is the
 // accuracy of a split of a route by country.
+//
+// Some countries are also split into regions, keyed by ISO 3166-2 code,
+// where road charges differ by region: Belgium's Flanders (BE-VLG),
+// Wallonia (BE-WAL) and Brussels-Capital (BE-BRU), merged from Statbel's
+// statistical sectors (drawn on 1:10,000 maps), in data/regions.bin.gz.
 package borders
 
 import (
@@ -21,14 +26,21 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"strings"
 	"sync"
 )
 
 //go:embed data/borders.bin.gz
 var embedded []byte
 
+//go:embed data/regions.bin.gz
+var embeddedRegions []byte
+
 // Source describes the embedded data, for notices and results.
 const Source = "Natural Earth 1:10m admin-0 countries v5.1.2 (public domain)"
+
+// RegionSource describes the embedded regions, for notices and results.
+const RegionSource = "Belgian regions: Statbel (Statistics Belgium), statistical sectors 2026, situation 1 January 2026, CC BY 4.0"
 
 // Polygon is a polygon's rings as [lon, lat] points: its outer ring
 // first, then its holes.
@@ -183,7 +195,8 @@ var (
 	defErr error
 )
 
-// Default is the index of the embedded borders, built on first use.
+// Default is the index of the embedded borders, with the embedded
+// regions, built on first use.
 func Default() (*Index, error) {
 	once.Do(func() {
 		cs, err := Decode(embedded)
@@ -191,7 +204,12 @@ func Default() (*Index, error) {
 			defErr = fmt.Errorf("borders: embedded data: %w", err)
 			return
 		}
-		def = NewIndex(cs)
+		rs, err := Decode(embeddedRegions)
+		if err != nil {
+			defErr = fmt.Errorf("borders: embedded regions: %w", err)
+			return
+		}
+		def = NewIndex(cs).WithRegions(rs)
 	})
 	return def, defErr
 }
@@ -310,6 +328,25 @@ type cell struct{ lon, lat int }
 type Index struct {
 	countries []country
 	cells     map[cell][]int32 // 1-degree cell -> countries whose polygons may cover it
+	// regions splits the countries in regioned into regions (ISO 3166-2
+	// codes, "BE-VLG"), see WithRegions.
+	regions  *Index
+	regioned map[string]bool
+}
+
+// WithRegions returns the index with regions inside its countries: each
+// region's code is its country's code, a hyphen and the region's (ISO
+// 3166-2). SplitKmRegions uses them.
+func (ix *Index) WithRegions(rs []Country) *Index {
+	out := *ix
+	out.regions = NewIndex(rs)
+	out.regioned = map[string]bool{}
+	for _, r := range rs {
+		if c, _, ok := strings.Cut(r.Code, "-"); ok {
+			out.regioned[c] = true
+		}
+	}
+	return &out
 }
 
 // NewIndex indexes countries for lookups.
@@ -439,8 +476,26 @@ const NearestKm = 30
 // outside every country count for the nearest one within NearestKm;
 // farther ones are at sea and count for "".
 func (ix *Index) SplitKm(line [][2]float64) map[string]float64 {
+	countries, _ := ix.split(line, false)
+	return countries
+}
+
+// SplitKmRegions is SplitKm, and the km in the countries that have
+// regions split by region (ISO 3166-2 code) as well: each segment counts
+// for the region its midpoint is in, else the nearest region within
+// NearestKm (the regions and the countries come from different sources
+// and their outer borders differ by up to about a kilometre), else "".
+// The regions of a country add up to its km.
+func (ix *Index) SplitKmRegions(line [][2]float64) (countries, regions map[string]float64) {
+	return ix.split(line, true)
+}
+
+func (ix *Index) split(line [][2]float64, withRegions bool) (countries, regions map[string]float64) {
 	out := map[string]float64{}
-	hint := -1
+	if withRegions && ix.regions != nil {
+		regions = map[string]float64{}
+	}
+	hint, rhint := -1, -1
 	for k := 0; k+1 < len(line); k++ {
 		a, b := line[k], line[k+1]
 		km := haversineKm(a, b)
@@ -462,8 +517,21 @@ func (ix *Index) SplitKm(line [][2]float64) map[string]float64 {
 			code, hint = ix.countries[c].code, c
 		}
 		out[code] += km
+		if regions != nil && ix.regioned[code] {
+			r, ok := ix.regions.find(mLon, mLat, rhint)
+			if !ok {
+				if r = ix.regions.nearest(mLon, mLat, 3); r < 0 {
+					r = ix.regions.nearest(mLon, mLat, NearestKm)
+				}
+			}
+			rc := ""
+			if r >= 0 {
+				rc, rhint = ix.regions.countries[r].code, r
+			}
+			regions[rc] += km
+		}
 	}
-	return out
+	return out, regions
 }
 
 func haversineKm(a, b [2]float64) float64 {
