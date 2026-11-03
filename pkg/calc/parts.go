@@ -12,7 +12,14 @@ type Route struct {
 	Parts map[string]float64 // e.g. PartFerry: 18.2
 	// Path is the route as [lon, lat] points, when asked for (WithPath).
 	Path [][2]float64
+	// CountryKm is the km on land by country (ISO 3166-1 alpha-2), without
+	// ferry parts, when asked for (WithCountryKm).
+	CountryKm map[string]float64
 }
+
+// CountryUnknown is the CountryKm key for distance that is in no
+// country's borders (e.g. a long bridge far from any coast).
+const CountryUnknown = "unknown"
 
 // Router is optionally implemented by a DistanceProvider that can say what
 // a route is made of. When it is, the calculator uses Route instead of

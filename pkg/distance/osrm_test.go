@@ -252,3 +252,67 @@ func TestOSRM_MaxInFlight(t *testing.T) {
 		t.Errorf("peak %d requests at a time, want at most 3", peak)
 	}
 }
+
+// splitByLon puts a line in "DK" if its first point is
+// east of 11°E, else in "DE", with a third of each line in "" (sea).
+type splitByLon struct{}
+
+func (splitByLon) SplitKm(line [][2]float64) map[string]float64 {
+	if len(line) < 2 {
+		return nil
+	}
+	c := "DE"
+	if line[0][0] > 11 {
+		c = "DK"
+	}
+	return map[string]float64{c: 2, "": 1}
+}
+
+func TestOSRM_CountryKm(t *testing.T) {
+	var calls int32
+	var query string
+	body := `{"code":"Ok","routes":[{"distance":130000,"legs":[{"steps":[
+		{"distance":60000,"mode":"driving","geometry":{"coordinates":[[12.5,55.6],[11.9,54.7]]}},
+		{"distance":19000,"mode":"ferry","geometry":{"coordinates":[[11.3,54.6],[11.2,54.5]]}},
+		{"distance":51000,"mode":"driving","geometry":{"coordinates":[[10.9,54.4],[10.0,53.5]]}},
+		{"distance":0,"mode":"driving","geometry":{"coordinates":[[10.0,53.5]]}}]}]}]}`
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&calls, 1)
+		query = r.URL.RawQuery
+		_, _ = w.Write([]byte(body))
+	}))
+	t.Cleanup(srv.Close)
+	o, err := NewOSRM(srv.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o.PartModes, o.Countries = RoadParts, splitByLon{}
+
+	// Not asked for: no split.
+	r, err := o.Route(context.Background(), calc.Road, copenhagen, hamburg)
+	if err != nil || r.CountryKm != nil {
+		t.Fatalf("plain route: %+v, %v; want no CountryKm", r, err)
+	}
+	ctx := calc.WithCountryKm(context.Background())
+	r, err = o.Route(ctx, calc.Road, copenhagen, hamburg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(query, "steps=true") || !strings.Contains(query, "geometries=geojson") {
+		t.Errorf("query %q: want steps and GeoJSON geometry", query)
+	}
+	// 111 km on land: each driving step 2/3 in its country, 1/3 unknown.
+	want := map[string]float64{"DK": 40, "DE": 34, calc.CountryUnknown: 37}
+	for k, v := range want {
+		if d := r.CountryKm[k] - v; d > 1e-9 || d < -1e-9 {
+			t.Errorf("CountryKm[%s] = %v, want %v (all: %v)", k, r.CountryKm[k], v, r.CountryKm)
+		}
+	}
+	if len(r.CountryKm) != len(want) || r.Parts[calc.PartFerry] != 19 {
+		t.Errorf("got %v and parts %v", r.CountryKm, r.Parts)
+	}
+	// The split route is cached apart from the plain one.
+	if _, err := o.Route(ctx, calc.Road, copenhagen, hamburg); err != nil || calls != 2 {
+		t.Errorf("calls = %d, err = %v; want the split route cached", calls, err)
+	}
+}

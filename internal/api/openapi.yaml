@@ -72,6 +72,10 @@ paths:
           in: query
           schema: { type: string, enum: ["false", "true", simplified, detailed, full], default: "false" }
           description: "Add each leg's route as GeoJSON [lon, lat] points (legs[].path), for a map: true or simplified (the router's simplified line, a few dozen points), detailed (the full line thinned to at most 1,000 points) or full (every point; a long road route can have tens of thousands). Distances are the same at every level. Two points mean a straight line (distance given or estimated)."
+        - name: country_km
+          in: query
+          schema: { type: boolean, default: false }
+          description: "Add each road and rail leg's routed distance by country (legs[].country_km), e.g. for per-country road tolls. Borders are Natural Earth 1:10m (about 1 km accurate). Routing takes longer."
       requestBody:
         required: true
         content:
@@ -98,6 +102,10 @@ paths:
           in: query
           schema: { type: boolean, default: true }
           description: false adds no road legs for shipments that don't set add_road_legs themselves.
+        - name: country_km
+          in: query
+          schema: { type: boolean, default: false }
+          description: "Add each road and rail leg's routed distance by country (legs[].country_km), e.g. for per-country road tolls. Borders are Natural Earth 1:10m (about 1 km accurate). Routing takes longer."
       requestBody:
         required: true
         content:
@@ -541,6 +549,10 @@ components:
           type: object
           additionalProperties: { type: number }
           description: "Routed km by kind: ferry (road), electrified, not_electrified, electrification_unknown (rail)"
+        country_km:
+          type: object
+          additionalProperties: { type: number }
+          description: "With ?country_km=true only. Routed km on land by country (ISO 3166-1 alpha-2, e.g. DK, DE); ferry crossings are in route_parts_km, not here. \"unknown\" is distance in no country's borders."
         path:
           type: array
           description: With ?path=true only. The leg's route as GeoJSON [lon, lat] points; two points mean a straight line.

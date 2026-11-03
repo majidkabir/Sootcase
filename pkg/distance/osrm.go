@@ -41,11 +41,20 @@ type OSRM struct {
 	// when many big batches run at once; here they wait their turn, with
 	// the request's timeout counting from when it is sent.
 	MaxInFlight int
+	// Countries splits routes by country when the calculation asks for it
+	// (calc.WithCountryKm). Nil: routes have no CountryKm.
+	Countries CountrySplitter
 
 	mu      sync.Mutex
 	cache   map[string]calc.Route
 	semOnce sync.Once
 	sem     chan struct{}
+}
+
+// CountrySplitter splits a line of [lon, lat] points into km by country
+// code, "" for none. *borders.Index implements it.
+type CountrySplitter interface {
+	SplitKm(line [][2]float64) map[string]float64
 }
 
 // DefaultMaxInFlight is OSRM.MaxInFlight's default.
@@ -111,12 +120,19 @@ const (
 // Route implements calc.Router.
 func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (calc.Route, error) {
 	key := cacheKey(from, to)
+	// Routes split by country need each step's geometry; they are cached
+	// apart from plain routes.
+	withCountries := calc.WantCountryKm(ctx) && o.Countries != nil
+	cacheAs := key
+	if withCountries {
+		cacheAs += "|countries"
+	}
 	// Routes with a path (single calculations, for a map) skip the cache:
 	// cached routes have no path.
 	withPath := calc.WantPath(ctx)
 	if !withPath {
 		o.mu.Lock()
-		if r, ok := o.cache[key]; ok {
+		if r, ok := o.cache[cacheAs]; ok {
 			o.mu.Unlock()
 			return r, nil
 		}
@@ -132,6 +148,9 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 		steps, limit = "true", maxStepsResponse
 	}
 	overview, geometries := "false", "polyline"
+	if withCountries {
+		steps, limit, geometries = "true", maxStepsResponse, "geojson"
+	}
 	detail := calc.PathDetailOf(ctx)
 	if withPath {
 		overview, geometries, limit = "simplified", "geojson", maxStepsResponse
@@ -180,6 +199,9 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 				Steps []struct {
 					Distance float64 `json:"distance"`
 					Mode     string  `json:"mode"`
+					Geometry struct {
+						Coordinates [][2]float64 `json:"coordinates"`
+					} `json:"geometry"`
 				} `json:"steps"`
 			} `json:"legs"`
 		} `json:"routes"`
@@ -230,6 +252,48 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	for k, v := range r.Parts { // step distances are rounded; keep parts within the route
 		r.Parts[k] = math.Min(v, r.Km)
 	}
+	if withCountries {
+		var ferryKm float64
+		ck := map[string]float64{}
+		for _, leg := range body.Routes[0].Legs {
+			for _, st := range leg.Steps {
+				if st.Distance <= 0 {
+					continue
+				}
+				if st.Mode == "ferry" || o.PartModes[st.Mode] == calc.PartFerry {
+					ferryKm += st.Distance / 1000
+					continue
+				}
+				// Each step's km is shared out in proportion to its
+				// line's length in each country.
+				split := o.Countries.SplitKm(st.Geometry.Coordinates)
+				var lineKm float64
+				for _, v := range split {
+					lineKm += v
+				}
+				if lineKm <= 0 {
+					continue
+				}
+				for c, v := range split {
+					if c == "" {
+						c = calc.CountryUnknown
+					}
+					ck[c] += v / lineKm * st.Distance / 1000
+				}
+			}
+		}
+		// Step distances are rounded: scale to the route's km on land.
+		var sum float64
+		for _, v := range ck {
+			sum += v
+		}
+		if land := r.Km - math.Min(ferryKm, r.Km); sum > 0 && land > 0 {
+			for c := range ck {
+				ck[c] *= land / sum
+			}
+			r.CountryKm = ck
+		}
+	}
 
 	if withPath {
 		return r, nil
@@ -238,7 +302,7 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	if o.cache == nil || len(o.cache) >= maxCacheEntries {
 		o.cache = make(map[string]calc.Route)
 	}
-	o.cache[key] = r
+	o.cache[cacheAs] = r
 	o.mu.Unlock()
 	return r, nil
 }

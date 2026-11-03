@@ -58,6 +58,9 @@ This product includes place data (pkg/places/data/places.tsv.gz):
   CC BY 4.0. Permission to redistribute has not been confirmed.
 - airports from OurAirports (https://ourairports.com), public domain
 
+Country borders (pkg/borders/data/borders.bin.gz, built by tools/borders) are Natural
+Earth's 1:10m admin-0 countries, v5.1.2 (https://www.naturalearthdata.com), public domain.
+
 Map tiles and routing data: (c) OpenStreetMap contributors, under the Open Database
 License (https://www.openstreetmap.org/copyright). They are not bundled; the map tiles are
 loaded from openstreetmap.org and the routing graphs are built where Sootcase is deployed.
