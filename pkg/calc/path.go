@@ -55,6 +55,21 @@ func PathDetailOf(ctx context.Context) PathDetail {
 	return d
 }
 
+type countryKey struct{}
+
+// WithCountryKm asks routers to also split each leg's distance by country
+// (LegResult.CountryKm), e.g. for per-country road tolls. It needs the
+// route's geometry, so routing takes longer.
+func WithCountryKm(ctx context.Context) context.Context {
+	return context.WithValue(ctx, countryKey{}, true)
+}
+
+// WantCountryKm says whether the calculation asked for CountryKm.
+func WantCountryKm(ctx context.Context) bool {
+	v, _ := ctx.Value(countryKey{}).(bool)
+	return v
+}
+
 // ThinPath keeps at most n points of p, evenly along it by index, with its
 // first and last.
 func ThinPath(p [][2]float64, n int) [][2]float64 {

@@ -255,6 +255,12 @@ type LegResult struct {
 	// RouteParts is the routed distance by kind (e.g. ferry, electrified),
 	// when the distance provider reports it.
 	RouteParts map[string]float64 `json:"route_parts_km,omitempty"`
+	// CountryKm is the routed distance on land by country (ISO 3166-1
+	// alpha-2), when asked for (WithCountryKm) and the router can split
+	// it. Ferry crossings are not in it (they are in RouteParts), so on a
+	// leg with a ferry it adds up to the distance less the ferry km.
+	// CountryUnknown is distance the borders can't place.
+	CountryKm map[string]float64 `json:"country_km,omitempty"`
 	// Path is the leg's route as GeoJSON [lon, lat] points, when asked for
 	// (single calculations only). Two points mean a straight line: the
 	// distance was given or estimated, not routed.

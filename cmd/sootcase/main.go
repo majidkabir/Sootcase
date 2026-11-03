@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/majidkabir/sootcase/pkg/batch"
+	"github.com/majidkabir/sootcase/pkg/borders"
 	"github.com/majidkabir/sootcase/pkg/calc"
 	"github.com/majidkabir/sootcase/pkg/csvio"
 	"github.com/majidkabir/sootcase/pkg/distance"
@@ -141,8 +142,16 @@ func (c *common) calculator() (calc.Calculator, *factors.Dataset, error) {
 		return calc.Calculator{}, nil, err
 	}
 	routed := map[calc.Mode]calc.DistanceProvider{}
+	var countries distance.CountrySplitter
+	if c.roadRegions != "" || c.osrmURL != "" || c.railURL != "" {
+		ix, err := borders.Default()
+		if err != nil {
+			return calc.Calculator{}, nil, err
+		}
+		countries = ix
+	}
 	if c.roadRegions != "" {
-		rs, err := distance.ParseRegions(c.roadRegions, func(o *distance.OSRM) { o.PartModes = distance.RoadParts })
+		rs, err := distance.ParseRegions(c.roadRegions, func(o *distance.OSRM) { o.PartModes, o.Countries = distance.RoadParts, countries })
 		if err != nil {
 			return calc.Calculator{}, nil, err
 		}
@@ -152,7 +161,7 @@ func (c *common) calculator() (calc.Calculator, *factors.Dataset, error) {
 		if err != nil {
 			return calc.Calculator{}, nil, err
 		}
-		o.PartModes = distance.RoadParts
+		o.PartModes, o.Countries = distance.RoadParts, countries
 		routed[calc.Road] = o
 	}
 	if c.waterwayURL != "" {
@@ -168,7 +177,7 @@ func (c *common) calculator() (calc.Calculator, *factors.Dataset, error) {
 		if err != nil {
 			return calc.Calculator{}, nil, err
 		}
-		o.Method, o.MaxSnapKm, o.PartModes = "osrm_rail", c.railMaxSnapKm, distance.RailParts
+		o.Method, o.MaxSnapKm, o.PartModes, o.Countries = "osrm_rail", c.railMaxSnapKm, distance.RailParts, countries
 		routed[calc.Rail] = o
 	}
 	if c.seaNetwork != "" {

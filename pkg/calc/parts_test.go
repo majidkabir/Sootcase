@@ -123,3 +123,23 @@ func TestCalculate_BadRouteParts(t *testing.T) {
 		t.Errorf("want error for a part longer than the route, got %v", err)
 	}
 }
+
+func TestCalculate_CountryKm(t *testing.T) {
+	ck := map[string]float64{"DK": 50, "DE": 30}
+	c := Calculator{Factors: partFactors, Distances: fakeRouter{Km: 100, Parts: map[string]float64{PartFerry: 20}, CountryKm: ck}}
+	r, err := c.Calculate(context.Background(), Shipment{WeightKg: 1, Legs: []Leg{{Mode: Road, VehicleType: "truck", From: cph, To: aar}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Legs[0].CountryKm; got["DK"] != 50 || got["DE"] != 30 || len(got) != 2 {
+		t.Errorf("CountryKm = %v, want %v", got, ck)
+	}
+	// More km by country than the route has is the router's error.
+	c.Distances = fakeRouter{Km: 10, CountryKm: map[string]float64{"DK": 11}}
+	if _, err := c.Calculate(context.Background(), Shipment{WeightKg: 1, Legs: []Leg{{Mode: Road, VehicleType: "truck", From: cph, To: aar}}}); err == nil || !strings.Contains(err.Error(), "by country") {
+		t.Errorf("want error for country km over the route, got %v", err)
+	}
+	if WantCountryKm(context.Background()) || !WantCountryKm(WithCountryKm(context.Background())) {
+		t.Error("WithCountryKm / WantCountryKm")
+	}
+}

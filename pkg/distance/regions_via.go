@@ -248,6 +248,14 @@ func (rs Regions) routeVia(ctx context.Context, m calc.Mode, from, to calc.Locat
 			r.Parts[k] += v
 		}
 	}
+	for _, ck := range []map[string]float64{r1.CountryKm, r2.CountryKm} {
+		for k, v := range ck {
+			if r.CountryKm == nil {
+				r.CountryKm = map[string]float64{}
+			}
+			r.CountryKm[k] += v
+		}
+	}
 	if len(r1.Path) > 0 || len(r2.Path) > 0 {
 		r.Path = append(append([][2]float64{}, r1.Path...), r2.Path...)
 	}

@@ -312,6 +312,10 @@ func (s *Server) calculate(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
+	ctx, ok := withCountryKm(w, r, ctx)
+	if !ok {
+		return
+	}
 	res, err := s.Calc.CalculateRetrying(ctx, sh)
 	if err != nil {
 		writeError(w, calcStatus(err), err)
@@ -437,7 +441,10 @@ func (s *Server) each(w http.ResponseWriter, r *http.Request, shipments []calc.S
 			fmt.Errorf("batch has %d shipments, max is %d", len(shipments), maxBatchItems))
 		return false
 	}
-	ctx := r.Context()
+	ctx, ok := withCountryKm(w, r, r.Context())
+	if !ok {
+		return false
+	}
 	release, ok := s.bigTurn(ctx, w, len(shipments), s.Limits.BigBatch)
 	if !ok {
 		return false
@@ -457,7 +464,9 @@ func (s *Server) each(w http.ResponseWriter, r *http.Request, shipments []calc.S
 		}
 		valid = append(valid, sh)
 	}
-	s.Calc.Prefetch(ctx, valid)
+	if !calc.WantCountryKm(ctx) { // a distance table has no geometry to split by country
+		s.Calc.Prefetch(ctx, valid)
+	}
 
 	workers := s.Limits.BatchWorkers
 	next := make(chan int)
@@ -681,4 +690,18 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_, _ = w.Write(append(b, '\n'))
+}
+
+// withCountryKm reads the country_km query parameter: true asks for each
+// road and rail leg's distance by country. It writes a 400 for a bad value.
+func withCountryKm(w http.ResponseWriter, r *http.Request, ctx context.Context) (context.Context, bool) {
+	on, err := boolParam(r.URL.Query(), "country_km")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err)
+		return ctx, false
+	}
+	if on {
+		ctx = calc.WithCountryKm(ctx)
+	}
+	return ctx, true
 }
