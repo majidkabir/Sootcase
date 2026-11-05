@@ -152,10 +152,11 @@ func Build(ops Operations, fuels calc.FactorProvider) (factors.Dataset, error) {
 		if err != nil {
 			return factors.Dataset{}, fmt.Errorf("hoc %q: %w", h.ID, err)
 		}
+		ttwT, wttT := ttw*1000/h.Tonnes, wtt*1000/h.Tonnes
 		ds.Hubs = append(ds.Hubs, calc.HubFactor{
 			HubType: h.ID, Year: ops.Year, DataType: calc.DataPrimary,
-			WTWPerTonneG: (ttw + wtt) * 1000 / h.Tonnes,
-			Source:       fmt.Sprintf("HOC %s (%s, %s): %s over %.0f tonnes", h.ID, ops.Name, ops.Period, desc, h.Tonnes),
+			WTWPerTonneG: ttwT + wttT, TTWPerTonneG: &ttwT, WTTPerTonneG: &wttT,
+			Source: fmt.Sprintf("HOC %s (%s, %s): %s over %.0f tonnes", h.ID, ops.Name, ops.Period, desc, h.Tonnes),
 		})
 	}
 	return ds, nil

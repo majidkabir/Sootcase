@@ -505,6 +505,8 @@ components:
         hub_type: { type: string }
         wtw_g_per_tonne: { type: number }
         wtw_g_per_container: { type: number, description: "Set instead of wtw_g_per_tonne for per-container hub types" }
+        ttw_g_per_tonne: { type: number, description: "TTW part of wtw_g_per_tonne, when known (with wtt_g_per_tonne); left out for WTW-only defaults" }
+        wtt_g_per_tonne: { type: number, description: "WTT part of wtw_g_per_tonne, when known (with ttw_g_per_tonne)" }
         source: { type: string }
         year: { type: integer }
         data_type: { type: string, description: "primary for hub factors built from the operator's own energy use; else left out" }
@@ -606,6 +608,8 @@ components:
               hub_id: { type: string }
               hub_type: { type: string }
               wtw_kg: { type: number }
+              ttw_kg: { type: number, description: "TTW part of wtw_kg when the hub factor gives the split (own energy data); left out for WTW-only defaults" }
+              wtt_kg: { type: number, description: "WTT part of wtw_kg when the hub factor gives the split" }
               data_type: { $ref: "#/components/schemas/DataType" }
               source: { type: string }
         tonne_km: { type: number }

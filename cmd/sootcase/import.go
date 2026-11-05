@@ -137,7 +137,11 @@ func runTOC(args []string) error {
 		fmt.Fprintf(os.Stderr, "TOC %-24s %8.2f g CO2e/tkm WTW (%.2f TTW + %.2f WTT)\n", l.VehicleType, l.WTW(), l.TTW, l.WTT)
 	}
 	for _, h := range layer.Hubs {
-		fmt.Fprintf(os.Stderr, "HOC %-24s %8.1f g CO2e/t WTW\n", h.HubType, h.WTWPerTonneG)
+		if h.TTWPerTonneG != nil && h.WTTPerTonneG != nil {
+			fmt.Fprintf(os.Stderr, "HOC %-24s %8.1f g CO2e/t WTW (%.1f TTW + %.1f WTT)\n", h.HubType, h.WTWPerTonneG, *h.TTWPerTonneG, *h.WTTPerTonneG)
+		} else {
+			fmt.Fprintf(os.Stderr, "HOC %-24s %8.1f g CO2e/t WTW\n", h.HubType, h.WTWPerTonneG)
+		}
 	}
 	w := os.Stdout
 	if *out != "-" {
