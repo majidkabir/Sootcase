@@ -30,6 +30,23 @@
         { "fuel": "electricity/DNK", "amount": 410000 },
         { "fuel": "diesel", "amount": 6000 }
       ]
+    },
+    {
+      "id": "cph_cold_store",
+      "description": "Copenhagen cold store, chilled, with refrigerant refills",
+      "tonnes": 30000,
+      "energy": [{ "fuel": "electricity/DNK", "amount": 900000 }],
+      "refrigerants": [{ "refrigerant": "R-404A", "kg": 25 }]
+    },
+    {
+      "id": "aarhus_terminal",
+      "description": "Aarhus container terminal, per container handled; one month of meter readings extrapolated to the year",
+      "containers": 120000,
+      "data_type": "modelled",
+      "energy": [
+        { "fuel": "diesel", "amount": 150000 },
+        { "fuel": "electricity/DNK", "amount": 2000000 }
+      ]
     }
   ]
 }

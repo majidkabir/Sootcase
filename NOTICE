@@ -23,8 +23,8 @@ ifeu, INFRAS and Fraunhofer IML; European road values to HBEFA; container trade 
 Clean Cargo; North American values to SmartWay and GREET; Ro-Ro to the Global Ro-Ro
 Community; hub values to the GILA project of Fraunhofer IML, Politecnico di Milano and
 GreenRouter; European rail load factors, empty running and electric train energy, Indian
-upstream electricity and one intermodal terminal value to EcoTransIT World); they are
-included as GLEC publishes them.
+upstream electricity and one intermodal terminal value to EcoTransIT World; refrigerant
+GWPs to IPCC AR6); they are included as GLEC publishes them.
 Country continents for the GLEC regions (tools/glec/countries.csv) are from OurAirports,
 public domain.
 

@@ -31,9 +31,14 @@ func TestEmbeddedSample(t *testing.T) {
 
 func TestParse_Rejects(t *testing.T) {
 	cases := map[string]string{
-		"duplicate": `{"legs":[{"mode":"road","vehicle_type":"a"},{"mode":"road","vehicle_type":"a"}]}`,
-		"negative":  `{"legs":[{"mode":"road","vehicle_type":"a","ttw_g_per_tkm":-1}]}`,
-		"bad json":  `{`,
+		"duplicate":                     `{"legs":[{"mode":"road","vehicle_type":"a"},{"mode":"road","vehicle_type":"a"}]}`,
+		"negative":                      `{"legs":[{"mode":"road","vehicle_type":"a","ttw_g_per_tkm":-1}]}`,
+		"bad json":                      `{`,
+		"container split without total": `{"hubs":[{"hub_type":"h","wtw_g_per_tonne":5,"ttw_g_per_container":1,"wtt_g_per_container":4}]}`,
+		"container split not summing":   `{"hubs":[{"hub_type":"h","wtw_g_per_container":5,"ttw_g_per_container":1,"wtt_g_per_container":1}]}`,
+		"container split half":          `{"hubs":[{"hub_type":"h","wtw_g_per_container":5,"ttw_g_per_container":5}]}`,
+		"refrigerant twice":             `{"refrigerants":[{"refrigerant":"R-404A","gwp100":1},{"refrigerant":"r404a","gwp100":2}]}`,
+		"refrigerant negative":          `{"refrigerants":[{"refrigerant":"R-1","gwp100":-1}]}`,
 	}
 	for name, in := range cases {
 		if _, err := Parse(strings.NewReader(in)); err == nil {
@@ -805,5 +810,24 @@ func TestCargoTypes_GLEC33(t *testing.T) {
 	}
 	if _, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 1000, CargoType: "frozen", Legs: []calc.Leg{road}}); !errors.Is(err, calc.ErrInvalidInput) {
 		t.Errorf("unknown cargo type: want an error, got %v", err)
+	}
+}
+
+// GLEC v3.3 Module 3, Table 2 (p. 117): refrigerant GWPs, found by name
+// however it is written, or by alias.
+func TestRefrigerants_GLEC33(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for name, want := range map[string]float64{"R-404A": 4728, "r404a": 4728, "R 134a": 1530, "R-448a": 1494.4,
+		"FX100": 2396.7, "R-427A": 2396.7, "CO2": 1, "R-1234ze(E)": 1.4, "ISCEON 89": 4052.5} {
+		r, err := ds.Refrigerant(name)
+		if err != nil || r.GWP100 != want || !strings.Contains(r.Source, "Module 3, Table 2") {
+			t.Errorf("%s: %+v %v, want GWP %v", name, r, err, want)
+		}
+	}
+	if _, err := ds.Refrigerant("R-717"); err == nil {
+		t.Error("R-717: GLEC prints no GWP, want error")
 	}
 }

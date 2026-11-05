@@ -202,11 +202,12 @@ Turn it off with `"add_road_legs": false` on a shipment, `?add_road_legs=false` 
 
 ## Verified against GLEC
 
-[`pkg/toc/glec_test.go`](pkg/toc/glec_test.go) reproduces worked examples from the GLEC Framework v3.3 (Section 3, Module 4) end to end through Sootcase: fuel and activity data → TOC/HOC intensities → shipment emissions. Road (p.119), a hybrid diesel/electric fleet (p.121), air (p.131–132), bulk sea with hubs (p.135–136) and a two-intensity container terminal (p.138–139) all match GLEC's published figures to the precision printed, except where the example contradicts itself. Notes from doing this:
+[`pkg/toc/glec_test.go`](pkg/toc/glec_test.go) reproduces worked examples from the GLEC Framework v3.3 (Section 3, Module 4) end to end through Sootcase: fuel and activity data → TOC/HOC intensities → shipment emissions. Road (p.119), a hybrid diesel/electric fleet (p.121), refrigerant losses of a temperature-controlled fleet (p.123), air (p.131–132), bulk sea with hubs (p.135–136) and a two-intensity container terminal (p.138–139) all match GLEC's published figures to the precision printed, except where the example contradicts itself. Notes from doing this:
 
 - GLEC sometimes rounds an intensity before applying it (air: 1.244 kg/tkm), so a few published results differ from the unrounded calculation in the last digit. The tests allow for that.
 - Hub example: the "general processes" electricity (70,400 kg for 160,000 kWh) uses 0.44 kg/kWh, while Table 13 gives 0.335; the items of the "unspecified group" add up to 810,019 kg, not the printed 814,019 (so 0.191 kg/t, not 0.192, and 16.6 kg, not 16.7, for the 87 t transfer); and 5.1 divides the v3.2 edition's total (991,519 kg) instead of Table 14's 860,269 kg (0.20 kg/t, not 0.23). The tests follow the printed table items.
 - Bulk sea: Table 11 prints 0.00676 kg/tkm as the overall TOC intensity; the text's 0.00685 is WTT + TTW and is what Sootcase gives.
+- Refrigerants: GLEC prints the reefer units' loss rounded (17.88 kg, 20.13 kg in all), but its total (30,791.25 kg CO2e) uses 17.875 kg. The test uses 17.875.
 - Hybrid fleet: GLEC prints 334.47 g/kWh as "equivalent" to Module 1's 92.8 g/MJ, which is 334.08 g/kWh. The test uses the printed value; Sootcase's GLEC dataset uses 92.8 g/MJ.
 
 ## Reporting
@@ -242,20 +243,23 @@ It reads the same CSV as `batch`, streaming, so any size works. The ISO sentence
 Carriers can calculate from their own measured data: group similar operations into a *transport operation category* (TOC) or *hub operation category* (HOC), and total a period's fuel and electricity against the activity carried out:
 
 ```
-TOC intensity (g CO2e/tkm) = Σ fuel × fuel factor / tonne-km carried (incl. empty running)
-HOC intensity (g CO2e/t)   = Σ energy × energy factor / tonnes handled
+TOC intensity (g CO2e/tkm)       = (Σ fuel × fuel factor + Σ refrigerant lost × GWP) / tonne-km carried (incl. empty running)
+HOC intensity (g CO2e/t)         = (Σ energy × energy factor + Σ refrigerant lost × GWP) / tonnes handled
+HOC intensity (g CO2e/container) = the same / containers handled, for container terminals
 ```
 
-`sootcase toc` turns an [operations file](examples/operations.json) into a dataset layer. Shipments then use the TOC id as their vehicle type, or the HOC id as their hub type, and are labelled primary data:
+`sootcase toc` turns an [operations file](examples/operations.json) into a dataset layer. Shipments then use the TOC id as their vehicle type, or the HOC id as their hub type (with `containers` on the hub stop for a per-container HOC), and are labelled primary data, or modelled data when the category says `"data_type": "modelled"` (a period extrapolated from a sample, as ISO 14083 calls it):
 
 ```sh
 sootcase toc -o acme-2025.json examples/operations.json
-#  TOC dk_road_ambient   93.51 g CO2e/tkm WTW (66.56 TTW + 26.95 WTT)
-#  HOC cph_crossdock    797.3 g CO2e/t WTW (188.7 TTW + 608.7 WTT)
+#  TOC dk_road_ambient    93.51 g CO2e/tkm WTW (66.56 TTW + 26.95 WTT)
+#  HOC cph_crossdock      797.3 g CO2e/t WTW (188.7 TTW + 608.7 WTT)
+#  HOC cph_cold_store    7372.3 g CO2e/t WTW (3940.0 TTW + 3432.3 WTT)
+#  HOC aarhus_terminal   6254.0 g CO2e/container WTW (3340.8 TTW + 2913.2 WTT)
 sootcase calc -factors desnz-2026,acme-2025.json shipment.json
 ```
 
-Fuels are converted with the selected dataset's fuel factors, including `electricity/<country>`. A HOC keeps its TTW and WTT parts (`ttw_g_per_tonne`, `wtt_g_per_tonne`), and hubs calculated with it show `ttw_kg` and `wtt_kg`, as ISO 14083 (13.3.2) asks at hub level. GLEC's hub default values are WTW only, so hubs on defaults show `wtw_kg` alone.
+Fuels are converted with the selected dataset's fuel factors, including `electricity/<country>`, the country's grid mix (location-based, as ISO 14083 asks; results with a supplier's own mix are reported apart from ISO 14083 results: Fraunhofer IML, *Guide for GHG Emissions Accounting at Logistics Hubs* v2.1, s. 8.3). Refrigerant losses are the kg refilled in the period (`"refrigerants": [{"refrigerant": "R-404A", "kg": 25}]`), times the GWP100 from GLEC v3.3 Module 3, Table 2 (IPCC AR6), and count as direct emissions (TTW), as in GLEC v3.3 Module 4, s. 1.3. For a refrigerant GLEC doesn't list (R-717 has no value there), give `gwp` and `gwp_source`. A HOC keeps its TTW and WTT parts (`ttw_g_per_tonne`, `wtt_g_per_tonne`, or `_per_container`), and hubs calculated with it show `ttw_kg` and `wtt_kg`, as ISO 14083 (13.3.2) asks at hub level. GLEC's hub default values are WTW only, so hubs on defaults show `wtw_kg` alone.
 
 ## Scenarios (what-if)
 
@@ -378,7 +382,7 @@ Protections for running it on a network: at most `-max-concurrent` calculation r
 
 | Dataset | What |
 |---|---|
-| `glec-3.3` | GLEC Framework v3.3 default values (Section 3 Module 2), built by `tools/glec/build.py` |
+| `glec-3.3` | GLEC Framework v3.3 default values (Section 3 Module 2) and refrigerant GWPs (Module 3, Table 2), built by `tools/glec/build.py` |
 | `desnz-2026` | UK government GHG conversion factors 2026, imported from the official flat file |
 | `nl-iww-2026` | Inland waterway factors from the Dutch [CO2 emission factor list](https://www.co2emissiefactoren.nl/) 2026 (CE Delft STREAM 2020) |
 | `eu-mrv-2024` | Container ship factors from EU MRV data for 2024, published by EMSA |

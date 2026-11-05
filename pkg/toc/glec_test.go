@@ -288,3 +288,34 @@ func mustJSON(t *testing.T, v any) string {
 	}
 	return string(b)
 }
+
+// Module 4, 1.3 Refrigerants (p.123): 10 trucks with air conditioning
+// (1.5 kg charge, 15% lost a year = 0.225 kg each) and temperature-controlled
+// units (5.5 kg, 32.5% = 1.7875 kg each), R-134a at 1,530 kg CO2e/kg, over
+// 6,000,000 tkm: 30,791.25 kg CO2e, 0.0051 kg CO2e/tkm on top of the fuel.
+// GLEC prints the reefer loss rounded (17.88 kg; 20.13 kg in all); the total
+// it prints uses 17.875 kg. The GWP comes from Sootcase's GLEC dataset
+// (Module 3, Table 2).
+func TestGLEC_Refrigerants(t *testing.T) {
+	ds, err := factors.Open(factors.Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ops, err := Parse(strings.NewReader(`{"name": "reefer", "period": "year",
+	  "tocs": [{"id": "reefer_toc", "mode": "road", "tonne_km": 6000000,
+	            "fuels": [{"fuel": "diesel", "amount": 0}],
+	            "refrigerants": [{"refrigerant": "R-134a", "kg": 2.25}, {"refrigerant": "r134a", "kg": 17.875}]}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	layer, err := Build(ops, ds)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := layer.Legs[0]
+	near(t, "refrigerant losses (kg)", f.TTW/1000*6_000_000, 30_791.25, 2)
+	near(t, "refrigerant intensity (kg/tkm)", f.WTW()/1000, 0.0051, 4)
+	if f.WTT != 0 {
+		t.Errorf("refrigerant losses are direct emissions, got WTT %v", f.WTT)
+	}
+}

@@ -507,9 +507,11 @@ components:
         wtw_g_per_container: { type: number, description: "Set instead of wtw_g_per_tonne for per-container hub types" }
         ttw_g_per_tonne: { type: number, description: "TTW part of wtw_g_per_tonne, when known (with wtt_g_per_tonne); left out for WTW-only defaults" }
         wtt_g_per_tonne: { type: number, description: "WTT part of wtw_g_per_tonne, when known (with ttw_g_per_tonne)" }
+        ttw_g_per_container: { type: number, description: "TTW part of wtw_g_per_container, when known (with wtt_g_per_container)" }
+        wtt_g_per_container: { type: number, description: "WTT part of wtw_g_per_container, when known (with ttw_g_per_container)" }
         source: { type: string }
         year: { type: integer }
-        data_type: { type: string, description: "primary for hub factors built from the operator's own energy use; else left out" }
+        data_type: { type: string, description: "primary (or modelled) for hub factors built from the operator's own energy use; else left out" }
     LegResult:
       type: object
       properties:
@@ -698,6 +700,17 @@ components:
         cargo_variants: { type: object, description: "Per vehicle type, the vehicle type GLEC gives for each cargo type" }
         hub_cargo_variants: { type: object, description: "Per hub type, the hub type for each cargo type" }
         load_models: { type: array, items: { type: object }, description: Load-dependent emissions per vehicle class (load_tonnes, load_factor) }
+        refrigerants:
+          type: array
+          description: "Refrigerant GWPs (kg CO2e per kg lost), for refrigerant losses in operation categories (GLEC v3.3 Module 3, IPCC AR6)"
+          items:
+            type: object
+            properties:
+              refrigerant: { type: string }
+              aliases: { type: array, items: { type: string } }
+              name: { type: string }
+              gwp100: { type: number }
+              source: { type: string }
         regions: { type: array, items: { type: object }, description: The regions and sea zones regional aliases choose by }
     Report:
       type: object

@@ -193,11 +193,14 @@ type HubFactor struct {
 	TTWPerTonneG *float64 `json:"ttw_g_per_tonne,omitempty"`
 	WTTPerTonneG *float64 `json:"wtt_g_per_tonne,omitempty"`
 	// WTWPerContainerG, when set, makes the factor per container handled
-	// instead of per tonne (HubStop.Containers).
-	WTWPerContainerG float64 `json:"wtw_g_per_container,omitempty"`
-	Source           string  `json:"source"`
-	Year             int     `json:"year"`
-	DataType         string  `json:"data_type,omitempty"` // as Factor.DataType
+	// instead of per tonne (HubStop.Containers). TTWPerContainerG and
+	// WTTPerContainerG split it when the split is known, as above.
+	WTWPerContainerG float64  `json:"wtw_g_per_container,omitempty"`
+	TTWPerContainerG *float64 `json:"ttw_g_per_container,omitempty"`
+	WTTPerContainerG *float64 `json:"wtt_g_per_container,omitempty"`
+	Source           string   `json:"source"`
+	Year             int      `json:"year"`
+	DataType         string   `json:"data_type,omitempty"` // as Factor.DataType
 }
 
 // LegResult is the outcome for one leg.

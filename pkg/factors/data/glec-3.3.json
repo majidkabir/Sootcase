@@ -10185,5 +10185,280 @@
   "intermodal_terminal": {
    "temperature_controlled": "intermodal_terminal_temperature_controlled"
   }
- }
+ },
+ "refrigerants": [
+  {
+   "refrigerant": "R-12",
+   "name": "Dichlorodifluoromethane (CF2Cl2)",
+   "gwp100": 12500.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-12 12500 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-22",
+   "name": "Chlorodifluoromethane (CHClF2)",
+   "gwp100": 1960.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-22 1960 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-23",
+   "name": "Fluoroform (CHF3)",
+   "gwp100": 14600.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-23 14600 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-32",
+   "name": "Difluoromethane (CH2F2)",
+   "gwp100": 771.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-32 771 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-115",
+   "name": "Chloropentafluoroethane (CClF2CF3)",
+   "gwp100": 9600.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-115 9600 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-124",
+   "name": "1-Chlor-1,2,2,2-Tetrafluoroethane (C2HF4Cl)",
+   "gwp100": 597.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-124 597 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-125",
+   "name": "Pentafluoroethane (CHF2CF3)",
+   "gwp100": 3740.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-125 3740 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-134a",
+   "name": "1,1,1,2-Tetrafluoroethane (CH2FCF3)",
+   "gwp100": 1530.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-134a 1530 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-142b",
+   "name": "1-Chlor-1,1-difluoroethane (C2H3F2Cl)",
+   "gwp100": 2300.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-142b 2300 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-143a",
+   "name": "1,1,1-Trifluoroethane (CH3CF3)",
+   "gwp100": 5810.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-143a 5810 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-152a",
+   "name": "1,1-Difluoroethane (C2H4F2)",
+   "gwp100": 164.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-152a 164 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-218",
+   "name": "Octafluoropropane (C3F8)",
+   "gwp100": 9290.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-218 9290 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-290",
+   "name": "Propane (C3H8)",
+   "gwp100": 0.02,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-290 0.02 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-401A",
+   "name": "Mixture: 53% R-22, 13% R-152A, 34% R-124",
+   "gwp100": 1263.1,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-401A 1263.1 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-402A",
+   "name": "Mixture: 60% R-125, 2% R-290, 38% R-22",
+   "gwp100": 2988.8,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-402A 2988.8 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-404A",
+   "name": "Mixture: 44% R-125, 4% R-134a, 52% R-143a",
+   "gwp100": 4728.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-404A 4728 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-407A",
+   "name": "Mixture: 20% R-32, 40% R-125, 40% R-134a",
+   "gwp100": 2262.2,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-407A 2262.2 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-407C",
+   "name": "Mixture: 23% R-32, 25% R-125, 52% R-134a",
+   "gwp100": 1907.9,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-407C 1907.9 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-407F",
+   "name": "Mixture: 30% R-32, 30% R-125, 40% R-134a",
+   "gwp100": 1965.3,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-407F 1965.3 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-408A",
+   "name": "Mixture: 7% R-125, 46% R-143a, 47% R-22",
+   "gwp100": 3855.6,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-408A 3855.6 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-409A",
+   "name": "Mixture: 60% R-22, 25% R-124, 15% R-142b",
+   "gwp100": 1670.3,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-409A 1670.3 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-410A",
+   "name": "Mixture: 50% R-32, 50% R-125",
+   "gwp100": 2255.5,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-410A 2255.5 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-413A",
+   "name": "Mixture: 88% R-134a, 9% R-218, 3% R-600a",
+   "gwp100": 2182.5,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-413A 2182.5 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-417A",
+   "name": "Mixture: 46.6% R-125, 50% R-134a, 3.4% R-600",
+   "gwp100": 2507.8,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-417A 2507.8 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-417C",
+   "name": "Mixture: 19.5% R-125, 78.8% R-134a, 1.7% R-600",
+   "gwp100": 1934.9,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-417C 1934.9 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-422A",
+   "name": "Mixture: 85.1% R-125, 11.5% R-134A, 3.4% R-600a",
+   "gwp100": 3358.7,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-422A 3358.7 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-422D",
+   "name": "Mixture: 65.1% R-125, 31.5% R-134a, 3.4% R-600a",
+   "gwp100": 2916.7,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-422D 2916.7 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-448A",
+   "name": "Mixture: 26% R-32, 26% R-125, 20% R-1234yf, 21% R-134a, 7% R-1234ze(E)",
+   "gwp100": 1494.4,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-448A 1494.4 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-449A",
+   "name": "Mixture: 25.7% R-134a, 25.3% R-1234yf, 24.7% R-125, 24.3% R-32",
+   "gwp100": 1504.5,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-449A 1504.5 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-450A",
+   "name": "Mixture: 42% R-134a, 58% R-1234ze(E)",
+   "gwp100": 643.4,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-450A 643.4 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-452A",
+   "name": "Mixture: 11% R-32, 59% R-125, 30% R-1234yf",
+   "gwp100": 2291.6,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-452A 2291.6 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-502",
+   "name": "Mixture: 48.8% R-22, 51.2% R-115",
+   "gwp100": 5871.7,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-502 5871.7 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-504",
+   "name": "Mixture: 48.2% R-32, 51.8% R-115",
+   "gwp100": 5344.4,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-504 5344.4 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-507",
+   "name": "Mixture: 50% R-125, 50% R-143a",
+   "gwp100": 4775.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-507 4775 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-507A",
+   "name": "Mixture: 50% R-125, 50% R-143a",
+   "gwp100": 4775.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-507A 4775 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-509A",
+   "name": "Mixture: 44% R-22, 56% R-218",
+   "gwp100": 6064.8,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-509A 6064.8 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-513A",
+   "name": "Mixture: 44% R-134a, 56% R-1234yf",
+   "gwp100": 673.5,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-513A 673.5 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-600",
+   "name": "n-Butane (C4H10)",
+   "gwp100": 0.01,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-600 0.01 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-600a",
+   "name": "Isobutane (C4H10)",
+   "gwp100": 0.01,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-600a 0.01 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-744",
+   "aliases": [
+    "CO2"
+   ],
+   "name": "Carbon dioxide (CO2)",
+   "gwp100": 1.0,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-744 1 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-1234ze(E)",
+   "aliases": [
+    "R-1234ze"
+   ],
+   "name": "(E)-1,3,3,3-Tetrafluoropropene (C3H2F4)",
+   "gwp100": 1.4,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-1234ze(E) 1.4 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-1234yf",
+   "name": "2,3,3,3-Tetrafluoropropene (C3H2F4)",
+   "gwp100": 0.5,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-1234yf 0.5 g CO2e/g"
+  },
+  {
+   "refrigerant": "ISCEON 89",
+   "name": "Mixture: 86% R-125, 9% R-218, 5% R-290",
+   "gwp100": 4052.5,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: ISCEON 89 4052.5 g CO2e/g"
+  },
+  {
+   "refrigerant": "R-427A",
+   "aliases": [
+    "FX 100"
+   ],
+   "name": "FX 100. Mixture: 50% R-134a, 25% R-125, 15% R-32, 10% R-143a",
+   "gwp100": 2396.7,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: R-427A 2396.7 g CO2e/g"
+  }
+ ]
 }
