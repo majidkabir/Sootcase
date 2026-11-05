@@ -796,6 +796,59 @@ hubs += [
                f"(n = 84), 21.4 kg CO2e per container"},
 ]
 
+# ---------------------------------------------------------------- refrigerants (Module 3, Table 2, p. 117)
+# GWP100 from IPCC AR6 as GLEC prints it, g CO2e per g (= kg CO2e per kg lost). Losses are direct emissions of the
+# operation. R-717 (ammonia) is left out: GLEC prints "-" (no value), so users give their own GWP for it.
+REFRIGERANTS = [  # (type, aliases, name or mixture, GWP100)
+    ("R-12", [], "Dichlorodifluoromethane (CF2Cl2)", 12500.0),
+    ("R-22", [], "Chlorodifluoromethane (CHClF2)", 1960.0),
+    ("R-23", [], "Fluoroform (CHF3)", 14600.0),
+    ("R-32", [], "Difluoromethane (CH2F2)", 771.0),
+    ("R-115", [], "Chloropentafluoroethane (CClF2CF3)", 9600.0),
+    ("R-124", [], "1-Chlor-1,2,2,2-Tetrafluoroethane (C2HF4Cl)", 597.0),
+    ("R-125", [], "Pentafluoroethane (CHF2CF3)", 3740.0),
+    ("R-134a", [], "1,1,1,2-Tetrafluoroethane (CH2FCF3)", 1530.0),
+    ("R-142b", [], "1-Chlor-1,1-difluoroethane (C2H3F2Cl)", 2300.0),
+    ("R-143a", [], "1,1,1-Trifluoroethane (CH3CF3)", 5810.0),
+    ("R-152a", [], "1,1-Difluoroethane (C2H4F2)", 164.0),
+    ("R-218", [], "Octafluoropropane (C3F8)", 9290.0),
+    ("R-290", [], "Propane (C3H8)", 0.02),
+    ("R-401A", [], "Mixture: 53% R-22, 13% R-152A, 34% R-124", 1263.1),
+    ("R-402A", [], "Mixture: 60% R-125, 2% R-290, 38% R-22", 2988.8),
+    ("R-404A", [], "Mixture: 44% R-125, 4% R-134a, 52% R-143a", 4728.0),
+    ("R-407A", [], "Mixture: 20% R-32, 40% R-125, 40% R-134a", 2262.2),
+    ("R-407C", [], "Mixture: 23% R-32, 25% R-125, 52% R-134a", 1907.9),
+    ("R-407F", [], "Mixture: 30% R-32, 30% R-125, 40% R-134a", 1965.3),
+    ("R-408A", [], "Mixture: 7% R-125, 46% R-143a, 47% R-22", 3855.6),
+    ("R-409A", [], "Mixture: 60% R-22, 25% R-124, 15% R-142b", 1670.3),
+    ("R-410A", [], "Mixture: 50% R-32, 50% R-125", 2255.5),
+    ("R-413A", [], "Mixture: 88% R-134a, 9% R-218, 3% R-600a", 2182.5),
+    ("R-417A", [], "Mixture: 46.6% R-125, 50% R-134a, 3.4% R-600", 2507.8),
+    ("R-417C", [], "Mixture: 19.5% R-125, 78.8% R-134a, 1.7% R-600", 1934.9),
+    ("R-422A", [], "Mixture: 85.1% R-125, 11.5% R-134A, 3.4% R-600a", 3358.7),
+    ("R-422D", [], "Mixture: 65.1% R-125, 31.5% R-134a, 3.4% R-600a", 2916.7),
+    ("R-448A", [], "Mixture: 26% R-32, 26% R-125, 20% R-1234yf, 21% R-134a, 7% R-1234ze(E)", 1494.4),
+    ("R-449A", [], "Mixture: 25.7% R-134a, 25.3% R-1234yf, 24.7% R-125, 24.3% R-32", 1504.5),
+    ("R-450A", [], "Mixture: 42% R-134a, 58% R-1234ze(E)", 643.4),
+    ("R-452A", [], "Mixture: 11% R-32, 59% R-125, 30% R-1234yf", 2291.6),
+    ("R-502", [], "Mixture: 48.8% R-22, 51.2% R-115", 5871.7),
+    ("R-504", [], "Mixture: 48.2% R-32, 51.8% R-115", 5344.4),
+    ("R-507", [], "Mixture: 50% R-125, 50% R-143a", 4775.0),
+    ("R-507A", [], "Mixture: 50% R-125, 50% R-143a", 4775.0),
+    ("R-509A", [], "Mixture: 44% R-22, 56% R-218", 6064.8),
+    ("R-513A", [], "Mixture: 44% R-134a, 56% R-1234yf", 673.5),
+    ("R-600", [], "n-Butane (C4H10)", 0.01),
+    ("R-600a", [], "Isobutane (C4H10)", 0.01),
+    ("R-744", ["CO2"], "Carbon dioxide (CO2)", 1.0),
+    ("R-1234ze(E)", ["R-1234ze"], "(E)-1,3,3,3-Tetrafluoropropene (C3H2F4)", 1.4),
+    ("R-1234yf", [], "2,3,3,3-Tetrafluoropropene (C3H2F4)", 0.5),
+    ("ISCEON 89", [], "Mixture: 86% R-125, 9% R-218, 5% R-290", 4052.5),
+    ("R-427A", ["FX 100"], "FX 100. Mixture: 50% R-134a, 25% R-125, 15% R-32, 10% R-143a", 2396.7),
+]
+refrigerants = [{"refrigerant": t, **({"aliases": a} if a else {}), "name": n, "gwp100": g,
+                 "source": f"{GLEC}, Section 3 Module 3, Table 2 (p. 117), GWP100 from IPCC AR6: {t} {g:g} g CO2e/g"}
+                for t, a, n, g in REFRIGERANTS]
+
 for l in legs:  # values that already are temperature-controlled keep themselves
     vt = l["vehicle_type"]
     if "temperature_controlled" in vt or vt.endswith("/reefer") or vt == "glec/road/na/refrigerated":
@@ -837,8 +890,9 @@ dataset = {
     "cargo_types": CARGO_TYPES,
     "cargo_variants": cargo_variants,
     "hub_cargo_variants": {"intermodal_terminal": {"temperature_controlled": "intermodal_terminal_temperature_controlled"}},
+    "refrigerants": refrigerants,
 }
 with open(OUT, "w", encoding="utf-8") as f:
     json.dump(dataset, f, indent=1, ensure_ascii=False)
     f.write("\n")
-print(f"wrote {OUT}: {len(legs)} factors, {len(fuels)} fuels, {len(hubs)} hubs, {len(aliases)} aliases, {len(regions)} region rules")
+print(f"wrote {OUT}: {len(legs)} factors, {len(fuels)} fuels, {len(hubs)} hubs, {len(refrigerants)} refrigerants, {len(aliases)} aliases, {len(regions)} region rules")

@@ -72,6 +72,9 @@ type Dataset struct {
 	// Regions place a leg's ends in the regions or zones that regional
 	// aliases choose by (see VehicleAlias.Regions and Lanes).
 	Regions []Region `json:"regions,omitempty"`
+	// Refrigerants give the GWP of refrigerants, for refrigerant losses in
+	// operation categories (pkg/toc).
+	Refrigerants []Refrigerant `json:"refrigerants,omitempty"`
 
 	legIdx   map[string]calc.Factor
 	shortIdx map[string]shortAlias
@@ -84,6 +87,18 @@ type Dataset struct {
 	aliasLM  map[string]string
 	fuelReg  map[string]map[string]calc.FuelFactor
 	cargoIdx map[string]map[string]calc.Factor
+	refIdx   map[string]Refrigerant
+}
+
+// Refrigerant is a refrigerant's global warming potential: kg CO2e per kg
+// lost to the air (the same as g CO2e/g). Refrigerant losses are direct
+// emissions of the operation (TTW); their production is not counted.
+type Refrigerant struct {
+	Refrigerant string   `json:"refrigerant"` // e.g. "R-404A"
+	Aliases     []string `json:"aliases,omitempty"`
+	Name        string   `json:"name,omitempty"` // chemical name or mixture
+	GWP100      float64  `json:"gwp100"`
+	Source      string   `json:"source"`
 }
 
 // CargoType is a cargo type a shipment can give (Shipment.CargoType).
@@ -233,6 +248,7 @@ func mergeInto(dst *Dataset, src Dataset) error {
 	dst.Legs = append(dst.Legs, src.Legs...)
 	dst.Hubs = append(dst.Hubs, src.Hubs...)
 	dst.Fuels = append(dst.Fuels, src.Fuels...)
+	dst.Refrigerants = append(dst.Refrigerants, src.Refrigerants...)
 	dst.LoadModels = append(dst.LoadModels, src.LoadModels...)
 	for _, x := range src.DAFs {
 		replaced := false
@@ -337,7 +353,7 @@ func Parse(r io.Reader) (*Dataset, error) {
 	// fuel regions at aliases too.
 	steps := []func() error{d.indexLegs, d.indexHubs, d.indexFuels, d.checkDistanceAdjustments, d.indexVehicleAliases,
 		d.indexDAFs, d.indexLoadModels, d.indexGrids, d.checkContainerLoads, d.indexFuelAliases, d.indexCargoVariants,
-		d.checkHubCargoVariants, d.indexFuelRegions}
+		d.checkHubCargoVariants, d.indexFuelRegions, d.indexRefrigerants}
 	for _, step := range steps {
 		if err := step(); err != nil {
 			return nil, err
@@ -396,6 +412,15 @@ func (d *Dataset) indexHubs() (err error) {
 				return fmt.Errorf("hub factor for %s: ttw_g_per_tonne + wtt_g_per_tonne must equal wtw_g_per_tonne (per tonne only)", h.HubType)
 			}
 		}
+		if (h.TTWPerContainerG == nil) != (h.WTTPerContainerG == nil) {
+			return fmt.Errorf("hub factor for %s: give both ttw_g_per_container and wtt_g_per_container, or neither", h.HubType)
+		}
+		if h.TTWPerContainerG != nil {
+			ttw, wtt := *h.TTWPerContainerG, *h.WTTPerContainerG
+			if ttw < 0 || wtt < 0 || h.WTWPerContainerG == 0 || math.Abs(ttw+wtt-h.WTWPerContainerG) > 1e-6*math.Max(1, h.WTWPerContainerG) {
+				return fmt.Errorf("hub factor for %s: ttw_g_per_container + wtt_g_per_container must equal wtw_g_per_container", h.HubType)
+			}
+		}
 		return nil
 	}, "duplicate hub factor for %s")
 	return err
@@ -409,6 +434,36 @@ func (d *Dataset) indexFuels() (err error) {
 		return nil
 	}, "duplicate fuel factor for %s")
 	return err
+}
+
+// refKey is how refrigerant names are matched: "R-404A", "r404a" and
+// "R 404 A" are the same.
+func refKey(name string) string {
+	return strings.NewReplacer("-", "", " ", "").Replace(strings.ToUpper(strings.TrimSpace(name)))
+}
+
+func (d *Dataset) indexRefrigerants() error {
+	d.refIdx = map[string]Refrigerant{}
+	for _, r := range d.Refrigerants {
+		if r.GWP100 < 0 || strings.TrimSpace(r.Refrigerant) == "" {
+			return fmt.Errorf("refrigerant %q: needs a name and gwp100 >= 0", r.Refrigerant)
+		}
+		for _, n := range append([]string{r.Refrigerant}, r.Aliases...) {
+			if _, dup := d.refIdx[refKey(n)]; dup {
+				return fmt.Errorf("refrigerant %s defined twice", n)
+			}
+			d.refIdx[refKey(n)] = r
+		}
+	}
+	return nil
+}
+
+// Refrigerant returns a refrigerant's GWP by name or alias.
+func (d *Dataset) Refrigerant(name string) (Refrigerant, error) {
+	if r, ok := d.refIdx[refKey(name)]; ok {
+		return r, nil
+	}
+	return Refrigerant{}, fmt.Errorf("no GWP for refrigerant %q in dataset %q; give gwp and gwp_source", name, d.Name)
 }
 
 func (d *Dataset) checkDistanceAdjustments() error {

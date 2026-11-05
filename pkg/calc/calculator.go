@@ -345,7 +345,11 @@ func (c Calculator) Hub(h HubStop, cargoType string, tonnes float64) (HubResult,
 	if hf.DataType != "" {
 		hr.DataType = hf.DataType
 	}
-	if hf.TTWPerTonneG != nil && hf.WTTPerTonneG != nil && hf.WTWPerContainerG == 0 {
+	switch {
+	case hf.WTWPerContainerG > 0 && hf.TTWPerContainerG != nil && hf.WTTPerContainerG != nil:
+		ttw, wtt := h.Containers**hf.TTWPerContainerG/1000, h.Containers**hf.WTTPerContainerG/1000
+		hr.TTWKg, hr.WTTKg = &ttw, &wtt
+	case hf.WTWPerContainerG == 0 && hf.TTWPerTonneG != nil && hf.WTTPerTonneG != nil:
 		ttw, wtt := tonnes**hf.TTWPerTonneG/1000, tonnes**hf.WTTPerTonneG/1000
 		hr.TTWKg, hr.WTTKg = &ttw, &wtt
 	}

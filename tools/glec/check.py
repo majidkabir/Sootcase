@@ -78,6 +78,24 @@ for f in d["fuels"]:
     ok = pair(fuel_text, ttw, wtw)  # blends: WTT = WTW - TTW, the total as printed
     if not ok:
         bad.append(f"{f['fuel']}: {ttw} {wtw}")
+# Module 3, Table 2 (p. 117): each refrigerant's GWP100 in its own row (the table has two columns of rows; a row's
+# value is the last number after its type cell on that line, before the next type cell; a type cell starts the line
+# or follows 3+ spaces, unlike the refrigerants named inside a mixture).
+PRINTED = {"R-448A": "R-448a", "R-452A": "R-452a", "R-427A": "FX 100 (R-427A)"}
+types = [PRINTED.get(r["refrigerant"], r["refrigerant"]) for r in d.get("refrigerants", [])]
+rows = {}
+for line in pages[117 - 1].splitlines():
+    at = sorted((m.start(), t) for t in types for m in re.finditer(r"(?:^|(?<=   ))" + re.escape(t) + r"(?![\w(])", line))
+    for k, (pos, t) in enumerate(at):
+        seg = line[pos + len(t): at[k + 1][0] if k + 1 < len(at) else len(line)].replace(",", "")
+        nums = re.findall(r"(?<![\w.%-])\d+\.\d+(?![\d%])", seg)
+        if nums:
+            rows.setdefault(t, nums[-1])
+for r in d.get("refrigerants", []):
+    checked += 1
+    got = rows.get(PRINTED.get(r["refrigerant"], r["refrigerant"]))
+    if got is None or float(got) != r["gwp100"]:
+        bad.append(f"refrigerant {r['refrigerant']}: {r['gwp100']} (PDF row: {got})")
 print(f"{checked} values checked against the PDF, {len(bad)} not found")
 for b in bad:
     print("  NOT FOUND", b)
