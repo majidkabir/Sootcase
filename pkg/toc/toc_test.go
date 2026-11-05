@@ -73,6 +73,16 @@ func TestBuild_AgainstDESNZ(t *testing.T) {
 	if want := 2000 * (wantTTW + wantWTT) / 1000; math.Abs(r.Legs[0].WTWKg-want) > 1e-9 {
 		t.Errorf("toc leg = %v kg, want %v", r.Legs[0].WTWKg, want)
 	}
+	// The HOC keeps its TTW/WTT split (ISO 14083 13.3.2), and so does the hub's result.
+	el, _ := ds.FuelFactor("electricity/DNK")
+	if hub.TTWPerTonneG == nil || hub.WTTPerTonneG == nil ||
+		math.Abs(*hub.TTWPerTonneG+*hub.WTTPerTonneG-hub.WTWPerTonneG) > 1e-9 ||
+		math.Abs(*hub.TTWPerTonneG-400000*el.TTW*1000/50000) > 1e-9 {
+		t.Errorf("hoc split = %v + %v, want %v total", hub.TTWPerTonneG, hub.WTTPerTonneG, hub.WTWPerTonneG)
+	}
+	if h := r.Hubs[0]; h.TTWKg == nil || h.WTTKg == nil || math.Abs(*h.TTWKg+*h.WTTKg-h.WTWKg) > 1e-9 {
+		t.Errorf("hub result split = %v + %v, want %v", h.TTWKg, h.WTTKg, h.WTWKg)
+	}
 	wantShare := (r.Legs[0].WTWKg + r.Hubs[0].WTWKg) / r.WTWKg
 	if math.Abs(r.PrimaryDataShare-wantShare) > 1e-12 {
 		t.Errorf("primary share %v, want %v", r.PrimaryDataShare, wantShare)
@@ -132,5 +142,29 @@ func TestDistanceBasis(t *testing.T) {
 	}
 	if _, err := Parse(strings.NewReader(`{"tocs":[{"id":"a","mode":"sea","tonne_km":1,"distance_basis":"nm","fuels":[{"fuel":"x","amount":1}]}]}`)); err == nil {
 		t.Error("bad basis: want error")
+	}
+}
+
+// GLEC's hub defaults are WTW only: the result has no TTW/WTT split, rather
+// than a zero one.
+func TestHubDefault_WTWOnly(t *testing.T) {
+	ds, err := factors.Open(factors.Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds}
+	r, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 10_000,
+		Legs: []calc.Leg{{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 50}},
+		Hubs: []calc.HubStop{{ID: "w", HubType: "warehouse"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := r.Hubs[0]
+	if h.WTWKg <= 0 || h.TTWKg != nil || h.WTTKg != nil {
+		t.Errorf("default hub = %+v, want WTW only", h)
+	}
+	b, _ := json.Marshal(h)
+	if strings.Contains(string(b), "ttw_kg") || strings.Contains(string(b), "wtt_kg") {
+		t.Errorf("default hub JSON has a split: %s", b)
 	}
 }

@@ -186,6 +186,12 @@ func (f Factor) WTW() float64 { return f.TTW + f.WTT }
 type HubFactor struct {
 	HubType      string  `json:"hub_type"`
 	WTWPerTonneG float64 `json:"wtw_g_per_tonne"`
+	// TTWPerTonneG and WTTPerTonneG split WTWPerTonneG when the split is known
+	// (hub operation categories from the operator's own energy use; ISO 14083
+	// 13.3.2 asks for both at hub level). GLEC's hub defaults give WTW only,
+	// so they leave these out.
+	TTWPerTonneG *float64 `json:"ttw_g_per_tonne,omitempty"`
+	WTTPerTonneG *float64 `json:"wtt_g_per_tonne,omitempty"`
 	// WTWPerContainerG, when set, makes the factor per container handled
 	// instead of per tonne (HubStop.Containers).
 	WTWPerContainerG float64 `json:"wtw_g_per_container,omitempty"`
@@ -283,8 +289,12 @@ type HubResult struct {
 	Note       string  `json:"note,omitempty"` // e.g. the hub type the cargo type chose
 	Containers float64 `json:"containers,omitempty"`
 	WTWKg      float64 `json:"wtw_kg"`
-	DataType   string  `json:"data_type"`
-	Source     string  `json:"source"`
+	// TTWKg and WTTKg split WTWKg when the hub factor gives the split; left
+	// out (not zero) when it doesn't, e.g. for GLEC's WTW-only defaults.
+	TTWKg    *float64 `json:"ttw_kg,omitempty"`
+	WTTKg    *float64 `json:"wtt_kg,omitempty"`
+	DataType string   `json:"data_type"`
+	Source   string   `json:"source"`
 }
 
 // Data types, as ISO 14083 distinguishes them: measured by the operator

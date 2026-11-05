@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"math"
 	"os"
 	"path"
 	"sort"
@@ -385,6 +386,15 @@ func (d *Dataset) indexHubs() (err error) {
 		}
 		if h.WTWPerTonneG < 0 {
 			return fmt.Errorf("negative hub factor for %s", h.HubType)
+		}
+		if (h.TTWPerTonneG == nil) != (h.WTTPerTonneG == nil) {
+			return fmt.Errorf("hub factor for %s: give both ttw_g_per_tonne and wtt_g_per_tonne, or neither", h.HubType)
+		}
+		if h.TTWPerTonneG != nil {
+			ttw, wtt := *h.TTWPerTonneG, *h.WTTPerTonneG
+			if ttw < 0 || wtt < 0 || h.WTWPerContainerG > 0 || math.Abs(ttw+wtt-h.WTWPerTonneG) > 1e-6*math.Max(1, h.WTWPerTonneG) {
+				return fmt.Errorf("hub factor for %s: ttw_g_per_tonne + wtt_g_per_tonne must equal wtw_g_per_tonne (per tonne only)", h.HubType)
+			}
 		}
 		return nil
 	}, "duplicate hub factor for %s")

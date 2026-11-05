@@ -250,12 +250,12 @@ HOC intensity (g CO2e/t)   = Σ energy × energy factor / tonnes handled
 
 ```sh
 sootcase toc -o acme-2025.json examples/operations.json
-#  TOC dk_road_ambient   83.54 g CO2e/tkm WTW (64.33 TTW + 19.22 WTT)
-#  HOC cph_crossdock    777.4 g CO2e/t WTW
+#  TOC dk_road_ambient   93.51 g CO2e/tkm WTW (66.56 TTW + 26.95 WTT)
+#  HOC cph_crossdock    797.3 g CO2e/t WTW (188.7 TTW + 608.7 WTT)
 sootcase calc -factors desnz-2026,acme-2025.json shipment.json
 ```
 
-Fuels are converted with the selected dataset's fuel factors, including `electricity/<country>`.
+Fuels are converted with the selected dataset's fuel factors, including `electricity/<country>`. A HOC keeps its TTW and WTT parts (`ttw_g_per_tonne`, `wtt_g_per_tonne`), and hubs calculated with it show `ttw_kg` and `wtt_kg`, as ISO 14083 (13.3.2) asks at hub level. GLEC's hub default values are WTW only, so hubs on defaults show `wtw_kg` alone.
 
 ## Scenarios (what-if)
 
