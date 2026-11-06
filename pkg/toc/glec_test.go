@@ -39,9 +39,8 @@ const glecFuels = `{"name": "glec-v3.3-examples", "fuels": [
   {"fuel": "jet_kg",       "unit": "kg",  "ttw_kg_per_unit": 3.18, "wtt_kg_per_unit": 0.66, "source": "GLEC v3.3 Module 4 p.132"},
   {"fuel": "vlsfo_na_kg",  "unit": "kg",  "ttw_kg_per_unit": 3.16, "wtt_kg_per_unit": 0.68, "source": "GLEC v3.3 Module 4 p.136"},
   {"fuel": "mgo_na_kg",    "unit": "kg",  "ttw_kg_per_unit": 3.26, "wtt_kg_per_unit": 0.61, "source": "GLEC v3.3 Module 4 p.136"},
-  {"fuel": "electricity_hub", "unit": "kWh", "wtt_kg_per_unit": 0.335, "source": "GLEC v3.3 Module 4 Table 13 p.138, Germany"},
-  {"fuel": "electricity_hub_general", "unit": "kWh", "wtt_kg_per_unit": 0.44, "source": "GLEC v3.3 Module 4 Tables 14-15 p.138-139, 70,400 kg / 160,000 kWh as printed"},
-  {"fuel": "natural_gas_kwh", "unit": "kWh", "ttw_kg_per_unit": 0.29121875, "source": "GLEC v3.3 Module 4 Tables 14-15, 9,319 kg / 32,000 kWh (Table 13: 0.29)"}
+  {"fuel": "electricity_hub", "unit": "kWh", "wtt_kg_per_unit": 0.44284, "source": "GLEC v3.3 Module 4 Table 13 p.138, Germany: printed 0.443; Table 14's items use 0.44284 (487,124 kg / 1,100,000 kWh)"},
+  {"fuel": "natural_gas_kwh", "unit": "kWh", "ttw_kg_per_unit": 0.29, "source": "GLEC v3.3 Module 4 Table 13 p.138"}
 ]}`
 
 // glecWorld builds the operations into a layer and opens fuels + layer.
@@ -176,8 +175,7 @@ func TestGLEC_BulkSea(t *testing.T) {
 	f := layer.Legs[0]
 	near(t, "bulk TOC WTT (kg/tkm)", f.WTT/1000, 0.00121, 5)
 	near(t, "bulk TOC TTW (kg/tkm)", f.TTW/1000, 0.00564, 5)
-	// The text gives 0.00685 (5,174,459 / 755,830,574); Table 11 prints
-	// 0.00676 as the overall intensity, which isn't WTT + TTW.
+	// 0.00685 = 5,174,459 / 755,830,574 (Table 11 and the text).
 	near(t, "bulk TOC WTW (kg/tkm)", f.WTW()/1000, 0.00685, 5)
 
 	// Default bulk-terminal intensity used by the example, as a hub factor.
@@ -220,40 +218,36 @@ func TestGLEC_BulkSea(t *testing.T) {
 
 // Module 4, 5. Hub operations (p.138-139): a container terminal in Germany
 // handling 4,250,000 t a year, of which 50,000 t refrigerated, with the
-// emissions per activity of Tables 14 and 15.
-//
-// The published v3.3 example contradicts itself in three places; the test
-// follows the printed table items:
-//   - "General processes" electricity: 160,000 kWh -> 70,400 kg, i.e. 0.44
-//     kg/kWh, while Table 13 gives German electricity as 0.335 (used for the
-//     other two electricity items).
-//   - The items of "unspecified group" add up to 810,019 kg; the table and
-//     text print 814,019 (and 0.192 kg/t from it).
-//   - 5.1 divides 991,519 kg (the v3.2 edition's total) by 4,250,000 t for
-//     0.23 kg/t; Table 14's own total, 860,269 kg, gives 0.20.
+// emissions per activity of Tables 14 and 15. These are the figures of the
+// v3.3 PDF as SFC corrected it on 2026-11-06 (the first v3.3 PDF used 0.335
+// for German electricity and didn't add up). GLEC rounds the intensities
+// (0.22, 1.33) before applying them, so its client results are a little
+// higher than the unrounded calculation.
 func TestGLEC_Hub(t *testing.T) {
 	ds, layer := glecWorld(t, `{"name": "terminal", "period": "year",
 	  "hocs": [
 	    {"id": "terminal_all", "tonnes": 4250000, "energy": [
 	      {"fuel": "electricity_hub", "amount": 1100000}, {"fuel": "diesel", "amount": 75000},
 	      {"fuel": "diesel_eu_b5", "amount": 30000}, {"fuel": "natural_gas_kwh", "amount": 32000},
-	      {"fuel": "electricity_hub_general", "amount": 160000}, {"fuel": "electricity_hub", "amount": 150000}]},
+	      {"fuel": "electricity_hub", "amount": 160000}, {"fuel": "electricity_hub", "amount": 150000}]},
 	    {"id": "terminal_general", "tonnes": 4250000, "energy": [
 	      {"fuel": "electricity_hub", "amount": 1100000}, {"fuel": "diesel", "amount": 75000},
 	      {"fuel": "diesel_eu_b5", "amount": 30000}, {"fuel": "natural_gas_kwh", "amount": 32000},
-	      {"fuel": "electricity_hub_general", "amount": 160000}]},
+	      {"fuel": "electricity_hub", "amount": 160000}]},
 	    {"id": "terminal_reefer_extra", "tonnes": 50000, "energy": [{"fuel": "electricity_hub", "amount": 150000}]}
 	  ]}`)
 	byID := map[string]float64{}
 	for _, h := range layer.Hubs {
 		byID[h.HubType] = h.WTWPerTonneG / 1000
 	}
-	near(t, "Table 14 item: handling electricity (kg)", 1_100_000*0.335, 368_500, 0)
-	near(t, "Table 14 item: reefer station (kg)", 150_000*0.335, 50_250, 0)
-	near(t, "HOC total emissions, Table 14 (kg)", byID["terminal_all"]*4_250_000, 860_269, 0)
-	near(t, "HOC average intensity from Table 14's total (kg/t)", byID["terminal_all"], 0.20, 2)
-	near(t, "emissions 'unspecified group', sum of items (kg)", byID["terminal_general"]*4_250_000, 810_019, 0)
-	near(t, "intensity 'refrigerated freight' (kg/t)", byID["terminal_reefer_extra"], 1.01, 2)
+	near(t, "Table 14 item: handling electricity (kg)", 1_100_000*0.44284, 487_124, 0)
+	near(t, "Table 14 item: general processes electricity (kg)", 160_000*0.44284, 70_854, 0)
+	near(t, "Table 14 item: reefer station (kg)", 150_000*0.44284, 66_426, 0)
+	near(t, "HOC total emissions, Table 14 (kg)", byID["terminal_all"]*4_250_000, 995_484, 0)
+	near(t, "HOC average intensity, 5.1 (kg/t)", byID["terminal_all"], 0.23, 2)
+	near(t, "emissions 'unspecified group', Table 15 (kg)", byID["terminal_general"]*4_250_000, 929_058, 0)
+	near(t, "intensity 'general' (kg/t)", byID["terminal_general"], 0.22, 2)
+	near(t, "intensity 'refrigerated freight' (kg/t)", byID["terminal_reefer_extra"], 1.33, 2)
 
 	c := calc.Calculator{Factors: ds}
 	leg := []calc.Leg{{Mode: calc.Road, DistanceKm: 1, Fuel: &calc.FuelUse{Fuel: "diesel", Amount: 0}}}
@@ -262,19 +256,20 @@ func TestGLEC_Hub(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// GLEC: 87 t x 0.192 kg/t = 16.7 kg, on its 814,019 kg. On the items'
-	// 810,019 kg the intensity is 0.1906 kg/t and the transfer 16.6 kg.
-	near(t, "ambient client transfer, GLEC arithmetic (kg)", 87*0.192, 16.7, 1)
-	near(t, "ambient client transfer (kg)", ambient.WTWKg, 16.6, 1)
+	// GLEC: 87 t x 0.22 kg/t = 19.14 kg; unrounded (0.2186 kg/t) 19.02 kg.
+	near(t, "ambient client transfer, GLEC arithmetic (kg)", 87*0.22, 19.14, 2)
+	near(t, "ambient client transfer (kg)", ambient.WTWKg, 19.02, 2)
 
-	// Refrigerated freight takes both: general + reefer station, 1.2 kg/t.
+	// Refrigerated freight takes both: general + reefer station, 1.55 kg/t.
 	reefer, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 100_000, Legs: leg,
 		Hubs: []calc.HubStop{{HubType: "terminal_general"}, {HubType: "terminal_reefer_extra"}}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	near(t, "refrigerated intensity (kg/t)", byID["terminal_general"]+byID["terminal_reefer_extra"], 1.2, 1)
-	near(t, "refrigerated client transfer (kg)", reefer.WTWKg, 120, 0)
+	near(t, "refrigerated intensity, GLEC (kg/t)", 0.22+1.33, 1.55, 2)
+	near(t, "refrigerated intensity (kg/t)", byID["terminal_general"]+byID["terminal_reefer_extra"], 1.55, 2)
+	// GLEC: 100 t x 1.55 kg/t = 155 kg; unrounded 154.7 kg.
+	near(t, "refrigerated client transfer (kg)", reefer.WTWKg, 154.7, 1)
 	if reefer.Hubs[0].DataType != calc.DataPrimary {
 		t.Errorf("HOC from measured energy should be primary data, got %q", reefer.Hubs[0].DataType)
 	}

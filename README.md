@@ -202,13 +202,13 @@ Turn it off with `"add_road_legs": false` on a shipment, `?add_road_legs=false` 
 
 ## Verified against GLEC
 
-[`pkg/toc/glec_test.go`](pkg/toc/glec_test.go) reproduces worked examples from the GLEC Framework v3.3 (Section 3, Module 4) end to end through Sootcase: fuel and activity data → TOC/HOC intensities → shipment emissions. Road (p.119), a hybrid diesel/electric fleet (p.121), refrigerant losses of a temperature-controlled fleet (p.123), air (p.131–132), bulk sea with hubs (p.135–136) and a two-intensity container terminal (p.138–139) all match GLEC's published figures to the precision printed, except where the example contradicts itself. Notes from doing this:
+[`pkg/toc/glec_test.go`](pkg/toc/glec_test.go) reproduces worked examples from the GLEC Framework v3.3 (Section 3, Module 4; the PDF as Smart Freight Centre updated it on 6 November 2026) end to end through Sootcase: fuel and activity data → TOC/HOC intensities → shipment emissions. Road (p.119), a hybrid diesel/electric fleet (p.121), refrigerant losses of a temperature-controlled fleet (p.123), air (p.131–132), bulk sea with hubs (p.135–136) and a two-intensity container terminal (p.138–139) all match GLEC's published figures to the precision printed. Notes from doing this:
 
 - GLEC sometimes rounds an intensity before applying it (air: 1.244 kg/tkm), so a few published results differ from the unrounded calculation in the last digit. The tests allow for that.
-- Hub example: the "general processes" electricity (70,400 kg for 160,000 kWh) uses 0.44 kg/kWh, while Table 13 gives 0.335; the items of the "unspecified group" add up to 810,019 kg, not the printed 814,019 (so 0.191 kg/t, not 0.192, and 16.6 kg, not 16.7, for the 87 t transfer); and 5.1 divides the v3.2 edition's total (991,519 kg) instead of Table 14's 860,269 kg (0.20 kg/t, not 0.23). The tests follow the printed table items.
-- Bulk sea: Table 11 prints 0.00676 kg/tkm as the overall TOC intensity; the text's 0.00685 is WTT + TTW and is what Sootcase gives.
+- Hub example: GLEC rounds the intensities (0.22 and 1.33 kg/t) before applying them, so its client results (19.14 and 155 kg) are slightly above the unrounded ones (19.02 and 154.7 kg). Table 13 prints German electricity as 0.443 kg/kWh; Table 14's items use 0.44284.
+- Smart Freight Centre corrected several figures in the v3.3 PDF on 6 November 2026 after Sootcase's tests found them (hub example, bulk sea Table 11, parcels, Module 5).
 - Refrigerants: GLEC prints the reefer units' loss rounded (17.88 kg, 20.13 kg in all), but its total (30,791.25 kg CO2e) uses 17.875 kg. The test uses 17.875.
-- Hybrid fleet: GLEC prints 334.47 g/kWh as "equivalent" to Module 1's 92.8 g/MJ, which is 334.08 g/kWh. The test uses the printed value; Sootcase's GLEC dataset uses 92.8 g/MJ.
+- Hybrid fleet: GLEC prints 334.47 g/kWh as "equivalent" to Module 1's 92.8 g/MJ; SFC's working file converts with 3.6042 MJ/kWh (3.6 gives 334.08). The test uses the printed value; Sootcase's GLEC dataset uses 92.8 g/MJ.
 
 ## Reporting
 
