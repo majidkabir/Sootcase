@@ -554,6 +554,7 @@ async function postReport(body, format) {
 }
 
 let reportBusy = false;
+let lastReportBody = null; // the shipments of the report shown, for the iLEAP download
 
 async function makeReport(e, body) {
   e && e.preventDefault();
@@ -592,7 +593,36 @@ async function makeReport(e, body) {
     reportBusy = false;
   }
   if (!res.ok) { $("#rerror").textContent = r.error || `Request failed (HTTP ${res.status}).`; return; }
+  lastReportBody = body;
   renderReport(r);
+}
+
+// The same shipments in the iLEAP data model (ShipmentFootprints, TOCs, HOCs),
+// with what iLEAP requires that the data lacks listed, not guessed.
+async function downloadILEAP() {
+  const btn = $("#dl-ileap"), msg = $("#ileap-msg");
+  if (!lastReportBody || btn.disabled) return;
+  const q = new URLSearchParams();
+  const org = $("#rorg").value.trim();
+  if (org) q.set("company", org);
+  if ($("#rfrom").value) q.set("period_from", $("#rfrom").value);
+  if ($("#rto").value) q.set("period_to", $("#rto").value);
+  if (!$("#rroadlegs").checked) q.set("add_road_legs", "false");
+  btn.disabled = true; msg.textContent = "Making the iLEAP file…";
+  let res, r;
+  try {
+    res = await fetch("v1/ileap?" + q, { method: "POST", headers: { "Content-Type": "text/csv" }, body: lastReportBody });
+    r = await res.json();
+  } catch {
+    msg.textContent = "Couldn't reach the Sootcase server, or it took too long. Try again.";
+    return;
+  } finally { btn.disabled = false; }
+  if (!res.ok) { msg.textContent = r.error || `Request failed (HTTP ${res.status}).`; return; }
+  download(JSON.stringify(r, null, 2), "application/json", "ileap.json");
+  const gaps = (r.gaps || []).length;
+  msg.textContent = r.conformant ? "Downloaded: complete, every value iLEAP requires is in it."
+    : `Downloaded. ${gaps} value${gaps === 1 ? "" : "s"} iLEAP requires ${gaps === 1 ? "isn't" : "aren't"} in the data: listed under "gaps" in the file, not guessed`
+      + (!org || !$("#rfrom").value || !$("#rto").value ? " (fill in organisation and period to add those)." : ".");
 }
 
 const pct = v => fmt(v * 100, 1) + "%";
@@ -626,7 +656,9 @@ function renderReport(r) {
       ${c.failed ? `<strong>${c.failed} of ${c.shipments} shipments excluded</strong> (see below).` : ""}
       ${c.retryable_failed ? `<strong>${c.retryable_failed} of them failed for a temporary reason, not the data: make the report again.</strong>` : ""}</p>
     <div class="actions"><button type="button" class="btn" id="dl-md">Report as Markdown</button>
-      <button type="button" class="btn" id="dl-json">Report as JSON</button></div>
+      <button type="button" class="btn" id="dl-json">Report as JSON</button>
+      <button type="button" class="btn" id="dl-ileap">iLEAP (JSON)</button></div>
+    <p class="id" id="ileap-msg" role="status">iLEAP: the same shipments in the <a href="https://specs.ileap.global/" rel="noopener">iLEAP</a> v1.1.0 format, for sharing with partners. Uses the organisation and period above.</p>
     ${(r.results || []).length ? `<p class="id">Each shipment's full calculation, as for a single shipment above:</p>
     <div class="actions"><button type="button" class="btn" id="dl-rcsv">Shipments as CSV (a row per leg)</button>
       <button type="button" class="btn" id="dl-rjson">Shipments as JSON</button></div>` : ""}
@@ -662,6 +694,7 @@ function renderReport(r) {
   const { results, markdown, ...rep } = r;
   $("#dl-json").addEventListener("click", () => download(JSON.stringify(rep, null, 2), "application/json", "emissions-report.json"));
   $("#dl-md").addEventListener("click", () => download(markdown || "", "text/markdown", "emissions-report.md"));
+  $("#dl-ileap").addEventListener("click", downloadILEAP);
   if ((results || []).length) {
     $("#dl-rcsv").addEventListener("click", () => download("\ufeff" + resultsCSV(results), "text/csv", "emissions-by-shipment.csv"));
     $("#dl-rjson").addEventListener("click", () => download(JSON.stringify(results, null, 2), "application/json", "emissions-by-shipment.json"));
