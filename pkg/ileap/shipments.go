@@ -240,6 +240,9 @@ func (b *builder) location(p *calc.Location) *Location {
 		return nil
 	}
 	city := strings.TrimSpace(p.Name)
+	if p.Code != "" { // "Shanghai Pt (CNSHG)": the code goes in locode
+		city = strings.TrimSpace(strings.TrimSuffix(city, "("+p.Code+")"))
+	}
 	if b.opts.City != nil {
 		if c, _, ok := b.opts.City(*p); ok && c != "" {
 			city = c
