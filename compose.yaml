@@ -69,7 +69,7 @@ services:
     environment:
       SOOTCASE_OSRM_URL: http://osrm:5000
       SOOTCASE_SEA_NETWORK: /sea/marnet.geojson
-      SOOTCASE_FACTORS: ${SOOTCASE_FACTORS:-desnz-2026,nl-iww-2026,eu-mrv-2024}
+      SOOTCASE_FACTORS: ${SOOTCASE_FACTORS:-desnz-2026,nl-iww-2026,eu-mrv-2024,glec-3.3}
     volumes:
       - sea-data:/sea:ro
     ports:

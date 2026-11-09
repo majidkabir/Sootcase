@@ -10,13 +10,13 @@
 
 Source-available freight emissions calculator following the GLEC Framework / ISO 14083 approach. Free for non-commercial use; see [License](#license).
 
-**Try it at [sootcase.org](https://sootcase.org)**: a free test service with worldwide road, rail, inland waterway and sea routing. Sign in with your email to use the calculator and get an API key.
+**Try it at [sootcase.org](https://sootcase.org)**: a free test service with worldwide road, rail, inland waterway and sea routing. No sign-up needed for the calculator; sign in with your email for an API key and bigger files.
 
 ![The Sootcase web page: a shipment entered leg by leg on the left; on the right its emissions, a bar per leg split into vehicle and fuel-supply emissions, and the route on a map](docs/screenshot.png)
 
 <sub>The calculator on sootcase.org, 2 November 2026, GLEC Framework v3.3 default values. Map: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.</sub>
 
-Ships with the **GLEC Framework v3.3 default values** built in (Smart Freight Centre, used with permission): road by region, rail, air, inland waterway, container ships by trade lane, other ships by size and fuel, and logistics hubs; GLEC's fuel emission factors (Module 1) for measured fuel; plus the **UK DESNZ 2026** conversion factors for load models, ferries and the rest. Every factor is split into tank-to-wheel and well-to-tank.
+Ships with the **GLEC Framework v3.3 default values** built in (Smart Freight Centre, used with permission): road by region, rail, air, inland waterway, container ships by trade lane, other ships by size and fuel, and logistics hubs; GLEC's fuel emission factors (Module 1) for measured fuel; plus the **UK DESNZ 2026** conversion factors for load models, ferries and the rest. Every transport factor is split into tank-to-wheel and well-to-tank (GLEC's hub values are well-to-wheel only).
 
 ## Quick start
 
@@ -102,11 +102,11 @@ This is the capacity-utilisation approach EcoTransIT World and GLEC use, built e
 
 **Own values** — a leg's `own_factor` (`wtw_g_per_tkm`, `ttw_g_per_tkm`, `source`, optional `distance_basis`) uses the carrier's or your own intensity instead of a default value, as primary data (ISO 14083 7.2.3); a DAF applies when its distance basis differs from the leg's. With measured fuel, `fuel.factor` (`unit`, `wtw_kg_per_unit`, `ttw_kg_per_unit`, `source`, optional `biogenic_co2_kg_per_unit`) uses the fuel supplier's emission factor instead of the dataset's. In CSV: `own_wtw_g_per_tkm`, `own_ttw_g_per_tkm`, `own_factor_source`, `own_distance_basis`; `fuel_unit`, `fuel_wtw_kg_per_unit`, `fuel_ttw_kg_per_unit`, `fuel_factor_source`, `fuel_biogenic_co2_kg_per_unit`.
 
-**Energy** — when a leg has `energy_kwh_per_tkm` and `country` (ISO alpha-3, e.g. `DNK`), for electric trains or trucks: the electricity used per tonne-km × that country's grid intensity, all well-to-tank (nothing is emitted at the vehicle). Grid intensities for 213 countries come from Ember via Our World in Data (2024–2025 values). There's no default energy figure: give your operator's, or your own. For metered kWh use the fuel method with fuel `electricity/DNK`.
+**Energy** — when a leg has `energy_kwh_per_tkm` and `country` (ISO alpha-3, e.g. `DNK`), for electric trains or trucks: the electricity used per tonne-km × that country's grid intensity, all well-to-tank (nothing is emitted at the vehicle). Grid intensities for 213 countries come from Ember via Our World in Data, the latest year for each: 2024 or 2025 for 195 of them, older for 18 (the oldest, Western Sahara, 2009). There's no default energy figure: give your operator's, or your own. For metered kWh use the fuel method with fuel `electricity/DNK`.
 
 **Repositioning** — `repositioning_km` on a truck leg: km driven empty for this trip (to the pickup, or back after delivery). They are shared over the truck's load like empty running: added to the empty trip factor as km per actual loaded km. Without a load, the shipment is taken as the whole load (a dedicated truck).
 
-**Hubs** add `weight_t × hub g/t / 1000` (WTW) to the total. Intensity (g/tkm) covers transport only.
+**Hubs** add `weight_t × hub g/t / 1000` to the total, or `containers × hub g/container / 1000` for per-container hub types; GLEC's hub values are WTW only, a HOC from your own data keeps its TTW and WTT. Intensity (g/tkm) covers transport only.
 
 **GHG Protocol scopes** — every result has `ghg_protocol`: for a company buying the transport, all of it is scope 3 (category 4 for transport it pays for, inbound or outbound; category 9 for sold products moved by transport it doesn't pay for); for the operator of the vehicles, scope 1 (fuel burnt), scope 2 (electricity used, including the upstream share its factor contains) and scope 3 category 3 (producing and delivering the fuel). Hubs are well-to-wheel only and given apart. Reports take `scope3_category` (4 or 9) to name the category. Battery electric vehicle factors from DESNZ (electricity generation and T&D) are counted as energy provision (WTT), none at the vehicle (DESNZ methodology, Table 15).
 
@@ -118,8 +118,8 @@ This is the capacity-utilisation approach EcoTransIT World and GLEC use, built e
 | sea | shortest route on a maritime network, with `-sea-network file.geojson` | shortest feasible (`sfd`) |
 | rail | an OSRM server built with the rail profile, with `-osrm-rail URL` | shortest feasible (`sfd`) |
 | inland waterway | an OSRM server built with the barge profile, with `-osrm-waterway URL` | shortest feasible (`sfd`) |
-| air, and rail or inland waterway without a server | great-circle | great-circle (`gcd`) |
-| road without a server | great-circle, refused when no DAF converts it to the factor's distance basis (all built-in road factors: give `distance_km`, see DAF below) | great-circle (`gcd`) |
+| air, and rail without a server | great-circle | great-circle (`gcd`) |
+| road, sea or inland waterway without a server | great-circle, refused when no DAF converts it to the factor's distance basis (all built-in road, container ship and inland waterway factors: give `distance_km`, see DAF below; DESNZ's other ships state no basis and take it) | great-circle (`gcd`) |
 
 A dataset may also define `distance_adjustments` (`gcd × multiplier + add_km`) to estimate route distance from great-circle for a mode; the result then has no known type.
 
@@ -133,7 +133,7 @@ A dataset may also define `distance_adjustments` (`gcd × multiplier + add_km`) 
 
 DESNZ air factors are per great-circle tonne-km, as GLEC and ISO 14083 measure air; so a great-circle leg needs no DAF and a flown distance gets the air DAF. DESNZ road factors and load models are per km actually driven (fuel use from the DfT road freight survey), so a routed road distance gets the road DAF and a given `actual` distance none; GLEC gives no DAF from great-circle to actual for road, so a road leg without a router needs `distance_km`. A mismatch with no DAF is an error rather than a silent guess. Results report `distance_type`, `daf` and `daf_source` per leg.
 
-Each leg result records `distance_method` (`given`, `osrm`, `sea_network`, `great_circle`, `great_circle_adjusted`) so every number can be traced. Plain great-circle badly understates sea distances (Rotterdam–Shanghai: 8,970 km vs 19,696 km routed), so use a sea network for sea legs.
+Each leg result records `distance_method` (`given`, `osrm`, `sea_network`, `great_circle`, `great_circle_adjusted`) so every number can be traced. Plain great-circle badly understates sea distances (Rotterdam to Shanghai, city centres: 8,927 km great-circle vs 19,730 km on the 20 km sea network, measured on sootcase.org in November 2026), so use a sea network for sea legs.
 
 ### Sea routing
 
@@ -253,6 +253,7 @@ HOC intensity (g CO2e/container) = the same / containers handled, for container 
 ```sh
 sootcase toc -o acme-2025.json examples/operations.json
 #  TOC dk_road_ambient    93.51 g CO2e/tkm WTW (66.56 TTW + 26.95 WTT)
+#  TOC dk_road_electric   33.05 g CO2e/tkm WTW (0.00 TTW + 33.05 WTT)
 #  HOC cph_crossdock      797.3 g CO2e/t WTW (188.7 TTW + 608.7 WTT)
 #  HOC cph_cold_store    7372.3 g CO2e/t WTW (3940.0 TTW + 3432.3 WTT)
 #  HOC aarhus_terminal   6254.0 g CO2e/container WTW (3340.8 TTW + 2913.2 WTT)
@@ -334,7 +335,7 @@ Not taken into account (also in every result): transit times and costs; whether 
 |---|---|
 | `shipment_id` | required |
 | `weight_kg`, or `teu` with `teu_net_tonnes` / `container_load` | cargo; can be on the first row only |
-| `cargo_type` | optional: GLEC cargo or load category (see below) |
+| `cargo_type` | optional: GLEC cargo or load category (see above) |
 | `leg_id`, `mode`, `vehicle_type`, `distance_km`, `distance_type` | leg |
 | `from_lat`, `from_lon`, `to_lat`, `to_lon` | leg, when `distance_km` is empty |
 | `from_code`, `to_code` | leg, instead of coordinates: a UN/LOCODE (`NLRTM`) or IATA airport code (`CPH`) |
@@ -354,7 +355,7 @@ A bad row fails only its shipment; the rest still calculate. Only failures cause
 
 `sootcase serve` also serves a page at `/`: enter a shipment leg by leg, picking each leg's start and end by name or code (cities, ports, rail and road terminals, airports; the list follows the mode), and see its emissions, a bar of each leg's share split into vehicle and fuel-supply emissions, and for every number the distance method, calculation method, data type and factor source. It opens with a worked example.
 
-Below it, **Report** takes a shipments CSV (the `batch` columns), an organisation and a period, and shows the [report](#report-over-many-shipments): totals, modes, hubs, energy carriers, data quality, notes. Download it as Markdown or JSON, and each shipment's full calculation as CSV (a row per leg and hub: distance and how it was found, method, data type, emissions, factor source, notes on added legs) or JSON, all from the one calculation. `POST /v1/report` takes the CSV directly with `Content-Type: text/csv`, report details in the query (`?organisation=...&period_from=...`).
+Below it, **Report** takes a shipments CSV (the `batch` columns), an organisation and a period, and shows the [report](#report-over-many-shipments): totals, modes, hubs, energy carriers, data quality, notes. Download it as Markdown or JSON, each shipment's full calculation as CSV (a row per leg and hub: distance and how it was found, method, data type, emissions, factor source, notes on added legs) or JSON, and the shipments in the [iLEAP data model](#ileap-export) (JSON), all from the one calculation. **Scenarios** below it runs the same file through the [what-if changes](#scenarios-what-if). `POST /v1/report` takes the CSV directly with `Content-Type: text/csv`, report details in the query (`?organisation=...&period_from=...`).
 
 **Check the calculation.** Under each result, "Check the calculation step by step" lays out every step: the cargo mass, each leg's distance and how it was found, the transport activity, the intensity (the factor and its source, the load model's per-km values, the DAF, the fuel or electricity used) and the emissions, then the total and the data quality. Each step shows its arithmetic with the numbers used, and the GLEC Framework v3.3 page and ISO 14083:2023 clause it follows (the clause numbers are those GLEC lists in its "ISO References" boxes), so someone who knows the methods can redo it by hand. Download it as Markdown, or print it to PDF. The API gives the same with `POST /v1/calculate?explain=true`.
 
@@ -376,10 +377,12 @@ Each output line is `{"line": n, "shipment_id": "...", "result": {...}}`, or `{"
 
 | Method | Path | |
 |---|---|---|
-| `POST` | `/v1/calculate` | one shipment; `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point); `?country_km=true` adds each road and rail leg's km by country (`legs[].country_km`, ISO 3166-1 alpha-2, `XK` for Kosovo, Natural Earth's three-letter code for the few areas without one; ferry km stay in `route_parts_km`), and in Belgium by region (`legs[].region_km`: `BE-VLG`, `BE-WAL`, `BE-BRU`, ISO 3166-2; from Statbel's statistical sectors, CC BY 4.0) |
+| `POST` | `/v1/calculate` | one shipment; `?explain=true` adds the step-by-step calculation sheet (`explanation`); `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point); `?country_km=true` adds each road and rail leg's km by country (`legs[].country_km`, ISO 3166-1 alpha-2, `XK` for Kosovo, Natural Earth's three-letter code for the few areas without one; ferry km stay in `route_parts_km`), and in Belgium by region (`legs[].region_km`: `BE-VLG`, `BE-WAL`, `BE-BRU`, ISO 3166-2; from Statbel's statistical sectors, CC BY 4.0) |
 | `POST` | `/v1/calculate/batch` | `{"shipments": [...]}`, up to 10,000; `?country_km=true` as for one shipment |
 | `POST` | `/v1/ileap` | the shipments as iLEAP ShipmentFootprints with their TOCs and HOCs (`company`, `company_ids`, `period_from`, `period_to`, `shipments`), and the `gaps` iLEAP requires that the data lacks |
 | `POST` | `/v1/ileap/operations` | an operator's measured data (`operations`, as for `sootcase toc`) as iLEAP TOCs and HOCs |
+| `POST` | `/v1/scenario` | the shipments now and with a plan's changes (`{"shipments", "plan"}`, or CSV with `?plan=`); see [Scenarios](#scenarios-what-if) |
+| `POST` | `/v1/recommend` | route changes that lower each shipment's emissions (`{"shipments", "settings"}`, or CSV with `?settings=`); see [Recommendations](#recommendations-route-changes) |
 | `POST` | `/v1/report` | `{"organisation", "period_from", "period_to", "shipments": [...]}`, JSON or `?format=md`; with `?results=true`, `?country_km=true` as for one shipment |
 | `GET` | `/v1/places?q=rotterdam&kind=port` | find places by name, UN/LOCODE or IATA code |
 | `GET` | `/v1/factors` | loaded dataset |
@@ -387,7 +390,7 @@ Each output line is `{"line": n, "shipment_id": "...", "result": {...}}`, or `{"
 | `GET` | `/healthz` | liveness |
 | `GET` | `/` | web page |
 
-A leg's `from` and `to` can be a code instead of coordinates: `{"code": "NLRTM"}` (UN/LOCODE) or `{"code": "CPH"}` (IATA); in CSV, `from_code` and `to_code`. The place list is embedded (about 160,000 places: GeoNames cities of 5,000 people or more, UN/LOCODE transport locations with coordinates, airports with IATA codes) and rebuilt monthly by `tools/gazetteer`; searches need no outside service.
+A leg's `from` and `to` can be a code instead of coordinates: `{"code": "NLRTM"}` (UN/LOCODE) or `{"code": "CPH"}` (IATA); in CSV, `from_code` and `to_code`. The place list is embedded (about 180,000 places: GeoNames cities of 5,000 people or more, UN/LOCODE transport locations with coordinates, airports with IATA codes) and rebuilt monthly by `tools/gazetteer`; searches need no outside service.
 
 Protections for running it on a network: at most `-max-concurrent` calculation requests at once (default 4 × CPUs; more get `503` with `Retry-After`), a `-request-timeout` per request (default 30 s, then `504`), `-max-legs` per shipment (default 100), big batches taking turns (batches and reports of `-big-batch` shipments or more, default 1,000, run `-big-concurrent` at a time, default 2; the rest wait in line, first come first served), at most 32 requests at a time to each OSRM server (the rest wait instead of timing out), 10 MiB bodies, 10,000 shipments per batch, panics answered with `500` without taking the server down, and `nosniff`/`no-store` headers. There's no authentication: put it behind your own gateway if it faces the internet.
 
@@ -405,13 +408,13 @@ Protections for running it on a network: at most `-max-concurrent` calculation r
 
 The default is `desnz-2026,nl-iww-2026,eu-mrv-2024,glec-3.3`: GLEC's aliases come last, so they win; the other datasets' vehicle types stay available by their full ids.
 
-A dataset is JSON with `legs` (g CO2e/tkm), `hubs` (g CO2e/t), `fuels` (kg CO2e/unit) and optional `load_models`, `dafs`, `distance_adjustments`, `vehicle_aliases`, `fuel_aliases` and `container_loads`, each factor with a TTW/WTT split, source and year. See [`sample.json`](pkg/factors/data/sample.json) for the shape.
+A dataset is JSON with `legs` (g CO2e/tkm), `hubs` (g CO2e/t or per container), `fuels` (kg CO2e/unit) and optional `load_models`, `dafs`, `distance_adjustments`, `vehicle_aliases`, `fuel_aliases`, `fuel_regions`, `regions`, `container_loads`, `cargo_types`, `cargo_variants`, `hub_cargo_variants` and `refrigerants`, each factor with its source and year, and a TTW/WTT split where the source gives one. See [`sample.json`](pkg/factors/data/sample.json) for the shape.
 
 **Vehicle types and fuel ids** follow the source's labels, e.g. `hgv_refrigerated_all_diesel/articulated_33t/100pct_laden` or `liquid_fuels/marine_gas_oil/tonnes`. Run `sootcase factors` to list them. Common ones have short aliases; results always show the full id used:
 
 | Mode | Aliases |
 |---|---|
-| road | `hgv`, `hgv_rigid`, `hgv_artic`, `hgv_artic_33t`, `hgv_reefer`, `van`, `truck_urban` (GLEC, by region), `van_electric`, `truck_electric` (GLEC: Europe × GLEC's European electricity, China, India; elsewhere refused) |
+| road | `hgv`, `hgv_rigid`, `hgv_artic`, `hgv_artic_33t`, `hgv_reefer`, `van`, `truck_urban` (GLEC, by region), `van_electric`, `truck_electric` (GLEC: Europe × GLEC's European electricity, China, India; elsewhere refused), `truck_bio_lng` (GLEC artic 34–40 t bio-LNG; Europe, South America, Asia, Africa) |
 | rail | `freight_train` (GLEC, by region), `freight_train_diesel`, `freight_train_electric` (GLEC Europe), `freight_train_reefer` (GLEC +12%; not for North America) |
 | sea | `container_ship`, `container_ship_reefer` (GLEC, by trade lane), `container_ship_short_sea`, `container_ship_deep_sea` (EU MRV), `bulk_carrier`, `general_cargo`, `roro`, `ropax` (DESNZ) |
 | air | `air_freight` (GLEC, aircraft type unknown; short-haul under 1,500 km; within India GLEC's Indian value), `air_freighter`, `air_belly` |
@@ -422,11 +425,11 @@ A dataset is JSON with `legs` (g CO2e/tkm), `hubs` (g CO2e/t), `fuels` (kg CO2e/
 
 **Inland waterways** (`nl-iww-2026`): three bulk vessel classes (`barge_bulk_small`/`medium`/`large`, 300 t to 11,000 t) and four container vessels (`barge_container_40teu`, `96teu`, `208teu`, `348teu`). Factors are per *actual* tonne-km and include sailing empty. Give coordinates with [waterway routing](#inland-waterway-routing) set up, or the river distance as `distance_km`; a shortest feasible distance (`distance_type: sfd`) is used as is, since GLEC needs no DAF for inland waterways. Without routing, a leg with only coordinates is refused: a straight line would undercount a river route, and there's no default correction for it. Source: www.co2emissiefactoren.nl, free to use with attribution.
 
-**Container ships** (`eu-mrv-2024`): from what container ships calling at EU ports reported for 2024 under the EU MRV regulation (Regulation (EU) 2015/757): fuel, CO2e and transport work (cargo mass × distance actually sailed), per ship, as published by the European Maritime Safety Agency ([THETIS-MRV](https://mrv.emsa.europa.eu/#public/emission-report); reproduction authorised with acknowledgement of the source). Ships that emit at least half their voyage CO2 between EU ports count as short-sea (350 ships), the rest as deep-sea (1,643 ships); each factor is its fleet's total CO2e divided by its total transport work, so big ships weigh in by the work they do. Well-to-tank is the fuel they reported × DESNZ's marine fuel oil well-to-tank. Factors are per *actual* tonne-km, so a routed sea distance gets the GLEC sea DAF (× 1.15). `container_ship` means the short-sea factor on legs under 2,000 km and the deep-sea factor from 2,000 km (Sootcase's threshold, not a standard's); the leg's note says which, and `container_ship_short_sea` or `container_ship_deep_sea` choose one. DESNZ's container ship factors by size stay available by their full ids (e.g. `cargo_ship/container_ship/8000_teu`). Rebuilt by `tools/mrv`.
+**Container ships** (`eu-mrv-2024`): from what container ships calling at EU ports reported for 2024 under the EU MRV regulation (Regulation (EU) 2015/757): fuel, CO2e and transport work (cargo mass × distance actually sailed), per ship, as published by the European Maritime Safety Agency ([THETIS-MRV](https://mrv.emsa.europa.eu/#public/emission-report); reproduction authorised with acknowledgement of the source). Ships that emit at least half their voyage CO2 between EU ports count as short-sea (350 ships), the rest as deep-sea (1,643 ships); each factor is its fleet's total CO2e divided by its total transport work, so big ships weigh in by the work they do. Well-to-tank is the fuel they reported × DESNZ's marine fuel oil well-to-tank. Factors are per *actual* tonne-km, so a routed sea distance gets the GLEC sea DAF (× 1.15). In this dataset, `container_ship` means the short-sea factor on legs under 2,000 km and the deep-sea factor from 2,000 km (Sootcase's threshold, not a standard's); in the default layering GLEC's `container_ship` (trade lanes) wins, and `container_ship_short_sea` or `container_ship_deep_sea` choose the EU MRV factors. DESNZ's container ship factors by size stay available by their full ids (e.g. `cargo_ship/container_ship/8000_teu`). Rebuilt by `tools/mrv`.
 
 Why: DESNZ's container ship factors (about 20 g CO2e per tonne-km on average, 15.5 g for the largest ships) gave Shanghai → Hamburg about 2.4× the highest of six calculators compared in Schramm & Lehner (2024); the deep-sea factor from EU MRV is in their range.
 
-**Notes on DESNZ data:**
+**Notes on the data:**
 - Air freight comes `with_rf` and `without_rf` (radiative forcing). ISO 14083 reports without RF.
 - Hub factors come from GLEC v3.3 Table 3 (GILA project; Fraunhofer IML, Politecnico di Milano, GreenRouter): `transshipment`, `storage_transshipment`, `warehouse`, `liquid_bulk_terminal`, and `_mixed` for mixed ambient and temperature-controlled sites (kg CO2e per tonne; sample sizes in the source); `intermodal_terminal` and `intermodal_terminal_temperature_controlled` are per container handled: give the hub's `containers` (CSV `hub_containers`). Add your own as a layer:
 
@@ -482,6 +485,8 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 | `pkg/ndjson` | Newline-delimited JSON input and output for streaming. |
 | `pkg/toc` | Transport and hub operation categories from operational data. |
 | `pkg/ileap` | Results and operation categories in the iLEAP data model, with what iLEAP requires that the data lacks. |
+| `pkg/explain` | The step-by-step calculation sheet, with the GLEC page and ISO 14083 clause of each step. |
+| `pkg/borders` | Country (and Belgian region) of a point or route line, for km by country. Embedded Natural Earth and Statbel data. |
 | `pkg/places` | Place search and location codes (embedded GeoNames, UN/LOCODE, OurAirports). |
 | `internal/desnz` | DESNZ flat-file importer. |
 | `internal/xlsx` | Minimal stdlib-only .xlsx reader. |
@@ -492,6 +497,10 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 | `pkg/recommend` | Route changes that lower emissions: alternatives per shipment, calculated with the same method. |
 | `tools/loadtest` | Load generator for a running server. |
 | `tools/gazetteer` | Builds the embedded place list. |
+| `tools/glec` | Builds the GLEC v3.3 dataset from the transcribed tables (`build.py`) and checks every value against the PDF (`check.py`). |
+| `tools/mrv` | Builds the EU MRV container ship dataset from EMSA's data. |
+| `tools/borders` | Builds the embedded country and Belgian region borders. |
+| `tools/osrmbench` | Measures an OSRM server's throughput. |
 
 ## Roadmap
 
@@ -537,6 +546,7 @@ Either:
 
 - **From GitHub** (works on mobile): Actions → Release → Run workflow, enter a version like `v0.1.0`. It runs the tests, creates the tag, then builds.
 - **From a terminal**: `git tag v0.1.0 && git push origin v0.1.0`.
+- **By a commit**: write the version (e.g. `v0.1.0`) into [`RELEASE`](RELEASE) and push it to `main`.
 
 Binaries for Linux, macOS and Windows go to GitHub Releases, the image to `ghcr.io/majidkabir/sootcase`.
 
