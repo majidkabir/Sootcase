@@ -408,8 +408,11 @@ func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
 		if f.DataType == "" || f.DataType == calc.DataDefault {
 			var fuelSrc string
 			ec, why, fuelSrc = b.defaultCarrier(*f)
-			if len(ec) == 1 && ec[0].EnergyCarrier == Electric && unitName == UnitTkm && f.TTW == 0 {
-				// All of it is electricity: kWh per tonne-km = intensity / factor.
+			if len(ec) == 1 {
+				// One energy carrier whose factor is the one behind the value
+				// (defaultCarrier checks): the energy used per unit of activity
+				// is the intensity over the factor, e.g. 0.029 l of diesel per
+				// tonne-km for GLEC's 34-40 t truck, as GLEC's Table 8 gives.
 				if g, ok := num(ec[0].EmissionFactorWTW); ok && g > 0 {
 					ec[0].EnergyConsumption = dec(l.WTWKg / activity / g)
 				}
