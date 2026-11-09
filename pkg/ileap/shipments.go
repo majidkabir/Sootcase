@@ -303,6 +303,7 @@ func (b *builder) legTOC(l calc.LegResult) (string, []SourceRef) {
 		CO2eIntensityWTW: wtw, CO2eIntensityTTW: ttw, TransportActivityUnit: UnitTkm,
 		TemperatureControl: temperature(l.VehicleType + " " + factorID(l)),
 	}
+	t.AirShippingOption, t.FlightLength = air(factorID(l))
 	if l.LoadFactor > 0 && l.LoadFactor <= 1 {
 		t.LoadFactor = dec(l.LoadFactor)
 	}
@@ -435,6 +436,19 @@ func hubType(t string) (string, string) {
 		temp = TempAmbient
 	}
 	return ht, temp
+}
+
+// air reads iLEAP's airShippingOption and flightLength from a GLEC air
+// factor id (glec/air/<belly|freighter|unknown>/<short_haul|long_haul>);
+// GLEC's short and long haul split at 1,500 km, as iLEAP's do.
+func air(id string) (option, length string) {
+	p := strings.Split(id, "/")
+	if len(p) != 4 || p[0] != "glec" || p[1] != "air" {
+		return "", ""
+	}
+	option = map[string]string{"belly": "belly freight", "freighter": "freighter"}[p[2]]
+	length = map[string]string{"short_haul": "short-haul", "long_haul": "long-haul"}[p[3]]
+	return option, length
 }
 
 func mode(m calc.Mode) string {
