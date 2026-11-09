@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
+	"github.com/majidkabir/sootcase/pkg/distance"
 	"github.com/majidkabir/sootcase/pkg/factors"
 )
 
@@ -18,9 +19,20 @@ func scenarioServer(t *testing.T) *httptest.Server {
 	if err != nil {
 		t.Fatal(err)
 	}
-	srv := httptest.NewServer((&Server{Calc: calc.Calculator{Factors: ds, Distances: ds.Distances(), NoRoadLegs: true}, Factors: ds}).Handler())
+	srv := httptest.NewServer((&Server{Calc: calc.Calculator{Factors: ds, Distances: railNet{ds.Distances()}, NoRoadLegs: true}, Factors: ds}).Handler())
 	t.Cleanup(srv.Close)
 	return srv
+}
+
+// railNet stands in for a rail router: great-circle distances, given as
+// shortest feasible for rail, which GLEC's rail values are per (p. 46).
+type railNet struct{ distance.GreatCircle }
+
+func (r railNet) DistanceType(m calc.Mode) string {
+	if m == calc.Rail {
+		return calc.DistSFD
+	}
+	return r.GreatCircle.DistanceType(m)
 }
 
 func TestScenario_JSONAndCSV(t *testing.T) {

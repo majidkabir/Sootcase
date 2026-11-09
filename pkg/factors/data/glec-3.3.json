@@ -2833,207 +2833,207 @@
    "vehicle_type": "glec/rail/eu/diesel/average_mixed",
    "ttw_g_per_tkm": 23.6,
    "wtt_g_per_tkm": 7.1,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Average/mixed (load 60%, empty 33%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Average/mixed (load 60%, empty 33%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/average_mixed",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 10.8,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Average/mixed (load 60%, empty 33%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Average/mixed (load 60%, empty 33%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/diesel/container",
    "ttw_g_per_tkm": 21.9,
    "wtt_g_per_tkm": 6.6,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Container (load 50%, empty 17%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Container (load 50%, empty 17%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/container",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 10.1,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Container (load 50%, empty 17%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Container (load 50%, empty 17%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/diesel/cars",
    "ttw_g_per_tkm": 50.7,
    "wtt_g_per_tkm": 15.3,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Cars (load 85%, empty 33%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Cars (load 85%, empty 33%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/cars",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 23.3,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Cars (load 85%, empty 33%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Cars (load 85%, empty 33%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/diesel/chemicals",
    "ttw_g_per_tkm": 20.3,
    "wtt_g_per_tkm": 6.1,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Chemicals (load 100%, empty 50%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Chemicals (load 100%, empty 50%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/chemicals",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 9.4,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Chemicals (load 100%, empty 50%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Chemicals (load 100%, empty 50%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/diesel/coal_steel",
    "ttw_g_per_tkm": 15.7,
    "wtt_g_per_tkm": 4.7,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Coal & steel (load 100%, empty 50%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Coal & steel (load 100%, empty 50%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/coal_steel",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 7.3,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Coal & steel (load 100%, empty 50%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Coal & steel (load 100%, empty 50%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/diesel/building_materials",
    "ttw_g_per_tkm": 19.7,
    "wtt_g_per_tkm": 5.9,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Building materials (load 100%, empty 50%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Building materials (load 100%, empty 50%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/building_materials",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 9.1,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Building materials (load 100%, empty 50%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Building materials (load 100%, empty 50%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/diesel/manufactured_products",
    "ttw_g_per_tkm": 20.7,
    "wtt_g_per_tkm": 6.2,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Manufactured products (load 75%, empty 38%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Manufactured products (load 75%, empty 38%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/manufactured_products",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 9.5,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Manufactured products (load 75%, empty 38%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Manufactured products (load 75%, empty 38%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/diesel/cereals",
    "ttw_g_per_tkm": 15.5,
    "wtt_g_per_tkm": 4.7,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Cereals (load 100%, empty 38%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Cereals (load 100%, empty 38%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/cereals",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 7.2,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Cereals (load 100%, empty 38%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Cereals (load 100%, empty 38%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/diesel/truck_trailer_on_train",
    "ttw_g_per_tkm": 49.0,
    "wtt_g_per_tkm": 13.9,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Truck + trailer on train (load 85%, empty 33%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Truck + trailer on train (load 85%, empty 33%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/truck_trailer_on_train",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 14.6,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Truck + trailer on train (load 85%, empty 33%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Truck + trailer on train (load 85%, empty 33%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/diesel/trailer_on_train",
    "ttw_g_per_tkm": 30.8,
    "wtt_g_per_tkm": 8.7,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Trailer only on train (load 85%, empty 33%)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 4, European diesel traction: Trailer only on train (load 85%, empty 33%); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/electric/trailer_on_train",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 9.3,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Trailer only on train (load 85%, empty 33%); all of it is electricity generation and distribution (well-to-tank)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Table 5, European electric traction at the average 2025 EU electricity mix: Trailer only on train (load 85%, empty 33%); all of it is electricity generation and distribution (well-to-tank); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/average_traction_unknown",
    "ttw_g_per_tkm": 8.968,
    "wtt_g_per_tkm": 9.394,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Europe: EU average where the traction is unknown, 18.4 g CO2e/t-km WTW (p. 98, based on 62% of EU track being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Europe: EU average where the traction is unknown, 18.4 g CO2e/t-km WTW (p. 98, based on 62% of EU track being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%; per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/na/average",
    "ttw_g_per_tkm": 13.4,
    "wtt_g_per_tkm": 2.7,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, North America: US average (diesel), 16.1 g CO2e/t-km WTW (p. 98)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, North America: US average (diesel), 16.1 g CO2e/t-km WTW (p. 98); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/in/average",
    "ttw_g_per_tkm": 1.5,
    "wtt_g_per_tkm": 9.6,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, India: Indian average, diesel and electric traction mixed, 11.1 g CO2e/t-km WTW (p. 98)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, India: Indian average, diesel and electric traction mixed, 11.1 g CO2e/t-km WTW (p. 98); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "air",
@@ -5263,198 +5263,198 @@
    "vehicle_type": "glec/rail/eu/temperature_controlled/average_traction_unknown",
    "ttw_g_per_tkm": 10.0442,
    "wtt_g_per_tkm": 10.5213,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/average_traction_unknown with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/average_traction_unknown with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/in/temperature_controlled/average",
    "ttw_g_per_tkm": 1.68,
    "wtt_g_per_tkm": 10.752,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/in/average with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/in/average with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/average_mixed",
    "ttw_g_per_tkm": 26.432,
    "wtt_g_per_tkm": 7.952,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/average_mixed with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/average_mixed with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/container",
    "ttw_g_per_tkm": 24.528,
    "wtt_g_per_tkm": 7.392,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/container with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/container with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/cars",
    "ttw_g_per_tkm": 56.784,
    "wtt_g_per_tkm": 17.136,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/cars with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/cars with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/chemicals",
    "ttw_g_per_tkm": 22.736,
    "wtt_g_per_tkm": 6.832,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/chemicals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/chemicals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/coal_steel",
    "ttw_g_per_tkm": 17.584,
    "wtt_g_per_tkm": 5.264,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/coal_steel with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/coal_steel with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/building_materials",
    "ttw_g_per_tkm": 22.064,
    "wtt_g_per_tkm": 6.608,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/building_materials with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/building_materials with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/manufactured_products",
    "ttw_g_per_tkm": 23.184,
    "wtt_g_per_tkm": 6.944,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/manufactured_products with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/manufactured_products with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/cereals",
    "ttw_g_per_tkm": 17.36,
    "wtt_g_per_tkm": 5.264,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/cereals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/cereals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/truck_trailer_on_train",
    "ttw_g_per_tkm": 54.88,
    "wtt_g_per_tkm": 15.568,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/truck_trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/truck_trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/diesel/trailer_on_train",
    "ttw_g_per_tkm": 34.496,
    "wtt_g_per_tkm": 9.744,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/diesel/trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/average_mixed",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 12.096,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/average_mixed with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/average_mixed with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/container",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 11.312,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/container with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/container with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/cars",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 26.096,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/cars with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/cars with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/chemicals",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 10.528,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/chemicals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/chemicals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/coal_steel",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 8.176,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/coal_steel with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/coal_steel with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/building_materials",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 10.192,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/building_materials with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/building_materials with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/manufactured_products",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 10.64,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/manufactured_products with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/manufactured_products with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/cereals",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 8.064,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/cereals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/cereals with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/truck_trailer_on_train",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 16.352,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/truck_trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/truck_trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   },
   {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/electric/trailer_on_train",
    "ttw_g_per_tkm": 0.0,
    "wtt_g_per_tkm": 10.416,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/electric/trailer_on_train with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": ""
+   "distance_basis": "sfd"
   }
  ],
  "hubs": [

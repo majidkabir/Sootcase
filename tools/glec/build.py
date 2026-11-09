@@ -230,6 +230,9 @@ for region in ("eu_sa", "asia_africa"):
 
 # ---------------------------------------------------------------- rail
 RAIL = f"{GLEC}, Section 3 Module 2, rail"
+# GLEC Section 1 Chapter 4 (Rail, p. 46): rail transport activity is calculated on the shortest feasible distance;
+# an actual distance needs a DAF established for it, and GLEC gives none.
+RAIL_SFD = "per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)"
 RAIL_TYPES = [
     ("average_mixed", "Average/mixed (load 60%, empty 33%)", 7.1, 23.6, 10.8),
     ("container", "Container (load 50%, empty 17%)", 6.6, 21.9, 10.1),
@@ -243,23 +246,23 @@ RAIL_TYPES = [
     ("trailer_on_train", "Trailer only on train (load 85%, empty 33%)", 8.7, 30.8, 9.3),
 ]
 for vid, label, wtt, ttw, el in RAIL_TYPES:
-    leg("rail", "glec/rail/eu/diesel/" + vid, wtt, ttw, f"{RAIL}, Table 4, European diesel traction: {label}", "")
+    leg("rail", "glec/rail/eu/diesel/" + vid, wtt, ttw, f"{RAIL}, Table 4, European diesel traction: {label}; {RAIL_SFD}", "sfd")
     leg("rail", "glec/rail/eu/electric/" + vid, el, 0,
         f"{RAIL}, Table 5, European electric traction at the average 2025 EU electricity mix: {label}; "
-        f"all of it is electricity generation and distribution (well-to-tank)", "")
+        f"all of it is electricity generation and distribution (well-to-tank); {RAIL_SFD}", "sfd")
 # EU average where the traction is unknown: 18.4 g WTW (p.98), which GLEC derives from 62% of EU track being
 # electrified (UIC 2017). GLEC gives no TTW/WTT split; this split weights the Table 4 and Table 5 average/mixed rows
 # 38% / 62% the same way (8.97 + 9.39 = 18.36 g).
 leg("rail", "glec/rail/eu/average_traction_unknown", 0.38 * 7.1 + 0.62 * 10.8, 0.38 * 23.6,
     f"{RAIL}, Europe: EU average where the traction is unknown, 18.4 g CO2e/t-km WTW (p. 98, based on 62% of EU track "
-    f"being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%", "")
+    f"being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%; {RAIL_SFD}", "sfd")
 for traction in ("diesel", "electric"):
     for vid, label, *_ in RAIL_TYPES:
         if vid != "average_mixed":
             variant(f"glec/rail/eu/{traction}/average_mixed", vid, f"glec/rail/eu/{traction}/{vid}")
-leg("rail", "glec/rail/na/average", 2.7, 13.4, f"{RAIL}, North America: US average (diesel), 16.1 g CO2e/t-km WTW (p. 98)", "")
+leg("rail", "glec/rail/na/average", 2.7, 13.4, f"{RAIL}, North America: US average (diesel), 16.1 g CO2e/t-km WTW (p. 98); {RAIL_SFD}", "sfd")
 leg("rail", "glec/rail/in/average", 9.6, 1.5,
-    f"{RAIL}, India: Indian average, diesel and electric traction mixed, 11.1 g CO2e/t-km WTW (p. 98)", "")
+    f"{RAIL}, India: Indian average, diesel and electric traction mixed, 11.1 g CO2e/t-km WTW (p. 98); {RAIL_SFD}", "sfd")
 
 # ---------------------------------------------------------------- air (Table 1, including the +95 km DAF: per GCD)
 AIR = [
@@ -756,7 +759,7 @@ for base, vid in RAIL_REEFER:
     b = find(base)
     leg("rail", vid, b["wtt_g_per_tkm"] * 1.12, b["ttw_g_per_tkm"] * 1.12,
         f"{GLEC}, Section 3 Module 2, rail: {base} with GLEC's +12% for temperature-controlled rail freight (p. 99, the road "
-        f"uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values)", "")
+        f"uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); {RAIL_SFD}", "sfd")
 
 # ---------------------------------------------------------------- electricity region set (for electric vehicles)
 regions += [

@@ -118,8 +118,8 @@ This is the capacity-utilisation approach EcoTransIT World and GLEC use, built e
 | sea | shortest route on a maritime network, with `-sea-network file.geojson` | shortest feasible (`sfd`) |
 | rail | an OSRM server built with the rail profile, with `-osrm-rail URL` | shortest feasible (`sfd`) |
 | inland waterway | an OSRM server built with the barge profile, with `-osrm-waterway URL` | shortest feasible (`sfd`) |
-| air, and rail without a server | great-circle | great-circle (`gcd`) |
-| road, sea or inland waterway without a server | great-circle, refused when no DAF converts it to the factor's distance basis (all built-in road, container ship and inland waterway factors: give `distance_km`, see DAF below; DESNZ's other ships state no basis and take it) | great-circle (`gcd`) |
+| air without a server | great-circle | great-circle (`gcd`) |
+| road, rail, sea or inland waterway without a server | great-circle, refused when no DAF converts it to the factor's distance basis (all built-in road, rail, container ship and inland waterway factors: give `distance_km`, see DAF below; DESNZ's other ships state no basis and take it) | great-circle (`gcd`) |
 
 A dataset may also define `distance_adjustments` (`gcd × multiplier + add_km`) to estimate route distance from great-circle for a mode; the result then has no known type.
 
@@ -130,6 +130,7 @@ A dataset may also define `distance_adjustments` (`gcd × multiplier + add_km`) 
 | air | actual flown → great-circle | actual − 95 km (GLEC: GCD / (GCD + 95 km)) |
 | road | shortest feasible → actual | × 1.05 (GLEC Section 1 Chapter 4: a DAF must be applied when the intensity is based on actual distance; 5% as in GLEC's own road default values) |
 | sea | shortest feasible → actual | × 1.15 (Clean Cargo, cited by GLEC) |
+| rail | none | GLEC's rail values are per shortest feasible distance and GLEC gives no DAF for rail (an actual distance needs one established for it, p. 46), so a rail leg needs a routed or `sfd` distance |
 
 DESNZ air factors are per great-circle tonne-km, as GLEC and ISO 14083 measure air; so a great-circle leg needs no DAF and a flown distance gets the air DAF. DESNZ road factors and load models are per km actually driven (fuel use from the DfT road freight survey), so a routed road distance gets the road DAF and a given `actual` distance none; GLEC gives no DAF from great-circle to actual for road, so a road leg without a router needs `distance_km`. A mismatch with no DAF is an error rather than a silent guess. Results report `distance_type`, `daf` and `daf_source` per leg.
 
@@ -169,7 +170,7 @@ sootcase calc -osrm http://localhost:5000 examples/cph-rotterdam.json
 docker compose -f compose.yaml -f compose.rail.yaml up -d
 ```
 
-It works with any region, and combines with the waterway file. CI routes Saarbrücken–Saarlouis on Saarland's map each week. Without it, rail legs given as coordinates use the great-circle distance, which undercounts real track distance.
+It works with any region, and combines with the waterway file. CI routes Saarbrücken–Saarlouis on Saarland's map each week. Without it, a rail leg needs `distance_km`: GLEC's rail values are per shortest feasible distance (Section 1 Chapter 4, p. 46), and a straight line would undercount the track.
 
 **Ferries on road routes.** When a routed road leg crosses water by ferry, those kilometres are calculated as a sea part with `-ferry-vehicle` (default `ropax`, DESNZ's large RoPax ferry), and the rest with the truck. The leg's result lists the ferry under `parts`, and reports credit it to sea. CI checks this on the Faroe Islands, where Tórshavn–Tvøroyri needs the Suðuroy ferry.
 
