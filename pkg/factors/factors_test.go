@@ -831,3 +831,31 @@ func TestRefrigerants_GLEC33(t *testing.T) {
 		t.Error("R-717: GLEC prints no GWP, want error")
 	}
 }
+
+// GLEC's rail values are per shortest feasible distance (GLEC v3.3 Section 1
+// Chapter 4, p. 46): a rail leg without a router (great circle) or with an
+// actual distance is refused, as GLEC gives no DAF for rail; a distance
+// given without a type is taken as the factor's.
+func TestRailPerSFD(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds, Distances: ds.Distances(), NoRoadLegs: true}
+	ham, muc := calc.Location{Lat: 53.55, Lon: 9.99}, calc.Location{Lat: 48.14, Lon: 11.58}
+	leg := func(f func(*calc.Leg)) calc.Shipment {
+		l := calc.Leg{Mode: calc.Rail, VehicleType: "freight_train", From: ham, To: muc}
+		f(&l)
+		return calc.Shipment{WeightKg: 10000, Legs: []calc.Leg{l}}
+	}
+	if _, err := c.Calculate(context.Background(), leg(func(*calc.Leg) {})); err == nil || !strings.Contains(err.Error(), "gcd") {
+		t.Errorf("great circle: %v", err)
+	}
+	if _, err := c.Calculate(context.Background(), leg(func(l *calc.Leg) { l.DistanceKm, l.DistanceType = 800, calc.DistActual })); err == nil {
+		t.Error("actual distance: no error")
+	}
+	r, err := c.Calculate(context.Background(), leg(func(l *calc.Leg) { l.DistanceKm = 800 }))
+	if err != nil || r.Legs[0].Factor.DistanceBasis != calc.DistSFD || r.Legs[0].DAF != 0 {
+		t.Errorf("given distance: %v %+v", err, r.Legs)
+	}
+}

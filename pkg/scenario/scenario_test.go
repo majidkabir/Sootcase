@@ -24,7 +24,18 @@ func setup(t *testing.T) (calc.Calculator, *factors.Dataset) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return calc.Calculator{Factors: ds, Distances: ds.Distances(), NoRoadLegs: true}, ds
+	return calc.Calculator{Factors: ds, Distances: railNet{ds.Distances()}, NoRoadLegs: true}, ds
+}
+
+// railNet stands in for a rail router: great-circle distances, given as
+// shortest feasible for rail, which GLEC's rail values are per (p. 46).
+type railNet struct{ distance.GreatCircle }
+
+func (r railNet) DistanceType(m calc.Mode) string {
+	if m == calc.Rail {
+		return calc.DistSFD
+	}
+	return r.GreatCircle.DistanceType(m)
 }
 
 func road(id string, from, to calc.Location, km float64) calc.Leg {
