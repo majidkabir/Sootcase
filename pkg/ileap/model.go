@@ -43,7 +43,7 @@ type ShipmentFootprint struct {
 // (iLEAP 6.2).
 type TCE struct {
 	TCEID             string       `json:"tceId"`
-	PrevTCEIDs        []string     `json:"prevTceIds,omitempty"`
+	PrevTCEIDs        *[]string    `json:"prevTceIds,omitempty"` // a pointer, so [] (the first TCE) is written
 	TOCID             string       `json:"tocId,omitempty"`
 	HOCID             string       `json:"hocId,omitempty"`
 	ShipmentID        string       `json:"shipmentId"`
@@ -101,7 +101,7 @@ type HOC struct {
 	EnergyCarriers                 []EnergyCarrier `json:"energyCarriers,omitempty"`
 	CO2eIntensityWTW               Decimal         `json:"co2eIntensityWTW"`
 	CO2eIntensityTTW               Decimal         `json:"co2eIntensityTTW,omitempty"`
-	HubActivityUnit                string          `json:"hubActivityUnit"`
+	HubActivityUnit                string          `json:"hubActivityUnit,omitempty"` // mandatory; empty only when unknown (a Gap)
 }
 
 // SourceRef names a secondary emission factor source.
@@ -129,7 +129,7 @@ type Location struct {
 // EnergyCarrier is one energy carrier of a TOC or HOC (iLEAP 6.7.6).
 type EnergyCarrier struct {
 	EnergyCarrier         string      `json:"energyCarrier"`
-	RelativeShare         Decimal     `json:"relativeShare"`
+	RelativeShare         Decimal     `json:"relativeShare,omitempty"` // mandatory; empty only when unknown (a Gap)
 	Feedstocks            []Feedstock `json:"feedstocks,omitempty"`
 	EnergyConsumption     Decimal     `json:"energyConsumption,omitempty"`
 	EnergyConsumptionUnit string      `json:"energyConsumptionUnit,omitempty"`

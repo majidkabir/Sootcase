@@ -87,6 +87,9 @@ func carrier(id string) string {
 		return Methanol
 	case has("biodiesel", "ethanol", "biogas", "natural_gas", "ammonia", "biomass", "coal", "wood", "lubricant", "naphtha", "burning_oil", "waste_oil", "refinery", "coke"):
 		return ""
+	case has("bio_lng", "bio_cng", "biomethane"):
+		// iLEAP's LNG and CNG are natural gas; it has no type for biomethane.
+		return ""
 	case has("diesel_hvo"): // diesel blended with some HVO is still diesel
 		return Diesel
 	case has("hvo"):
@@ -138,13 +141,19 @@ func unit(u string) (string, float64, bool) {
 func glecFuel(carrierType, vehicleID string, mode calc.Mode) string {
 	switch mode {
 	case calc.Sea:
-		switch carrierType {
-		case HFO:
-			return "glec/fuel/marine/hfo/kg"
-		case MGO:
-			return "glec/fuel/marine/mdo_mgo/kg"
-		case LNG:
-			return "glec/fuel/marine/lng/kg"
+		// GLEC's Tables 14-17 name the fuel HFO, VLSFO or MDO; their WTT/TTW
+		// splits are those of Module 1's HFO (HSHFO), HFO (VLSFO) and MDO/MGO
+		// (VLSFO) rows (Module 1's "HFO Default" has the VLSFO numbers), so
+		// those are the factors behind them (checked in TestCarrierSplits).
+		if strings.HasPrefix(vehicleID, "glec/sea/") {
+			switch vehicleID[strings.LastIndex(vehicleID, "/")+1:] {
+			case "hfo":
+				return "glec/fuel/marine/hfo_hshfo/kg"
+			case "vlsfo":
+				return "glec/fuel/marine/hfo_vlsfo/kg"
+			case "mdo":
+				return "glec/fuel/marine/mdo_mgo_vlsfo/kg"
+			}
 		}
 		return ""
 	case calc.Air:

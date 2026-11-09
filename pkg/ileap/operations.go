@@ -85,8 +85,13 @@ func (b *builder) operatorHOC(ops toc.Operations, h toc.HOC, fuels calc.FactorPr
 		b.gap("hoc", h.ID, "hubType", "no hub_type given for the HOC")
 	}
 	activity, unitName, label := h.Tonnes, UnitTonnes, "tonnes"
-	if h.Containers > 0 {
-		activity, unitName, label = h.Containers, UnitTEU, "containers (TEU)"
+	switch {
+	case h.Containers > 0 && h.ContainersInTEU:
+		activity, unitName, label = h.Containers, UnitTEU, "TEU"
+	case h.Containers > 0:
+		// Containers counted as boxes of any size; iLEAP's unit is the TEU.
+		activity, unitName, label = h.Containers, "", "containers"
+		b.gap("hoc", h.ID, "hubActivityUnit", "the HOC is per container, of no given size, and iLEAP's hub units are TEU and tonnes; set containers_in_teu when the containers are counted in TEU")
 	}
 	out.HubActivityUnit = unitName
 	ttw, wtt, err := toc.Totals(h.Energy, h.Refrigerants, fuels)

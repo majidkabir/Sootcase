@@ -62,7 +62,7 @@ func TestRoadDefault(t *testing.T) {
 	sf := ex.ShipmentFootprints[0]
 	tce := sf.TCEs[0]
 	if tce.TCEID != "S1/l1" || tce.Mass != "12000" || tce.Distance.SFD != "332" || tce.TransportActivity != "3984" ||
-		tce.CO2eWTW != "498" || tce.CO2eTTW != "382.464" || tce.PrevTCEIDs == nil || len(tce.PrevTCEIDs) != 0 {
+		tce.CO2eWTW != "498" || tce.CO2eTTW != "382.464" || tce.PrevTCEIDs == nil || len(*tce.PrevTCEIDs) != 0 {
 		t.Errorf("tce %+v", tce)
 	}
 	if tce.Origin == nil || tce.Origin.City != "Copenhagen" || tce.Origin.Country != "DK" || tce.Destination.Country != "DE" {
@@ -128,8 +128,10 @@ func TestGaps(t *testing.T) {
 		t.Errorf("hoc %+v", h)
 	}
 	sea := sf.TCEs[1]
-	if sea.Distance.SFD != "560" || sea.PackagingOrTrEq != "Container-TEU" || sea.PackagingAmount != "1.2" {
-		t.Errorf("sea tce %+v (the factor's distance basis; 12 t / 10 t per TEU)", sea)
+	// The TEU worked out from the mass is stated in the shipment's comment,
+	// not as equipment on the TCE.
+	if sea.Distance.SFD != "560" || sea.PackagingOrTrEq != "" || !strings.Contains(sf.Comment, "12 t is taken as 1.2 TEU") {
+		t.Errorf("sea tce %+v, comment %q (the factor's distance basis; 12 t / 10 t per TEU)", sea, sf.Comment)
 	}
 	// A container leg's TOC is per TEU-km, and TEU x km x intensity = the TCE.
 	for _, x := range ex.TOCs {
@@ -193,6 +195,12 @@ func TestOperations(t *testing.T) {
 		}
 	}
 	ops.HOCs[2].HubType = "maritime_container_terminal"
+	// Containers of no given size: no iLEAP unit.
+	ex = FromOperations(ops, ds, opts(ds))
+	if ex.Conformant || len(ex.Gaps) != 1 || ex.Gaps[0].Field != "hubActivityUnit" {
+		t.Fatalf("containers without a size: gaps %+v", ex.Gaps)
+	}
+	ops.HOCs[2].ContainersInTEU = true
 	ex = FromOperations(ops, ds, opts(ds))
 	if !ex.Conformant {
 		t.Fatalf("gaps %+v, problems %v", ex.Gaps, Validate(ex))
@@ -255,7 +263,7 @@ func TestDecimal(t *testing.T) {
 
 func TestCarrier(t *testing.T) {
 	for id, want := range map[string]string{
-		"glec/road/eu_sa/artic_34_40t/diesel": Diesel, "glec/road/eu_sa/artic_34_40t/bio_lng": LNG,
+		"glec/road/eu_sa/artic_34_40t/diesel": Diesel, "glec/road/eu_sa/artic_34_40t/bio_lng": "",
 		"glec/road/eu_sa/artic_34_40t/lng_diesel": "", "glec/road/eu_sa/rigid_7_5_12t/electricity": Electric,
 		"glec/road/na/tl_dry_van": "", "vans/average_up_to_3_5_tonnes/plug_in_hybrid_electric_vehicle": "",
 		"vans/average_up_to_3_5_tonnes/battery_electric_vehicle": Electric, "hgv_refrigerated_all_diesel/rigid_17_tonnes/average_laden": Diesel,
@@ -432,7 +440,7 @@ func TestConsistency(t *testing.T) {
 	if len(f.TCEs) != 2 || f.TCEs[1].TCEID != "ferry/a/ferry" || tocs[f.TCEs[1].TOCID].Mode != "Sea" || f.TCEs[0].PrevTCEIDs != nil {
 		t.Errorf("ferry split %+v", f.TCEs)
 	}
-	if o := tocs[ex.ShipmentFootprints[2].TCEs[0].TOCID]; o.EmptyDistanceFactor != "0.2" || o.LoadFactor != "0.6" ||
+	if o := tocs[ex.ShipmentFootprints[2].TCEs[0].TOCID]; o.EmptyDistanceFactor != "0.2" || o.LoadFactor != "" || !strings.Contains(o.Description, "modelled data") ||
 		len(o.EnergyCarriers) != 1 || o.EnergyCarriers[0].EmissionFactorWTW == "" || len(o.SecondaryEmissionFactorSources) == 0 ||
 		o.SecondaryEmissionFactorSources[0].Name != "UK Government GHG Conversion Factors for Company Reporting (DESNZ)" {
 		t.Errorf("load toc %+v (0.25 empty per loaded km = 0.2 of all km)", o)
@@ -451,5 +459,120 @@ func TestLocationCodeName(t *testing.T) {
 	l := b.location(&calc.Location{Name: "Shanghai Pt (CNSHG)", Code: "CNSHG", Lat: 30.6, Lon: 122.1})
 	if l == nil || l.City != "Shanghai Pt" || l.LOCODE != "CNSHG" || l.Country != "CN" {
 		t.Fatalf("location = %+v", l)
+	}
+}
+
+// TestCarrierSplits checks that a fuel factor given with a default value
+// is the one behind it: for every value with one, the TTW share of WTW of
+// the value and of the fuel agree, row by row (within rounding) and over
+// all rows of a fuel (closely). And that the values whose fuel factor is
+// known not to fit get none.
+func TestCarrierSplits(t *testing.T) {
+	ds := dataset(t)
+	b := newBuilder(opts(ds))
+	type sum struct{ ttw, wtw, fuel float64 }
+	byFuel := map[string]*sum{}
+	without := map[string]string{}
+	for _, f := range ds.Legs {
+		ec, why, src := b.defaultCarrier(f)
+		if len(ec) == 0 || ec[0].EmissionFactorWTW == "" {
+			without[f.VehicleType] = why
+			continue
+		}
+		w, _ := num(ec[0].EmissionFactorWTW)
+		tt, _ := num(ec[0].EmissionFactorTTW)
+		if d := math.Abs(share(f.TTW, f.WTW()) - tt/w); d > maxShareDiff {
+			t.Errorf("%s: TTW share %.3f vs %s %.3f", f.VehicleType, share(f.TTW, f.WTW()), src, tt/w)
+		}
+		s := byFuel[src]
+		if s == nil {
+			s = &sum{fuel: tt / w}
+			byFuel[src] = s
+		}
+		s.ttw += f.TTW
+		s.wtw += f.WTW()
+	}
+	for src, s := range byFuel {
+		if d := math.Abs(s.ttw/s.wtw - s.fuel); d > 0.01 { // DESNZ vehicle TTW has its own CH4 and N2O
+			t.Errorf("%s: its values' TTW share %.4f vs the fuel's %.4f", src, s.ttw/s.wtw, s.fuel)
+		}
+	}
+	for _, id := range []string{"glec/road/in/heavy_cv_1/cng", "glec/road/eu_sa/artic_34_40t_si/bio_lng", "glec/rail/eu/electric/container",
+		"glec/rail/eu/average_traction_unknown", "glec/road/cn/truck_12t/electricity"} {
+		if _, ok := without[id]; !ok {
+			t.Errorf("%s got a fuel factor", id)
+		}
+	}
+	for _, id := range []string{"glec/road/europe/electric/artic_34_40t", "glec/sea/bulk_carrier/0-9999_dwt/hfo",
+		"glec/sea/bulk_carrier/0-9999_dwt/mdo", "glec/iww/container_110m", "glec/rail/na/average", "glec/road/cn/artic_49t/diesel"} {
+		if why, ok := without[id]; ok {
+			t.Errorf("%s got no fuel factor: %s", id, why)
+		}
+	}
+	t.Logf("%d fuel factors used; %d values without one", len(byFuel), len(without))
+	for src, s := range byFuel {
+		t.Logf("%.4f vs %.4f %s", s.ttw/s.wtw, s.fuel, src)
+	}
+}
+
+func TestRecheck4(t *testing.T) {
+	ds := dataset(t)
+	ships := []calc.Shipment{
+		{ID: "eu_electric", WeightKg: 10000, Legs: []calc.Leg{{ID: "a", Mode: calc.Road, VehicleType: "glec/road/europe/electric/artic_34_40t", From: cph, To: ham, DistanceKm: 300, DistanceType: calc.DistSFD}}},
+		{ID: "bulk", WeightKg: 5000000, Legs: []calc.Leg{{ID: "s", Mode: calc.Sea, VehicleType: "glec/sea/bulk_carrier/0-9999_dwt/hfo", From: ham, To: rtm, DistanceKm: 560}}},
+		{ID: "terminal", WeightKg: 20000, Legs: []calc.Leg{{ID: "a", Mode: calc.Road, VehicleType: "hgv", From: cph, To: ham, DistanceKm: 332, DistanceType: calc.DistSFD}},
+			Hubs: []calc.HubStop{{ID: "t", HubType: "intermodal_terminal", Containers: 2}}},
+		{ID: "grid", WeightKg: 5000, Legs: []calc.Leg{{ID: "a", Mode: calc.Road, VehicleType: "truck_electric", From: cph, To: ham, DistanceKm: 300, DistanceType: calc.DistSFD, EnergyKWhPerTkm: 0.08, Country: "DNK"}}},
+	}
+	var results []calc.Result
+	for _, s := range ships {
+		results = append(results, calculate(t, ds, s))
+	}
+	ex := FromResults(results, opts(ds))
+	tocs := map[string]TOC{}
+	for _, x := range ex.TOCs {
+		tocs[x.TOCID] = x
+	}
+	// GLEC's European electric truck: kWh/t-km x 334.08 g CO2e/kWh.
+	e := tocs[ex.ShipmentFootprints[0].TCEs[0].TOCID]
+	if len(e.EnergyCarriers) != 1 || e.EnergyCarriers[0].EnergyCarrier != Electric || e.EnergyCarriers[0].EmissionFactorWTW != "0.33408" ||
+		e.EnergyCarriers[0].EmissionFactorTTW != "0" || e.EnergyCarriers[0].EnergyConsumption != "0.12" || e.EnergyCarriers[0].EnergyConsumptionUnit != "kWh" {
+		t.Errorf("European electric toc %+v", e)
+	}
+	// GLEC's HFO bulk carrier: Module 1's HFO (HSHFO), 3.73 kg CO2e/kg WTW.
+	s := tocs[ex.ShipmentFootprints[1].TCEs[0].TOCID]
+	if len(s.EnergyCarriers) != 1 || s.EnergyCarriers[0].EnergyCarrier != HFO || s.EnergyCarriers[0].EmissionFactorWTW != "3.73" {
+		t.Errorf("bulk toc %+v", s)
+	}
+	// Per-container hub: containers of no given size.
+	hub := ex.ShipmentFootprints[2].TCEs[1]
+	if hub.PackagingOrTrEq != "Container" || hub.PackagingAmount != "2" {
+		t.Errorf("terminal tce %+v", hub)
+	}
+	gaps := map[string]bool{}
+	for _, g := range ex.Gaps {
+		if g.Object == "hoc" && g.ID == hub.HOCID {
+			gaps[g.Field] = true
+		}
+	}
+	if !gaps["hubActivityUnit"] || !gaps["hubType"] {
+		t.Errorf("terminal hoc gaps %v", gaps)
+	}
+	// The first TCE of an ordered shipment says so with [].
+	if b, _ := json.Marshal(ex.ShipmentFootprints[0].TCEs[0]); !strings.Contains(string(b), `"prevTceIds":[]`) {
+		t.Errorf("first tce %s", b)
+	}
+	// The grid factor's source is listed.
+	found := false
+	for _, src := range ex.ShipmentFootprints[3].SecondaryEmissionFactorSources {
+		found = found || src.Name == "Ember via Our World in Data"
+	}
+	if !found {
+		t.Errorf("grid sources %+v", ex.ShipmentFootprints[3].SecondaryEmissionFactorSources)
+	}
+	for _, p := range Validate(ex) {
+		if !strings.Contains(p, "hubActivityUnit") && !strings.Contains(p, "hubType") && !strings.Contains(p, "energyCarriers missing") && !strings.Contains(p, "TTW") { // hub values are WTW only
+			t.Errorf("problem %s", p)
+		}
 	}
 }
