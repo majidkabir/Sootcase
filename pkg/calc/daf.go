@@ -76,7 +76,7 @@ func (c Calculator) adjust(mode Mode, legType, basis string, km float64) (float6
 	}
 	if !ok {
 		return 0, nil, fmt.Errorf("%w: the distance is %s but the factor is per %s tonne-km; "+
-			"give distance_km with distance_type %q, or add a %s DAF from %s to %s to the dataset",
+			"give distance_km with distance_type %q, or add a DAF for %s from %s to %s to the dataset",
 			ErrNoDAF, legType, basis, basis, mode, legType, basis)
 	}
 	adj := d.Apply(km)

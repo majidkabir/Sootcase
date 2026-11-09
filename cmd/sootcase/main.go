@@ -37,14 +37,14 @@ Usage:
   sootcase import-desnz [-o out.json] flat-file.xlsx   convert UK DESNZ factors
   sootcase import-grid  [-o out.json] owid-energy.csv  convert grid intensities
   sootcase toc     [-o layer.json] operations.json      intensities from your own fuel data
-  sootcase ileap   [-company -from -to] [-operations ops.json] [shipments.csv]   iLEAP ShipmentFootprints, TOCs and HOCs (JSON)
+  sootcase ileap   [-company -company-ids -from -to] [-operations ops.json] [shipments.csv]   iLEAP ShipmentFootprints, TOCs and HOCs (JSON)
   sootcase health  [-addr :8080]                        check a running server (for healthchecks)
   sootcase version
 
 Use "-" as the file name to read stdin. The default datasets are UK DESNZ 2026,
 the Dutch inland waterway list 2026, EU MRV 2024 container ships and the GLEC
 Framework v3.3 default values (desnz-2026,nl-iww-2026,eu-mrv-2024,glec-3.3).
-calc, batch, report and serve also take -osrm URL (road routing),
+Commands that calculate also take -osrm URL (road routing),
 -osrm-rail URL, -osrm-waterway URL and -sea-network file.geojson (sea
 routing); see "sootcase calc -h".`
 

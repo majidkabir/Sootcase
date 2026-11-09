@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.1.0
+  version: 0.11.0
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -599,7 +599,7 @@ components:
           enum: [gap, access]
           description: "Set on road legs the calculator added: gap (the legs didn't join up) or access (to or from the port or terminal a leg was moved to)"
         note: { type: string, description: Why the leg was added, or where its end was moved to }
-        factor_note: { type: string, description: Which factor the vehicle type meant at this leg's distance (e.g. container_ship short-sea or deep-sea) }
+        factor_note: { type: string, description: "Which factor a short vehicle type meant for this leg, e.g. the GLEC region or container trade lane used" }
         from: { $ref: "#/components/schemas/Location", description: "Where the leg was calculated from (moved for a leg moved to a port or terminal), when known" }
         to: { $ref: "#/components/schemas/Location", description: Where the leg was calculated to, when known }
         mode: { $ref: "#/components/schemas/Mode" }
