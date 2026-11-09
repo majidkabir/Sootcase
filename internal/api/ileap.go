@@ -136,8 +136,8 @@ func (s *Server) ileapOperations(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
-	fuels, ok := s.Calc.Factors.(calc.FactorProvider)
-	if !ok {
+	fuels := s.Calc.Factors
+	if fuels == nil {
 		writeError(w, http.StatusInternalServerError, errors.New("no fuel factors"))
 		return
 	}
