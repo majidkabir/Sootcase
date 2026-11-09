@@ -110,7 +110,7 @@ func Validate(ex Export) []string {
 			if t.ShipmentID != s.ShipmentID {
 				bad("%s: shipmentId %q differs from the footprint's", w, t.ShipmentID)
 			}
-			for _, pr := range t.PrevTCEIDs {
+			for _, pr := range deref(t.PrevTCEIDs) {
 				if !ids[pr] {
 					bad("%s: prevTceIds %s is not in the shipment", w, pr)
 				}
@@ -131,6 +131,9 @@ func Validate(ex Export) []string {
 			for _, l := range []*Location{t.Origin, t.Destination} {
 				if l != nil && (l.City == "" || len(l.Country) != 2) {
 					bad("%s: a location needs a city and an ISO 3166 alpha-2 country", w)
+				}
+				if l != nil && (l.Lat == "") != (l.Lng == "") {
+					bad("%s: a location needs both lat and lng, or neither", w)
 				}
 			}
 		}
@@ -217,4 +220,11 @@ func checkCarriers(bad func(string, ...any), where string, ecs []EnergyCarrier) 
 	if math.Abs(sum-1) > 1e-6 {
 		bad("%s: energy carrier shares add up to %s, not 1", where, dec(sum))
 	}
+}
+
+func deref(p *[]string) []string {
+	if p == nil {
+		return nil
+	}
+	return *p
 }

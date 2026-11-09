@@ -4,9 +4,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"math"
 	"regexp"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -154,6 +156,7 @@ func (b *builder) shipment(r calc.Result) {
 	}
 	var prev []string
 	used := map[string]int{}
+	derived := 0.0 // TEU worked out from the mass, for per-TEU-km TOCs
 	for _, l := range legs {
 		id := uniqueID(r.ShipmentID+"/"+l.LegID, used)
 		teu := b.containerTEU(r, l)
@@ -166,11 +169,14 @@ func (b *builder) shipment(r calc.Result) {
 			TransportActivity: dec(l.TonneKm), CO2eWTW: dec(l.WTWKg), CO2eTTW: dec(l.TTWKg),
 			Distance: b.distance(id, l), Origin: b.location(l.From), Destination: b.location(l.To),
 		}
-		if teu > 0 {
+		if teu > 0 && r.TEU > 0 {
 			t.PackagingOrTrEq, t.PackagingAmount = "Container-TEU", dec(teu)
+		} else if teu > 0 {
+			derived = teu
 		}
 		if ordered {
-			t.PrevTCEIDs = append([]string{}, prev...)
+			ids := append([]string{}, prev...)
+			t.PrevTCEIDs = &ids
 			prev = []string{id}
 		}
 		sf.TCEs = append(sf.TCEs, t)
@@ -186,7 +192,12 @@ func (b *builder) shipment(r calc.Result) {
 			Distance: GLECDistance{Actual: "0"}, TransportActivity: "0", CO2eWTW: dec(h.WTWKg),
 		}
 		if h.Containers > 0 {
-			t.PackagingOrTrEq, t.PackagingAmount = "Container-TEU", dec(h.Containers)
+			// Containers handled: TEU when the HOC counts in TEU, else boxes
+			// of no given size.
+			t.PackagingOrTrEq, t.PackagingAmount = "Container", dec(h.Containers)
+			if i, ok := b.hocs[hocID]; ok && b.ex.HOCs[i].HubActivityUnit == UnitTEU {
+				t.PackagingOrTrEq = "Container-TEU"
+			}
 		}
 		if h.TTWKg != nil {
 			t.CO2eTTW = dec(*h.TTWKg)
@@ -196,6 +207,17 @@ func (b *builder) shipment(r calc.Result) {
 		sf.TCEs = append(sf.TCEs, t)
 	}
 	sf.SecondaryEmissionFactorSources = sortedSources(sources)
+	if r.WeightBasis == "teu" && r.TEU > 0 {
+		// iLEAP's mass is the goods' mass; here it comes from the TEU.
+		how := "the net tonnes per TEU given"
+		if r.ContainerLoad != "" {
+			how = fmt.Sprintf("container load profile %q", r.ContainerLoad)
+		}
+		sf.Comment = fmt.Sprintf("Mass: %s TEU x %s t per TEU (%s), not weighed.", dec(r.TEU), dec(r.WeightKg/1000/r.TEU), how)
+	}
+	if derived > 0 {
+		sf.Comment = fmt.Sprintf("Container legs: the shipment's %s t is taken as %s TEU (GLEC Framework v3.3's average of 10 t per TEU, p. 21); their TCEs = TEU x km x the TOC's intensity per TEU-km.", dec(r.WeightKg/1000), dec(derived))
+	}
 	if len(sf.TCEs) == 0 {
 		b.gap("shipment", r.ShipmentID, "tces", "the shipment has no legs or hubs")
 	}
@@ -308,7 +330,7 @@ func (b *builder) containerTEU(r calc.Result, l calc.LegResult) float64 {
 	if !strings.Contains(strings.ToLower(factorID(l)), "container") {
 		return 0
 	}
-	b.note("Container legs' TOCs are per TEU-km, as iLEAP asks for sea and inland waterways; for shipments given in kg, the TEU is the tonnes / 10 t per TEU (GLEC v3.3's average, p. 21), shown on the TCE as packagingOrTrEqAmount.")
+	b.note("Container legs' TOCs are per TEU-km, as iLEAP asks for sea and inland waterways; for shipments given in kg, the TEU is the tonnes / 10 t per TEU (GLEC v3.3's average, p. 21), stated in the shipment's comment.")
 	return r.WeightKg / 1000 / 10
 }
 
@@ -344,6 +366,9 @@ func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
 		key += "|" + l.Factor.Source
 		desc = fmt.Sprintf("%s, electric (%s kWh/tkm, %s grid)", l.Mode, dec(l.EnergyKWhPerTkm), l.Country)
 		comment = "Emission intensity: " + l.Factor.Source
+		if s, ok := secondary(l.Factor.Source); ok {
+			srcs = append(srcs, s)
+		}
 		ec = []EnergyCarrier{{EnergyCarrier: Electric, RelativeShare: "1",
 			Feedstocks:        []Feedstock{{Feedstock: FeedstockGrid, RegionProvenance: l.Country}},
 			EnergyConsumption: dec(l.EnergyKWhPerTkm), EnergyConsumptionUnit: "kWh",
@@ -368,7 +393,11 @@ func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
 	case l.Factor != nil:
 		f := l.Factor
 		key += "|" + f.VehicleType + "|" + f.Source
-		desc = fmt.Sprintf("%s, %s (%s)", l.Mode, f.VehicleType, dataTypeLabel(f.DataType))
+		dt := l.DataType // the leg's: a load model on a default value is modelled data
+		if dt == "" {
+			dt = f.DataType
+		}
+		desc = fmt.Sprintf("%s, %s (%s)", l.Mode, f.VehicleType, dataTypeLabel(dt))
 		comment = "Emission intensity: " + f.Source
 		if l.DAF > 0 && l.DAF != 1 {
 			comment += fmt.Sprintf("; distance adjustment x %s (%s)", dec(l.DAF), l.DAFSource)
@@ -379,6 +408,12 @@ func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
 		if f.DataType == "" || f.DataType == calc.DataDefault {
 			var fuelSrc string
 			ec, why, fuelSrc = b.defaultCarrier(*f)
+			if len(ec) == 1 && ec[0].EnergyCarrier == Electric && unitName == UnitTkm && f.TTW == 0 {
+				// All of it is electricity: kWh per tonne-km = intensity / factor.
+				if g, ok := num(ec[0].EmissionFactorWTW); ok && g > 0 {
+					ec[0].EnergyConsumption = dec(l.WTWKg / activity / g)
+				}
+			}
 			if fuelSrc != "" {
 				comment += "; energy carrier emission factors: " + fuelSrc
 				if s, ok := secondary(fuelSrc); ok && !slices.Contains(srcs, s) {
@@ -410,9 +445,9 @@ func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
 		TemperatureControl: temperature(l.VehicleType + " " + factorID(l)),
 	}
 	t.AirShippingOption, t.FlightLength = air(factorID(l))
-	if l.LoadFactor > 0 && l.LoadFactor <= 1 {
-		t.LoadFactor = dec(l.LoadFactor)
-	}
+	// Sootcase's load factor is a share of the load model's payload (DESNZ's
+	// "100% laden"), not of the vehicle's maximum legal load as iLEAP's
+	// loadFactor is, so it isn't given.
 	if l.EmptyTripFactor > 0 {
 		// Sootcase's empty trip factor is empty km per loaded km; iLEAP's
 		// emptyDistanceFactor is empty km over all km.
@@ -452,6 +487,17 @@ func (b *builder) defaultCarrier(f calc.Factor) ([]EnergyCarrier, string, string
 		return nil, fmt.Sprintf("the emission factor %s doesn't say which energy carrier it is for", f.VehicleType), ""
 	}
 	ec := EnergyCarrier{EnergyCarrier: c, RelativeShare: "1"}
+	if c == Electric {
+		// GLEC's European electric truck values are kWh/t-km x GLEC's
+		// European average electricity, which their source text gives.
+		if m := perKWh.FindStringSubmatch(f.Source); m != nil && strings.HasPrefix(f.Source, "GLEC Framework v3.3") {
+			if g, err := strconv.ParseFloat(m[1], 64); err == nil && g > 0 {
+				ec.Feedstocks = []Feedstock{{Feedstock: FeedstockGrid, RegionProvenance: "Europe"}}
+				ec.EnergyConsumptionUnit, ec.EmissionFactorWTW, ec.EmissionFactorTTW = "kWh", dec(g/1000), "0"
+				return []EnergyCarrier{ec}, "", "GLEC Framework v3.3, Module 1: European average electricity, " + m[1] + " g CO2e/kWh"
+			}
+		}
+	}
 	name := ""
 	switch {
 	case strings.HasPrefix(f.VehicleType, "glec/"):
@@ -470,8 +516,30 @@ func (b *builder) defaultCarrier(f calc.Factor) ([]EnergyCarrier, string, string
 	if reason != "" {
 		return []EnergyCarrier{ec}, reason, ""
 	}
+	// The fuel factor must be the one behind the value: their TTW shares
+	// of WTW agree within rounding when it is (e.g. GLEC's Indian CNG trucks
+	// don't use GLEC's Indian CNG factor, so it isn't given for them).
+	if a, b := share(f.TTW, f.WTW()), share(ff.TTW, ff.WTW()); math.Abs(a-b) > maxShareDiff {
+		return []EnergyCarrier{ec}, fmt.Sprintf("%s's TTW is %.1f%% of its WTW, but %s's is %.1f%%, so that fuel factor isn't the one behind it", f.VehicleType, 100*a, name, 100*b), ""
+	}
 	full.EnergyCarrier, full.RelativeShare = c, "1"
 	return []EnergyCarrier{full}, "", ff.Source
+}
+
+// perKWh finds the electricity factor in a GLEC electric truck value's
+// source text ("... kWh/t-km ... × 334.08 g CO2e/kWh, ...").
+var perKWh = regexp.MustCompile(`× ([0-9]+(?:\.[0-9]+)?) g CO2e/kWh`)
+
+// maxShareDiff is how far a value's TTW share of WTW may be from its fuel
+// factor's: rounding in GLEC's tables moves it by up to about 1.5 points
+// (sea rows of 4.7 g WTT), while a different fuel moves it by more.
+const maxShareDiff = 0.03
+
+func share(ttw, wtw float64) float64 {
+	if wtw <= 0 {
+		return 0
+	}
+	return ttw / wtw
 }
 
 // factorCarrier is vehicleCarrier, plus what a GLEC value's own text
@@ -504,7 +572,7 @@ func (b *builder) hubHOC(r calc.Result, h calc.HubResult) (string, []SourceRef) 
 	}
 	per, unitName := r.WeightKg/1000, UnitTonnes
 	if h.Containers > 0 {
-		per, unitName = h.Containers, UnitTEU
+		per, unitName = h.Containers, "" // per container of no given size
 	}
 	var srcs []SourceRef
 	if s, ok := secondary(h.Source); ok {
@@ -534,6 +602,9 @@ func (b *builder) hubHOC(r calc.Result, h calc.HubResult) (string, []SourceRef) 
 	}
 	if ttw == "" {
 		b.gap("hoc", id, "co2eIntensityTTW", "the hub's emission intensity is given as WTW only, with no TTW/WTT split")
+	}
+	if unitName == "" {
+		b.gap("hoc", id, "hubActivityUnit", "the hub's emission intensity is per container, of no given size; iLEAP's hub units are TEU and tonnes")
 	}
 	b.gap("hoc", id, "energyCarriers", "the hub's emission intensity doesn't say which energy carriers it is for")
 	b.addHOC(o)
@@ -629,8 +700,15 @@ func secondary(src string) (SourceRef, bool) {
 	case strings.HasPrefix(src, "www.co2emissiefactoren.nl 2026"):
 		return SourceRef{Name: "CO2emissiefactoren.nl", Version: "2026"}, true
 	}
+	if m := ember.FindStringSubmatch(src); m != nil {
+		return SourceRef{Name: "Ember via Our World in Data", Version: m[1]}, true
+	}
 	return SourceRef{}, false
 }
+
+// ember finds a grid factor's year in its source text: "... grid 151
+// g/kWh (2024, Ember via Our World in Data: Denmark)".
+var ember = regexp.MustCompile(`\(([0-9]{4}), Ember via Our World in Data`)
 
 // baseSource is the published source a factor's source text rests on: a
 // load model's text names the dataset it is "from".

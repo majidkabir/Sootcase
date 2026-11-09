@@ -79,6 +79,10 @@ type HOC struct {
 	// TemperatureControl ambient, refrigerated or mixed. Optional.
 	HubType            string `json:"hub_type,omitempty"`
 	TemperatureControl string `json:"temperature_control,omitempty"`
+	// ContainersInTEU says Containers are counted in TEU (twenty-foot
+	// equivalent units), not as boxes of any size. Optional; only the
+	// iLEAP export uses it, as iLEAP's container unit is the TEU.
+	ContainersInTEU bool `json:"containers_in_teu,omitempty"`
 }
 
 // EnergyUse is an amount of one fuel, in that fuel factor's unit.
@@ -163,6 +167,9 @@ func Check(ops Operations) (Operations, error) {
 		}
 		if err := checkEnergy(h.ID, h.Energy, h.Refrigerants, h.DataType); err != nil {
 			return Operations{}, err
+		}
+		if h.ContainersInTEU && h.Containers == 0 {
+			return Operations{}, fmt.Errorf("hoc %q: containers_in_teu needs containers", h.ID)
 		}
 		if h.HubType != "" && !slices.Contains(HubTypes, h.HubType) {
 			return Operations{}, fmt.Errorf("hoc %q: hub_type must be one of %s", h.ID, strings.Join(HubTypes, ", "))
