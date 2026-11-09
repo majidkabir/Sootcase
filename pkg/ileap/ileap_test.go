@@ -445,3 +445,11 @@ func TestConsistency(t *testing.T) {
 		t.Log("valid")
 	}
 }
+
+func TestLocationCodeName(t *testing.T) {
+	b := &builder{opts: Options{Country: func(calc.Location) string { return "CN" }}}
+	l := b.location(&calc.Location{Name: "Shanghai Pt (CNSHG)", Code: "CNSHG", Lat: 30.6, Lon: 122.1})
+	if l == nil || l.City != "Shanghai Pt" || l.LOCODE != "CNSHG" || l.Country != "CN" {
+		t.Fatalf("location = %+v", l)
+	}
+}
