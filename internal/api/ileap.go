@@ -45,7 +45,7 @@ type ILEAPResponse struct {
 
 func (m ILEAPMeta) options(fuels ileap.FuelLookup) (ileap.Options, error) {
 	o := ileap.Options{CompanyName: strings.TrimSpace(m.Company), CompanyIDs: m.CompanyIDs, CreatedAt: time.Now(),
-		Fuels: fuels, Country: places.Codes{}.Country}
+		Fuels: fuels, Country: places.Codes{}.Country, City: places.Codes{}.Town}
 	if len(o.CompanyName) > maxMetaLen || len(o.CompanyIDs) > 20 {
 		return o, fmt.Errorf("company is limited to %d bytes and 20 ids", maxMetaLen)
 	}

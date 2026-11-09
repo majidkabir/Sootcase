@@ -34,6 +34,10 @@ type Options struct {
 	// Country names the ISO 3166 alpha-2 country of a point, "" when it
 	// can't. Optional; without it, locations need a UN/LOCODE.
 	Country func(calc.Location) string
+	// City names the city a point is in or near (ok false when none).
+	// Optional; without it, or when it finds none, a location's own name
+	// is used as its city.
+	City func(calc.Location) (name string, km float64, ok bool)
 	// Operator are TOCs and HOCs built from the operator's own data
 	// (FromOperations), by id: legs and hubs calculated with them refer
 	// to them instead of to a category made from the result.
@@ -136,10 +140,21 @@ func (b *builder) shipment(r calc.Result) {
 	sources := map[SourceRef]bool{}
 	// Legs are in transport order; hub stops aren't placed between them,
 	// so the order is only given when there are no hubs.
+	// A leg with parts (a ferry on a road route, electrified rail track)
+	// becomes a TCE per part; where on the leg a part lies isn't known, so
+	// then the order isn't given either.
 	ordered := len(r.Hubs) == 0
+	var legs []calc.LegResult
+	for _, l := range r.Legs {
+		main, parts := split(l)
+		legs = append(append(legs, main), parts...)
+		if len(parts) > 0 {
+			ordered = false
+		}
+	}
 	var prev []string
 	used := map[string]int{}
-	for _, l := range r.Legs {
+	for _, l := range legs {
 		id := uniqueID(r.ShipmentID+"/"+l.LegID, used)
 		teu := b.containerTEU(r, l)
 		tocID, srcs := b.legTOC(l, teu)
@@ -221,10 +236,19 @@ var locode = regexp.MustCompile(`^[A-Z]{2}[A-Z2-9]{3}$`)
 // location is an iLEAP Location when the place has a name and a known
 // country; nil otherwise (origin and destination are optional).
 func (b *builder) location(p *calc.Location) *Location {
-	if p == nil || strings.TrimSpace(p.Name) == "" {
+	if p == nil {
 		return nil
 	}
-	l := Location{City: p.Name, Lat: dec(p.Lat), Lng: dec(p.Lon)}
+	city := strings.TrimSpace(p.Name)
+	if b.opts.City != nil {
+		if c, _, ok := b.opts.City(*p); ok && c != "" {
+			city = c
+		}
+	}
+	if city == "" {
+		return nil
+	}
+	l := Location{City: city, Lat: dec(p.Lat), Lng: dec(p.Lon)}
 	if code := strings.ToUpper(strings.ReplaceAll(p.Code, " ", "")); locode.MatchString(code) {
 		l.LOCODE, l.Country = code, code[:2]
 	}
@@ -235,6 +259,34 @@ func (b *builder) location(p *calc.Location) *Location {
 		return nil
 	}
 	return &l
+}
+
+// split separates a leg's parts (iLEAP has a TCE per mode and factor):
+// the leg without its parts, and each part as a leg of its own. A leg's
+// totals include its parts.
+func split(l calc.LegResult) (calc.LegResult, []calc.LegResult) {
+	if len(l.Parts) == 0 {
+		return l, nil
+	}
+	main := l
+	main.Parts = nil
+	var out []calc.LegResult
+	for _, p := range l.Parts {
+		main.DistanceKm -= p.DistanceKm
+		main.TonneKm -= p.TonneKm
+		main.TTWKg -= p.TTWKg
+		main.WTTKg -= p.WTTKg
+		main.WTWKg -= p.WTWKg
+		vt := l.VehicleType
+		if p.Factor != nil {
+			vt = p.Factor.VehicleType
+		}
+		out = append(out, calc.LegResult{LegID: l.LegID + "/" + p.Kind, Mode: p.Mode, VehicleType: vt,
+			DistanceKm: p.DistanceKm, DistanceType: l.DistanceType, TonneKm: p.TonneKm,
+			TTWKg: p.TTWKg, WTTKg: p.WTTKg, WTWKg: p.WTWKg, Method: p.Method, DataType: p.DataType,
+			Factor: p.Factor, DAF: p.DAF, DAFSource: p.DAFSource, EnergyKWhPerTkm: p.EnergyKWhPerTkm, Country: p.Country})
+	}
+	return main, out
 }
 
 // containerTEU is the TEU a sea or inland waterway leg carries in
@@ -283,6 +335,19 @@ func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
 	var ec []EnergyCarrier
 	var why string
 	switch {
+	case l.Method == calc.MethodEnergy && l.EnergyKWhPerTkm > 0 && l.Factor != nil:
+		// The energy method: kWh per tonne-km x the country's grid; the
+		// vehicle itself emits nothing.
+		key += "|" + l.Factor.Source
+		desc = fmt.Sprintf("%s, electric (%s kWh/tkm, %s grid)", l.Mode, dec(l.EnergyKWhPerTkm), l.Country)
+		comment = "Emission intensity: " + l.Factor.Source
+		ec = []EnergyCarrier{{EnergyCarrier: Electric, RelativeShare: "1",
+			Feedstocks:        []Feedstock{{Feedstock: FeedstockGrid, RegionProvenance: l.Country}},
+			EnergyConsumption: dec(l.EnergyKWhPerTkm), EnergyConsumptionUnit: "kWh",
+			EmissionFactorWTW: dec(l.Factor.WTT / l.EnergyKWhPerTkm / 1000), EmissionFactorTTW: "0"}}
+		if teu > 0 {
+			ec[0].EnergyConsumption = "" // per tonne-km; the TOC is per TEU-km
+		}
 	case l.FuelFactor != nil:
 		key += "|" + l.FuelFactor.Fuel + "|" + l.FuelFactor.Source
 		desc = fmt.Sprintf("%s, measured fuel (%s)", l.Mode, l.FuelFactor.Fuel)
@@ -345,8 +410,10 @@ func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
 	if l.LoadFactor > 0 && l.LoadFactor <= 1 {
 		t.LoadFactor = dec(l.LoadFactor)
 	}
-	if l.EmptyTripFactor > 0 && l.EmptyTripFactor < 1 {
-		t.EmptyDistanceFactor = dec(l.EmptyTripFactor)
+	if l.EmptyTripFactor > 0 {
+		// Sootcase's empty trip factor is empty km per loaded km; iLEAP's
+		// emptyDistanceFactor is empty km over all km.
+		t.EmptyDistanceFactor = dec(l.EmptyTripFactor / (1 + l.EmptyTripFactor))
 	}
 	if len(ec) == 0 {
 		b.gap("toc", id, "energyCarriers", why)
@@ -386,7 +453,7 @@ func (b *builder) defaultCarrier(f calc.Factor) ([]EnergyCarrier, string, string
 	switch {
 	case strings.HasPrefix(f.VehicleType, "glec/"):
 		name = glecFuel(c, f.VehicleType, f.Mode)
-	case strings.HasPrefix(f.Source, "DESNZ"):
+	case strings.HasPrefix(baseSource(f.Source), "DESNZ"):
 		name = desnzFuel(c)
 	}
 	if name == "" || b.opts.Fuels == nil {
@@ -548,6 +615,7 @@ func dataTypeLabel(t string) string {
 // secondary names the published source of a factor, from the start of
 // its source text; ok is false for the operator's own data.
 func secondary(src string) (SourceRef, bool) {
+	src = baseSource(src)
 	switch {
 	case strings.HasPrefix(src, "GLEC Framework v3.3"):
 		return SourceRef{Name: "GLEC Framework", Version: "3.3"}, true
@@ -559,6 +627,17 @@ func secondary(src string) (SourceRef, bool) {
 		return SourceRef{Name: "CO2emissiefactoren.nl", Version: "2026"}, true
 	}
 	return SourceRef{}, false
+}
+
+// baseSource is the published source a factor's source text rests on: a
+// load model's text names the dataset it is "from".
+func baseSource(src string) string {
+	if strings.HasPrefix(src, "load model (") {
+		if i := strings.LastIndex(src, ") from "); i > 0 {
+			return src[i+len(") from "):]
+		}
+	}
+	return src
 }
 
 func sortedSources(m map[SourceRef]bool) []SourceRef {
