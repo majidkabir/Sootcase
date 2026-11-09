@@ -1,0 +1,519 @@
+package ileap
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"regexp"
+	"sort"
+	"strings"
+	"time"
+
+	"github.com/majidkabir/sootcase/pkg/calc"
+)
+
+// FuelLookup gives fuel factors by name (factors.Dataset does).
+type FuelLookup interface {
+	FuelFactor(name string) (calc.FuelFactor, error)
+}
+
+// Options are the details iLEAP asks for that a calculation doesn't
+// have: who owns the data, when it was made, and the period it covers.
+type Options struct {
+	CompanyName string   // mandatory in iLEAP
+	CompanyIDs  []string // optional, e.g. "urn:..." ids of the data owner
+	CreatedAt   time.Time
+	// PeriodStart and PeriodEnd bound the data's reference period
+	// (mandatory in iLEAP); zero when not given. PeriodEnd is exclusive,
+	// as in iLEAP: the moment after the period.
+	PeriodStart, PeriodEnd time.Time
+	// Fuels gives the emission factors of a default value's energy
+	// carrier (GLEC Module 1, DESNZ fuels). Optional.
+	Fuels FuelLookup
+	// Country names the ISO 3166 alpha-2 country of a point, "" when it
+	// can't. Optional; without it, locations need a UN/LOCODE.
+	Country func(calc.Location) string
+	// Operator are TOCs and HOCs built from the operator's own data
+	// (FromOperations), by id: legs and hubs calculated with them refer
+	// to them instead of to a category made from the result.
+	Operator map[string]any
+}
+
+func (o Options) stamp() (created, start, end string) {
+	t := o.CreatedAt
+	if t.IsZero() {
+		t = time.Now()
+	}
+	created = t.UTC().Format(time.RFC3339)
+	if !o.PeriodStart.IsZero() {
+		start = o.PeriodStart.UTC().Format(time.RFC3339)
+	}
+	if !o.PeriodEnd.IsZero() {
+		end = o.PeriodEnd.UTC().Format(time.RFC3339)
+	}
+	return
+}
+
+// builder collects the objects and gaps of one export.
+type builder struct {
+	opts  Options
+	ex    Export
+	tocs  map[string]int // id -> index in ex.TOCs
+	hocs  map[string]int
+	gaps  map[string]bool
+	notes map[string]bool
+}
+
+func newBuilder(o Options) *builder {
+	return &builder{opts: o, ex: Export{SpecVersion: SpecVersion}, tocs: map[string]int{}, hocs: map[string]int{},
+		gaps: map[string]bool{}, notes: map[string]bool{}}
+}
+
+func (b *builder) gap(object, id, field, reason string) {
+	k := object + "\x00" + id + "\x00" + field
+	if !b.gaps[k] {
+		b.gaps[k] = true
+		b.ex.Gaps = append(b.ex.Gaps, Gap{Object: object, ID: id, Field: field, Reason: reason})
+	}
+}
+
+func (b *builder) note(s string) {
+	if !b.notes[s] {
+		b.notes[s] = true
+		b.ex.Notes = append(b.ex.Notes, s)
+	}
+}
+
+// common fills the properties ShipmentFootprints, TOCs and HOCs share,
+// and records the mandatory ones that are missing.
+func (b *builder) common(object, id string) (created, start, end string) {
+	created, start, end = b.opts.stamp()
+	if b.opts.CompanyName == "" {
+		b.gap(object, id, "companyName", "no company name given (the data owner)")
+	}
+	if start == "" || end == "" {
+		b.gap(object, id, "referencePeriodStart/referencePeriodEnd", "no reference period given")
+	}
+	return
+}
+
+func (b *builder) finish() Export {
+	sort.SliceStable(b.ex.Gaps, func(i, j int) bool { return b.ex.Gaps[i].Object < b.ex.Gaps[j].Object })
+	b.ex.Conformant = len(b.ex.Gaps) == 0
+	if b.ex.Conformant {
+		b.ex.Conformant = len(Validate(b.ex)) == 0
+	}
+	return b.ex
+}
+
+// FromResults turns calculated shipments into ShipmentFootprints, with
+// one TCE per leg and per hub, and the TOCs and HOCs they refer to.
+// A TOC made from a result is the intensity the leg was calculated with
+// (its WTW and TTW over its tonne-km), so every TCE equals its transport
+// activity times its TOC's intensity.
+func FromResults(results []calc.Result, opts Options) Export {
+	b := newBuilder(opts)
+	for _, r := range results {
+		b.shipment(r)
+		if len(r.Hubs) > 0 {
+			b.note("Hub TCEs have distance 0 and transport activity 0: iLEAP makes both mandatory for every TCE, and a hub has neither.")
+		}
+	}
+	return b.finish()
+}
+
+func (b *builder) shipment(r calc.Result) {
+	created, start, end := b.common("shipment", r.ShipmentID)
+	sf := ShipmentFootprint{
+		SpecVersion: SpecVersion, CompanyName: b.opts.CompanyName, CompanyIDs: b.opts.CompanyIDs,
+		CreatedAt: created, Status: StatusActive, ReferencePeriodStart: start, ReferencePeriodEnd: end,
+		Mass: dec(r.WeightKg), ShipmentID: r.ShipmentID,
+	}
+	if r.ShipmentID == "" {
+		b.gap("shipment", "", "shipmentId", "the shipment has no id")
+	}
+	sources := map[SourceRef]bool{}
+	// Legs are in transport order; hub stops aren't placed between them,
+	// so the order is only given when there are no hubs.
+	ordered := len(r.Hubs) == 0
+	var prev []string
+	used := map[string]int{}
+	for _, l := range r.Legs {
+		id := uniqueID(r.ShipmentID+"/"+l.LegID, used)
+		tocID, srcs := b.legTOC(l)
+		for _, s := range srcs {
+			sources[s] = true
+		}
+		t := TCE{
+			TCEID: id, TOCID: tocID, ShipmentID: r.ShipmentID, Mass: dec(r.WeightKg),
+			TransportActivity: dec(l.TonneKm), CO2eWTW: dec(l.WTWKg), CO2eTTW: dec(l.TTWKg),
+			Distance: b.distance(id, l), Origin: b.location(l.From), Destination: b.location(l.To),
+		}
+		if ordered {
+			t.PrevTCEIDs = append([]string{}, prev...)
+			prev = []string{id}
+		}
+		sf.TCEs = append(sf.TCEs, t)
+	}
+	for _, h := range r.Hubs {
+		id := uniqueID(r.ShipmentID+"/hub/"+h.HubID, used)
+		hocID, srcs := b.hubHOC(r, h)
+		for _, s := range srcs {
+			sources[s] = true
+		}
+		t := TCE{
+			TCEID: id, HOCID: hocID, ShipmentID: r.ShipmentID, Mass: dec(r.WeightKg),
+			Distance: GLECDistance{Actual: "0"}, TransportActivity: "0", CO2eWTW: dec(h.WTWKg),
+		}
+		if h.Containers > 0 {
+			t.PackagingOrTrEq, t.PackagingAmount = "Container-TEU", dec(h.Containers)
+		}
+		if h.TTWKg != nil {
+			t.CO2eTTW = dec(*h.TTWKg)
+		} else {
+			b.gap("tce", id, "co2eTTW", "the hub's emission intensity ("+h.HubType+", "+sourceName(h.Source)+") is given as WTW only, with no TTW/WTT split")
+		}
+		sf.TCEs = append(sf.TCEs, t)
+	}
+	sf.SecondaryEmissionFactorSources = sortedSources(sources)
+	if len(sf.TCEs) == 0 {
+		b.gap("shipment", r.ShipmentID, "tces", "the shipment has no legs or hubs")
+	}
+	b.ex.ShipmentFootprints = append(b.ex.ShipmentFootprints, sf)
+}
+
+func uniqueID(id string, used map[string]int) string {
+	used[id]++
+	if n := used[id]; n > 1 {
+		return fmt.Sprintf("%s#%d", id, n)
+	}
+	return id
+}
+
+// distance is the leg's distance by its GLEC type: the type given with
+// it, or else the type of the factor it was calculated with (Sootcase
+// applies no adjustment then, so that is the type it stands for).
+func (b *builder) distance(tceID string, l calc.LegResult) GLECDistance {
+	t := l.DistanceType
+	if t == "" && l.Factor != nil {
+		t = l.Factor.DistanceBasis
+	}
+	km := dec(l.DistanceKm)
+	switch t {
+	case calc.DistActual:
+		return GLECDistance{Actual: km}
+	case calc.DistGCD:
+		return GLECDistance{GCD: km}
+	case calc.DistSFD:
+		return GLECDistance{SFD: km}
+	}
+	b.gap("tce", tceID, "distance", fmt.Sprintf("the leg's distance (%s km) has no distance type (actual, gcd or sfd)", km))
+	return GLECDistance{}
+}
+
+var locode = regexp.MustCompile(`^[A-Z]{2}[A-Z2-9]{3}$`)
+
+// location is an iLEAP Location when the place has a name and a known
+// country; nil otherwise (origin and destination are optional).
+func (b *builder) location(p *calc.Location) *Location {
+	if p == nil || strings.TrimSpace(p.Name) == "" {
+		return nil
+	}
+	l := Location{City: p.Name, Lat: dec(p.Lat), Lng: dec(p.Lon)}
+	if code := strings.ToUpper(strings.ReplaceAll(p.Code, " ", "")); locode.MatchString(code) {
+		l.LOCODE, l.Country = code, code[:2]
+	}
+	if l.Country == "" && b.opts.Country != nil {
+		l.Country = strings.ToUpper(b.opts.Country(*p))
+	}
+	if len(l.Country) != 2 {
+		return nil
+	}
+	return &l
+}
+
+// legTOC returns the id of the TOC a leg was calculated with, adding it
+// to the export, and the secondary sources it rests on.
+func (b *builder) legTOC(l calc.LegResult) (string, []SourceRef) {
+	if l.Factor != nil && l.Factor.DataType != "" && l.Factor.DataType != calc.DataDefault {
+		if t, ok := b.opts.Operator[l.Factor.VehicleType].(TOC); ok {
+			b.addTOC(t)
+			return t.TOCID, t.SecondaryEmissionFactorSources
+		}
+	}
+	if l.TonneKm <= 0 {
+		id := "sootcase-toc-" + hash(string(l.Mode), l.LegID, "no-activity")
+		b.gap("toc", id, "co2eIntensityWTW", "the leg has no transport activity, so no intensity")
+		return id, nil
+	}
+	wtw, ttw := dec(l.WTWKg/l.TonneKm), dec(l.TTWKg/l.TonneKm)
+	key, desc, comment := l.Method, "", ""
+	var srcs []SourceRef
+	var ec []EnergyCarrier
+	var why string
+	switch {
+	case l.FuelFactor != nil:
+		key += "|" + l.FuelFactor.Fuel + "|" + l.FuelFactor.Source
+		desc = fmt.Sprintf("%s, measured fuel (%s)", l.Mode, l.FuelFactor.Fuel)
+		comment = "Intensity of this shipment's share of the measured fuel. Fuel factor: " + l.FuelFactor.Source
+		if s, ok := secondary(l.FuelFactor.Source); ok {
+			srcs = append(srcs, s)
+		}
+		c, reason := carrierFromFuel(*l.FuelFactor, 0)
+		if reason != "" {
+			why = reason
+		} else {
+			c.RelativeShare = "1"
+			ec = []EnergyCarrier{c}
+		}
+	case l.Factor != nil:
+		f := l.Factor
+		key += "|" + f.VehicleType + "|" + f.Source
+		desc = fmt.Sprintf("%s, %s (%s)", l.Mode, f.VehicleType, dataTypeLabel(f.DataType))
+		comment = "Emission intensity: " + f.Source
+		if l.DAF > 0 && l.DAF != 1 {
+			comment += fmt.Sprintf("; distance adjustment x %s (%s)", dec(l.DAF), l.DAFSource)
+		}
+		if s, ok := secondary(f.Source); ok {
+			srcs = append(srcs, s)
+		}
+		if f.DataType == "" || f.DataType == calc.DataDefault {
+			ec, why = b.defaultCarrier(*f)
+		} else {
+			why = "the leg used the operator's own intensity (" + f.VehicleType + "), which doesn't say which energy carriers it is for; give the operator's data (operations) to export its TOC"
+		}
+	default:
+		key += "|" + l.VehicleType
+		desc = fmt.Sprintf("%s, %s", l.Mode, l.VehicleType)
+		why = "the result doesn't name the leg's emission factor"
+	}
+	if l.LoadFactor > 0 || l.EmptyTripFactor > 0 || l.AllocationShare > 0 {
+		key += fmt.Sprintf("|%g|%g|%g", l.LoadFactor, l.EmptyTripFactor, l.AllocationShare)
+	}
+	id := "sootcase-toc-" + hash(string(l.Mode), key, string(wtw), string(ttw))
+	if _, ok := b.tocs[id]; ok {
+		return id, srcs
+	}
+	created, start, end := b.common("toc", id)
+	t := TOC{
+		SpecVersion: SpecVersion, CompanyName: b.opts.CompanyName, CompanyIDs: b.opts.CompanyIDs,
+		CreatedAt: created, Status: StatusActive, ReferencePeriodStart: start, ReferencePeriodEnd: end,
+		SecondaryEmissionFactorSources: srcs, Comment: comment,
+		TOCID: id, Description: desc, Mode: mode(l.Mode), EnergyCarriers: ec,
+		CO2eIntensityWTW: wtw, CO2eIntensityTTW: ttw, TransportActivityUnit: UnitTkm,
+		TemperatureControl: temperature(l.VehicleType + " " + factorID(l)),
+	}
+	if l.LoadFactor > 0 && l.LoadFactor <= 1 {
+		t.LoadFactor = dec(l.LoadFactor)
+	}
+	if l.EmptyTripFactor > 0 && l.EmptyTripFactor < 1 {
+		t.EmptyDistanceFactor = dec(l.EmptyTripFactor)
+	}
+	if len(ec) == 0 {
+		b.gap("toc", id, "energyCarriers", why)
+	} else if ec[0].EmissionFactorWTW == "" {
+		b.gap("toc", id, "energyCarriers.emissionFactorWTW/TTW", why)
+	}
+	b.addTOC(t)
+	return id, srcs
+}
+
+func (b *builder) addTOC(t TOC) {
+	if _, ok := b.tocs[t.TOCID]; ok {
+		return
+	}
+	b.tocs[t.TOCID] = len(b.ex.TOCs)
+	b.ex.TOCs = append(b.ex.TOCs, t)
+}
+
+func (b *builder) addHOC(h HOC) {
+	if _, ok := b.hocs[h.HOCID]; ok {
+		return
+	}
+	b.hocs[h.HOCID] = len(b.ex.HOCs)
+	b.ex.HOCs = append(b.ex.HOCs, h)
+}
+
+// defaultCarrier is the energy carrier of a default (or modelled) value,
+// when its id names one, with the emission factors of that fuel from the
+// same source family when the dataset has them; why says what's missing.
+func (b *builder) defaultCarrier(f calc.Factor) ([]EnergyCarrier, string) {
+	c := vehicleCarrier(f.VehicleType, f.Mode)
+	if c == "" {
+		return nil, fmt.Sprintf("the emission factor %s doesn't say which energy carrier it is for", f.VehicleType)
+	}
+	ec := EnergyCarrier{EnergyCarrier: c, RelativeShare: "1"}
+	name := ""
+	switch {
+	case strings.HasPrefix(f.VehicleType, "glec/"):
+		name = glecFuel(c, f.VehicleType, f.Mode)
+	case strings.HasPrefix(f.Source, "DESNZ"):
+		name = desnzFuel(c)
+	}
+	if name == "" || b.opts.Fuels == nil {
+		return []EnergyCarrier{ec}, fmt.Sprintf("no %s fuel factor to go with %s", c, f.VehicleType)
+	}
+	ff, err := b.opts.Fuels.FuelFactor(name)
+	if err != nil {
+		return []EnergyCarrier{ec}, fmt.Sprintf("fuel factor %s: %v", name, err)
+	}
+	full, reason := carrierFromFuel(ff, 0)
+	if reason != "" {
+		return []EnergyCarrier{ec}, reason
+	}
+	full.EnergyCarrier, full.RelativeShare = c, "1"
+	return []EnergyCarrier{full}, ""
+}
+
+// hubHOC returns the id of the HOC a hub stop was calculated with,
+// adding it to the export.
+func (b *builder) hubHOC(r calc.Result, h calc.HubResult) (string, []SourceRef) {
+	if h.DataType != "" && h.DataType != calc.DataDefault {
+		if o, ok := b.opts.Operator[h.HubType].(HOC); ok {
+			b.addHOC(o)
+			return o.HOCID, o.SecondaryEmissionFactorSources
+		}
+	}
+	per, unitName := r.WeightKg/1000, UnitTonnes
+	if h.Containers > 0 {
+		per, unitName = h.Containers, UnitTEU
+	}
+	var srcs []SourceRef
+	if s, ok := secondary(h.Source); ok {
+		srcs = append(srcs, s)
+	}
+	wtw := dec(h.WTWKg / per)
+	ttw := Decimal("")
+	if h.TTWKg != nil {
+		ttw = dec(*h.TTWKg / per)
+	}
+	id := "sootcase-hoc-" + hash(h.HubType, h.Source, string(wtw), string(ttw), unitName)
+	if _, ok := b.hocs[id]; ok {
+		return id, srcs
+	}
+	created, start, end := b.common("hoc", id)
+	ht, temp := hubType(h.HubType)
+	o := HOC{
+		SpecVersion: SpecVersion, CompanyName: b.opts.CompanyName, CompanyIDs: b.opts.CompanyIDs,
+		CreatedAt: created, Status: StatusActive, ReferencePeriodStart: start, ReferencePeriodEnd: end,
+		SecondaryEmissionFactorSources: srcs, Comment: "Emission intensity: " + h.Source,
+		HOCID: id, Description: fmt.Sprintf("%s (%s)", h.HubType, dataTypeLabel(h.DataType)),
+		HubType: ht, TemperatureControl: temp,
+		CO2eIntensityWTW: wtw, CO2eIntensityTTW: ttw, HubActivityUnit: unitName,
+	}
+	if ht == "" {
+		b.gap("hoc", id, "hubType", "iLEAP has no hub type for "+h.HubType)
+	}
+	if ttw == "" {
+		b.gap("hoc", id, "co2eIntensityTTW", "the hub's emission intensity is given as WTW only, with no TTW/WTT split")
+	}
+	b.gap("hoc", id, "energyCarriers", "the hub's emission intensity doesn't say which energy carriers it is for")
+	b.addHOC(o)
+	return id, srcs
+}
+
+// hubType maps a Sootcase (GLEC) hub type to iLEAP's HubType and
+// temperature control. GLEC's per-tonne hub values have an ambient and a
+// mixed (ambient and temperature-controlled) column.
+func hubType(t string) (string, string) {
+	base, temp := t, ""
+	if strings.HasPrefix(t, "glec") || !strings.Contains(t, "/") {
+		switch {
+		case strings.HasSuffix(t, "_mixed"):
+			base, temp = strings.TrimSuffix(t, "_mixed"), TempMixed
+		case strings.HasSuffix(t, "_temperature_controlled"):
+			base, temp = strings.TrimSuffix(t, "_temperature_controlled"), TempRefrigerated
+		}
+	}
+	ht := map[string]string{
+		"transshipment":         "Transshipment",
+		"storage_transshipment": "StorageAndTransshipment",
+		"warehouse":             "Warehouse",
+		"liquid_bulk_terminal":  "LiquidBulkTerminal",
+	}[base]
+	if ht != "" && temp == "" {
+		temp = TempAmbient
+	}
+	return ht, temp
+}
+
+func mode(m calc.Mode) string {
+	return map[calc.Mode]string{calc.Road: "Road", calc.Rail: "Rail", calc.Sea: "Sea", calc.Air: "Air",
+		calc.InlandWaterway: "InlandWaterway"}[m]
+}
+
+// temperature is "refrigerated" when a vehicle or factor id says the
+// freight is temperature-controlled, "" when it doesn't say.
+func temperature(s string) string {
+	s = strings.ToLower(s)
+	if strings.Contains(s, "non_refrigerated") {
+		return ""
+	}
+	for _, w := range []string{"reefer", "refrigerated", "temperature_controlled"} {
+		if strings.Contains(s, w) {
+			return TempRefrigerated
+		}
+	}
+	return ""
+}
+
+func factorID(l calc.LegResult) string {
+	if l.Factor != nil {
+		return l.Factor.VehicleType
+	}
+	return ""
+}
+
+func dataTypeLabel(t string) string {
+	switch t {
+	case calc.DataPrimary:
+		return "primary data"
+	case calc.DataModelled:
+		return "modelled data"
+	}
+	return "default value"
+}
+
+// secondary names the published source of a factor, from the start of
+// its source text; ok is false for the operator's own data.
+func secondary(src string) (SourceRef, bool) {
+	switch {
+	case strings.HasPrefix(src, "GLEC Framework v3.3"):
+		return SourceRef{Name: "GLEC Framework", Version: "3.3"}, true
+	case strings.HasPrefix(src, "DESNZ 2026"):
+		return SourceRef{Name: "UK Government GHG Conversion Factors for Company Reporting (DESNZ)", Version: "2026"}, true
+	case strings.HasPrefix(src, "EU MRV 2024"):
+		return SourceRef{Name: "EU MRV (EMSA THETIS-MRV)", Version: "2024"}, true
+	case strings.HasPrefix(src, "www.co2emissiefactoren.nl 2026"):
+		return SourceRef{Name: "CO2emissiefactoren.nl", Version: "2026"}, true
+	}
+	return SourceRef{}, false
+}
+
+func sortedSources(m map[SourceRef]bool) []SourceRef {
+	out := make([]SourceRef, 0, len(m))
+	for s := range m {
+		out = append(out, s)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name+out[i].Version < out[j].Name+out[j].Version })
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+func hash(parts ...string) string {
+	h := sha256.Sum256([]byte(strings.Join(parts, "\x00")))
+	return hex.EncodeToString(h[:6])
+}
+
+// sourceName is a short name of a factor's source, for messages.
+func sourceName(src string) string {
+	if s, ok := secondary(src); ok {
+		return s.Name + " " + s.Version
+	}
+	if len(src) > 60 {
+		return src[:60] + "..."
+	}
+	return src
+}

@@ -24,7 +24,9 @@ import (
 	"io"
 	"math"
 	"regexp"
+	"slices"
 	"strings"
+	"time"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
 	"github.com/majidkabir/sootcase/pkg/factors"
@@ -35,8 +37,12 @@ type Operations struct {
 	Name   string `json:"name"`
 	Period string `json:"period"` // free text, e.g. "2025" or "2025-Q3"
 	Year   int    `json:"year,omitempty"`
-	TOCs   []TOC  `json:"tocs"`
-	HOCs   []HOC  `json:"hocs"`
+	// PeriodStart and PeriodEnd (YYYY-MM-DD, the first and the last day)
+	// bound the period exactly. Optional; iLEAP exports need them.
+	PeriodStart string `json:"period_start,omitempty"`
+	PeriodEnd   string `json:"period_end,omitempty"`
+	TOCs        []TOC  `json:"tocs"`
+	HOCs        []HOC  `json:"hocs"`
 }
 
 // TOC is a transport operation category.
@@ -53,6 +59,8 @@ type TOC struct {
 	// temperature-controlled units). Optional.
 	Refrigerants []RefrigerantUse `json:"refrigerants,omitempty"`
 	DataType     string           `json:"data_type,omitempty"` // primary (default) or modelled
+	// TemperatureControl is ambient, refrigerated or mixed. Optional.
+	TemperatureControl string `json:"temperature_control,omitempty"`
 }
 
 // HOC is a hub operation category. Give Tonnes (outbound tonnes handled,
@@ -66,13 +74,28 @@ type HOC struct {
 	Energy       []EnergyUse      `json:"energy"` // fuels and electricity, e.g. "electricity/DNK" in kWh
 	Refrigerants []RefrigerantUse `json:"refrigerants,omitempty"`
 	DataType     string           `json:"data_type,omitempty"` // primary (default) or modelled
+	// HubType is transshipment, storage_transshipment, warehouse,
+	// liquid_bulk_terminal or maritime_container_terminal, and
+	// TemperatureControl ambient, refrigerated or mixed. Optional.
+	HubType            string `json:"hub_type,omitempty"`
+	TemperatureControl string `json:"temperature_control,omitempty"`
 }
 
 // EnergyUse is an amount of one fuel, in that fuel factor's unit.
+// ActivityShare, optional, is the share of the category's activity
+// (tonne-km, tonnes or containers) done with this fuel, 0 to 1; iLEAP
+// asks for it when a category uses more than one energy carrier.
 type EnergyUse struct {
-	Fuel   string  `json:"fuel"`
-	Amount float64 `json:"amount"`
+	Fuel          string   `json:"fuel"`
+	Amount        float64  `json:"amount"`
+	ActivityShare *float64 `json:"activity_share,omitempty"`
 }
+
+// Hub types and temperature controls a HOC or TOC can name.
+var (
+	HubTypes     = []string{"transshipment", "storage_transshipment", "warehouse", "liquid_bulk_terminal", "maritime_container_terminal"}
+	Temperatures = []string{"ambient", "refrigerated", "mixed"}
+)
 
 // RefrigerantUse is one refrigerant lost in the period: the kg refilled
 // to replace leaks. Its GWP comes from the dataset (GLEC v3.3 Module 3,
@@ -97,8 +120,16 @@ func Parse(r io.Reader) (Operations, error) {
 	if err := dec.Decode(&ops); err != nil {
 		return Operations{}, fmt.Errorf("operations: %w", err)
 	}
+	return Check(ops)
+}
+
+// Check validates operations (as Parse does after decoding).
+func Check(ops Operations) (Operations, error) {
 	if len(ops.TOCs) == 0 && len(ops.HOCs) == 0 {
 		return Operations{}, errors.New("operations: no tocs or hocs")
+	}
+	if err := checkPeriod(ops.PeriodStart, ops.PeriodEnd); err != nil {
+		return Operations{}, err
 	}
 	ids := map[string]bool{}
 	for _, t := range ops.TOCs {
@@ -119,6 +150,9 @@ func Parse(r io.Reader) (Operations, error) {
 		if err := checkEnergy(t.ID, t.Fuels, t.Refrigerants, t.DataType); err != nil {
 			return Operations{}, err
 		}
+		if t.TemperatureControl != "" && !slices.Contains(Temperatures, t.TemperatureControl) {
+			return Operations{}, fmt.Errorf("toc %q: temperature_control must be one of %s", t.ID, strings.Join(Temperatures, ", "))
+		}
 	}
 	for _, h := range ops.HOCs {
 		if err := checkID(h.ID, ids); err != nil {
@@ -130,8 +164,28 @@ func Parse(r io.Reader) (Operations, error) {
 		if err := checkEnergy(h.ID, h.Energy, h.Refrigerants, h.DataType); err != nil {
 			return Operations{}, err
 		}
+		if h.HubType != "" && !slices.Contains(HubTypes, h.HubType) {
+			return Operations{}, fmt.Errorf("hoc %q: hub_type must be one of %s", h.ID, strings.Join(HubTypes, ", "))
+		}
+		if h.TemperatureControl != "" && !slices.Contains(Temperatures, h.TemperatureControl) {
+			return Operations{}, fmt.Errorf("hoc %q: temperature_control must be one of %s", h.ID, strings.Join(Temperatures, ", "))
+		}
 	}
 	return ops, nil
+}
+
+// checkPeriod checks the optional exact period: both dates or neither,
+// YYYY-MM-DD, the last day not before the first.
+func checkPeriod(start, end string) error {
+	if start == "" && end == "" {
+		return nil
+	}
+	a, err1 := time.Parse(time.DateOnly, start)
+	b, err2 := time.Parse(time.DateOnly, end)
+	if err1 != nil || err2 != nil || b.Before(a) {
+		return errors.New("operations: give period_start and period_end (the first and the last day) as YYYY-MM-DD")
+	}
+	return nil
 }
 
 var idRe = regexp.MustCompile(`^[a-z0-9][a-z0-9_./-]*$`)
@@ -154,6 +208,9 @@ func checkEnergy(id string, uses []EnergyUse, refs []RefrigerantUse, dataType st
 	for _, u := range uses {
 		if strings.TrimSpace(u.Fuel) == "" || u.Amount < 0 || !finite(u.Amount) {
 			return fmt.Errorf("%q: each fuel needs a name and an amount >= 0", id)
+		}
+		if u.ActivityShare != nil && (*u.ActivityShare <= 0 || *u.ActivityShare > 1 || !finite(*u.ActivityShare)) {
+			return fmt.Errorf("%q: %s: activity_share must be more than 0 and at most 1", id, u.Fuel)
 		}
 	}
 	for _, r := range refs {
@@ -221,6 +278,13 @@ func Build(ops Operations, fuels calc.FactorProvider) (factors.Dataset, error) {
 		ds.Hubs = append(ds.Hubs, hf)
 	}
 	return ds, nil
+}
+
+// Totals returns TTW and WTT kg CO2e for a category's energy uses and
+// refrigerant losses (refrigerants count as TTW).
+func Totals(uses []EnergyUse, refs []RefrigerantUse, fuels calc.FactorProvider) (ttw, wtt float64, err error) {
+	ttw, wtt, _, err = sum(uses, refs, fuels)
+	return
 }
 
 // sum returns TTW and WTT kg CO2e for a list of energy uses and

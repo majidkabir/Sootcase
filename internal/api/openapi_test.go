@@ -11,6 +11,7 @@ import (
 
 	"github.com/majidkabir/sootcase/pkg/calc"
 	"github.com/majidkabir/sootcase/pkg/factors"
+	"github.com/majidkabir/sootcase/pkg/ileap"
 	"github.com/majidkabir/sootcase/pkg/places"
 	"github.com/majidkabir/sootcase/pkg/recommend"
 	"github.com/majidkabir/sootcase/pkg/report"
@@ -83,6 +84,7 @@ func TestOpenAPIMatchesTypes(t *testing.T) {
 		"Result": calc.Result{}, "Dataset": factors.Dataset{}, "Report": report.Report{}, "RecommendSettings": recommend.Settings{},
 		"RecommendRoute": recommend.Route{}, "ScenarioChange": scenario.Change{}, "ScenarioPlan": scenario.Plan{},
 		"ScenarioTotals": scenario.Totals{}, "ScenarioResult": scenario.Result{},
+		"ILEAPResponse": ILEAPResponse{}, "ILEAPGap": ileap.Gap{},
 	}
 	for name, v := range types {
 		props, ok := spec[name]

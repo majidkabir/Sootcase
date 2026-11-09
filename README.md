@@ -261,6 +261,19 @@ sootcase calc -factors desnz-2026,acme-2025.json shipment.json
 
 Fuels are converted with the selected dataset's fuel factors, including `electricity/<country>`, the country's grid mix (location-based, as ISO 14083 asks; results with a supplier's own mix are reported apart from ISO 14083 results: Fraunhofer IML, *Guide for GHG Emissions Accounting at Logistics Hubs* v2.1, s. 8.3). Refrigerant losses are the kg refilled in the period (`"refrigerants": [{"refrigerant": "R-404A", "kg": 25}]`), times the GWP100 from GLEC v3.3 Module 3, Table 2 (IPCC AR6), and count as direct emissions (TTW), as in GLEC v3.3 Module 4, s. 1.3. For a refrigerant GLEC doesn't list (R-717 has no value there), give `gwp` and `gwp_source`. A HOC keeps its TTW and WTT parts (`ttw_g_per_tonne`, `wtt_g_per_tonne`, or `_per_container`), and hubs calculated with it show `ttw_kg` and `wtt_kg`, as ISO 14083 (13.3.2) asks at hub level. GLEC's hub default values are WTW only, so hubs on defaults show `wtw_kg` alone.
 
+For an iLEAP export (below), operations can also give the exact period (`period_start`, `period_end`: first and last day), a HOC's `hub_type` (`transshipment`, `storage_transshipment`, `warehouse`, `liquid_bulk_terminal`, `maritime_container_terminal`), a TOC's or HOC's `temperature_control` (`ambient`, `refrigerated`, `mixed`), and, when a category uses more than one fuel, each fuel's `activity_share` (its share of the category's activity). None of them changes a calculation.
+
+### iLEAP export
+
+`sootcase ileap` (and `POST /v1/ileap`) writes calculated shipments in the data model of the [iLEAP Technical Specifications](https://specs.ileap.global/) v1.1.0: a ShipmentFootprint per shipment, a TCE per leg and per hub stop, and the TOCs and HOCs they were calculated with. With `-operations` (or `POST /v1/ileap/operations`), an operator's own categories become iLEAP TOCs and HOCs too, with their energy carriers, energy use per unit of activity and emission factors; shipments calculated with them refer to them by id.
+
+```sh
+sootcase ileap -company "Acme Logistics" -from 2025-01-01 -to 2025-12-31 \
+  -operations examples/operations.json examples/shipments.csv > acme-ileap.json
+```
+
+iLEAP makes some properties mandatory that a calculation on default values can't fill: the energy carrier of a default value that doesn't name one (GLEC's rail "traction unknown", Clean Cargo trade lanes, inland vessels), and a TTW value for GLEC's hub values, which are WTW only. Sootcase doesn't invent them: it leaves them out, lists each one in `gaps`, and sets `conformant` to `false`. Energy carriers are taken only from what a value states: GLEC road rows end in their fuel, GLEC rail rows name diesel or electric traction, GLEC ship rows name their fuel, and air freight factors are for jet fuel; their emission factors per litre or kg are GLEC v3.3 Module 1's (or DESNZ's for DESNZ rows). A TCE's emissions equal its transport activity times its TOC's intensity. Hub TCEs carry distance and transport activity 0, as iLEAP requires both. The company and the period aren't in a calculation, so they are inputs. This is the data model only: serving it to data recipients (the iLEAP REST API with its authentication) is not part of this repository. Sootcase is not iLEAP-approved; SFC's approval needs a prior GLEC approval.
+
 ## Scenarios (what-if)
 
 `sootcase scenario shipments.csv plan.json` (or `POST /v1/scenario`) calculates the shipments as they are and with the plan's changes, with the same method, and shows both totals and the difference. Results are scenarios, not reported emissions; every value a change uses is given by you (with its source) or a default with its source, listed in the output.
@@ -365,6 +378,8 @@ Each output line is `{"line": n, "shipment_id": "...", "result": {...}}`, or `{"
 |---|---|---|
 | `POST` | `/v1/calculate` | one shipment; `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point); `?country_km=true` adds each road and rail leg's km by country (`legs[].country_km`, ISO 3166-1 alpha-2, `XK` for Kosovo, Natural Earth's three-letter code for the few areas without one; ferry km stay in `route_parts_km`), and in Belgium by region (`legs[].region_km`: `BE-VLG`, `BE-WAL`, `BE-BRU`, ISO 3166-2; from Statbel's statistical sectors, CC BY 4.0) |
 | `POST` | `/v1/calculate/batch` | `{"shipments": [...]}`, up to 10,000; `?country_km=true` as for one shipment |
+| `POST` | `/v1/ileap` | the shipments as iLEAP ShipmentFootprints with their TOCs and HOCs (`company`, `company_ids`, `period_from`, `period_to`, `shipments`), and the `gaps` iLEAP requires that the data lacks |
+| `POST` | `/v1/ileap/operations` | an operator's measured data (`operations`, as for `sootcase toc`) as iLEAP TOCs and HOCs |
 | `POST` | `/v1/report` | `{"organisation", "period_from", "period_to", "shipments": [...]}`, JSON or `?format=md`; with `?results=true`, `?country_km=true` as for one shipment |
 | `GET` | `/v1/places?q=rotterdam&kind=port` | find places by name, UN/LOCODE or IATA code |
 | `GET` | `/v1/factors` | loaded dataset |
@@ -466,6 +481,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 | `pkg/batch` | Parallel, ordered, bounded-memory batch processing. |
 | `pkg/ndjson` | Newline-delimited JSON input and output for streaming. |
 | `pkg/toc` | Transport and hub operation categories from operational data. |
+| `pkg/ileap` | Results and operation categories in the iLEAP data model, with what iLEAP requires that the data lacks. |
 | `pkg/places` | Place search and location codes (embedded GeoNames, UN/LOCODE, OurAirports). |
 | `internal/desnz` | DESNZ flat-file importer. |
 | `internal/xlsx` | Minimal stdlib-only .xlsx reader. |
@@ -513,6 +529,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 - [x] Terminal handlings in recommendations and scenarios: new rail, waterway and sea legs between terminals, GLEC v3.3 intermodal terminal value per container
 - [x] Missing road legs: gaps between legs, first and last mile to ports, rail terminals and airports
 - [x] Cargo-type presets (GLEC v3.3's cargo and load categories)
+- [x] iLEAP data model export (ShipmentFootprints, TCEs, TOCs, HOCs), with gaps listed instead of invented
 
 ## Releasing
 

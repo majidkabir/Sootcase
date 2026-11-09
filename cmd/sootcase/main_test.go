@@ -131,3 +131,33 @@ func TestHealthWithoutServer(t *testing.T) {
 		t.Error("health without a server should fail")
 	}
 }
+
+func TestILEAP(t *testing.T) {
+	out, e, code := run(t, "", "ileap", "-company", "Acme", "-from", "2025-01-01", "-to", "2025-12-31",
+		"-operations", "../../examples/operations.json", shipmentsCSV)
+	if code != 0 || !strings.Contains(e, "shipment footprints") {
+		t.Fatalf("exit %d: %s", code, e)
+	}
+	var ex struct {
+		Footprints []map[string]any `json:"shipment_footprints"`
+		TOCs       []map[string]any `json:"tocs"`
+		HOCs       []map[string]any `json:"hocs"`
+		Gaps       []map[string]any `json:"gaps"`
+	}
+	if err := json.Unmarshal([]byte(out), &ex); err != nil {
+		t.Fatal(err)
+	}
+	ids := map[any]bool{}
+	for _, x := range ex.TOCs {
+		ids[x["tocId"]] = true
+	}
+	if len(ex.Footprints) == 0 || !ids["dk_road_electric"] || len(ex.HOCs) != 3 || len(ex.Gaps) == 0 {
+		t.Errorf("export: %d footprints, tocs %v, %d hocs, %d gaps", len(ex.Footprints), ids, len(ex.HOCs), len(ex.Gaps))
+	}
+	if _, e, code := run(t, "", "ileap"); code != 1 || !strings.Contains(e, "expected") {
+		t.Errorf("no input: %d %s", code, e)
+	}
+	if _, e, code := run(t, "", "ileap", "-from", "2025-02-01", "-to", "2025-01-01", shipmentsCSV); code != 1 || !strings.Contains(e, "first and last day") {
+		t.Errorf("bad period: %d %s", code, e)
+	}
+}

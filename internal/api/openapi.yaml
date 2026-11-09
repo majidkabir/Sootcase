@@ -206,6 +206,83 @@ paths:
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Busy" }
         "504": { $ref: "#/components/responses/Error" }
+  /v1/ileap:
+    post:
+      summary: Shipments as iLEAP ShipmentFootprints, with their TOCs and HOCs
+      description: >
+        Calculates the shipments and writes them in the data model of the
+        iLEAP Technical Specifications v1.1.0 (https://specs.ileap.global/):
+        one ShipmentFootprint per shipment, a TCE per leg and per hub stop,
+        and the TOCs and HOCs they were calculated with (iLEAP property
+        names, decimals as strings). iLEAP makes some properties mandatory
+        that default values can't fill, such as the energy carrier of GLEC's
+        rail "traction unknown" or a TTW value for GLEC's hub values (WTW
+        only). Sootcase never invents them: it leaves them out, lists them
+        in gaps, and sets conformant to false. Up to 10,000 shipments; with
+        a CSV body, company, company_ids, period_from and period_to are query
+        parameters.
+      parameters:
+        - name: add_road_legs
+          in: query
+          schema: { type: boolean, default: true }
+          description: false adds no road legs for shipments that don't set add_road_legs themselves.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [shipments]
+              properties:
+                company: { type: string, maxLength: 1000, description: The company owning the data (iLEAP companyName) }
+                company_ids: { type: array, maxItems: 20, items: { type: string }, description: "Ids of that company, e.g. urn:..." }
+                period_from: { type: string, format: date, description: First day of the period the data covers }
+                period_to: { type: string, format: date, description: Last day of the period the data covers }
+                shipments:
+                  type: array
+                  items: { $ref: "#/components/schemas/Shipment" }
+          text/csv:
+            schema: { type: string }
+      responses:
+        "200":
+          description: The iLEAP objects, what they lack, and the shipments that failed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ILEAPResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "413": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Busy" }
+  /v1/ileap/operations:
+    post:
+      summary: An operator's measured data as iLEAP TOCs and HOCs
+      description: >
+        The operations of "sootcase toc" (fuel and energy used per transport
+        or hub operation category over a period) as iLEAP TOCs and HOCs:
+        intensities, and energy carriers with consumption per unit of
+        activity and emission factors. Give hub_type for HOCs, and each
+        fuel's activity_share when a category uses more than one, as iLEAP
+        asks; refrigerant losses are in the TTW values (iLEAP has no separate
+        property for them, said in comment).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [operations]
+              properties:
+                company: { type: string, maxLength: 1000, description: The company owning the data; default the operations' name }
+                company_ids: { type: array, maxItems: 20, items: { type: string } }
+                period_from: { type: string, format: date, description: "First day of the period, if the operations don't give period_start" }
+                period_to: { type: string, format: date, description: "Last day of the period, if the operations don't give period_end" }
+                operations: { type: object, description: "As for sootcase toc: name, period, period_start, period_end, tocs, hocs" }
+      responses:
+        "200":
+          description: The iLEAP TOCs and HOCs, and what they lack
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ILEAPResponse" }
+        "400": { $ref: "#/components/responses/Error" }
   /v1/scenario:
     post:
       summary: What-if comparison of up to 2,500 shipments
@@ -712,6 +789,35 @@ components:
               gwp100: { type: number }
               source: { type: string }
         regions: { type: array, items: { type: object }, description: The regions and sea zones regional aliases choose by }
+    ILEAPResponse:
+      type: object
+      properties:
+        ileap_spec_version: { type: string, example: "1.1.0" }
+        conformant: { type: boolean, description: "True when nothing iLEAP requires is missing and every object passes Sootcase's check of the data model" }
+        shipment_footprints: { type: array, items: { type: object }, description: "iLEAP ShipmentFootprints (iLEAP 6.1), each with its TCEs (6.2)" }
+        tocs: { type: array, items: { type: object }, description: iLEAP TOCs (6.3) }
+        hocs: { type: array, items: { type: object }, description: iLEAP HOCs (6.4) }
+        gaps:
+          type: array
+          description: Properties iLEAP requires that the data doesn't give (left out, not invented)
+          items: { $ref: "#/components/schemas/ILEAPGap" }
+        notes: { type: array, items: { type: string } }
+        failed:
+          type: array
+          description: Shipments that couldn't be calculated, so aren't in the export
+          items:
+            type: object
+            properties:
+              shipment_id: { type: string }
+              error: { type: string }
+              retryable: { type: boolean }
+    ILEAPGap:
+      type: object
+      properties:
+        object: { type: string, enum: [shipment, tce, toc, hoc] }
+        id: { type: string }
+        field: { type: string }
+        reason: { type: string }
     Report:
       type: object
       description: See pkg/report for every field. Emissions in kg CO2e.
