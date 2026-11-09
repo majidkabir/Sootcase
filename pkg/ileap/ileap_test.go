@@ -325,3 +325,35 @@ func TestTEUGiven(t *testing.T) {
 		t.Errorf("units %v", units)
 	}
 }
+
+// GLEC's inland waterway rows and US rail average say diesel in their text.
+func TestCarrierFromSource(t *testing.T) {
+	ds := dataset(t)
+	for id, want := range map[string]string{"glec/iww/motor_vessel_85_110m": Diesel, "glec/iww/container_110m": Diesel,
+		"glec/rail/na/average": Diesel, "glec/rail/in/average": "", "glec/rail/eu/average_traction_unknown": "",
+		"barge_container_96teu": ""} {
+		var f calc.Factor
+		for _, x := range ds.Legs {
+			if x.VehicleType == id {
+				f = x
+			}
+		}
+		if f.VehicleType == "" {
+			t.Fatalf("no factor %s", id)
+		}
+		if got := factorCarrier(f); got != want {
+			t.Errorf("%s: %q, want %q", id, got, want)
+		}
+	}
+	b := newBuilder(opts(ds))
+	var iww calc.Factor
+	for _, x := range ds.Legs {
+		if x.VehicleType == "glec/iww/container_110m" {
+			iww = x
+		}
+	}
+	ec, why, src := b.defaultCarrier(iww)
+	if why != "" || len(ec) != 1 || ec[0].EmissionFactorWTW == "" || !strings.HasPrefix(src, "GLEC Framework v3.3") {
+		t.Errorf("iww carrier %+v %q %q", ec, why, src)
+	}
+}

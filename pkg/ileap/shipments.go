@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -308,7 +309,14 @@ func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
 			srcs = append(srcs, s)
 		}
 		if f.DataType == "" || f.DataType == calc.DataDefault {
-			ec, why = b.defaultCarrier(*f)
+			var fuelSrc string
+			ec, why, fuelSrc = b.defaultCarrier(*f)
+			if fuelSrc != "" {
+				comment += "; energy carrier emission factors: " + fuelSrc
+				if s, ok := secondary(fuelSrc); ok && !slices.Contains(srcs, s) {
+					srcs = append(srcs, s)
+				}
+			}
 		} else {
 			why = "the leg used the operator's own intensity (" + f.VehicleType + "), which doesn't say which energy carriers it is for; give the operator's data (operations) to export its TOC"
 		}
@@ -368,10 +376,10 @@ func (b *builder) addHOC(h HOC) {
 // defaultCarrier is the energy carrier of a default (or modelled) value,
 // when its id names one, with the emission factors of that fuel from the
 // same source family when the dataset has them; why says what's missing.
-func (b *builder) defaultCarrier(f calc.Factor) ([]EnergyCarrier, string) {
-	c := vehicleCarrier(f.VehicleType, f.Mode)
+func (b *builder) defaultCarrier(f calc.Factor) ([]EnergyCarrier, string, string) {
+	c := factorCarrier(f)
 	if c == "" {
-		return nil, fmt.Sprintf("the emission factor %s doesn't say which energy carrier it is for", f.VehicleType)
+		return nil, fmt.Sprintf("the emission factor %s doesn't say which energy carrier it is for", f.VehicleType), ""
 	}
 	ec := EnergyCarrier{EnergyCarrier: c, RelativeShare: "1"}
 	name := ""
@@ -382,18 +390,37 @@ func (b *builder) defaultCarrier(f calc.Factor) ([]EnergyCarrier, string) {
 		name = desnzFuel(c)
 	}
 	if name == "" || b.opts.Fuels == nil {
-		return []EnergyCarrier{ec}, fmt.Sprintf("no %s fuel factor to go with %s", c, f.VehicleType)
+		return []EnergyCarrier{ec}, fmt.Sprintf("no %s fuel factor to go with %s", c, f.VehicleType), ""
 	}
 	ff, err := b.opts.Fuels.FuelFactor(name)
 	if err != nil {
-		return []EnergyCarrier{ec}, fmt.Sprintf("fuel factor %s: %v", name, err)
+		return []EnergyCarrier{ec}, fmt.Sprintf("fuel factor %s: %v", name, err), ""
 	}
 	full, reason := carrierFromFuel(ff, 0)
 	if reason != "" {
-		return []EnergyCarrier{ec}, reason
+		return []EnergyCarrier{ec}, reason, ""
 	}
 	full.EnergyCarrier, full.RelativeShare = c, "1"
-	return []EnergyCarrier{full}, ""
+	return []EnergyCarrier{full}, "", ff.Source
+}
+
+// factorCarrier is vehicleCarrier, plus what a GLEC value's own text
+// says: GLEC's inland waterway rows (Table 2) and its US rail average are
+// for diesel.
+func factorCarrier(f calc.Factor) string {
+	if c := vehicleCarrier(f.VehicleType, f.Mode); c != "" {
+		return c
+	}
+	src := strings.ToLower(f.Source)
+	switch {
+	case !strings.HasPrefix(f.Source, "GLEC Framework") || strings.Contains(src, "electric"):
+		return ""
+	case f.Mode == calc.InlandWaterway && strings.HasPrefix(f.VehicleType, "glec/iww/") && strings.HasSuffix(src, ", diesel"):
+		return Diesel
+	case f.Mode == calc.Rail && strings.HasPrefix(f.VehicleType, "glec/rail/na/") && strings.Contains(src, "(diesel)"):
+		return Diesel
+	}
+	return ""
 }
 
 // hubHOC returns the id of the HOC a hub stop was calculated with,

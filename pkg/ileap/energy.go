@@ -152,6 +152,12 @@ func glecFuel(carrierType, vehicleID string, mode calc.Mode) string {
 			return "glec/fuel/air/jet_kerosene/kg"
 		}
 		return ""
+	case calc.InlandWaterway:
+		// GLEC's inland waterway values are mainly European data (Table 2).
+		if carrierType == Diesel && strings.HasPrefix(vehicleID, "glec/iww/") {
+			return "glec/fuel/eu/diesel/l"
+		}
+		return ""
 	}
 	region := ""
 	for _, r := range []string{"eu_sa", "na", "cn", "in"} {
