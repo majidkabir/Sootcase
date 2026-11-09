@@ -576,3 +576,20 @@ func TestRecheck4(t *testing.T) {
 		}
 	}
 }
+
+// A default value's energy use per tonne-km is its intensity over its fuel
+// factor: GLEC's Table 8 gives 0.029 l of diesel per t-km for an
+// articulated truck 34-40 t at average load.
+func TestDefaultConsumption(t *testing.T) {
+	ds := dataset(t)
+	r := calculate(t, ds, calc.Shipment{ID: "x", WeightKg: 20000, Legs: []calc.Leg{{ID: "a", Mode: calc.Road,
+		VehicleType: "glec/road/eu_sa/artic_34_40t/diesel", From: cph, To: ham, DistanceKm: 300, DistanceType: calc.DistSFD}}})
+	ex := FromResults([]calc.Result{r}, opts(ds))
+	ec := ex.TOCs[0].EnergyCarriers
+	if len(ec) != 1 || ec[0].EnergyConsumptionUnit != "l" {
+		t.Fatalf("carriers %+v", ec)
+	}
+	if c, _ := num(ec[0].EnergyConsumption); math.Abs(c-0.029) > 0.0005 {
+		t.Errorf("energy use %s l/tkm, GLEC 0.029", ec[0].EnergyConsumption)
+	}
+}
