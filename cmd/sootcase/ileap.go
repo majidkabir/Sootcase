@@ -36,7 +36,7 @@ func runILEAP(args []string) error {
 	if fs.NArg() > 1 || (fs.NArg() == 0 && *opsFile == "") {
 		return errors.New("ileap: expected a shipments CSV file, -operations file.json, or both")
 	}
-	o := ileap.Options{CompanyName: *company, CreatedAt: time.Now(), Country: places.Codes{}.Country}
+	o := ileap.Options{CompanyName: *company, CreatedAt: time.Now(), Country: places.Codes{}.Country, City: places.Codes{}.Town}
 	for _, id := range strings.Split(*ids, ",") {
 		if id = strings.TrimSpace(id); id != "" {
 			o.CompanyIDs = append(o.CompanyIDs, id)

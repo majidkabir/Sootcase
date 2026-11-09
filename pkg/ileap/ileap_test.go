@@ -28,7 +28,7 @@ func opts(ds *factors.Dataset) Options {
 	return Options{
 		CompanyName: "Acme Logistics", CreatedAt: time.Date(2026, 11, 9, 12, 0, 0, 0, time.UTC),
 		PeriodStart: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), PeriodEnd: time.Date(2027, 1, 1, 0, 0, 0, 0, time.UTC),
-		Fuels: ds, Country: places.Codes{}.Country,
+		Fuels: ds, Country: places.Codes{}.Country, City: places.Codes{}.Town,
 	}
 }
 
@@ -355,5 +355,93 @@ func TestCarrierFromSource(t *testing.T) {
 	ec, why, src := b.defaultCarrier(iww)
 	if why != "" || len(ec) != 1 || ec[0].EmissionFactorWTW == "" || !strings.HasPrefix(src, "GLEC Framework v3.3") {
 		t.Errorf("iww carrier %+v %q %q", ec, why, src)
+	}
+}
+
+// Every TCE holds together: activity = mass x distance, emissions =
+// activity x its TOC's intensity (TEU x km for TEU-km TOCs), and the TCEs
+// add up to the shipment.
+func TestConsistency(t *testing.T) {
+	ds := dataset(t)
+	ships := []calc.Shipment{
+		{ID: "road", WeightKg: 12000, Legs: []calc.Leg{{ID: "a", Mode: calc.Road, VehicleType: "hgv", From: cph, To: ham, DistanceKm: 332, DistanceType: calc.DistSFD}}},
+		{ID: "actual", WeightKg: 8000, Legs: []calc.Leg{{ID: "a", Mode: calc.Road, VehicleType: "hgv_artic", From: cph, To: ham, DistanceKm: 350, DistanceType: calc.DistActual}}},
+		{ID: "load", WeightKg: 8000, Legs: []calc.Leg{{ID: "a", Mode: calc.Road, VehicleType: "hgv", From: cph, To: ham, DistanceKm: 350, DistanceType: calc.DistSFD, LoadFactor: 0.6, EmptyTripFactor: 0.25}}},
+		{ID: "electric", WeightKg: 5000, Legs: []calc.Leg{{ID: "a", Mode: calc.Road, VehicleType: "truck_electric", From: cph, To: ham, DistanceKm: 300, DistanceType: calc.DistSFD, EnergyKWhPerTkm: 0.08, Country: "DNK"}}},
+		{ID: "fuel", WeightKg: 3500, Legs: []calc.Leg{{ID: "a", Mode: calc.Road, VehicleType: "hgv", DistanceKm: 610, DistanceType: calc.DistActual, Fuel: &calc.FuelUse{Fuel: "diesel", Amount: 190, VehicleTonneKm: 14000}}}},
+		{ID: "teu", TEU: 3, Legs: []calc.Leg{{ID: "s", Mode: calc.Sea, VehicleType: "container_ship", From: ham, To: rtm, DistanceKm: 560}, {ID: "b", Mode: calc.InlandWaterway, VehicleType: "container_barge", From: rtm, To: ham, DistanceKm: 200, DistanceType: calc.DistSFD}}},
+		{ID: "air", WeightKg: 300, Legs: []calc.Leg{{ID: "f", Mode: calc.Air, VehicleType: "air_freighter", From: cph, To: rtm, DistanceKm: 600, DistanceType: calc.DistGCD}}},
+		{ID: "hub", WeightKg: 10000, Legs: []calc.Leg{{ID: "a", Mode: calc.Road, VehicleType: "hgv", From: cph, To: ham, DistanceKm: 332, DistanceType: calc.DistSFD}}, Hubs: []calc.HubStop{{ID: "h", HubType: "warehouse"}}},
+	}
+	var results []calc.Result
+	for _, s := range ships {
+		results = append(results, calculate(t, ds, s))
+	}
+	// A road leg with a ferry part, as routing gives it.
+	r := results[0]
+	l := r.Legs[0]
+	ferry := calc.LegPart{Kind: calc.PartFerry, Mode: calc.Sea, DistanceKm: 20, TonneKm: 240, TTWKg: 5, WTTKg: 1, WTWKg: 6, Method: calc.MethodIntensity, DataType: calc.DataDefault,
+		Factor: &calc.Factor{Mode: calc.Sea, VehicleType: "cargo_ship/large_ropax_ferry/average", TTW: 20.8, WTT: 4.2, Source: "DESNZ 2026: test"}}
+	l.DistanceKm, l.TonneKm, l.TTWKg, l.WTTKg, l.WTWKg = l.DistanceKm+20, l.TonneKm+240, l.TTWKg+5, l.WTTKg+1, l.WTWKg+6
+	l.Parts = []calc.LegPart{ferry}
+	r.ShipmentID, r.Legs, r.WTWKg = "ferry", []calc.LegResult{l}, r.WTWKg+6
+	results = append(results, r)
+
+	ex := FromResults(results, opts(ds))
+	tocs := map[string]TOC{}
+	for _, x := range ex.TOCs {
+		tocs[x.TOCID] = x
+	}
+	near := func(a, b float64) bool { return math.Abs(a-b) <= 1e-6*math.Max(1, math.Abs(b)) }
+	for i, sf := range ex.ShipmentFootprints {
+		sum := 0.0
+		for _, tce := range sf.TCEs {
+			mass, _ := num(tce.Mass)
+			act, _ := num(tce.TransportActivity)
+			wtw, _ := num(tce.CO2eWTW)
+			sum += wtw
+			if tce.HOCID != "" {
+				continue
+			}
+			km := 0.0
+			for _, d := range []Decimal{tce.Distance.Actual, tce.Distance.GCD, tce.Distance.SFD} {
+				if x, ok := num(d); ok {
+					km = x
+				}
+			}
+			if !near(act, mass/1000*km) {
+				t.Errorf("%s: activity %v != %v t x %v km", tce.TCEID, act, mass/1000, km)
+			}
+			o := tocs[tce.TOCID]
+			iw, _ := num(o.CO2eIntensityWTW)
+			base := act
+			if o.TransportActivityUnit == UnitTEUkm {
+				teu, _ := num(tce.PackagingAmount)
+				base = teu * km
+			}
+			if !near(wtw, base*iw) {
+				t.Errorf("%s: WTW %v != %v x %v (%s)", tce.TCEID, wtw, base, iw, o.TransportActivityUnit)
+			}
+		}
+		if !near(sum, results[i].WTWKg) {
+			t.Errorf("%s: TCEs add up to %v, shipment %v", sf.ShipmentID, sum, results[i].WTWKg)
+		}
+	}
+	// The ferry is a TCE of its own; the load model's empty factor is empty km / all km.
+	f := ex.ShipmentFootprints[len(ex.ShipmentFootprints)-1]
+	if len(f.TCEs) != 2 || f.TCEs[1].TCEID != "ferry/a/ferry" || tocs[f.TCEs[1].TOCID].Mode != "Sea" || f.TCEs[0].PrevTCEIDs != nil {
+		t.Errorf("ferry split %+v", f.TCEs)
+	}
+	if o := tocs[ex.ShipmentFootprints[2].TCEs[0].TOCID]; o.EmptyDistanceFactor != "0.2" || o.LoadFactor != "0.6" ||
+		len(o.EnergyCarriers) != 1 || o.EnergyCarriers[0].EmissionFactorWTW == "" || len(o.SecondaryEmissionFactorSources) == 0 ||
+		o.SecondaryEmissionFactorSources[0].Name != "UK Government GHG Conversion Factors for Company Reporting (DESNZ)" {
+		t.Errorf("load toc %+v (0.25 empty per loaded km = 0.2 of all km)", o)
+	}
+	if o := tocs[ex.ShipmentFootprints[3].TCEs[0].TOCID]; len(o.EnergyCarriers) != 1 || o.EnergyCarriers[0].EnergyCarrier != Electric ||
+		o.EnergyCarriers[0].EnergyConsumption != "0.08" || o.EnergyCarriers[0].Feedstocks[0].RegionProvenance != "DNK" {
+		t.Errorf("electric toc %+v", o)
+	}
+	if p := Validate(ex); len(p) == 0 {
+		t.Log("valid")
 	}
 }
