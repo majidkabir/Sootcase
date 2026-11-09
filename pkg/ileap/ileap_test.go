@@ -127,8 +127,20 @@ func TestGaps(t *testing.T) {
 	if h.HubType != "Transshipment" || h.TemperatureControl != "ambient" || h.CO2eIntensityWTW != "1.2" || h.HubActivityUnit != "tonnes" {
 		t.Errorf("hoc %+v", h)
 	}
-	if sea := sf.TCEs[1]; sea.Distance.SFD != "560" {
-		t.Errorf("sea distance %+v (the factor's basis)", sea.Distance)
+	sea := sf.TCEs[1]
+	if sea.Distance.SFD != "560" || sea.PackagingOrTrEq != "Container-TEU" || sea.PackagingAmount != "1.2" {
+		t.Errorf("sea tce %+v (the factor's distance basis; 12 t / 10 t per TEU)", sea)
+	}
+	// A container leg's TOC is per TEU-km, and TEU x km x intensity = the TCE.
+	for _, x := range ex.TOCs {
+		if x.TOCID != sea.TOCID {
+			continue
+		}
+		w, _ := num(x.CO2eIntensityWTW)
+		e, _ := num(sea.CO2eWTW)
+		if x.TransportActivityUnit != "TEUkm" || math.Abs(1.2*560*w-e) > 1e-6*e {
+			t.Errorf("sea toc %+v vs tce %s", x, sea.CO2eWTW)
+		}
 	}
 }
 
@@ -287,5 +299,29 @@ func TestAir(t *testing.T) {
 		if o, l := air(id); o != want[0] || l != want[1] {
 			t.Errorf("%s: %q %q", id, o, l)
 		}
+	}
+}
+
+// Given in TEU: the TCE carries the TEU given, on any sea leg; road stays per tonne-km.
+func TestTEUGiven(t *testing.T) {
+	ds := dataset(t)
+	r := calculate(t, ds, calc.Shipment{ID: "T", TEU: 2, Legs: []calc.Leg{
+		{ID: "road", Mode: calc.Road, VehicleType: "hgv", From: cph, To: ham, DistanceKm: 332, DistanceType: calc.DistSFD},
+		{ID: "sea", Mode: calc.Sea, VehicleType: "container_ship", From: ham, To: rtm, DistanceKm: 560},
+	}})
+	if r.TEU != 2 {
+		t.Fatalf("result teu %v", r.TEU)
+	}
+	ex := FromResults([]calc.Result{r}, opts(ds))
+	tces := ex.ShipmentFootprints[0].TCEs
+	if tces[0].PackagingAmount != "" || tces[1].PackagingAmount != "2" {
+		t.Errorf("tces %+v", tces)
+	}
+	units := map[string]string{}
+	for _, x := range ex.TOCs {
+		units[x.TOCID] = x.TransportActivityUnit
+	}
+	if units[tces[0].TOCID] != "tkm" || units[tces[1].TOCID] != "TEUkm" {
+		t.Errorf("units %v", units)
 	}
 }

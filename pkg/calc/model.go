@@ -318,13 +318,15 @@ type Result struct {
 	WeightBasis string  `json:"weight_basis"`
 	// ContainerLoad is the container load profile that set the tonnes per
 	// TEU: the shipment's, or DefaultContainerLoad when only TEU was given.
-	ContainerLoad string      `json:"container_load,omitempty"`
-	Legs          []LegResult `json:"legs"`
-	Hubs          []HubResult `json:"hubs,omitempty"`
-	TonneKm       float64     `json:"tonne_km"`
-	TTWKg         float64     `json:"ttw_kg"`
-	WTTKg         float64     `json:"wtt_kg"`
-	WTWKg         float64     `json:"wtw_kg"`
+	ContainerLoad string `json:"container_load,omitempty"`
+	// TEU is the shipment's TEU when it was given in TEU (weight_basis teu).
+	TEU     float64     `json:"teu,omitempty"`
+	Legs    []LegResult `json:"legs"`
+	Hubs    []HubResult `json:"hubs,omitempty"`
+	TonneKm float64     `json:"tonne_km"`
+	TTWKg   float64     `json:"ttw_kg"`
+	WTTKg   float64     `json:"wtt_kg"`
+	WTWKg   float64     `json:"wtw_kg"`
 	// IntensityG is transport WTW intensity in g CO2e per tonne-km (hubs excluded).
 	IntensityG float64 `json:"intensity_g_per_tkm"`
 	// BiogenicCO2Kg sums the legs' biogenic CO2: reported separately, not

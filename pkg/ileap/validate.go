@@ -57,7 +57,7 @@ func Validate(ex Export) []string {
 		checkCarriers(bad, where, t.EnergyCarriers)
 		checkDec(bad, where+" co2eIntensityWTW", t.CO2eIntensityWTW, true)
 		checkDec(bad, where+" co2eIntensityTTW", t.CO2eIntensityTTW, true)
-		if t.TransportActivityUnit != UnitTkm && t.TransportActivityUnit != "TEUkm" {
+		if t.TransportActivityUnit != UnitTkm && t.TransportActivityUnit != UnitTEUkm {
 			bad("%s: transportActivityUnit %q", where, t.TransportActivityUnit)
 		}
 	}

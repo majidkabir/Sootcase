@@ -676,6 +676,7 @@ components:
         weight_kg: { type: number, description: Cargo weight used }
         weight_basis: { type: string, enum: [weight, teu] }
         container_load: { type: string, description: Container load profile that set the tonnes per TEU }
+        teu: { type: number, description: "The shipment's TEU, when it was given in TEU" }
         legs:
           type: array
           items: { $ref: "#/components/schemas/LegResult" }
