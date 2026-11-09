@@ -178,6 +178,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/report", s.limited(s.report))
 	mux.HandleFunc("POST /v1/scenario", s.limited(s.scenarioRun))
 	mux.HandleFunc("POST /v1/recommend", s.limited(s.recommendRun))
+	mux.HandleFunc("POST /v1/ileap", s.limited(s.ileapShipments))
+	mux.HandleFunc("POST /v1/ileap/operations", s.limited(s.ileapOperations))
 	var h http.Handler = s.recoverPanics(secureHeaders(mux))
 	if s.Log != nil {
 		h = s.logRequests(h)

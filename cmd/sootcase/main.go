@@ -37,6 +37,7 @@ Usage:
   sootcase import-desnz [-o out.json] flat-file.xlsx   convert UK DESNZ factors
   sootcase import-grid  [-o out.json] owid-energy.csv  convert grid intensities
   sootcase toc     [-o layer.json] operations.json      intensities from your own fuel data
+  sootcase ileap   [-company -from -to] [-operations ops.json] [shipments.csv]   iLEAP ShipmentFootprints, TOCs and HOCs (JSON)
   sootcase health  [-addr :8080]                        check a running server (for healthchecks)
   sootcase version
 
@@ -64,6 +65,7 @@ func main() {
 		"import-desnz": runImportDESNZ,
 		"import-grid":  runImportGrid,
 		"toc":          runTOC,
+		"ileap":        runILEAP,
 		"health":       runHealth,
 		"version":      func([]string) error { fmt.Println(version); return nil },
 	}
