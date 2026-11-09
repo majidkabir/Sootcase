@@ -188,6 +188,9 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 	}
 	tonnes := weightKg / 1000
 	res := Result{ShipmentID: s.ID, WeightKg: weightKg, WeightBasis: basis, ContainerLoad: profile}
+	if basis == "teu" {
+		res.TEU = s.TEU
+	}
 	if n, ok := c.Factors.(DatasetNamer); ok {
 		res.Dataset = n.DatasetName()
 	}

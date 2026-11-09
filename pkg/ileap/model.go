@@ -168,6 +168,7 @@ const (
 	StatusActive = "Active"
 
 	UnitTkm    = "tkm"
+	UnitTEUkm  = "TEUkm"
 	UnitTonnes = "tonnes"
 	UnitTEU    = "TEU"
 

@@ -140,7 +140,8 @@ func (b *builder) shipment(r calc.Result) {
 	used := map[string]int{}
 	for _, l := range r.Legs {
 		id := uniqueID(r.ShipmentID+"/"+l.LegID, used)
-		tocID, srcs := b.legTOC(l)
+		teu := b.containerTEU(r, l)
+		tocID, srcs := b.legTOC(l, teu)
 		for _, s := range srcs {
 			sources[s] = true
 		}
@@ -148,6 +149,9 @@ func (b *builder) shipment(r calc.Result) {
 			TCEID: id, TOCID: tocID, ShipmentID: r.ShipmentID, Mass: dec(r.WeightKg),
 			TransportActivity: dec(l.TonneKm), CO2eWTW: dec(l.WTWKg), CO2eTTW: dec(l.TTWKg),
 			Distance: b.distance(id, l), Origin: b.location(l.From), Destination: b.location(l.To),
+		}
+		if teu > 0 {
+			t.PackagingOrTrEq, t.PackagingAmount = "Container-TEU", dec(teu)
 		}
 		if ordered {
 			t.PrevTCEIDs = append([]string{}, prev...)
@@ -232,9 +236,31 @@ func (b *builder) location(p *calc.Location) *Location {
 	return &l
 }
 
+// containerTEU is the TEU a sea or inland waterway leg carries in
+// containers, 0 when it isn't containerised (bulk, tankers, general cargo,
+// Ro-Ro): the shipment's TEU when it was given in TEU; else, on a
+// container value, its tonnes / 10 t per TEU, the average GLEC uses when
+// only one of the two is known (GLEC v3.3, p. 21; the GLEC container
+// values are per TEU-km / 10 t).
+func (b *builder) containerTEU(r calc.Result, l calc.LegResult) float64 {
+	if l.Mode != calc.Sea && l.Mode != calc.InlandWaterway {
+		return 0
+	}
+	if r.TEU > 0 {
+		return r.TEU
+	}
+	if !strings.Contains(strings.ToLower(factorID(l)), "container") {
+		return 0
+	}
+	b.note("Container legs' TOCs are per TEU-km, as iLEAP asks for sea and inland waterways; for shipments given in kg, the TEU is the tonnes / 10 t per TEU (GLEC v3.3's average, p. 21), shown on the TCE as packagingOrTrEqAmount.")
+	return r.WeightKg / 1000 / 10
+}
+
 // legTOC returns the id of the TOC a leg was calculated with, adding it
-// to the export, and the secondary sources it rests on.
-func (b *builder) legTOC(l calc.LegResult) (string, []SourceRef) {
+// to the export, and the secondary sources it rests on. With teu > 0 the
+// TOC is per TEU-km (container legs on sea and inland waterways), so the
+// leg's emissions = TEU x distance x intensity; else per tonne-km.
+func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
 	if l.Factor != nil && l.Factor.DataType != "" && l.Factor.DataType != calc.DataDefault {
 		if t, ok := b.opts.Operator[l.Factor.VehicleType].(TOC); ok {
 			b.addTOC(t)
@@ -246,7 +272,11 @@ func (b *builder) legTOC(l calc.LegResult) (string, []SourceRef) {
 		b.gap("toc", id, "co2eIntensityWTW", "the leg has no transport activity, so no intensity")
 		return id, nil
 	}
-	wtw, ttw := dec(l.WTWKg/l.TonneKm), dec(l.TTWKg/l.TonneKm)
+	activity, unitName := l.TonneKm, UnitTkm
+	if teu > 0 && l.DistanceKm > 0 {
+		activity, unitName = teu*l.DistanceKm, UnitTEUkm
+	}
+	wtw, ttw := dec(l.WTWKg/activity), dec(l.TTWKg/activity)
 	key, desc, comment := l.Method, "", ""
 	var srcs []SourceRef
 	var ec []EnergyCarrier
@@ -290,7 +320,7 @@ func (b *builder) legTOC(l calc.LegResult) (string, []SourceRef) {
 	if l.LoadFactor > 0 || l.EmptyTripFactor > 0 || l.AllocationShare > 0 {
 		key += fmt.Sprintf("|%g|%g|%g", l.LoadFactor, l.EmptyTripFactor, l.AllocationShare)
 	}
-	id := "sootcase-toc-" + hash(string(l.Mode), key, string(wtw), string(ttw))
+	id := "sootcase-toc-" + hash(string(l.Mode), key, string(wtw), string(ttw), unitName)
 	if _, ok := b.tocs[id]; ok {
 		return id, srcs
 	}
@@ -300,7 +330,7 @@ func (b *builder) legTOC(l calc.LegResult) (string, []SourceRef) {
 		CreatedAt: created, Status: StatusActive, ReferencePeriodStart: start, ReferencePeriodEnd: end,
 		SecondaryEmissionFactorSources: srcs, Comment: comment,
 		TOCID: id, Description: desc, Mode: mode(l.Mode), EnergyCarriers: ec,
-		CO2eIntensityWTW: wtw, CO2eIntensityTTW: ttw, TransportActivityUnit: UnitTkm,
+		CO2eIntensityWTW: wtw, CO2eIntensityTTW: ttw, TransportActivityUnit: unitName,
 		TemperatureControl: temperature(l.VehicleType + " " + factorID(l)),
 	}
 	t.AirShippingOption, t.FlightLength = air(factorID(l))
