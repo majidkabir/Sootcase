@@ -75,6 +75,8 @@ type TOC struct {
 	LoadFactor                     Decimal         `json:"loadFactor,omitempty"`
 	EmptyDistanceFactor            Decimal         `json:"emptyDistanceFactor,omitempty"`
 	TemperatureControl             string          `json:"temperatureControl,omitempty"`
+	AirShippingOption              string          `json:"airShippingOption,omitempty"`
+	FlightLength                   string          `json:"flightLength,omitempty"`
 	EnergyCarriers                 []EnergyCarrier `json:"energyCarriers,omitempty"` // mandatory; empty only when unknown (a Gap)
 	CO2eIntensityWTW               Decimal         `json:"co2eIntensityWTW"`
 	CO2eIntensityTTW               Decimal         `json:"co2eIntensityTTW,omitempty"`

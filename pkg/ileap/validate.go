@@ -38,6 +38,12 @@ func Validate(ex Export) []string {
 		if t.TemperatureControl != "" && !slices.Contains(temps, t.TemperatureControl) {
 			bad("%s: temperatureControl %q", where, t.TemperatureControl)
 		}
+		if t.AirShippingOption != "" && t.AirShippingOption != "belly freight" && t.AirShippingOption != "freighter" {
+			bad("%s: airShippingOption %q", where, t.AirShippingOption)
+		}
+		if t.FlightLength != "" && t.FlightLength != "short-haul" && t.FlightLength != "long-haul" {
+			bad("%s: flightLength %q", where, t.FlightLength)
+		}
 		if t.LoadFactor != "" {
 			if x, ok := num(t.LoadFactor); !ok || x <= 0 || x > 1 {
 				bad("%s: loadFactor %q", where, t.LoadFactor)

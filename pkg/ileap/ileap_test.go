@@ -278,3 +278,14 @@ func TestCarrier(t *testing.T) {
 		}
 	}
 }
+
+func TestAir(t *testing.T) {
+	for id, want := range map[string][2]string{
+		"glec/air/freighter/long_haul": {"freighter", "long-haul"}, "glec/air/belly/short_haul": {"belly freight", "short-haul"},
+		"glec/air/unknown/short_haul": {"", "short-haul"}, "glec/air/in/domestic": {"", ""}, "freight_flights/x/y": {"", ""},
+	} {
+		if o, l := air(id); o != want[0] || l != want[1] {
+			t.Errorf("%s: %q %q", id, o, l)
+		}
+	}
+}
