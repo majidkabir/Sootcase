@@ -102,8 +102,8 @@ type OwnFactor struct {
 // OwnFuelFactor is a fuel's emission factor from the supplier or your own
 // data, in kg CO2e per unit of fuel.
 type OwnFuelFactor struct {
-	Unit   string  `json:"unit"`            // e.g. "l", "kg", "kWh"
-	WTW float64 `json:"wtw_kg_per_unit"` // well-to-wheel
+	Unit string  `json:"unit"`            // e.g. "l", "kg", "kWh"
+	WTW  float64 `json:"wtw_kg_per_unit"` // well-to-wheel
 	// TTW is the tank-to-wheel part of WTW; required, as for OwnFactor.
 	TTW    *float64 `json:"ttw_kg_per_unit"`
 	Source string   `json:"source"`
