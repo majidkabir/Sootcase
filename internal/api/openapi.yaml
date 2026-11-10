@@ -444,20 +444,20 @@ components:
         factor:
           type: object
           description: The fuel supplier's or your own emission factor, used instead of the dataset's (fuel is then just its name).
-          required: [unit, wtw_kg_per_unit, source]
+          required: [unit, wtw_kg_per_unit, ttw_kg_per_unit, source]
           properties:
             unit: { type: string, example: l }
             wtw_kg_per_unit: { type: number, exclusiveMinimum: 0, description: Well-to-wheel kg CO2e per unit }
-            ttw_kg_per_unit: { type: number, minimum: 0, description: Tank-to-wheel kg CO2e per unit, part of WTW }
+            ttw_kg_per_unit: { type: number, minimum: 0, description: "Tank-to-wheel kg CO2e per unit, part of WTW; required (0 only for energy not burnt in the vehicle, e.g. electricity), so TTW, WTT and the GHG Protocol scopes are split" }
             source: { type: string, description: Who gives the factor, and for what }
             biogenic_co2_kg_per_unit: { type: number, minimum: 0, description: Reported apart, not in WTW }
     OwnFactor:
       type: object
       description: The carrier's or your own intensity for a leg (primary data, ISO 14083 7.2.3), used instead of a default value.
-      required: [wtw_g_per_tkm, source]
+      required: [wtw_g_per_tkm, ttw_g_per_tkm, source]
       properties:
         wtw_g_per_tkm: { type: number, exclusiveMinimum: 0 }
-        ttw_g_per_tkm: { type: number, minimum: 0, description: Part of WTW; the rest is WTT }
+        ttw_g_per_tkm: { type: number, minimum: 0, description: "Part of WTW; the rest is WTT. Required (0 only when no fuel is burnt in the vehicle, e.g. electric), so TTW, WTT and the GHG Protocol scopes are split" }
         source: { type: string, description: Who measured it, and for what (e.g. the carrier's TOC report and year) }
         distance_basis:
           type: string

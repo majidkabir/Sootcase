@@ -218,7 +218,7 @@
         <div><label>Amount</label><input name="fuel_amount" type="number" min="0" step="any"></div>
         <div><label>Vehicle tonne-km (shared trip)</label><input name="vehicle_tonne_km" type="number" min="0" step="any"></div>
       </div>
-      <p class="hint">Optional: the fuel supplier's own emission factor, instead of the default for this fuel.</p>
+      <p class="hint">Optional: the fuel supplier's own emission factor, instead of the default for this fuel. Give well-to-wheel and tank-to-wheel (0 only for electricity) and the source.</p>
       <div class="row">
         <div><label>Unit (l, kg, kWh)</label><input name="fuel_unit" placeholder="l" autocomplete="off"></div>
         <div><label>Well-to-wheel (kg CO₂e per unit)</label><input name="fuel_wtw" type="number" min="0" step="any"></div>
@@ -228,7 +228,7 @@
     </details>
     <details><summary>Carrier's own intensity</summary>
       <p class="hint">The carrier's or your own measured g CO₂e per tonne-km for this leg, instead of a default value (primary data, ISO 14083).
-        Give its source. Leave the distance basis as it is unless the figure is per actual km or great-circle km.</p>
+        Give both values and the source: tank-to-wheel is the part burnt in the vehicle (0 only for electric). Leave the distance basis as it is unless the figure is per actual km or great-circle km.</p>
       <div class="row">
         <div><label>Well-to-wheel (g per tonne-km)</label><input name="own_wtw" type="number" min="0" step="any"></div>
         <div><label>Tank-to-wheel (g per tonne-km)</label><input name="own_ttw" type="number" min="0" step="any"></div>

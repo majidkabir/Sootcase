@@ -17,7 +17,7 @@ func TestOwnFactor_DAF(t *testing.T) {
 	}
 	c := calc.Calculator{Factors: ds}
 	leg := calc.Leg{ID: "r", Mode: calc.Road, DistanceKm: 500, DistanceType: calc.DistSFD,
-		OwnFactor: &calc.OwnFactor{WTW: 70, TTW: 56, Source: "carrier", DistanceBasis: calc.DistActual}}
+		OwnFactor: &calc.OwnFactor{WTW: 70, TTW: func() *float64 { v := 56.0; return &v }(), Source: "carrier", DistanceBasis: calc.DistActual}}
 	r, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 10000, Legs: []calc.Leg{leg}})
 	if err != nil {
 		t.Fatal(err)

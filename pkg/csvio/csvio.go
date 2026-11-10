@@ -272,6 +272,14 @@ func addRow(s *calc.Shipment, row rowReader) error {
 		errs = append(errs, err)
 		return v
 	}
+	// opt is a number that may be left empty (nil), as opposed to 0.
+	opt := func(name string) *float64 {
+		if row.str(name) == "" {
+			return nil
+		}
+		v := get(name)
+		return &v
+	}
 	leg.DistanceKm = get("distance_km")
 	leg.From = calc.Location{Code: row.str("from_code"), Lat: get("from_lat"), Lon: get("from_lon")}
 	leg.To = calc.Location{Code: row.str("to_code"), Lat: get("to_lat"), Lon: get("to_lon")}
@@ -284,12 +292,12 @@ func addRow(s *calc.Shipment, row rowReader) error {
 	if fuel := row.str("fuel"); fuel != "" {
 		leg.Fuel = &calc.FuelUse{Fuel: fuel, Amount: get("fuel_amount"), VehicleTonneKm: get("vehicle_tonne_km")}
 		if src, wtw := row.str("fuel_factor_source"), get("fuel_wtw_kg_per_unit"); src != "" || wtw != 0 {
-			leg.Fuel.Factor = &calc.OwnFuelFactor{Unit: row.str("fuel_unit"), WTW: wtw, TTW: get("fuel_ttw_kg_per_unit"), Source: src,
+			leg.Fuel.Factor = &calc.OwnFuelFactor{Unit: row.str("fuel_unit"), WTW: wtw, TTW: opt("fuel_ttw_kg_per_unit"), Source: src,
 				BiogenicCO2: get("fuel_biogenic_co2_kg_per_unit")}
 		}
 	}
 	if src, wtw := row.str("own_factor_source"), get("own_wtw_g_per_tkm"); src != "" || wtw != 0 {
-		leg.OwnFactor = &calc.OwnFactor{WTW: wtw, TTW: get("own_ttw_g_per_tkm"), Source: src,
+		leg.OwnFactor = &calc.OwnFactor{WTW: wtw, TTW: opt("own_ttw_g_per_tkm"), Source: src,
 			DistanceBasis: strings.ToLower(row.str("own_distance_basis"))}
 	}
 	if err := errors.Join(errs...); err != nil {

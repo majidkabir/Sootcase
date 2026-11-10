@@ -238,15 +238,23 @@ func TestRead_OwnFactors(t *testing.T) {
 		t.Fatalf("%v %+v", err, items)
 	}
 	legs := items[0].Shipment.Legs
-	if o := legs[0].OwnFactor; o == nil || o.WTW != 70 || o.TTW != 56 || o.Source != "Carrier X" || o.DistanceBasis != "actual" || legs[0].Fuel != nil {
+	if o := legs[0].OwnFactor; o == nil || o.WTW != 70 || o.TTW == nil || *o.TTW != 56 || o.Source != "Carrier X" || o.DistanceBasis != "actual" || legs[0].Fuel != nil {
 		t.Errorf("own factor: %+v", legs[0])
 	}
-	if f := legs[1].Fuel; f == nil || f.Factor == nil || f.Factor.Unit != "l" || f.Factor.WTW != 0.5 || f.Factor.TTW != 0.03 ||
+	if f := legs[1].Fuel; f == nil || f.Factor == nil || f.Factor.Unit != "l" || f.Factor.WTW != 0.5 || f.Factor.TTW == nil || *f.Factor.TTW != 0.03 ||
 		f.Factor.Source != "Supplier Y" || f.Factor.BiogenicCO2 != 2.4 || legs[1].OwnFactor != nil {
 		t.Errorf("fuel factor: %+v", legs[1].Fuel)
 	}
 	if f := legs[2].Fuel; f == nil || f.Factor != nil {
 		t.Errorf("dataset fuel: %+v", legs[2].Fuel)
+	}
+	// An empty TTW cell stays empty (nil), so the calculation can refuse it;
+	// "0" is a value.
+	in2 := "shipment_id,weight_kg,mode,distance_km,own_wtw_g_per_tkm,own_ttw_g_per_tkm,own_factor_source\nA,1000,road,100,70,,X\nB,1000,road,100,70,0,X\n"
+	items2, err := Read(strings.NewReader(in2))
+	if err != nil || len(items2) != 2 || items2[0].Shipment.Legs[0].OwnFactor.TTW != nil ||
+		items2[1].Shipment.Legs[0].OwnFactor.TTW == nil || *items2[1].Shipment.Legs[0].OwnFactor.TTW != 0 {
+		t.Errorf("empty vs 0 TTW: %v %+v", err, items2)
 	}
 }
 

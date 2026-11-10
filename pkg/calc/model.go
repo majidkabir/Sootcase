@@ -87,9 +87,12 @@ type FuelUse struct {
 // OwnFactor is an intensity from the carrier or your own measurements, in
 // grams CO2e per tonne-km.
 type OwnFactor struct {
-	WTW    float64 `json:"wtw_g_per_tkm"` // well-to-wheel
-	TTW    float64 `json:"ttw_g_per_tkm"` // tank-to-wheel, part of WTW
-	Source string  `json:"source"`        // who measured it, and for what
+	WTW float64 `json:"wtw_g_per_tkm"` // well-to-wheel
+	// TTW is the tank-to-wheel part of WTW. Required: without it the split
+	// into TTW and WTT, and so the GHG Protocol scopes, would be a guess
+	// (0 is right only when no fuel is burnt in the vehicle, e.g. electric).
+	TTW    *float64 `json:"ttw_g_per_tkm"`
+	Source string   `json:"source"` // who measured it, and for what
 	// DistanceBasis is the distance type the intensity is per tonne-km of:
 	// sfd, gcd or actual. Empty: the same as the leg's distance, so no
 	// distance adjustment factor.
@@ -99,10 +102,11 @@ type OwnFactor struct {
 // OwnFuelFactor is a fuel's emission factor from the supplier or your own
 // data, in kg CO2e per unit of fuel.
 type OwnFuelFactor struct {
-	Unit   string  `json:"unit"`            // e.g. "l", "kg", "kWh"
-	WTW    float64 `json:"wtw_kg_per_unit"` // well-to-wheel
-	TTW    float64 `json:"ttw_kg_per_unit"` // tank-to-wheel, part of WTW
-	Source string  `json:"source"`
+	Unit string  `json:"unit"`            // e.g. "l", "kg", "kWh"
+	WTW  float64 `json:"wtw_kg_per_unit"` // well-to-wheel
+	// TTW is the tank-to-wheel part of WTW; required, as for OwnFactor.
+	TTW    *float64 `json:"ttw_kg_per_unit"`
+	Source string   `json:"source"`
 	// BiogenicCO2 is biogenic CO2 per unit, reported apart (optional).
 	BiogenicCO2 float64 `json:"biogenic_co2_kg_per_unit,omitempty"`
 }
