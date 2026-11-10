@@ -63,6 +63,10 @@ type DistanceTyper interface {
 // ErrNoDAF reports a distance-type mismatch with no DAF to bridge it.
 var ErrNoDAF = errors.New("no distance adjustment factor")
 
+// ErrNoDistance reports a road, rail, sea or inland waterway leg whose only
+// distance is a great circle.
+var ErrNoDistance = errors.New("no distance for the leg")
+
 // adjust returns the distance to multiply by an intensity: km of type
 // legType turned into the type the factor is per (basis), and the DAF that
 // did it. No DAF is applied (nil) when the types match or one of them is
@@ -72,21 +76,27 @@ func (c Calculator) adjust(mode Mode, legType, basis string, km float64) (float6
 	if legType == "" || legType == basis {
 		return km, nil, nil
 	}
+	// A great circle on a network mode: a straight line is no road, rail,
+	// sea or river distance of any type (Rotterdam to Shanghai is 8,900 km
+	// as the crow flies and 19,700 km by sea), unless the dataset has a DAF
+	// that makes it one.
+	straight := legType == DistGCD && mode != Air
+	noRoute := fmt.Errorf("%w: a straight line (great circle) is not a %s distance; give distance_km, "+
+		"the distance by %s, or set up routing for %s legs", ErrNoDistance, mode, mode, mode)
 	if basis == "" {
-		// A factor that states no basis takes the distance as it is, except
-		// a great circle on a network mode: a straight line is no road,
-		// rail, sea or river distance of any type (Rotterdam to Shanghai is
-		// 8,900 km as the crow flies and 19,700 km by sea).
-		if legType != DistGCD || mode == Air {
-			return km, nil, nil
+		// A factor that states no basis takes the distance as it is.
+		if straight {
+			return 0, nil, noRoute
 		}
-		return 0, nil, fmt.Errorf("%w: a great-circle distance isn't a %s distance; give distance_km "+
-			"(shortest feasible or actual), or set up routing for %s legs", ErrNoDAF, mode, mode)
+		return km, nil, nil
 	}
 	var d DAF
 	ok := false
 	if p, has := c.Factors.(DAFProvider); has {
 		d, ok = p.DAF(mode, legType, basis)
+	}
+	if !ok && straight {
+		return 0, nil, noRoute
 	}
 	if !ok {
 		return 0, nil, fmt.Errorf("%w: the distance is %s but the factor is per %s tonne-km; "+

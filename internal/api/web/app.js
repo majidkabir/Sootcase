@@ -211,7 +211,8 @@ function buildShipment() {
 }
 
 // source "example" marks the page's own example, so a hosted service can
-// tell it from what visitors calculate themselves.
+// tell it from what visitors calculate themselves. Resolves to the HTTP
+// status (0 when the server wasn't reached).
 async function calculate(e, source) {
   e && e.preventDefault();
   $("#error").textContent = "";
@@ -225,16 +226,17 @@ async function calculate(e, source) {
     body = await res.json();
   } catch (err) {
     $("#error").textContent = "Couldn't reach the Sootcase server. Check it's still running.";
-    return;
+    return 0;
   } finally {
     btn.disabled = false; btn.textContent = "Calculate";
   }
-  if (!res.ok) { $("#error").textContent = body.error || `Request failed (HTTP ${res.status}).`; return; }
+  if (!res.ok) { $("#error").textContent = body.error || `Request failed (HTTP ${res.status}).`; return res.status; }
   render(req, body);
   if (e && window.matchMedia("(max-width: 900px)").matches) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     $("#res-h").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
+  return res.status;
 }
 
 // legInfo names a result leg, "Leg 2" for the shipment's own (found by id) or "Added" for a road leg the
@@ -879,4 +881,16 @@ fetch("../site-nav.json").then(r => r.ok ? r.json() : null).then(d => {
     .map(l => `<a href="${esc(l.href)}"${l.current ? ' aria-current="page"' : ""}>${esc(l.label)}</a>`).join("");
 }).catch(() => {});
 try { loadExample(0); } finally { document.documentElement.classList.remove("js-loading"); }
-loadFactors().then(() => calculate(null, "example"));
+// The examples leave their distances to the server's routers, and the first
+// needs road, rail and sea routing. A server that routes less (one small
+// road map, or nothing) opens with the first example it can calculate.
+async function openExample() {
+  for (let i = 0; i < examples.length; i++) {
+    if (i) loadExample(i);
+    if (await calculate(null, "example") !== 422) return; // done, or a failure another example won't mend
+  }
+  loadExample(0);
+  $("#error").textContent = "This server can't find the examples' distances: it has no routing for them. " +
+    "Enter each leg's distance in km, or start Sootcase with routing (see the README).";
+}
+loadFactors().then(openExample);

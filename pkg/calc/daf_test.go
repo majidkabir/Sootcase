@@ -82,8 +82,11 @@ func TestDAF(t *testing.T) {
 	}
 
 	// Mismatch with no DAF to bridge it.
-	if _, err := one(Leg{Mode: Sea, DistanceKm: 100, DistanceType: DistGCD}); !errors.Is(err, ErrNoDAF) {
-		t.Errorf("sea gcd: want ErrNoDAF, got %v", err)
+	if _, err := one(Leg{Mode: Sea, DistanceKm: 100, DistanceType: DistSFD + ""}); err != nil {
+		t.Errorf("sea sfd: %v", err)
+	}
+	if _, err := one(Leg{Mode: Air, DistanceKm: 100, DistanceType: DistSFD}); !errors.Is(err, ErrNoDAF) {
+		t.Errorf("air sfd: want ErrNoDAF, got %v", err)
 	}
 	// DAF that would make the distance non-positive.
 	if _, err := one(Leg{Mode: Air, DistanceKm: 50, DistanceType: DistActual}); !errors.Is(err, ErrInvalidInput) {
@@ -118,8 +121,8 @@ func TestGreatCircleOnlyForAir(t *testing.T) {
 		if l.DistanceKm == 0 {
 			l.From, l.To = from, to
 		}
-		if _, err := c.Calculate(context.Background(), Shipment{WeightKg: 1000, Legs: []Leg{l}}); !errors.Is(err, ErrNoDAF) {
-			t.Errorf("%s: want ErrNoDAF, got %v", name, err)
+		if _, err := c.Calculate(context.Background(), Shipment{WeightKg: 1000, Legs: []Leg{l}}); !errors.Is(err, ErrNoDistance) {
+			t.Errorf("%s: want ErrNoDistance, got %v", name, err)
 		}
 	}
 	r, err := c.Calculate(context.Background(), Shipment{WeightKg: 1000, Legs: []Leg{{Mode: Air, VehicleType: "freighter", From: from, To: to}}})

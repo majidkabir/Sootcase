@@ -333,7 +333,7 @@ Not taken into account (also in every result): transit times and costs; whether 
 
 **JSON** — see [`examples/cph-rotterdam.json`](examples/cph-rotterdam.json) and the [OpenAPI spec](internal/api/openapi.yaml).
 
-**CSV** — one row per leg or hub stop, grouped by `shipment_id`. Columns (any order):
+**CSV** — one row per leg or hub stop, grouped by `shipment_id`. Separated by commas, or by semicolons or tabs when the header row has those and no comma; a semicolon file may use decimal commas (`12,5`), as spreadsheets save CSV in many countries. Columns (any order):
 
 | Column | Use |
 |---|---|
@@ -357,7 +357,7 @@ A bad row fails only its shipment; the rest still calculate. Only failures cause
 
 ## Web page
 
-`sootcase serve` also serves a page at `/`: enter a shipment leg by leg, picking each leg's start and end by name or code (cities, ports, rail and road terminals, airports; the list follows the mode), and see its emissions, a bar of each leg's share split into vehicle and fuel-supply emissions, and for every number the distance method, calculation method, data type and factor source. It opens with a worked example. The examples leave the distances to the routers, so they need them (`docker compose up`, or the `-osrm` and `-sea-network` flags); without routing, enter each leg's distance in km.
+`sootcase serve` also serves a page at `/`: enter a shipment leg by leg, picking each leg's start and end by name or code (cities, ports, rail and road terminals, airports; the list follows the mode), and see its emissions, a bar of each leg's share split into vehicle and fuel-supply emissions, and for every number the distance method, calculation method, data type and factor source. It opens with a worked example. The examples leave their distances to the server's routers, so the page opens with the first one the server can route (with `docker compose up` and its Denmark map: Copenhagen to Aarhus); without any routing, enter each leg's distance in km.
 
 Below it, **Report** takes a shipments CSV (the `batch` columns), an organisation and a period, and shows the [report](#report-over-many-shipments): totals, modes, hubs, energy carriers, data quality, notes. Download it as Markdown or JSON, each shipment's full calculation as CSV (a row per leg and hub: distance and how it was found, method, data type, emissions, factor source, notes on added legs) or JSON, and the shipments in the [iLEAP data model](#ileap-export) (JSON), all from the one calculation. **Scenarios** below it runs the same file through the [what-if changes](#scenarios-what-if). `POST /v1/report` takes the CSV directly with `Content-Type: text/csv`, report details in the query (`?organisation=...&period_from=...`).
 

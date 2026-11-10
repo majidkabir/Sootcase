@@ -213,17 +213,8 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 		return Result{}, err
 	}
 	res.Warnings = warnings
-	for _, ct := range append([]string{s.CargoType}, legCargo(s.Legs)...) {
-		if ct == "" {
-			continue
-		}
-		cp, ok := c.Factors.(CargoProvider)
-		if !ok {
-			return Result{}, fmt.Errorf("%w: cargo_type %q: the dataset has no cargo types", ErrInvalidInput, ct)
-		}
-		if err := cp.ValidCargo(ct); err != nil {
-			return Result{}, err
-		}
+	if err := c.checkCargo(s); err != nil {
+		return Result{}, err
 	}
 	own := 0 // the shipment's own legs so far, to name an unnamed one
 	for _, p := range legs {
@@ -284,32 +275,57 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 	for _, h := range res.Hubs {
 		res.WTTKg -= h.WTWKg
 	}
-	var primary float64
-	for _, l := range res.Legs {
-		main := l.WTWKg
-		for _, p := range l.Parts {
-			main -= p.WTWKg
-			if p.DataType == DataPrimary {
-				primary += p.WTWKg
-			}
-		}
-		if l.DataType == DataPrimary {
-			primary += main
-		}
-	}
-	for _, h := range res.Hubs {
-		if h.DataType == DataPrimary {
-			primary += h.WTWKg
-		}
-	}
-	if res.WTWKg > 0 {
-		res.PrimaryDataShare = primary / res.WTWKg
-	}
+	res.PrimaryDataShare = primaryShare(res)
 	res.GHGProtocol = ghgScopes(res)
 	if err := checkResult(res); err != nil {
 		return Result{}, err
 	}
 	return res, nil
+}
+
+// checkCargo refuses a cargo type, of the shipment or of a leg, that the
+// dataset doesn't know.
+func (c Calculator) checkCargo(s Shipment) error {
+	for _, ct := range append([]string{s.CargoType}, legCargo(s.Legs)...) {
+		if ct == "" {
+			continue
+		}
+		cp, ok := c.Factors.(CargoProvider)
+		if !ok {
+			return fmt.Errorf("%w: cargo_type %q: the dataset has no cargo types", ErrInvalidInput, ct)
+		}
+		if err := cp.ValidCargo(ct); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// primaryShare is the share of a result's WTW emissions that comes from
+// primary data: legs (less their parts), leg parts and hubs labelled so.
+func primaryShare(r Result) float64 {
+	if !(r.WTWKg > 0) {
+		return 0
+	}
+	var primary float64
+	for _, l := range r.Legs {
+		rest := l.WTWKg
+		for _, p := range l.Parts {
+			rest -= p.WTWKg
+			if p.DataType == DataPrimary {
+				primary += p.WTWKg
+			}
+		}
+		if l.DataType == DataPrimary {
+			primary += rest
+		}
+	}
+	for _, h := range r.Hubs {
+		if h.DataType == DataPrimary {
+			primary += h.WTWKg
+		}
+	}
+	return primary / r.WTWKg
 }
 
 // dataType labels a leg by how its emissions were obtained: measured fuel is
@@ -337,28 +353,32 @@ const DefaultContainerLoad = "average"
 // per container.
 func (c Calculator) Hub(h HubStop, cargoType string, tonnes float64) (HubResult, error) {
 	hubType, cargoNote := h.HubType, ""
+	name := h.ID // for errors: the stop's id, or its type when it has none
+	if name == "" {
+		name = h.HubType
+	}
 	if cp, ok := c.Factors.(CargoProvider); ok && cargoType != "" {
 		var err error
 		if hubType, cargoNote, err = cp.HubCargo(h.HubType, cargoType); err != nil {
-			return HubResult{}, fmt.Errorf("hub %q: %w", h.ID, err)
+			return HubResult{}, fmt.Errorf("hub %q: %w", name, err)
 		}
 	}
 	hf, err := c.Factors.HubFactor(hubType)
 	if err != nil {
-		return HubResult{}, fmt.Errorf("hub %q: %w", h.ID, err)
+		return HubResult{}, fmt.Errorf("hub %q: %w", name, err)
 	}
 	if h.Containers < 0 || math.IsNaN(h.Containers) || math.IsInf(h.Containers, 0) {
-		return HubResult{}, fmt.Errorf("%w: hub %q: containers must be >= 0", ErrInvalidInput, h.ID)
+		return HubResult{}, fmt.Errorf("%w: hub %q: containers must be >= 0", ErrInvalidInput, name)
 	}
 	hr := HubResult{HubID: h.ID, HubType: hubType, WTWKg: tonnes * hf.WTWPerTonneG / 1000,
 		DataType: DataDefault, Source: hf.Source, Note: cargoNote}
 	if hf.WTWPerContainerG > 0 {
 		if h.Containers == 0 {
-			return HubResult{}, fmt.Errorf("%w: hub %q: %s is per container handled; give containers", ErrInvalidInput, h.ID, h.HubType)
+			return HubResult{}, fmt.Errorf("%w: hub %q: %s is per container handled; give containers", ErrInvalidInput, name, h.HubType)
 		}
 		hr.Containers, hr.WTWKg = h.Containers, h.Containers*hf.WTWPerContainerG/1000
 	} else if h.Containers != 0 {
-		return HubResult{}, fmt.Errorf("%w: hub %q: %s is per tonne of cargo, not per container; leave containers out", ErrInvalidInput, h.ID, hubType)
+		return HubResult{}, fmt.Errorf("%w: hub %q: %s is per tonne of cargo, not per container; leave containers out", ErrInvalidInput, name, hubType)
 	}
 	if hf.DataType != "" {
 		hr.DataType = hf.DataType

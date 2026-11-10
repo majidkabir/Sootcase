@@ -1,7 +1,10 @@
 // Package csvio reads shipments from CSV and writes results as CSV.
 //
 // Input has a header row; column order is free and unknown columns are
-// ignored. One row per leg, or per hub stop when hub_type is set. Rows are
+// ignored. Columns are separated by commas, or by semicolons or tabs when
+// the header row has those and no comma; a semicolon file may write its
+// numbers with a decimal comma ("12,5"), as spreadsheets do in many
+// countries. One row per leg, or per hub stop when hub_type is set. Rows are
 // grouped into shipments by shipment_id: anywhere in the file for Read,
 // next to each other for the streaming Reader.
 //
@@ -25,6 +28,8 @@
 package csvio
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -66,6 +71,7 @@ func Read(r io.Reader) ([]Item, error) {
 	if err != nil {
 		return nil, err
 	}
+	decimalComma := cr.Comma == ';'
 	var items []*Item
 	byID := map[string]*Item{}
 	line := 1
@@ -81,7 +87,7 @@ func Read(r io.Reader) ([]Item, error) {
 		if blank(rec) {
 			continue
 		}
-		row := rowReader{rec: rec, col: col}
+		row := rowReader{rec: rec, col: col, decimalComma: decimalComma}
 		id := row.str("shipment_id")
 		if id == "" {
 			return nil, fmt.Errorf("line %d: empty shipment_id", line)
@@ -107,8 +113,12 @@ func Read(r io.Reader) ([]Item, error) {
 	return out, nil
 }
 
+// open reads the header row. The reader it returns has the file's
+// separator as its Comma.
 func open(r io.Reader) (*csv.Reader, map[string]int, error) {
-	cr := csv.NewReader(r)
+	br := bufio.NewReader(r)
+	cr := csv.NewReader(br)
+	cr.Comma = separator(br)
 	cr.FieldsPerRecord = -1
 	cr.TrimLeadingSpace = true
 
@@ -130,6 +140,24 @@ func open(r io.Reader) (*csv.Reader, map[string]int, error) {
 	}
 	cr.ReuseRecord = true
 	return cr, col, nil
+}
+
+// separator finds the column separator from the header row: a comma, or a
+// semicolon or tab when the row has one and no comma (column names have
+// none of the three).
+func separator(br *bufio.Reader) rune {
+	head, _ := br.Peek(4096)
+	if i := bytes.IndexAny(head, "\r\n"); i >= 0 {
+		head = head[:i]
+	}
+	switch {
+	case bytes.IndexByte(head, ',') >= 0:
+	case bytes.IndexByte(head, ';') >= 0:
+		return ';'
+	case bytes.IndexByte(head, '\t') >= 0:
+		return '\t'
+	}
+	return ','
 }
 
 // Reader streams shipments from CSV one at a time, so memory stays flat
@@ -187,7 +215,7 @@ func (r *Reader) Next() (Item, error) {
 		if blank(rec) {
 			continue // a row of empty cells, as spreadsheets export below the data
 		}
-		row := rowReader{rec: rec, col: r.col}
+		row := rowReader{rec: rec, col: r.col, decimalComma: r.cr.Comma == ';'}
 		id := row.str("shipment_id")
 		if id == "" {
 			return Item{}, fmt.Errorf("line %d: empty shipment_id", r.line)
@@ -310,6 +338,8 @@ func addRow(s *calc.Shipment, row rowReader) error {
 type rowReader struct {
 	rec []string
 	col map[string]int
+	// decimalComma reads "12,5" as 12.5 (files separated by semicolons).
+	decimalComma bool
 }
 
 func (r rowReader) str(name string) string {
@@ -327,6 +357,9 @@ func (r rowReader) float(name string) (float64, error) {
 		return 0, nil
 	}
 	v, err := strconv.ParseFloat(s, 64)
+	if err != nil && r.decimalComma && strings.Count(s, ",") == 1 && !strings.Contains(s, ".") {
+		v, err = strconv.ParseFloat(strings.Replace(s, ",", ".", 1), 64)
+	}
 	if err != nil {
 		return 0, fmt.Errorf("%s: %q is not a number", name, s)
 	}

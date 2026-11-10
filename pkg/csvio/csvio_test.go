@@ -284,3 +284,38 @@ func TestBlankRowsSkipped(t *testing.T) {
 		t.Fatalf("Reader: %d shipments", n)
 	}
 }
+
+// Spreadsheets in many countries save CSV with semicolons and decimal
+// commas; tab-separated files are common too.
+func TestSeparators(t *testing.T) {
+	for name, in := range map[string]string{
+		"semicolons": "shipment_id;weight_kg;mode;vehicle_type;distance_km\nA;1000,5;road;hgv;12,25\n",
+		"tabs":       "shipment_id\tweight_kg\tmode\tvehicle_type\tdistance_km\nA\t1000.5\troad\thgv\t12.25\n",
+		"commas":     "shipment_id,weight_kg,mode,vehicle_type,distance_km\nA,1000.5,road,hgv,12.25\n",
+	} {
+		items, err := Read(strings.NewReader(in))
+		if err != nil || len(items) != 1 || items[0].Err != nil {
+			t.Errorf("%s: %v %+v", name, err, items)
+			continue
+		}
+		if s := items[0].Shipment; s.WeightKg != 1000.5 || len(s.Legs) != 1 || s.Legs[0].DistanceKm != 12.25 || s.Legs[0].VehicleType != "hgv" {
+			t.Errorf("%s: %+v", name, s)
+		}
+		r, err := NewReader(strings.NewReader(in))
+		if err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		if it, err := r.Next(); err != nil || it.Err != nil || it.Shipment.WeightKg != 1000.5 {
+			t.Errorf("%s, streamed: %v %+v", name, err, it)
+		}
+	}
+	// A decimal comma is only read in a semicolon file, and "1.000,5" in none.
+	for _, in := range []string{
+		"shipment_id,weight_kg,mode,vehicle_type,distance_km\nA,\"1000,5\",road,hgv,10\n",
+		"shipment_id;weight_kg;mode;vehicle_type;distance_km\nA;1.000,5;road;hgv;10\n",
+	} {
+		if items, err := Read(strings.NewReader(in)); err != nil || len(items) != 1 || items[0].Err == nil {
+			t.Errorf("want a number error for %q, got %v %+v", in, err, items)
+		}
+	}
+}
