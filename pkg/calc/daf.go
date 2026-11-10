@@ -63,11 +63,25 @@ type DistanceTyper interface {
 // ErrNoDAF reports a distance-type mismatch with no DAF to bridge it.
 var ErrNoDAF = errors.New("no distance adjustment factor")
 
-// adjust returns the distance to multiply by the intensity, and the DAF
-// applied (nil when the types match or either is unknown).
+// adjust returns the distance to multiply by an intensity: km of type
+// legType turned into the type the factor is per (basis), and the DAF that
+// did it. No DAF is applied (nil) when the types match or one of them is
+// unknown, with one exception that is an error: a great circle on a
+// network mode. A type mismatch without a DAF for it is an error too.
 func (c Calculator) adjust(mode Mode, legType, basis string, km float64) (float64, *DAF, error) {
-	if legType == "" || basis == "" || legType == basis {
+	if legType == "" || legType == basis {
 		return km, nil, nil
+	}
+	if basis == "" {
+		// A factor that states no basis takes the distance as it is, except
+		// a great circle on a network mode: a straight line is no road,
+		// rail, sea or river distance of any type (Rotterdam to Shanghai is
+		// 8,900 km as the crow flies and 19,700 km by sea).
+		if legType != DistGCD || mode == Air {
+			return km, nil, nil
+		}
+		return 0, nil, fmt.Errorf("%w: a great-circle distance isn't a %s distance; give distance_km "+
+			"(shortest feasible or actual), or set up routing for %s legs", ErrNoDAF, mode, mode)
 	}
 	var d DAF
 	ok := false

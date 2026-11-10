@@ -1,9 +1,11 @@
 package places
 
 import (
-	"github.com/majidkabir/sootcase/pkg/calc"
+	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/majidkabir/sootcase/pkg/calc"
 )
 
 func TestFold(t *testing.T) {
@@ -43,8 +45,18 @@ func TestLookup(t *testing.T) {
 	if p.Lat < 53 || p.Lat > 54 || p.Lon < 9.5 || p.Lon > 10.5 || p.CountryName != "Germany" {
 		t.Errorf("Hamburg: %+v", p)
 	}
-	if _, ok := ix.Lookup("XXZZZ"); ok {
-		t.Error("unknown code found")
+	// An airport's UN/LOCODE is its country and IATA code; the country must
+	// be the airport's.
+	if p, ok := ix.Lookup("CNSHA"); !ok || p.ID != "iata:SHA" {
+		t.Errorf("CNSHA = %q %v, want Shanghai Hongqiao (iata:SHA)", p.ID, ok)
+	}
+	if r := ix.Search("cnsha", nil, 3); len(r) == 0 || r[0].ID != "iata:SHA" {
+		t.Errorf("Search(cnsha) = %+v, want Shanghai Hongqiao first", r)
+	}
+	for _, c := range []string{"XXZZZ", "DEPVG", "CNQQQ"} {
+		if p, ok := ix.Lookup(c); ok {
+			t.Errorf("unknown code %s found: %s", c, p.ID)
+		}
 	}
 }
 
@@ -152,6 +164,49 @@ func TestCountry(t *testing.T) {
 		if got := ix.Country(calc.Location{Lat: c.lat, Lon: c.lon}); got != c.want {
 			t.Errorf("%v, %v: %q, want %q", c.lat, c.lon, got, c.want)
 		}
+	}
+}
+
+// TestCountryNearest checks Country against measuring every place.
+func TestCountryNearest(t *testing.T) {
+	ix := index(t)
+	r := rand.New(rand.NewSource(1))
+	for i := 0; i < 600; i++ {
+		p := calc.Location{Lat: -60 + r.Float64()*135, Lon: -180 + r.Float64()*360}
+		switch i % 4 {
+		case 0: // Europe, where places are dense
+			p = calc.Location{Lat: 36 + r.Float64()*30, Lon: -10 + r.Float64()*40}
+		case 1: // the far north, where a degree of longitude is short
+			p = calc.Location{Lat: 60 + r.Float64()*25, Lon: -180 + r.Float64()*360}
+		case 2: // across the antimeridian
+			p = calc.Location{Lat: -50 + r.Float64()*120, Lon: 177 + r.Float64()*6}
+			if p.Lon > 180 {
+				p.Lon -= 360
+			}
+		}
+		want, wantKm := "", 100.0
+		for j := range ix.places {
+			q := &ix.places[j]
+			if km := haversine(p.Lat, p.Lon, q.Lat, q.Lon); km < wantKm {
+				want, wantKm = q.Country, km
+			}
+		}
+		if got := ix.Country(p); got != want {
+			t.Errorf("Country(%v, %v) = %q, want %q (%.1f km)", p.Lat, p.Lon, got, want, wantKm)
+		}
+	}
+}
+
+func BenchmarkCountry(b *testing.B) {
+	ix, err := Default()
+	if err != nil {
+		b.Fatal(err)
+	}
+	r := rand.New(rand.NewSource(1))
+	ix.Country(calc.Location{Lat: 50, Lon: 10}) // builds the grid
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ { // new points in Europe: none is in the cache
+		ix.Country(calc.Location{Lat: 43 + r.Float64()*12, Lon: -2 + r.Float64()*22})
 	}
 }
 

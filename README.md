@@ -108,7 +108,7 @@ This is the capacity-utilisation approach EcoTransIT World and GLEC use, built e
 
 **Hubs** add `weight_t × hub g/t / 1000` to the total, or `containers × hub g/container / 1000` for per-container hub types; GLEC's hub values are WTW only, a HOC from your own data keeps its TTW and WTT. Intensity (g/tkm) covers transport only.
 
-**GHG Protocol scopes** — every result has `ghg_protocol`: for a company buying the transport, all of it is scope 3 (category 4 for transport it pays for, inbound or outbound; category 9 for sold products moved by transport it doesn't pay for); for the operator of the vehicles, scope 1 (fuel burnt), scope 2 (electricity used, including the upstream share its factor contains) and scope 3 category 3 (producing and delivering the fuel). Hubs are well-to-wheel only and given apart. Reports take `scope3_category` (4 or 9) to name the category. Battery electric vehicle factors from DESNZ (electricity generation and T&D) are counted as energy provision (WTT), none at the vehicle (DESNZ methodology, Table 15).
+**GHG Protocol scopes** — every result has `ghg_protocol`: for a company buying the transport, all of it is scope 3 (category 4 for transport it pays for, inbound or outbound; category 9 for sold products moved by transport it doesn't pay for); for the operator of the vehicles, scope 1 (fuel burnt), scope 2 (electricity used, including the upstream share its factor contains) and scope 3 category 3 (producing and delivering the fuel). GLEC's European rail average for unknown traction mixes diesel and electric trains (62% electric): its electric part is scope 2 (`electricity_g_per_tkm` on the factor). GLEC's Indian rail average mixes them too but doesn't say in what shares, so all of its energy provision counts as category 3. Hubs are well-to-wheel only and given apart. Reports take `scope3_category` (4 or 9) to name the category. Battery electric vehicle factors from DESNZ (electricity generation and T&D) are counted as energy provision (WTT), none at the vehicle (DESNZ methodology, Table 15).
 
 **Distance** comes from `distance_km` when given. Otherwise:
 
@@ -119,9 +119,9 @@ This is the capacity-utilisation approach EcoTransIT World and GLEC use, built e
 | rail | an OSRM server built with the rail profile, with `-osrm-rail URL` | shortest feasible (`sfd`) |
 | inland waterway | an OSRM server built with the barge profile, with `-osrm-waterway URL` | shortest feasible (`sfd`) |
 | air without a server | great-circle | great-circle (`gcd`) |
-| road, rail, sea or inland waterway without a server | great-circle, refused when no DAF converts it to the factor's distance basis (all built-in road, rail, container ship and inland waterway factors: give `distance_km`, see DAF below; DESNZ's other ships state no basis and take it) | great-circle (`gcd`) |
+| road, rail, sea or inland waterway without a server | none: the leg is refused, give `distance_km`. A straight line is no road, rail, sea or river distance, and GLEC gives no DAF to make it one | |
 
-A dataset may also define `distance_adjustments` (`gcd × multiplier + add_km`) to estimate route distance from great-circle for a mode; the result then has no known type.
+A dataset of your own may define `distance_adjustments` (`gcd × multiplier + add_km`) to estimate a mode's route distance from the great circle; such a distance has no known type, so it only works with factors that state no `distance_basis`. The built-in datasets define none.
 
 **Distance adjustment factors (DAF).** Following the GLEC Framework v3.3 and ISO 14083, emissions are `tonne-km × intensity × DAF`. A DAF is needed when the leg's distance type differs from the distance type a factor was built on (`distance_basis`: `sfd`, `gcd` or `actual`). Give the type of a given distance with `distance_type`. Built-in GLEC defaults:
 
@@ -129,12 +129,15 @@ A dataset may also define `distance_adjustments` (`gcd × multiplier + add_km`) 
 |---|---|---|
 | air | actual flown → great-circle | actual − 95 km (GLEC: GCD / (GCD + 95 km)) |
 | road | shortest feasible → actual | × 1.05 (GLEC Section 1 Chapter 4: a DAF must be applied when the intensity is based on actual distance; 5% as in GLEC's own road default values) |
+| road | actual → shortest feasible | ÷ 1.05, for GLEC's road values, which include the 5% and so are per shortest feasible distance |
 | sea | shortest feasible → actual | × 1.15 (Clean Cargo, cited by GLEC) |
+| sea | actual → shortest feasible | ÷ 1.15, for GLEC's container ship values, which include the 15% |
+| inland waterway | shortest feasible ↔ actual | × 1 (GLEC p. 43: the network leaves little room for a difference) |
 | rail | none | GLEC's rail values are per shortest feasible distance and GLEC gives no DAF for rail (an actual distance needs one established for it, p. 46), so a rail leg needs a routed or `sfd` distance |
 
-DESNZ air factors are per great-circle tonne-km, as GLEC and ISO 14083 measure air; so a great-circle leg needs no DAF and a flown distance gets the air DAF. DESNZ road factors and load models are per km actually driven (fuel use from the DfT road freight survey), so a routed road distance gets the road DAF and a given `actual` distance none; GLEC gives no DAF from great-circle to actual for road, so a road leg without a router needs `distance_km`. A mismatch with no DAF is an error rather than a silent guess. Results report `distance_type`, `daf` and `daf_source` per leg.
+DESNZ air factors are per great-circle tonne-km, as GLEC and ISO 14083 measure air; so a great-circle leg needs no DAF and a flown distance gets the air DAF. DESNZ road factors and load models are per km actually driven (fuel use from the DfT road freight survey), so a routed road distance gets the road DAF and a given `actual` distance none; GLEC gives no DAF from great-circle to actual for road, so a road leg without a router needs `distance_km`. A mismatch with no DAF is an error rather than a silent guess. A given distance without a `distance_type` is taken as the kind of distance the factor is per. Results report `distance_type`, `daf` and `daf_source` per leg.
 
-Each leg result records `distance_method` (`given`, `osrm`, `sea_network`, `great_circle`, `great_circle_adjusted`) so every number can be traced. Plain great-circle badly understates sea distances (Rotterdam to Shanghai, city centres: 8,927 km great-circle vs 19,730 km on the 20 km sea network, measured on sootcase.org in November 2026), so use a sea network for sea legs.
+Each leg result records `distance_method` (`given`, `osrm`, `sea_network`, `great_circle`, `great_circle_adjusted`) so every number can be traced. A great circle badly understates sea distances (Rotterdam to Shanghai, city centres: 8,927 km great-circle vs 19,730 km on the 20 km sea network, measured on sootcase.org in November 2026), which is why a sea leg needs a sea network or its `distance_km`.
 
 ### Sea routing
 
@@ -339,14 +342,14 @@ Not taken into account (also in every result): transit times and costs; whether 
 | `cargo_type` | optional: GLEC cargo or load category (see above) |
 | `leg_id`, `mode`, `vehicle_type`, `distance_km`, `distance_type` | leg |
 | `from_lat`, `from_lon`, `to_lat`, `to_lon` | leg, when `distance_km` is empty |
-| `from_code`, `to_code` | leg, instead of coordinates: a UN/LOCODE (`NLRTM`) or IATA airport code (`CPH`) |
+| `from_code`, `to_code` | leg, instead of coordinates: a UN/LOCODE (`NLRTM`) or IATA airport code (`CPH`); an airport's UN/LOCODE (`CNSHA`, Shanghai Hongqiao) works too |
 | `fuel`, `fuel_amount`, `vehicle_tonne_km` | leg, fuel method |
 | `load_tonnes` or `load_factor`, `empty_trip_factor` | leg, load model |
 | `repositioning_km` | leg, trucks: empty km for this trip |
 | `energy_kwh_per_tkm`, `country` | leg, energy method |
 | `own_wtw_g_per_tkm`, `own_ttw_g_per_tkm`, `own_factor_source`, `own_distance_basis` | leg, the carrier's or your own intensity (primary data) |
 | `fuel_unit`, `fuel_wtw_kg_per_unit`, `fuel_ttw_kg_per_unit`, `fuel_factor_source`, `fuel_biogenic_co2_kg_per_unit` | leg with `fuel`, the supplier's emission factor |
-| `hub_id`, `hub_type`, `hub_containers` | hub stop (row is a hub when `hub_type` is set); containers for per-container hub types |
+| `hub_id`, `hub_type`, `hub_containers` | hub stop (row is a hub when `hub_type` is set); containers for per-container hub types only |
 
 A bad row fails only its shipment; the rest still calculate. Only failures caused by the data are final: when a shipment fails because a routing service didn't answer (unreachable, timed out, overloaded or restarting), it is tried again after 1 s and 3 s. If it still fails, it is marked `retryable` (batch results, reports' `retryable_failed`, HTTP 503 with `Retry-After` for a single shipment), so you know to send it again rather than fix it.
 
@@ -354,7 +357,7 @@ A bad row fails only its shipment; the rest still calculate. Only failures cause
 
 ## Web page
 
-`sootcase serve` also serves a page at `/`: enter a shipment leg by leg, picking each leg's start and end by name or code (cities, ports, rail and road terminals, airports; the list follows the mode), and see its emissions, a bar of each leg's share split into vehicle and fuel-supply emissions, and for every number the distance method, calculation method, data type and factor source. It opens with a worked example.
+`sootcase serve` also serves a page at `/`: enter a shipment leg by leg, picking each leg's start and end by name or code (cities, ports, rail and road terminals, airports; the list follows the mode), and see its emissions, a bar of each leg's share split into vehicle and fuel-supply emissions, and for every number the distance method, calculation method, data type and factor source. It opens with a worked example. The examples leave the distances to the routers, so they need them (`docker compose up`, or the `-osrm` and `-sea-network` flags); without routing, enter each leg's distance in km.
 
 Below it, **Report** takes a shipments CSV (the `batch` columns), an organisation and a period, and shows the [report](#report-over-many-shipments): totals, modes, hubs, energy carriers, data quality, notes. Download it as Markdown or JSON, each shipment's full calculation as CSV (a row per leg and hub: distance and how it was found, method, data type, emissions, factor source, notes on added legs) or JSON, and the shipments in the [iLEAP data model](#ileap-export) (JSON), all from the one calculation. **Scenarios** below it runs the same file through the [what-if changes](#scenarios-what-if). `POST /v1/report` takes the CSV directly with `Content-Type: text/csv`, report details in the query (`?organisation=...&period_from=...`).
 
@@ -432,7 +435,7 @@ Why: DESNZ's container ship factors (about 20 g CO2e per tonne-km on average, 15
 
 **Notes on the data:**
 - Air freight comes `with_rf` and `without_rf` (radiative forcing). ISO 14083 reports without RF.
-- Hub factors come from GLEC v3.3 Table 3 (GILA project; Fraunhofer IML, Politecnico di Milano, GreenRouter): `transshipment`, `storage_transshipment`, `warehouse`, `liquid_bulk_terminal`, and `_mixed` for mixed ambient and temperature-controlled sites (kg CO2e per tonne; sample sizes in the source); `intermodal_terminal` and `intermodal_terminal_temperature_controlled` are per container handled: give the hub's `containers` (CSV `hub_containers`). Add your own as a layer:
+- Hub factors come from GLEC v3.3 Table 3 (GILA project; Fraunhofer IML, Politecnico di Milano, GreenRouter): `transshipment`, `storage_transshipment`, `warehouse`, `liquid_bulk_terminal`, and for all but the warehouse `_mixed` for mixed ambient and temperature-controlled sites (kg CO2e per tonne; sample sizes in the source); `intermodal_terminal` and `intermodal_terminal_temperature_controlled` are per container handled: give the hub's `containers` (CSV `hub_containers`). Add your own as a layer:
 
   ```json
   {"name": "my-hubs", "note": "where these values come from",
@@ -455,17 +458,17 @@ It reports how many rows it imported, skipped as blank, or couldn't match to a w
 
 ## Performance
 
-Measured with [`tools/loadtest`](tools/loadtest/main.go) against `sootcase serve` with the default datasets, the server pinned to **one CPU core** and the load generator to another (Go 1.24, Linux, a small cloud VM). Each shipment has a road and a sea leg, distances by great-circle; routing via OSRM adds its own time.
+Measured with [`tools/loadtest`](tools/loadtest/main.go) against `sootcase serve` with the default datasets, the server pinned to **one CPU core** and the load generator to another (Go 1.24.7, Linux, Intel Xeon 2.1 GHz cloud VM, 10 November 2026). Each shipment has a road and a sea leg between random points in Europe with the distance given, so this is the calculation alone; routing adds its own time.
 
 | Request | Concurrent | Throughput | Latency p50 / p99 |
 |---|---:|---:|---:|
-| `/v1/calculate`, one shipment | 1 | 6,600 req/s | 0.14 / 0.39 ms |
-| `/v1/calculate`, one shipment | 32 | 17,000 req/s | 1.6 / 5.6 ms |
-| `/v1/calculate/batch`, 100 shipments | 4 | 59,000 shipments/s | 6.4 / 17 ms |
-| `/v1/calculate/batch`, 1,000 shipments | 4 | 59,000 shipments/s | 66 / 157 ms |
-| `/v1/report`, 1,000 shipments | 4 | 86,000 shipments/s | 39 / 164 ms |
+| `/v1/calculate`, one shipment | 1 | 4,900 req/s | 0.18 / 0.44 ms |
+| `/v1/calculate`, one shipment | 32 | 11,500 req/s | 2.4 / 10.6 ms |
+| `/v1/calculate/batch`, 100 shipments | 4 | 17,000 shipments/s | 20 / 76 ms |
+| `/v1/calculate/batch`, 1,000 shipments | 4 | 10,200 shipments/s | 391 / 624 ms |
+| `/v1/report`, 1,000 shipments | 4 | 12,100 shipments/s | 320 / 504 ms |
 
-Throughput scales with cores. Under overload (32 concurrent 1,000-shipment batches on one core) requests beyond `-max-concurrent` got an immediate `503` with `Retry-After`, throughput held at 59,000 shipments/s, and the server stayed at 48 MB of memory. To run it yourself:
+The 1,000-shipment runs send a million different coordinates, more than the server remembers the country of (100,000), so they also measure finding each point's country. Throughput scales with cores. Under overload (32 concurrent 1,000-shipment batches on one core) requests beyond `-max-concurrent` got an immediate `503` with `Retry-After` and throughput held at 10,400 shipments/s. The server takes about 190 MB of memory at rest (most of it the place list) and was at 340 MB after these runs. To run it yourself:
 
 ```sh
 sootcase serve &

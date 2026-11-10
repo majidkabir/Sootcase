@@ -114,7 +114,7 @@ jobs:
           curl -fsS -X POST localhost:8080/v1/calculate -d '{"weight_kg":1000,"legs":[{"mode":"road","vehicle_type":"hgv",
             "from":{"lat":52.37,"lon":4.90},"to":{"lat":51.92,"lon":4.48}}]}' | grep -q '"distance_method":"osrm"' || { cat serve.log; exit 1; }
           for args in "-kind calc -c 16" "-kind batch -batch 100 -c 4" "-kind batch -batch 1000 -c 2"; do
-            line=$(taskset -c 3 bin/loadtest -url http://127.0.0.1:8080 $args -d "$DUR" -fresh -road-only -bbox "$BBOX")
+            line=$(taskset -c 3 bin/loadtest -url http://127.0.0.1:8080 $args -d "$DUR" -fresh -road-only -route -bbox "$BBOX")
             echo "$line"; echo "::notice title=Sootcase + OSRM CH ($args)::$line"; echo "- sootcase $line" >> results.md
           done
 

@@ -154,23 +154,36 @@ var (
 	ErrInvalidTEU    = errors.New("invalid container data")
 )
 
-// Calculate returns the emissions of a shipment.
+// Calculate returns the emissions of a shipment: its legs, then its hubs.
 //
-// Intensity method (default, modelled data):
+// A leg is calculated by the first of these its input asks for:
+//
+//	own factor   (leg.OwnFactor, primary data)        the carrier's own g/tkm
+//	energy       (leg.EnergyKWhPerTkm, modelled)      kWh/tkm x the country's grid
+//	fuel         (leg.Fuel, primary data)             measured fuel x its factor
+//	load model   (leg.LoadFactor or LoadTonnes)       the vehicle at that load
+//	intensity    (otherwise, default values)          the vehicle type's g/tkm
+//
+// A leg may ask for one only. For the methods per tonne-km:
 //
 //	tonne-km = (weight_kg / 1000) * distance_km
-//	TTW kg   = tonne-km * TTW g/tkm / 1000
-//	WTW kg   = tonne-km * WTW g/tkm / 1000
+//	TTW kg   = tonne-km * DAF * TTW g/tkm / 1000
+//	WTW kg   = tonne-km * DAF * WTW g/tkm / 1000
 //
-// Fuel method (leg.Fuel set, primary data):
+// where the DAF (see adjust) turns the leg's distance into the type of
+// distance the factor is per. For measured fuel:
 //
 //	share    = tonne-km / vehicle_tonne_km   (1 when vehicle_tonne_km is 0)
 //	TTW kg   = fuel_amount * TTW kg/unit * share
 //	WTW kg   = fuel_amount * WTW kg/unit * share
 //
-// Hubs (WTW only):
+// Hubs, per tonne or per container handled:
 //
 //	hub kg   = (weight_kg / 1000) * hub g/t / 1000
+//	hub kg   = containers * hub g/container / 1000
+//
+// Hub values that come as a WTW total only count in WTW and in neither
+// TTW nor WTT.
 func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 	s, err := c.resolve(s)
 	if err != nil {
@@ -344,6 +357,8 @@ func (c Calculator) Hub(h HubStop, cargoType string, tonnes float64) (HubResult,
 			return HubResult{}, fmt.Errorf("%w: hub %q: %s is per container handled; give containers", ErrInvalidInput, h.ID, h.HubType)
 		}
 		hr.Containers, hr.WTWKg = h.Containers, h.Containers*hf.WTWPerContainerG/1000
+	} else if h.Containers != 0 {
+		return HubResult{}, fmt.Errorf("%w: hub %q: %s is per tonne of cargo, not per container; leave containers out", ErrInvalidInput, h.ID, hubType)
 	}
 	if hf.DataType != "" {
 		hr.DataType = hf.DataType
@@ -485,13 +500,21 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 		}
 	}
 	if methods > 1 {
-		return LegResult{}, fmt.Errorf("leg uses more than one of fuel, load_factor, energy_kwh_per_tkm and own_factor")
+		return LegResult{}, fmt.Errorf("%w: a leg takes one of fuel, a load (load_factor or load_tonnes), energy_kwh_per_tkm and own_factor, not several", ErrInvalidInput)
 	}
 	if leg.OwnFactor != nil {
 		return c.ownLeg(lr, leg, tonnes, dist, dtype)
 	}
 	if leg.Country != "" && leg.EnergyKWhPerTkm == 0 {
 		return LegResult{}, fmt.Errorf("%w: country is only used with energy_kwh_per_tkm", ErrInvalidEnergy)
+	}
+	if leg.EnergyKWhPerTkm != 0 || leg.Fuel != nil {
+		// Energy per tonne-km and the shipment's share of measured fuel
+		// take the leg's tonne-km as they are: no factor says what kind of
+		// distance it wants, but it must be one of the mode (see adjust).
+		if _, _, err := c.adjust(leg.Mode, dtype, "", dist); err != nil {
+			return LegResult{}, err
+		}
 	}
 	if leg.EnergyKWhPerTkm != 0 {
 		return c.energyLeg(lr, leg)
@@ -525,8 +548,14 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 		}
 		lr.FactorNote = strings.TrimSpace(lr.FactorNote + " " + note)
 	}
-	// Emissions = tonne-km x intensity x DAF (GLEC Framework, ISO 14083).
-	adjKm, daf, err := c.adjust(leg.Mode, dtype, f.DistanceBasis, dist)
+	return c.perTonneKm(lr, MethodIntensity, leg.Mode, f, tonnes, dist, dtype)
+}
+
+// perTonneKm fills in a leg calculated from an emission intensity:
+// emissions = tonne-km x DAF x intensity (GLEC Framework, ISO 14083), the
+// DAF turning the leg's distance into the type of distance f is per.
+func (c Calculator) perTonneKm(lr LegResult, method string, mode Mode, f Factor, tonnes, dist float64, dtype string) (LegResult, error) {
+	adjKm, daf, err := c.adjust(mode, dtype, f.DistanceBasis, dist)
 	if err != nil {
 		return LegResult{}, err
 	}
@@ -534,7 +563,7 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 		lr.DAF, lr.DAFSource = adjKm/dist, daf.Source
 	}
 	adjTkm := tonnes * adjKm
-	lr.Method = MethodIntensity
+	lr.Method = method
 	lr.Factor = &f
 	lr.TTWKg = adjTkm * f.TTW / 1000
 	lr.WTWKg = adjTkm * f.WTW() / 1000
@@ -569,6 +598,10 @@ func (c Calculator) ownLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype st
 	basis := o.DistanceBasis
 	switch basis {
 	case "":
+		// Per the leg's own kind of distance, which must be one of the mode.
+		if _, _, err := c.adjust(leg.Mode, dtype, "", dist); err != nil {
+			return LegResult{}, err
+		}
 		basis = dtype
 	case DistSFD, DistGCD, DistActual:
 	default:
@@ -580,22 +613,10 @@ func (c Calculator) ownLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype st
 	}
 	f := Factor{Mode: leg.Mode, VehicleType: vt, TTW: *o.TTW, WTT: o.WTW - *o.TTW, Source: "Own value: " + strings.TrimSpace(o.Source),
 		DataType: DataPrimary, DistanceBasis: basis}
-	adjKm, daf, err := c.adjust(leg.Mode, dtype, f.DistanceBasis, dist)
-	if err != nil {
-		return LegResult{}, err
-	}
-	if daf != nil && dist > 0 {
-		lr.DAF, lr.DAFSource = adjKm/dist, daf.Source
-	}
-	adjTkm := tonnes * adjKm
-	lr.Method = MethodIntensity
-	lr.Factor = &f
-	lr.TTWKg = adjTkm * f.TTW / 1000
-	lr.WTWKg = adjTkm * f.WTW() / 1000
 	if leg.CargoType != "" {
 		lr.FactorNote = fmt.Sprintf("Cargo type %q isn't applied here: it chooses default values, and this leg uses its own intensity.", leg.CargoType)
 	}
-	return lr, nil
+	return c.perTonneKm(lr, MethodIntensity, leg.Mode, f, tonnes, dist, dtype)
 }
 
 func (c Calculator) fuelLeg(lr LegResult, fu FuelUse, from, to Where) (LegResult, error) {
@@ -659,7 +680,7 @@ func (c Calculator) loadLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype s
 	// so the source says how many tonnes it means.
 	// Repositioning km are empty running for this trip: as empty km per
 	// loaded km (actual), they join the empty trip factor.
-	adjKm, daf, err := c.adjust(leg.Mode, dtype, m.DistanceBasis, dist)
+	adjKm, _, err := c.adjust(leg.Mode, dtype, m.DistanceBasis, dist)
 	if err != nil {
 		return LegResult{}, err
 	}
@@ -707,18 +728,9 @@ func (c Calculator) loadLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype s
 			load, round3(etf), repoText(leg.RepositioningKm), m.PayloadT, m.Source),
 	}
 	f.DistanceBasis = m.DistanceBasis
-	// Emissions = tonne-km x intensity x DAF, as for fleet-average factors.
-	if daf != nil && dist > 0 {
-		lr.DAF, lr.DAFSource = adjKm/dist, daf.Source
-	}
-	adjTkm := tonnes * adjKm
-	lr.Method = MethodLoadModel
-	lr.Factor = &f
 	lr.LoadFactor, lr.LoadTonnes, lr.EmptyTripFactor, lr.PayloadT = lf, leg.LoadTonnes, etf, m.PayloadT
 	lr.RepositioningKm = leg.RepositioningKm
-	lr.TTWKg = adjTkm * ttw / 1000
-	lr.WTWKg = adjTkm * f.WTW() / 1000
-	return lr, nil
+	return c.perTonneKm(lr, MethodLoadModel, leg.Mode, f, tonnes, dist, dtype)
 }
 
 func (c Calculator) distance(ctx context.Context, leg Leg) (rt Route, method, dtype string, err error) {

@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
 )
@@ -139,23 +140,44 @@ type ReasonCount struct {
 	Retryable bool   `json:"retryable,omitempty"` // failures only: see Coverage.RetryableFailed
 }
 
-// reason turns an error into a reason shared by similar failures: numbers
-// (distances, leg numbers, coordinates) become "#".
+// reason turns an error into a reason shared by similar failures: the
+// numbers that differ between them (distances, leg numbers, coordinates)
+// become "#". Numbers that are part of a name ("glec-3.3", "hgv_26t") or
+// a limit ("must be > 0") stay.
 func reason(e string) string {
+	r := []rune(e)
+	digit := func(c rune) bool { return c >= '0' && c <= '9' }
+	// inName: the number at i follows a letter, "_" or "/", or a hyphen
+	// inside a word ("glec-3.3", but not the sign of "-5").
+	inName := func(i int) bool {
+		if i == 0 {
+			return false
+		}
+		c := r[i-1]
+		return unicode.IsLetter(c) || c == '_' || c == '/' ||
+			(c == '-' && i > 1 && (unicode.IsLetter(r[i-2]) || digit(r[i-2])))
+	}
 	var b strings.Builder
-	num := false
-	for _, r := range e {
-		if (r >= '0' && r <= '9') || (num && (r == '.' || r == ',')) {
-			if !num {
-				b.WriteByte('#')
-				num = true
-			}
+	for i := 0; i < len(r); {
+		if !digit(r[i]) {
+			b.WriteRune(r[i])
+			i++
 			continue
 		}
-		num = false
-		b.WriteRune(r)
+		j := i // the number is r[i:j]: digits, with . or , between them
+		for j < len(r) && (digit(r[j]) || ((r[j] == '.' || r[j] == ',') && j+1 < len(r) && digit(r[j+1]))) {
+			j++
+		}
+		before := strings.TrimRight(string(r[:i]), " ")
+		limit := strings.HasSuffix(before, ">") || strings.HasSuffix(before, "<") || strings.HasSuffix(before, "=")
+		if limit || inName(i) || (j < len(r) && unicode.IsLetter(r[j])) {
+			b.WriteString(string(r[i:j]))
+		} else {
+			b.WriteByte('#')
+		}
+		i = j
 	}
-	return b.String()
+	return strings.ReplaceAll(b.String(), "-#", "#") // a negative number is a number
 }
 
 // warningKinds describe each warning code in a report, without the leg

@@ -165,7 +165,7 @@ func TestCalculate_UsesDistanceProvider(t *testing.T) {
 func TestCalculate_Errors(t *testing.T) {
 	c := Calculator{Factors: testFactors}
 	ctx := context.Background()
-	if _, err := c.Calculate(ctx, Shipment{WeightKg: 0, Legs: []Leg{{DistanceKm: 1}}}); !errors.Is(err, ErrInvalidWeight) {
+	if _, err := c.Calculate(ctx, Shipment{WeightKg: 0, Legs: []Leg{{Mode: Road, DistanceKm: 1}}}); !errors.Is(err, ErrInvalidWeight) {
 		t.Errorf("want ErrInvalidWeight, got %v", err)
 	}
 	if _, err := c.Calculate(ctx, Shipment{WeightKg: 1}); !errors.Is(err, ErrNoLegs) {

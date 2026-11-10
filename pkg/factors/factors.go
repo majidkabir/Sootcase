@@ -386,6 +386,9 @@ func (d *Dataset) indexLegs() (err error) {
 		if f.TTW < 0 || f.WTT < 0 {
 			return fmt.Errorf("negative factor for %s/%s", f.Mode, f.VehicleType)
 		}
+		if f.ElectricityG < 0 || f.ElectricityG > f.WTT {
+			return fmt.Errorf("factor %s/%s: electricity_g_per_tkm is a part of wtt_g_per_tkm, so between 0 and it", f.Mode, f.VehicleType)
+		}
 		switch f.DistanceBasis {
 		case "", calc.DistSFD, calc.DistGCD, calc.DistActual:
 			return nil
@@ -664,13 +667,32 @@ func (d *Dataset) LegFactor(m calc.Mode, vt string) (calc.Factor, error) {
 	if f, ok := d.legIdx[legKey(m, vt)]; ok {
 		return f, nil
 	}
+	if vt == "" {
+		return calc.Factor{}, errNoVehicleType(m)
+	}
 	for _, f := range d.Legs {
 		if f.Mode == m {
-			return calc.Factor{}, fmt.Errorf("no factor for %s/%s in dataset %q", m, vt, d.Name)
+			return calc.Factor{}, fmt.Errorf("%w: no factor for %s/%s in dataset %q%s", calc.ErrInvalidInput, m, vt, d.Name, d.didYouMean(m, vt))
 		}
 	}
 	return calc.Factor{}, fmt.Errorf("dataset %q has no %s factors; add a layer with your own (-factors %s,mine.json) "+
 		"or build one from fuel data with sootcase toc", d.Name, m, d.Name)
+}
+
+// errNoVehicleType is the error for a leg that needs a vehicle type's value
+// and names none.
+func errNoVehicleType(m calc.Mode) error {
+	return fmt.Errorf("%w: vehicle_type is missing; \"sootcase factors\" and GET /v1/factors list the %s vehicle types", calc.ErrInvalidInput, m)
+}
+
+// didYouMean points at the vehicle type that vt is but for its case or
+// spaces ("HGV", "Container Ship"), or says where the types are listed.
+func (d *Dataset) didYouMean(m calc.Mode, vt string) string {
+	norm := strings.ReplaceAll(strings.ReplaceAll(strings.ToLower(strings.TrimSpace(vt)), " ", "_"), "-", "_")
+	if _, ok := d.legIdx[legKey(m, norm)]; ok && norm != vt {
+		return fmt.Sprintf("; did you mean %q?", norm)
+	}
+	return "; \"sootcase factors\" and GET /v1/factors list the vehicle types"
 }
 
 // HubFactor implements calc.FactorProvider.
@@ -717,7 +739,10 @@ func (d *Dataset) LoadModel(m calc.Mode, vt string) (calc.LoadModel, error) {
 			}
 		}
 	}
-	return calc.LoadModel{}, fmt.Errorf("no load model for %s/%s in dataset %q", m, vt, d.Name)
+	if vt == "" {
+		return calc.LoadModel{}, errNoVehicleType(m)
+	}
+	return calc.LoadModel{}, fmt.Errorf("%w: no load model for %s/%s in dataset %q", calc.ErrInvalidInput, m, vt, d.Name)
 }
 
 func dafKey(m calc.Mode, from, to string) string { return string(m) + " " + from + "->" + to }

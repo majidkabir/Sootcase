@@ -1,6 +1,6 @@
-shipment_id,weight_kg,leg_id,mode,vehicle_type,distance_km,from_lat,from_lon,to_lat,to_lon,fuel,fuel_amount,vehicle_tonne_km
-CPH-RTM-1,12000,truck,road,hgv,,55.6761,12.5683,53.5511,9.9937,,,
-CPH-RTM-1,,feeder,sea,container_ship,560,,,,,,,
-AAR-OSL-7,3500,truck,road,hgv,610,,,,,diesel,190,14000
-CPH-HAM-RAIL,20000,rail,rail,freight_train,330,,,,,,,
-BAD-1,0,truck,road,hgv,100,,,,,,,
+shipment_id,weight_kg,leg_id,mode,vehicle_type,distance_km,distance_type,from_lat,from_lon,to_lat,to_lon,fuel,fuel_amount,vehicle_tonne_km
+CPH-RTM-1,12000,truck,road,hgv,332,sfd,55.6761,12.5683,53.5511,9.9937,,,
+CPH-RTM-1,,feeder,sea,container_ship,560,,53.5511,9.9937,51.9244,4.4777,,,
+AAR-OSL-7,3500,truck,road,hgv,610,,,,,,diesel,190,14000
+CPH-HAM-RAIL,20000,rail,rail,freight_train,330,,,,,,,,
+BAD-1,0,truck,road,hgv,100,,,,,,,,

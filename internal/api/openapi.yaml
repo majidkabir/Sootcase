@@ -565,6 +565,7 @@ components:
         source: { type: string }
         year: { type: integer }
         distance_basis: { $ref: "#/components/schemas/DistanceType" }
+        electricity_g_per_tkm: { type: number, description: "Part of wtt_g_per_tkm that is the electricity the vehicles run on, for a value that mixes fuel and electric traction (GLEC's European rail average): the operator's scope 2. Left out otherwise" }
         data_type: { type: string, description: "primary for factors built from the operator's own measurements (transport operation categories); else left out" }
     FuelFactor:
       type: object

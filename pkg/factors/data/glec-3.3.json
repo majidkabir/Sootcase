@@ -3015,7 +3015,8 @@
    "wtt_g_per_tkm": 9.394,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail, Europe: EU average where the traction is unknown, 18.4 g CO2e/t-km WTW (p. 98, based on 62% of EU track being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%; per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "electricity_g_per_tkm": 6.696
   },
   {
    "mode": "rail",
@@ -5265,7 +5266,8 @@
    "wtt_g_per_tkm": 10.5213,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, rail: glec/rail/eu/average_traction_unknown with GLEC's +12% for temperature-controlled rail freight (p. 99, the road uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); per shortest feasible distance (GLEC Section 1 Chapter 4, Rail, p. 46)",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "electricity_g_per_tkm": 7.4995
   },
   {
    "mode": "rail",

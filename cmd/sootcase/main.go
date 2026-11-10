@@ -113,13 +113,14 @@ func (c *common) register(fs *flag.FlagSet) {
 	fs.Float64Var(&c.waterwayMaxSnapKm, "waterway-max-snap-km", 10,
 		"reject inland waterway points farther than this from a navigable waterway (0 = no limit)")
 	fs.StringVar(&c.railURL, "osrm-rail", env("OSRM_RAIL_URL"),
-		"OSRM server built with deploy/rail.lua for rail distances, also $SOOTCASE_OSRM_RAIL_URL (default: great-circle)")
+		"OSRM server built with deploy/rail.lua for rail distances, also $SOOTCASE_OSRM_RAIL_URL "+
+			"(default: none; give distance_km)")
 	fs.Float64Var(&c.railMaxSnapKm, "rail-max-snap-km", 5,
 		"reject rail points farther than this from a railway line (0 = no limit)")
 	fs.StringVar(&c.ferryVehicle, "ferry-vehicle", calc.DefaultFerryVehicle,
 		"sea vehicle type for ferry crossings on routed road legs")
 	fs.StringVar(&c.seaNetwork, "sea-network", env("SEA_NETWORK"),
-		"maritime network GeoJSON for sea distances, also $SOOTCASE_SEA_NETWORK (default: adjusted great-circle)")
+		"maritime network GeoJSON for sea distances, also $SOOTCASE_SEA_NETWORK (default: none; give distance_km)")
 	fs.StringVar(&c.seaAvoid, "sea-avoid", "", "comma-separated passages to avoid, e.g. suez,panama")
 	fs.StringVar(&c.seaOpen, "sea-open", "", "comma-separated passages to open that are closed by default ("+
 		strings.Join(distance.DefaultAvoid, ",")+")")

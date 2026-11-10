@@ -23,9 +23,14 @@ GLEC = "GLEC Framework v3.3 (Smart Freight Centre, 2026)"
 legs = []
 
 
-def leg(mode, vt, wtt, ttw, source, basis):
-    legs.append({"mode": mode, "vehicle_type": vt, "ttw_g_per_tkm": round(ttw, 4), "wtt_g_per_tkm": round(wtt, 4),
-                 "source": source, "year": YEAR, "distance_basis": basis})
+def leg(mode, vt, wtt, ttw, source, basis, electricity=0):
+    """electricity is the part of wtt that is the electricity the vehicle runs on, for a value that mixes fuel and
+    electric traction (the operator's scope 2)."""
+    f = {"mode": mode, "vehicle_type": vt, "ttw_g_per_tkm": round(ttw, 4), "wtt_g_per_tkm": round(wtt, 4),
+         "source": source, "year": YEAR, "distance_basis": basis}
+    if electricity:
+        f["electricity_g_per_tkm"] = round(electricity, 4)
+    legs.append(f)
 
 
 # ---------------------------------------------------------------- road
@@ -255,7 +260,8 @@ for vid, label, wtt, ttw, el in RAIL_TYPES:
 # 38% / 62% the same way (8.97 + 9.39 = 18.36 g).
 leg("rail", "glec/rail/eu/average_traction_unknown", 0.38 * 7.1 + 0.62 * 10.8, 0.38 * 23.6,
     f"{RAIL}, Europe: EU average where the traction is unknown, 18.4 g CO2e/t-km WTW (p. 98, based on 62% of EU track "
-    f"being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%; {RAIL_SFD}", "sfd")
+    f"being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%; {RAIL_SFD}", "sfd",
+    electricity=0.62 * 10.8)
 for traction in ("diesel", "electric"):
     for vid, label, *_ in RAIL_TYPES:
         if vid != "average_mixed":
@@ -759,7 +765,8 @@ for base, vid in RAIL_REEFER:
     b = find(base)
     leg("rail", vid, b["wtt_g_per_tkm"] * 1.12, b["ttw_g_per_tkm"] * 1.12,
         f"{GLEC}, Section 3 Module 2, rail: {base} with GLEC's +12% for temperature-controlled rail freight (p. 99, the road "
-        f"uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); {RAIL_SFD}", "sfd")
+        f"uplift recommended for Europe, South America, Asia and Africa in the absence of rail-specific values); {RAIL_SFD}", "sfd",
+        electricity=b.get("electricity_g_per_tkm", 0) * 1.12)
 
 # ---------------------------------------------------------------- electricity region set (for electric vehicles)
 regions += [
