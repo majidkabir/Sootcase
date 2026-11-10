@@ -21,6 +21,13 @@ func TestGHGScopes(t *testing.T) {
 	if bev.OperatorScope2Kg != 5 || bev.OperatorScope1Kg != 0 {
 		t.Errorf("battery electric: %+v", bev)
 	}
+	// A value that mixes diesel and electric traction: 6 of its 10 g WTT are
+	// electricity (scope 2), the other 4 g the diesel's supply (category 3).
+	mixed := ghgScopes(Result{Legs: []LegResult{{Method: MethodIntensity, TTWKg: 8, WTWKg: 18,
+		Factor: &Factor{VehicleType: "rail/average_traction_unknown", TTW: 8, WTT: 10, ElectricityG: 6}}}})
+	if !approx(mixed.OperatorScope1Kg, 8) || !approx(mixed.OperatorScope2Kg, 6) || !approx(mixed.OperatorScope3Cat3Kg, 4) {
+		t.Errorf("mixed traction: %+v", mixed)
+	}
 	for id, want := range map[string]bool{
 		"glec/road/europe/electric/artic_34_40t":                        true,
 		"glec/road/cn/truck_12t/electricity":                            true,

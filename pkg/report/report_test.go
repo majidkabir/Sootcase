@@ -217,6 +217,21 @@ func TestReport_LegParts(t *testing.T) {
 	}
 }
 
+func TestReason(t *testing.T) {
+	for in, want := range map[string]string{
+		"leg 3: from is 12.5 km from the nearest rail line (max 5 km)":                "leg #: from is # km from the nearest rail line (max # km)",
+		"shipment weight must be > 0":                                                 "shipment weight must be > 0",
+		`leg 2: no factor for road/hgv_26t in dataset "desnz-2026+glec-3.3"`:          `leg #: no factor for road/hgv_26t in dataset "desnz-2026+glec-3.3"`,
+		"leg 1: from must have lat in [-90, 90] and lon in [-180, 180], got 95, 12.5": "leg #: from must have lat in [#, #] and lon in [#, #], got #, #",
+		"load_tonnes 30 t is more than 28.5 t (1.5 × its 19.0 t payload)":             "load_tonnes # t is more than # t (# × its # t payload)",
+		"distance_km must be >= 0, got -5":                                            "distance_km must be >= 0, got #",
+	} {
+		if got := reason(in); got != want {
+			t.Errorf("reason(%q)\n got %q\nwant %q", in, got, want)
+		}
+	}
+}
+
 func TestFailureReasons(t *testing.T) {
 	b := New(Meta{})
 	b.Add("a", calc.Result{}, errors.New("leg 1: from is 12.3 km from the nearest rail line (max 5 km)"))

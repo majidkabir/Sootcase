@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.11.0
+  version: 0.12.0
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -565,6 +565,7 @@ components:
         source: { type: string }
         year: { type: integer }
         distance_basis: { $ref: "#/components/schemas/DistanceType" }
+        electricity_g_per_tkm: { type: number, description: "Part of wtt_g_per_tkm that is the electricity the vehicles run on, for a value that mixes fuel and electric traction (GLEC's European rail average): the operator's scope 2. Left out otherwise" }
         data_type: { type: string, description: "primary for factors built from the operator's own measurements (transport operation categories); else left out" }
     FuelFactor:
       type: object

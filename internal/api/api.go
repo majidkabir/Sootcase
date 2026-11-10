@@ -18,6 +18,7 @@ import (
 	"regexp"
 	"runtime"
 	"runtime/debug"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -363,9 +364,14 @@ func (s *Server) places(w http.ResponseWriter, r *http.Request) {
 	}
 	var kinds []string
 	for _, k := range strings.Split(q.Get("kind"), ",") {
-		if k = strings.TrimSpace(k); k != "" {
-			kinds = append(kinds, k)
+		if k = strings.TrimSpace(k); k == "" {
+			continue
 		}
+		if !slices.Contains(places.Kinds(), k) {
+			writeError(w, http.StatusBadRequest, fmt.Errorf("unknown kind %q (kinds: %s)", k, strings.Join(places.Kinds(), ", ")))
+			return
+		}
+		kinds = append(kinds, k)
 	}
 	limit := 10
 	if v := q.Get("limit"); v != "" {

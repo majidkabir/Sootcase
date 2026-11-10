@@ -181,6 +181,12 @@ type Factor struct {
 	// DistanceBasis is the distance type the intensity is per tonne-km of
 	// ("sfd", "gcd", "actual"); empty if unknown, which disables DAFs.
 	DistanceBasis string `json:"distance_basis,omitempty"`
+	// ElectricityG is the part of WTT that is the electricity the vehicle
+	// runs on, for a factor that mixes fuel and electric traction (GLEC's
+	// European rail average): the operator's scope 2, the rest of WTT its
+	// scope 3 category 3. Factors for electric vehicles only leave it out;
+	// all of their emissions are electricity (see ghgScopes).
+	ElectricityG float64 `json:"electricity_g_per_tkm,omitempty"`
 }
 
 // WTW is the well-to-wheel factor (WTT + TTW).

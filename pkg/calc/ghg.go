@@ -54,23 +54,43 @@ func electricFactor(id string) bool {
 	return false
 }
 
+// electricityShare is the share of a leg's emissions (of what is left
+// after its parts) that is electricity its vehicles use: all of it for an
+// electric leg, the factor's stated part for a factor that mixes fuel and
+// electric traction, else none.
+func electricityShare(l LegResult) float64 {
+	switch {
+	case electricLeg(l):
+		return 1
+	case l.Method == MethodIntensity && l.Factor != nil && l.Factor.ElectricityG > 0 && l.Factor.WTW() > 0:
+		return l.Factor.ElectricityG / l.Factor.WTW()
+	}
+	return 0
+}
+
 func ghgScopes(r Result) GHGScopes {
 	g := GHGScopes{Scope3Kg: r.WTWKg}
-	add := func(electric bool, ttw, wtw float64) {
-		if electric {
-			g.OperatorScope2Kg += wtw
-			return
+	// add places emissions of which the share electricity is scope 2; the
+	// rest is fuel: burnt (TTW) in scope 1, its supply in scope 3.
+	add := func(electricity, ttw, wtw float64) {
+		scope2 := wtw * electricity
+		g.OperatorScope2Kg += scope2
+		if electricity < 1 {
+			g.OperatorScope1Kg += ttw
+			g.OperatorScope3Cat3Kg += wtw - ttw - scope2
 		}
-		g.OperatorScope1Kg += ttw
-		g.OperatorScope3Cat3Kg += wtw - ttw
 	}
 	for _, l := range r.Legs {
 		ttw, wtw := l.TTWKg, l.WTWKg
 		for _, p := range l.Parts {
 			ttw, wtw = ttw-p.TTWKg, wtw-p.WTWKg
-			add(p.Kind == PartElectrified || p.Method == MethodEnergy, p.TTWKg, p.WTWKg)
+			electricity := 0.0
+			if p.Kind == PartElectrified || p.Method == MethodEnergy {
+				electricity = 1
+			}
+			add(electricity, p.TTWKg, p.WTWKg)
 		}
-		add(electricLeg(l), ttw, wtw)
+		add(electricityShare(l), ttw, wtw)
 	}
 	for _, h := range r.Hubs {
 		g.HubsKg += h.WTWKg

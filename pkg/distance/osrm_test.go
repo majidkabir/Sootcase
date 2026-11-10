@@ -91,7 +91,7 @@ func TestByMode(t *testing.T) {
 	var path string
 	srv := fakeOSRM(t, `{"code":"Ok","routes":[{"distance":100000}]}`, 200, &calls, &path)
 	o, _ := NewOSRM(srv.URL)
-	gc, _ := NewGreatCircle([]Adjustment{{Mode: calc.Air, AddKm: 50}})
+	gc, _ := NewGreatCircle([]Adjustment{{Mode: calc.Rail, AddKm: 50}})
 	b := ByMode{Providers: map[calc.Mode]calc.DistanceProvider{calc.Road: o}, Fallback: gc}
 
 	c := calc.Calculator{Factors: fakeFactors{}, Distances: b}
@@ -105,7 +105,7 @@ func TestByMode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if b.DistanceType(calc.Road) != calc.DistSFD || b.DistanceType(calc.Rail) != calc.DistGCD || b.DistanceType(calc.Air) != "" {
+	if b.DistanceType(calc.Road) != calc.DistSFD || b.DistanceType(calc.Rail) != "" || b.DistanceType(calc.Air) != calc.DistGCD {
 		t.Errorf("distance types: road %q rail %q air %q", b.DistanceType(calc.Road), b.DistanceType(calc.Rail), b.DistanceType(calc.Air))
 	}
 	want := map[string]struct {
@@ -113,8 +113,8 @@ func TestByMode(t *testing.T) {
 		method string
 	}{
 		"road":  {100, "osrm"},
-		"rail":  {Haversine(copenhagen, hamburg), "great_circle"},
-		"air":   {Haversine(copenhagen, hamburg) + 50, "great_circle_adjusted"},
+		"rail":  {Haversine(copenhagen, hamburg) + 50, "great_circle_adjusted"},
+		"air":   {Haversine(copenhagen, hamburg), "great_circle"},
 		"given": {7, calc.DistanceGiven},
 	}
 	for _, l := range res.Legs {

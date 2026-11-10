@@ -248,7 +248,7 @@ func TestPlaces(t *testing.T) {
 func TestCalculate_LocationCode(t *testing.T) {
 	srv := newTestServer(t)
 	resp, out := post(t, srv.URL+"/v1/calculate",
-		`{"weight_kg":1000,"legs":[{"mode":"road","vehicle_type":"truck_40t","from":{"code":"DKCPH"},"to":{"code":"DEHAM"}}]}`)
+		`{"weight_kg":1000,"legs":[{"mode":"air","vehicle_type":"freighter","from":{"code":"CPH"},"to":{"code":"HAM"}}]}`)
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("status %d: %v", resp.StatusCode, out)
 	}
@@ -261,7 +261,7 @@ func TestCalculate_LocationCode(t *testing.T) {
 
 func TestCalculate_Path(t *testing.T) {
 	srv := newTestServer(t)
-	body := `{"weight_kg":1000,"legs":[{"mode":"road","vehicle_type":"truck_40t","from":{"lat":55.68,"lon":12.57},"to":{"lat":53.55,"lon":9.99}},{"mode":"road","vehicle_type":"truck_40t","distance_km":40}]}`
+	body := `{"weight_kg":1000,"legs":[{"mode":"air","vehicle_type":"freighter","from":{"code":"CPH"},"to":{"code":"HAM"}},{"mode":"road","vehicle_type":"truck_40t","distance_km":40}]}`
 	_, out := post(t, srv.URL+"/v1/calculate?path=true", body)
 	legs := out["legs"].([]any)
 	if p, ok := legs[0].(map[string]any)["path"].([]any); !ok || len(p) != 2 {

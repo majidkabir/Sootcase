@@ -407,8 +407,8 @@ func TestInlandWaterway_NL2026(t *testing.T) {
 	_, err = c.Calculate(ctx, calc.Shipment{WeightKg: 1000,
 		Legs: []calc.Leg{{Mode: calc.InlandWaterway, VehicleType: "barge",
 			From: calc.Location{Lat: 51.95, Lon: 4.05}, To: calc.Location{Lat: 51.45, Lon: 6.73}}}})
-	if !errors.Is(err, calc.ErrNoDAF) {
-		t.Errorf("coordinates only: want ErrNoDAF, got %v", err)
+	if !errors.Is(err, calc.ErrNoDistance) {
+		t.Errorf("coordinates only: want ErrNoDistance, got %v", err)
 	}
 }
 
@@ -499,8 +499,8 @@ func TestRoadDAF_GLEC(t *testing.T) {
 	if err != nil || fu.DAF != 0 {
 		t.Errorf("measured fuel: DAF %v, %v; want none", fu.DAF, err)
 	}
-	if _, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: desnzHGV, From: a, To: b}); !errors.Is(err, calc.ErrNoDAF) {
-		t.Errorf("great-circle road leg: err %v, want ErrNoDAF", err)
+	if _, err := calcLeg(calc.Leg{Mode: calc.Road, VehicleType: desnzHGV, From: a, To: b}); !errors.Is(err, calc.ErrNoDistance) {
+		t.Errorf("great-circle road leg: err %v, want ErrNoDistance", err)
 	}
 	// GLEC v3.3 road defaults include the +5%: per shortest feasible
 	// distance, so a routed distance needs no DAF and an actual one is
@@ -587,8 +587,8 @@ func TestInlandWaterway_GLEC33(t *testing.T) {
 	_, err = c.Calculate(ctx, calc.Shipment{WeightKg: 1000,
 		Legs: []calc.Leg{{Mode: calc.InlandWaterway, VehicleType: "barge",
 			From: calc.Location{Lat: 51.95, Lon: 4.05}, To: calc.Location{Lat: 51.45, Lon: 6.73}}}})
-	if !errors.Is(err, calc.ErrNoDAF) {
-		t.Errorf("coordinates only: want ErrNoDAF, got %v", err)
+	if !errors.Is(err, calc.ErrNoDistance) {
+		t.Errorf("coordinates only: want ErrNoDistance, got %v", err)
 	}
 }
 
@@ -848,7 +848,7 @@ func TestRailPerSFD(t *testing.T) {
 		f(&l)
 		return calc.Shipment{WeightKg: 10000, Legs: []calc.Leg{l}}
 	}
-	if _, err := c.Calculate(context.Background(), leg(func(*calc.Leg) {})); err == nil || !strings.Contains(err.Error(), "gcd") {
+	if _, err := c.Calculate(context.Background(), leg(func(*calc.Leg) {})); !errors.Is(err, calc.ErrNoDistance) {
 		t.Errorf("great circle: %v", err)
 	}
 	if _, err := c.Calculate(context.Background(), leg(func(l *calc.Leg) { l.DistanceKm, l.DistanceType = 800, calc.DistActual })); err == nil {

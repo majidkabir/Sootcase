@@ -6,8 +6,11 @@
 // Kinds: calc (POST /v1/calculate, one shipment), batch (POST
 // /v1/calculate/batch with -batch shipments) and report (POST /v1/report
 // with -batch shipments). Shipments are random but repeatable (-seed):
-// a road leg and a sea leg between points in Europe, distances by the
-// server's distance provider (great-circle unless routing is set up).
+// a road leg and a sea leg between points in Europe, each with its
+// distance given (the great circle between its ends), so that the
+// calculation is measured and not a router. With -route the distances
+// are left out and the server routes every leg: it then needs road
+// routing (-osrm) and a sea network (-sea-network).
 package main
 
 import (
@@ -17,6 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"math/rand"
 	"net/http"
 	"os"
@@ -34,10 +38,11 @@ type loc struct {
 }
 
 type leg struct {
-	Mode        string `json:"mode"`
-	VehicleType string `json:"vehicle_type"`
-	From        loc    `json:"from"`
-	To          loc    `json:"to"`
+	Mode        string  `json:"mode"`
+	VehicleType string  `json:"vehicle_type"`
+	From        loc     `json:"from"`
+	To          loc     `json:"to"`
+	DistanceKm  float64 `json:"distance_km,omitempty"`
 }
 
 type shipment struct {
@@ -53,13 +58,29 @@ func randLoc(r *rand.Rand) loc {
 	return loc{Lat: bbox[1] + r.Float64()*(bbox[3]-bbox[1]), Lon: bbox[0] + r.Float64()*(bbox[2]-bbox[0])}
 }
 
-var roadOnly bool
+var roadOnly, route bool
+
+// randLeg is a leg between two random points, with the great circle
+// between them as its distance unless the server is to route it.
+func randLeg(r *rand.Rand, mode, vehicle string) leg {
+	l := leg{Mode: mode, VehicleType: vehicle, From: randLoc(r), To: randLoc(r)}
+	if !route {
+		l.DistanceKm = math.Max(1, greatCircleKm(l.From, l.To))
+	}
+	return l
+}
+
+func greatCircleKm(a, b loc) float64 {
+	rad := func(d float64) float64 { return d * math.Pi / 180 }
+	h := math.Pow(math.Sin(rad(b.Lat-a.Lat)/2), 2) +
+		math.Cos(rad(a.Lat))*math.Cos(rad(b.Lat))*math.Pow(math.Sin(rad(b.Lon-a.Lon)/2), 2)
+	return 2 * 6371 * math.Asin(math.Sqrt(h))
+}
 
 func randShipment(r *rand.Rand, i int) shipment {
-	s := shipment{ID: fmt.Sprintf("S%d", i), WeightKg: 500 + r.Float64()*20_000, Legs: []leg{
-		{Mode: "road", VehicleType: "hgv", From: randLoc(r), To: randLoc(r)}}}
+	s := shipment{ID: fmt.Sprintf("S%d", i), WeightKg: 500 + r.Float64()*20_000, Legs: []leg{randLeg(r, "road", "hgv")}}
 	if !roadOnly {
-		s.Legs = append(s.Legs, leg{Mode: "sea", VehicleType: "container_ship", From: randLoc(r), To: randLoc(r)})
+		s.Legs = append(s.Legs, randLeg(r, "sea", "container_ship"))
 	}
 	return s
 }
@@ -74,6 +95,7 @@ func main() {
 	bboxS := flag.String("bbox", "", "minLon,minLat,maxLon,maxLat for random points (default much of Europe)")
 	fresh := flag.Bool("fresh", false, "new random points for every request, so nothing is served from a cache")
 	flag.BoolVar(&roadOnly, "road-only", false, "one road leg per shipment, no sea leg")
+	flag.BoolVar(&route, "route", false, "leave the distances out, so the server routes every leg (it needs routing set up)")
 	flag.Parse()
 	if *bboxS != "" {
 		parts := strings.Split(*bboxS, ",")

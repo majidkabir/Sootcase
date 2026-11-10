@@ -82,8 +82,11 @@ func TestDAF(t *testing.T) {
 	}
 
 	// Mismatch with no DAF to bridge it.
-	if _, err := one(Leg{Mode: Sea, DistanceKm: 100, DistanceType: DistGCD}); !errors.Is(err, ErrNoDAF) {
-		t.Errorf("sea gcd: want ErrNoDAF, got %v", err)
+	if _, err := one(Leg{Mode: Sea, DistanceKm: 100, DistanceType: DistSFD + ""}); err != nil {
+		t.Errorf("sea sfd: %v", err)
+	}
+	if _, err := one(Leg{Mode: Air, DistanceKm: 100, DistanceType: DistSFD}); !errors.Is(err, ErrNoDAF) {
+		t.Errorf("air sfd: want ErrNoDAF, got %v", err)
 	}
 	// DAF that would make the distance non-positive.
 	if _, err := one(Leg{Mode: Air, DistanceKm: 50, DistanceType: DistActual}); !errors.Is(err, ErrInvalidInput) {
@@ -97,6 +100,34 @@ func TestDAF(t *testing.T) {
 	if _, err := cg.Calculate(ctx, Shipment{WeightKg: 1, Legs: []Leg{{Mode: Air, DistanceType: DistActual,
 		From: Location{Lat: 1, Lon: 1}, To: Location{Lat: 2, Lon: 2}}}}); !errors.Is(err, ErrInvalidInput) {
 		t.Errorf("distance_type without distance_km: %v", err)
+	}
+}
+
+// A great circle stands in for no road, rail, sea or waterway distance,
+// whatever the method and even when the factor states no distance basis.
+// For air it is the distance to use.
+func TestGreatCircleOnlyForAir(t *testing.T) {
+	c := Calculator{Factors: dafFactors{testFactors}, Distances: typedDistance(DistGCD)}
+	from, to := Location{Lat: 1, Lon: 1}, Location{Lat: 2, Lon: 2}
+	ttw := 40.0
+	for name, l := range map[string]Leg{
+		"default value": {Mode: Road, VehicleType: "truck_40t"},
+		"rail":          {Mode: Rail, VehicleType: "train"},
+		"waterway":      {Mode: InlandWaterway, VehicleType: "barge"},
+		"measured fuel": {Mode: Road, Fuel: &FuelUse{Fuel: "diesel", Amount: 10}},
+		"own factor":    {Mode: Road, OwnFactor: &OwnFactor{WTW: 50, TTW: &ttw, Source: "carrier"}},
+		"given as gcd":  {Mode: Road, VehicleType: "truck_40t", DistanceKm: 100, DistanceType: DistGCD},
+	} {
+		if l.DistanceKm == 0 {
+			l.From, l.To = from, to
+		}
+		if _, err := c.Calculate(context.Background(), Shipment{WeightKg: 1000, Legs: []Leg{l}}); !errors.Is(err, ErrNoDistance) {
+			t.Errorf("%s: want ErrNoDistance, got %v", name, err)
+		}
+	}
+	r, err := c.Calculate(context.Background(), Shipment{WeightKg: 1000, Legs: []Leg{{Mode: Air, VehicleType: "freighter", From: from, To: to}}})
+	if err != nil || r.Legs[0].DistanceType != DistGCD || r.Legs[0].DAF != 0 {
+		t.Errorf("air on a great circle: %+v, %v", r.Legs, err)
 	}
 }
 

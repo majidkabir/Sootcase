@@ -36,6 +36,9 @@ const (
 
 var kindLetter = map[byte]string{'c': City, 'p': Port, 'r': Rail, 't': Road, 'a': Airport, 'i': Inland, 'b': Border}
 
+// Kinds lists the kinds of place Search takes.
+func Kinds() []string { return []string{City, Port, Rail, Road, Airport, Inland, Border} }
+
 // Place is a searchable location.
 type Place struct {
 	ID          string   `json:"id"`             // "locode:NLRTM", "iata:CPH", "geonames:2618425"
@@ -166,12 +169,23 @@ func (ix *Index) Len() int { return len(ix.places) }
 
 // Lookup finds a place by UN/LOCODE ("NLRTM", "NL RTM"), IATA code
 // ("CPH") or id ("geonames:2618425").
+//
+// UN/LOCODE lists airports under their country and IATA code ("CNSHA",
+// Shanghai Hongqiao). The place list takes airports from OurAirports
+// instead, so a UN/LOCODE that isn't in the list is looked up as that:
+// the airport with the code's last three letters, in the country of its
+// first two.
 func (ix *Index) Lookup(code string) (Place, bool) {
 	c := strings.TrimSpace(code)
 	if !strings.Contains(c, ":") {
 		c = strings.ToUpper(strings.ReplaceAll(c, " ", ""))
 	}
 	i, ok := ix.byCode[c]
+	if !ok && len(c) == 5 {
+		if i, ok = ix.byCode["iata:"+c[2:]]; ok && ix.places[i].Country != c[:2] {
+			ok = false
+		}
+	}
 	if !ok {
 		return Place{}, false
 	}
@@ -206,6 +220,8 @@ func (ix *Index) Search(q string, kinds []string, limit int) []Place {
 		switch {
 		case p.Code != "" && p.Code == code:
 			s = 1000
+		case len(code) == 5 && p.ID == "iata:"+code[2:] && p.Country == code[:2]:
+			s = 900 // an airport by its UN/LOCODE, as Lookup
 		case p.name == fq:
 			s = 500
 		case p.alt == fq: // usually the English name
@@ -402,21 +418,50 @@ func (ix *Index) Country(p calc.Location) string {
 	if dLon > 180 {
 		dLon = 180
 	}
+	// The nearest place in p's own cell bounds the search: rows and columns
+	// of cells, and places, farther off than that along one axis alone
+	// can't be nearer, which leaves few places to measure.
+	// Lower bounds on km per degree, so that nothing nearer is skipped: a
+	// degree of latitude is 111.19 km on haversine's sphere, a degree of
+	// longitude that times the cosine of the latitude, here of the row
+	// nearest a pole (and for a few degrees only: the bound is for short
+	// arcs).
+	const kmPerDegLat = 111.0
+	limit := maxKm
+	for _, j := range ix.grid[cellKey(la0, lo0)] {
+		q := &ix.places[j]
+		if math.Abs(q.Lat-p.Lat)*kmPerDegLat > limit {
+			continue
+		}
+		if km := haversine(p.Lat, p.Lon, q.Lat, q.Lon); km < limit {
+			limit = km
+		}
+	}
+	kmPerDegLon := 110.0 * math.Cos(math.Min(90, math.Abs(p.Lat)+2)*math.Pi/180)
 	best, bestKm := "", maxKm
 	for la := la0 - 1; la <= la0+1; la++ {
 		if la < -90 || la > 89 {
 			continue
 		}
+		if gap := math.Max(float64(la)-p.Lat, p.Lat-float64(la+1)); gap*kmPerDegLat > limit {
+			continue
+		}
 		for lo := lo0 - dLon; lo <= lo0+dLon; lo++ {
+			if gap := math.Max(float64(lo)-p.Lon, p.Lon-float64(lo+1)); gap < 5 && gap*kmPerDegLon > limit {
+				continue
+			}
 			for _, j := range ix.grid[cellKey(la, lo)] {
 				q := &ix.places[j]
+				if math.Abs(q.Lat-p.Lat)*kmPerDegLat > limit {
+					continue
+				}
 				if km := haversine(p.Lat, p.Lon, q.Lat, q.Lon); km < bestKm {
 					best, bestKm = q.Country, km
 				}
 			}
 		}
 	}
-	if ix.nCached.Add(1) <= 500_000 { // bounded: a cache, not a copy of every point seen
+	if ix.nCached.Add(1) <= 100_000 { // bounded: a cache, not a copy of every point seen
 		ix.countries.Store(key, best)
 	}
 	return best

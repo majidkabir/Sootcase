@@ -58,6 +58,14 @@ jobs:
           echo "$out" | jq '.legs[0] | {distance_km, distance_method}'
           echo "$out" | jq -e '.legs[0].distance_method == "osrm" and .legs[0].distance_km > 1.5 and .legs[0].distance_km < 10'
 
+      - name: Road leg from outside the map is refused
+        run: |
+          # Paris isn't on Monaco's map: OSRM would take it to the nearest road it has.
+          code=$(curl -s -o /tmp/out.json -w '%{http_code}' -X POST localhost:8080/v1/calculate -d '{"weight_kg":1000,"legs":[{"mode":"road","vehicle_type":"hgv",
+            "from":{"lat":48.8566,"lon":2.3522},"to":{"lat":43.7275,"lon":7.4155}}]}')
+          cat /tmp/out.json; echo
+          [ "$code" = 422 ] && jq -e '.error | test("from the road network")' /tmp/out.json
+
       - name: Sea leg is routed on the maritime network
         run: |
           out=$(curl -fsS -X POST localhost:8080/v1/calculate -d '{"weight_kg":10000,"legs":[{"mode":"sea","vehicle_type":"container_ship",
