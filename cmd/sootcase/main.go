@@ -92,6 +92,7 @@ type common struct {
 	roadRegions                                    string
 	seaNetwork, seaAvoid, seaOpen                  string
 	seaMaxSnapKm, waterwayMaxSnapKm, railMaxSnapKm float64
+	roadMaxSnapKm                                  float64
 	roadLegs                                       bool
 	roadVehicle                                    string
 	ferryVehicle                                   string
@@ -107,6 +108,9 @@ func (c *common) register(fs *flag.FlagSet) {
 	fs.StringVar(&c.roadRegions, "osrm-regions", env("OSRM_REGIONS"),
 		"road OSRM servers by region, \"name=url@minlon,minlat,maxlon,maxlat;...\"; a route uses the smallest region "+
 			"holding both ends; replaces -osrm. Also $SOOTCASE_OSRM_REGIONS")
+	fs.Float64Var(&c.roadMaxSnapKm, "road-max-snap-km", 25,
+		"reject road points farther than this from a road (0 = no limit): a router takes any point to the nearest road "+
+			"it knows, however far, so a point outside its map would get a distance that means nothing")
 	fs.StringVar(&c.waterwayURL, "osrm-waterway", env("OSRM_WATERWAY_URL"),
 		"OSRM server built with deploy/barge.lua for inland waterway distances, also $SOOTCASE_OSRM_WATERWAY_URL "+
 			"(default: none; give distance_km)")
@@ -157,7 +161,9 @@ func (c *common) calculator() (calc.Calculator, *factors.Dataset, error) {
 		countries = ix
 	}
 	if c.roadRegions != "" {
-		rs, err := distance.ParseRegions(c.roadRegions, func(o *distance.OSRM) { o.PartModes, o.Countries = distance.RoadParts, countries })
+		rs, err := distance.ParseRegions(c.roadRegions, func(o *distance.OSRM) {
+			o.PartModes, o.Countries, o.MaxSnapKm = distance.RoadParts, countries, c.roadMaxSnapKm
+		})
 		if err != nil {
 			return calc.Calculator{}, nil, err
 		}
@@ -167,7 +173,7 @@ func (c *common) calculator() (calc.Calculator, *factors.Dataset, error) {
 		if err != nil {
 			return calc.Calculator{}, nil, err
 		}
-		o.PartModes, o.Countries = distance.RoadParts, countries
+		o.PartModes, o.Countries, o.MaxSnapKm = distance.RoadParts, countries, c.roadMaxSnapKm
 		routed[calc.Road] = o
 	}
 	if c.waterwayURL != "" {

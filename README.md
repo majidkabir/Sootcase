@@ -162,8 +162,10 @@ docker run -t -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-extract -p 
 docker run -t -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-partition /data/denmark-latest.osrm
 docker run -t -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-customize /data/denmark-latest.osrm
 docker run -t -p 5000:5000 -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-routed --algorithm mld /data/denmark-latest.osrm
-sootcase calc -osrm http://localhost:5000 examples/cph-rotterdam.json
+sootcase serve -osrm http://localhost:5000
 ```
+
+OSRM takes any point to the nearest road it knows, however far away, so a point outside its map would get a distance that means nothing. A road leg that starts or ends more than 25 km from a road is therefore refused; `-road-max-snap-km` changes the limit.
 
 ### Rail routing
 
