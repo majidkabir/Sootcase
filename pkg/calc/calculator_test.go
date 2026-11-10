@@ -367,7 +367,7 @@ func FuzzCalculate_Finite(f *testing.F) {
 // it must have a source, and TTW within WTW.
 func TestCalculate_OwnFactor(t *testing.T) {
 	c := Calculator{Factors: testFactors}
-	leg := Leg{ID: "l1", Mode: Road, DistanceKm: 300, DistanceType: DistSFD, OwnFactor: &OwnFactor{WTW: 80, TTW: 64, Source: "Carrier X, 2025 TOC report"}}
+	leg := Leg{ID: "l1", Mode: Road, DistanceKm: 300, DistanceType: DistSFD, OwnFactor: &OwnFactor{WTW: 80, TTW: ptr(64), Source: "Carrier X, 2025 TOC report"}}
 	r, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000, Legs: []Leg{leg}})
 	if err != nil {
 		t.Fatal(err)
@@ -379,11 +379,13 @@ func TestCalculate_OwnFactor(t *testing.T) {
 		t.Errorf("got %+v %+v", l, l.Factor)
 	}
 	for name, o := range map[string]OwnFactor{
-		"no source":   {WTW: 80, TTW: 64},
-		"ttw > wtw":   {WTW: 80, TTW: 90, Source: "x"},
-		"zero wtw":    {Source: "x"},
-		"bad basis":   {WTW: 80, Source: "x", DistanceBasis: "miles"},
-		"negative tw": {WTW: 80, TTW: -1, Source: "x"},
+		"no source":   {WTW: 80, TTW: ptr(64)},
+		"ttw > wtw":   {WTW: 80, TTW: ptr(90), Source: "x"},
+		"zero wtw":    {TTW: ptr(0), Source: "x"},
+		"bad basis":   {WTW: 80, TTW: ptr(64), Source: "x", DistanceBasis: "miles"},
+		"negative tw": {WTW: 80, TTW: ptr(-1), Source: "x"},
+		// WTW alone can't be split into TTW and WTT (scope 1 vs scope 3 cat. 3).
+		"wtw only": {WTW: 80, Source: "x"},
 	} {
 		l := leg
 		l.OwnFactor = &o
@@ -401,7 +403,7 @@ func TestCalculate_OwnFactor(t *testing.T) {
 // A fuel supplier's own emission factor replaces the dataset's.
 func TestCalculate_OwnFuelFactor(t *testing.T) {
 	c := Calculator{Factors: testFactors}
-	fu := FuelUse{Fuel: "HVO from supplier Y", Amount: 100, Factor: &OwnFuelFactor{Unit: "l", WTW: 0.5, TTW: 0.03, Source: "Supplier Y, 2026", BiogenicCO2: 2.4}}
+	fu := FuelUse{Fuel: "HVO from supplier Y", Amount: 100, Factor: &OwnFuelFactor{Unit: "l", WTW: 0.5, TTW: ptr(0.03), Source: "Supplier Y, 2026", BiogenicCO2: 2.4}}
 	r, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000, Legs: []Leg{{ID: "l1", Mode: Road, DistanceKm: 300, Fuel: &fu}}})
 	if err != nil {
 		t.Fatal(err)
@@ -412,10 +414,11 @@ func TestCalculate_OwnFuelFactor(t *testing.T) {
 		t.Errorf("got %+v %+v", l, l.FuelFactor)
 	}
 	for name, o := range map[string]OwnFuelFactor{
-		"no source": {Unit: "l", WTW: 1},
-		"no unit":   {WTW: 1, Source: "x"},
-		"ttw > wtw": {Unit: "l", WTW: 1, TTW: 2, Source: "x"},
-		"zero wtw":  {Unit: "l", Source: "x"},
+		"no source": {Unit: "l", WTW: 1, TTW: ptr(0.8)},
+		"no unit":   {WTW: 1, TTW: ptr(0.8), Source: "x"},
+		"ttw > wtw": {Unit: "l", WTW: 1, TTW: ptr(2), Source: "x"},
+		"zero wtw":  {Unit: "l", TTW: ptr(0), Source: "x"},
+		"wtw only":  {Unit: "l", WTW: 1, Source: "x"},
 	} {
 		f := fu
 		f.Factor = &o
@@ -424,3 +427,6 @@ func TestCalculate_OwnFuelFactor(t *testing.T) {
 		}
 	}
 }
+
+// ptr returns a pointer to v (optional numbers in inputs).
+func ptr(v float64) *float64 { return &v }

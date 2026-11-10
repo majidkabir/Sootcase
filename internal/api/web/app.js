@@ -195,13 +195,13 @@ function buildShipment() {
       l.fuel = { fuel, amount: num(f("fuel_amount")) || 0, vehicle_tonne_km: num(f("vehicle_tonne_km")) };
       const fw = num(f("fuel_wtw"));
       if (fw !== undefined || f("fuel_source").value.trim()) {
-        l.fuel.factor = { unit: f("fuel_unit").value.trim(), wtw_kg_per_unit: fw || 0, ttw_kg_per_unit: num(f("fuel_ttw")) || 0,
+        l.fuel.factor = { unit: f("fuel_unit").value.trim(), wtw_kg_per_unit: fw || 0, ttw_kg_per_unit: num(f("fuel_ttw")),
           source: f("fuel_source").value.trim() };
       }
     }
     const ow = num(f("own_wtw"));
     if (ow !== undefined || f("own_source").value.trim()) {
-      l.own_factor = { wtw_g_per_tkm: ow || 0, ttw_g_per_tkm: num(f("own_ttw")) || 0, source: f("own_source").value.trim() };
+      l.own_factor = { wtw_g_per_tkm: ow || 0, ttw_g_per_tkm: num(f("own_ttw")), source: f("own_source").value.trim() };
       if (f("own_basis").value) l.own_factor.distance_basis = f("own_basis").value;
     }
     s.legs.push(l);
