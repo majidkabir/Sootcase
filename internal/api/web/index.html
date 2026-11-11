@@ -180,7 +180,7 @@
           <option value="road">Road</option><option value="rail">Rail</option><option value="sea">Sea</option>
           <option value="air">Air</option><option value="inland_waterway">Inland waterway</option>
         </select></div>
-      <div><label>Vehicle</label><select name="vehicle_pick"></select>
+      <div class="vehicle"><label>Vehicle</label><select name="vehicle_pick"></select>
         <select name="vehicle_other" aria-label="Dataset vehicle type" hidden style="margin-top:6px"></select>
         <input name="vehicle_type" type="hidden"></div>
     </div>
@@ -190,11 +190,15 @@
       <div class="place"><label>To</label><input name="to_q" placeholder="City, port, airport or code" autocomplete="off"
         role="combobox" aria-autocomplete="list" aria-expanded="false"><ul class="suggest" role="listbox" hidden></ul></div>
     </div>
-    <details><summary>Distance or coordinates</summary>
-      <p class="hint">A distance here is used instead of routing between the places.</p>
-      <div class="row">
-        <div><label>Distance (km)</label><input name="distance_km" type="number" min="0" step="any"></div>
-      </div>
+    <div class="row">
+      <div><label>Distance</label>
+        <select name="distance_from">
+          <option value="route">Routed between the places</option><option value="given">I give the distance</option>
+        </select></div>
+      <div data-show="given" hidden><label>Distance (km)</label><input name="distance_km" type="number" min="0" step="any"></div>
+    </div>
+    <details><summary>Exact coordinates</summary>
+      <p class="hint">Filled in by the places above. Change them to start or end at an exact point.</p>
       <div class="row">
         <div><label>From lat</label><input name="from_lat" type="number" step="any"></div>
         <div><label>From lon</label><input name="from_lon" type="number" step="any"></div>
@@ -202,34 +206,53 @@
         <div><label>To lon</label><input name="to_lon" type="number" step="any"></div>
       </div>
     </details>
-    <details class="only-road"><summary>Load and empty running</summary>
-      <p class="hint">For trucks. Replaces the fleet-average factor. Give the tonnes on the truck, or a load factor.</p>
+    <div class="row">
+      <div><label>Emissions from</label>
+        <select name="method">
+          <option value="default">A default value for the vehicle</option>
+          <option value="load" data-modes="road">The truck's load and empty running</option>
+          <option value="fuel">Measured fuel</option>
+          <option value="own">The carrier's own intensity</option>
+          <option value="energy" data-modes="road rail">Electricity used (kWh per tonne-km)</option>
+        </select></div>
+    </div>
+    <div class="method" data-method="load" hidden>
+      <p class="hint">For trucks: the value for this truck at this load, instead of the fleet average.</p>
       <div class="row">
-        <div><label>Load on the truck (t)</label><input name="load_tonnes" type="number" min="0" step="any"></div>
-        <div><label>or load factor (0–1)</label><input name="load_factor" type="number" min="0" max="1" step="any"></div>
+        <div><label>Load given as</label>
+          <select name="load_as"><option value="tonnes">Tonnes on the truck</option><option value="factor">Share of the truck's payload</option></select></div>
+        <div data-show="tonnes"><label>Load on the truck (t)</label><input name="load_tonnes" type="number" min="0" step="any"></div>
+        <div data-show="factor" hidden><label>Load factor (0–1)</label><input name="load_factor" type="number" min="0" max="1" step="any"></div>
+      </div>
+      <div class="row">
         <div><label>Empty km per loaded km</label><input name="empty_trip_factor" type="number" min="0" step="any"></div>
         <div><label>Empty km for this trip (repositioning)</label><input name="repositioning_km" type="number" min="0" step="any"></div>
       </div>
       <p class="hint">Repositioning: km the truck drives empty to the pickup or back, shared over its load. Without a load, the shipment is taken as the whole load.</p>
       <p class="hint payload-hint"></p>
-    </details>
-    <details><summary>Measured fuel</summary>
+    </div>
+    <div class="method" data-method="fuel" hidden>
       <div class="row">
         <div><label>Fuel</label><select name="fuel_pick"></select>
           <input name="fuel_name" placeholder="Supplier's name for the fuel" aria-label="Supplier's name for the fuel" autocomplete="off" hidden style="margin-top:6px">
           <input name="fuel" type="hidden"></div>
         <div><label>Amount</label><input name="fuel_amount" type="number" min="0" step="any"></div>
         <div><label>Unit</label><select name="fuel_unit"></select></div>
-        <div><label>Vehicle tonne-km (shared trip)</label><input name="vehicle_tonne_km" type="number" min="0" step="any"></div>
+        <div><label>Vehicle tonne-km</label><input name="vehicle_tonne_km" type="number" min="0" step="any"></div>
       </div>
-      <p class="hint">Optional: the fuel supplier's own emission factor per unit, instead of the default for this fuel (needed for a supplier's own fuel). Give well-to-wheel and tank-to-wheel (0 only for electricity) and the source.</p>
+      <p class="hint">Vehicle tonne-km: of everything on the vehicle, when the trip was shared. The shipment then gets its share of the fuel; left empty, all of it.</p>
       <div class="row">
+        <div><label>Emission factor of the fuel</label>
+          <select name="fuel_factor_from"><option value="default">The default value for this fuel</option><option value="supplier">The fuel supplier's own</option></select></div>
+      </div>
+      <p class="hint" data-show="supplier" hidden>Per unit of the fuel: well-to-wheel and tank-to-wheel (0 only for electricity), and the source.</p>
+      <div class="row" data-show="supplier" hidden>
         <div><label>Well-to-wheel (kg CO₂e per unit)</label><input name="fuel_wtw" type="number" min="0" step="any"></div>
         <div><label>Tank-to-wheel (kg CO₂e per unit)</label><input name="fuel_ttw" type="number" min="0" step="any"></div>
         <div><label>Source</label><input name="fuel_source" placeholder="Supplier, product, year" autocomplete="off"></div>
       </div>
-    </details>
-    <details><summary>Carrier's own intensity</summary>
+    </div>
+    <div class="method" data-method="own" hidden>
       <p class="hint">The carrier's or your own measured g CO₂e per tonne-km for this leg, instead of a default value (primary data, ISO 14083).
         Give both values and the source: tank-to-wheel is the part burnt in the vehicle (0 only for electric). Leave the distance basis as it is unless the figure is per actual km or great-circle km.</p>
       <div class="row">
@@ -239,13 +262,13 @@
         <div><label>Distance basis</label><select name="own_basis"><option value="">Same as the leg</option>
           <option value="sfd">Shortest feasible</option><option value="actual">Actual km</option><option value="gcd">Great circle</option></select></div>
       </div>
-    </details>
-    <details class="only-road-rail"><summary>Electric (energy per tonne-km)</summary>
+    </div>
+    <div class="method" data-method="energy" hidden>
       <div class="row">
         <div><label>kWh per tonne-km</label><input name="energy_kwh_per_tkm" type="number" min="0" step="any"></div>
         <div><label>Country (its electricity grid)</label><select name="country"></select></div>
       </div>
-    </details>
+    </div>
   </div>
 </template>
 

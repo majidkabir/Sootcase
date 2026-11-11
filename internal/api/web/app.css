@@ -188,3 +188,5 @@ footer.credits a { color: var(--blue); }
 .chips button { border: 0; background: none; cursor: pointer; padding: 4px 8px; font-size: 1rem; line-height: 1; color: var(--muted); border-radius: 999px; }
 .chips button:hover { color: var(--ink); }
 select:disabled { opacity: .55; }
+/* The fields of the way of calculating that is chosen for a leg. */
+.method { margin: 0 0 10px; padding: 2px 0 2px 14px; border-left: 3px solid var(--rule); }
