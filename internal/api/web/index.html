@@ -122,11 +122,11 @@
         <label class="check"><input type="checkbox" id="s-el"><span><strong>Electric trucks</strong></span></label>
         <div class="row">
           <div><label for="s-el-kwh">kWh per tonne-km</label><input id="s-el-kwh" type="number" min="0" step="any"></div>
-          <div><label for="s-el-country">Grid country (ISO alpha-3)</label><input id="s-el-country" placeholder="DEU" maxlength="3"></div>
+          <div><label for="s-el-country">Country (its electricity grid)</label><select id="s-el-country"></select></div>
           <div><label for="s-el-share">Share (%)</label><input id="s-el-share" type="number" min="1" max="100" step="any" value="100"></div>
         </div>
         <div class="row">
-          <div><label for="s-el-vt">Vehicle types (empty: all road)</label><input id="s-el-vt" placeholder="hgv_rigid, van"></div>
+          <div><label for="s-el-vt-add">Vehicle types (none chosen: all road)</label><div class="picks" id="s-el-vt"></div></div>
           <div><label for="s-el-src">Source of the kWh value</label><input id="s-el-src" placeholder="maker's data sheet"></div>
         </div>
       </div>
@@ -142,7 +142,7 @@
           <div><label for="s-fuel-ratio">Energy vs diesel (×)</label><input id="s-fuel-ratio" type="number" min="0" step="any" value="1"></div>
         </div>
         <div class="row">
-          <div><label for="s-fuel-vt">Vehicle types (empty: all road)</label><input id="s-fuel-vt"></div>
+          <div><label for="s-fuel-vt-add">Vehicle types (none chosen: all road)</label><div class="picks" id="s-fuel-vt"></div></div>
           <div><label for="s-fuel-src">Source (if energy isn't 1×)</label><input id="s-fuel-src"></div>
         </div>
       </div>
@@ -152,7 +152,7 @@
         <div class="row">
           <div><label for="s-load-t">Tonnes on the truck</label><input id="s-load-t" type="number" min="0" step="any"></div>
           <div><label for="s-load-etf">Empty km per loaded km</label><input id="s-load-etf" type="number" min="0" step="any"></div>
-          <div><label for="s-load-vt">Vehicle types</label><input id="s-load-vt" placeholder="hgv_artic_33t"></div>
+          <div><label for="s-load-vt-add">Vehicle types (none chosen: all road)</label><div class="picks" id="s-load-vt"></div></div>
         </div>
       </div>
 
@@ -181,7 +181,8 @@
           <option value="air">Air</option><option value="inland_waterway">Inland waterway</option>
         </select></div>
       <div><label>Vehicle</label><select name="vehicle_pick"></select>
-        <input name="vehicle_type" autocomplete="off" placeholder="Dataset vehicle type" aria-label="Dataset vehicle type" hidden style="margin-top:6px"></div>
+        <select name="vehicle_other" aria-label="Dataset vehicle type" hidden style="margin-top:6px"></select>
+        <input name="vehicle_type" type="hidden"></div>
     </div>
     <div class="row">
       <div class="place"><label>From</label><input name="from_q" placeholder="City, port, airport or code" autocomplete="off"
@@ -214,13 +215,15 @@
     </details>
     <details><summary>Measured fuel</summary>
       <div class="row">
-        <div><label>Fuel</label><input name="fuel" placeholder="diesel" autocomplete="off"></div>
+        <div><label>Fuel</label><select name="fuel_pick"></select>
+          <input name="fuel_name" placeholder="Supplier's name for the fuel" aria-label="Supplier's name for the fuel" autocomplete="off" hidden style="margin-top:6px">
+          <input name="fuel" type="hidden"></div>
         <div><label>Amount</label><input name="fuel_amount" type="number" min="0" step="any"></div>
+        <div><label>Unit</label><select name="fuel_unit"></select></div>
         <div><label>Vehicle tonne-km (shared trip)</label><input name="vehicle_tonne_km" type="number" min="0" step="any"></div>
       </div>
-      <p class="hint">Optional: the fuel supplier's own emission factor, instead of the default for this fuel. Give well-to-wheel and tank-to-wheel (0 only for electricity) and the source.</p>
+      <p class="hint">Optional: the fuel supplier's own emission factor per unit, instead of the default for this fuel (needed for a supplier's own fuel). Give well-to-wheel and tank-to-wheel (0 only for electricity) and the source.</p>
       <div class="row">
-        <div><label>Unit (l, kg, kWh)</label><input name="fuel_unit" placeholder="l" autocomplete="off"></div>
         <div><label>Well-to-wheel (kg CO₂e per unit)</label><input name="fuel_wtw" type="number" min="0" step="any"></div>
         <div><label>Tank-to-wheel (kg CO₂e per unit)</label><input name="fuel_ttw" type="number" min="0" step="any"></div>
         <div><label>Source</label><input name="fuel_source" placeholder="Supplier, product, year" autocomplete="off"></div>
@@ -240,7 +243,7 @@
     <details class="only-road-rail"><summary>Electric (energy per tonne-km)</summary>
       <div class="row">
         <div><label>kWh per tonne-km</label><input name="energy_kwh_per_tkm" type="number" min="0" step="any"></div>
-        <div><label>Country (ISO, e.g. DNK)</label><input name="country" maxlength="3"></div>
+        <div><label>Country (its electricity grid)</label><select name="country"></select></div>
       </div>
     </details>
   </div>

@@ -4,6 +4,9 @@ const $ = (s, el = document) => el.querySelector(s);
 const legsEl = $("#legs");
 let vehicleLists = {};
 let vehicleNames = {}, loadModels = []; // alias -> dataset vehicle type; road load models
+// What the dataset offers to choose from: its fuels (groups of {key, label},
+// and key -> the fuel's ids by unit) and the countries with a grid factor.
+let fuelChoices = { groups: [], units: {} }, countries = [], regionLabels = {};
 
 // payloadHint says what a load factor means in tonnes for the leg's vehicle.
 function payloadHint(node) {
@@ -34,6 +37,135 @@ const vehicleLabels = {
   air_freight: "Air freight (aircraft unknown)", air_freighter: "Air freight, freighter", air_belly: "Air freight, belly cargo",
   barge: "Motor vessel 85–110 m", container_barge: "Container barge 110 m" };
 const vehicleLabel = v => vehicleLabels[v] || v;
+
+// ---- Lists to choose from ----
+// pretty turns a part of a dataset id ("diesel_b7", "bio_lng") into words.
+const acronyms = new Set(["hfo", "vlsfo", "ulsfo", "mdo", "mgo", "lng", "cng", "lpg", "hvo", "smr", "hgv", "uk", "us", "eu", "dwt", "teu", "rf", "cv", "gj"]);
+const pretty = s => s.split("_").map((w, i) =>
+  acronyms.has(w) || /^(b|e|hvo)\d+$/.test(w) ? w.toUpperCase() : i ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+const unitName = u => ({ l: "litres", t: "tonnes", m3: "cubic metres" }[u] || u);
+const fuelLabels = { diesel: "Diesel", petrol: "Petrol", hvo: "HVO", jet_fuel: "Jet fuel", marine_fuel_oil: "Marine fuel oil", marine_gas_oil: "Marine gas oil" };
+const fuelRegions = { eu: "Europe", na: "North America", cn: "China", in: "India", marine: "ships", air: "aircraft" };
+const ownFuel = "__own", ownUnits = ["l", "kg", "t", "kWh", "m3", "GJ"];
+
+// fuelIndex arranges the dataset's fuels for the form: a fuel, then the unit
+// it was measured in. The short names come first; they take the value of
+// the leg's region.
+function fuelIndex(d) {
+  const byId = Object.fromEntries((d.fuels || []).map(f => [f.fuel, f]));
+  const units = {}, groups = new Map();
+  const add = (group, key, label, id, unit) => {
+    if (!units[key]) {
+      units[key] = [];
+      if (!groups.has(group)) groups.set(group, []);
+      groups.get(group).push({ key, label });
+    }
+    units[key].push({ id, unit });
+  };
+  const seen = new Set();
+  for (const [alias, id] of Object.entries(d.fuel_aliases || {}).sort(([a], [b]) => a.localeCompare(b))) {
+    if (!byId[id] || seen.has(id)) continue; // two names for one fuel: the first
+    seen.add(id);
+    add("Common fuels", alias, fuelLabels[alias] || pretty(alias), alias, byId[id].unit);
+  }
+  for (const f of d.fuels || []) {
+    const p = f.fuel.split("/");
+    const from = ((f.source || "").match(/^(DESNZ \d+|GLEC Framework v[\d.]+)/) || [""])[0];
+    let group = from || "Other fuels", name = p.slice(0, -1).map(pretty).join(", ") || f.fuel;
+    if (p[0] === "glec" && p[1] === "fuel" && p.length === 5) { group += ": " + (fuelRegions[p[2]] || pretty(p[2])); name = pretty(p[3]); }
+    else if (p.length === 3) { group += ": " + pretty(p[0]).toLowerCase(); name = pretty(p[1]); }
+    add(group, p.length > 1 ? p.slice(0, -1).join("/") : f.fuel, name, f.fuel, f.unit);
+  }
+  // The short names first, then GLEC's fuels (the default values), then the rest.
+  const rank = label => label === "Common fuels" ? 0 : label.startsWith("GLEC") ? 1 : 2;
+  return { groups: [...groups].map(([label, fuels]) => ({ label, fuels })).sort((a, b) => rank(a.label) - rank(b.label)), units };
+}
+
+// typeOptions lists dataset vehicle types as options, grouped by GLEC
+// table and region or by the dataset's own family of vehicles.
+function typeOptions(types, selected) {
+  const groups = new Map();
+  for (const v of types) {
+    const p = v.split("/");
+    const n = p[0] === "glec" ? Math.min(3, p.length - 1) : p.length > 1 ? 1 : 0;
+    const g = p.slice(0, n).join("/");
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g).push([v, p.slice(n).map(pretty).join(", ")]);
+  }
+  const label = g => g.split("/").map((w, i, a) => w === "glec" ? "GLEC" : a[0] !== "glec" ? pretty(w) :
+    i === 2 && regionLabels[w] ? regionLabels[w] : pretty(w).toLowerCase()).join(", ");
+  return [...groups].map(([g, vs]) => {
+    const opts = vs.map(([v, name]) => `<option value="${esc(v)}"${v === selected ? " selected" : ""}>${esc(name)}</option>`).join("");
+    return g ? `<optgroup label="${esc(label(g))}">${opts}</optgroup>` : opts;
+  }).join("");
+}
+
+// fillCountry lists the countries with a grid factor in a select, keeping
+// its choice (data-want holds one made before the list arrived).
+function fillCountry(sel) {
+  const cur = sel.value || sel.dataset.want || "";
+  sel.innerHTML = `<option value="">Choose a country</option>` +
+    countries.map(c => `<option value="${esc(c.code)}">${esc(c.name)} (${esc(c.code)})</option>`).join("");
+  if (cur && !countries.some(c => c.code === cur)) sel.insertAdjacentHTML("beforeend", `<option value="${esc(cur)}">${esc(cur)}</option>`);
+  sel.value = cur;
+}
+
+// fillFuel lists the fuels in a leg's fuel select and the chosen fuel's
+// units next to it. The leg's hidden "fuel" field holds the fuel's id.
+function fillFuel(node) {
+  const f = name => node.querySelector(`[name="${name}"]`);
+  const cur = f("fuel").value.trim();
+  f("fuel_pick").innerHTML = `<option value="">None</option>` + fuelChoices.groups.map(g =>
+    `<optgroup label="${esc(g.label)}">${g.fuels.map(x => `<option value="${esc(x.key)}">${esc(x.label)}</option>`).join("")}</optgroup>`).join("") +
+    `<option value="${ownFuel}">Supplier's own fuel…</option>`;
+  const key = !cur ? "" : Object.keys(fuelChoices.units).find(k => fuelChoices.units[k].some(u => u.id === cur)) || ownFuel;
+  f("fuel_pick").value = key;
+  if (key === ownFuel && !f("fuel_name").value) f("fuel_name").value = cur;
+  fillFuelUnits(node, cur);
+}
+
+function fillFuelUnits(node, cur) {
+  const f = name => node.querySelector(`[name="${name}"]`);
+  const key = f("fuel_pick").value, own = key === ownFuel;
+  const units = own ? ownUnits.map(u => ({ id: u, unit: u })) : fuelChoices.units[key] || [];
+  f("fuel_unit").innerHTML = units.map(u => `<option value="${esc(u.id)}" data-unit="${esc(u.unit)}">${esc(unitName(u.unit))}</option>`).join("");
+  if (units.some(u => u.id === cur)) f("fuel_unit").value = cur;
+  f("fuel_unit").disabled = !units.length;
+  f("fuel_name").hidden = !own;
+}
+
+// fuelOf reads a leg's fuel: its id (a supplier's own fuel: its name) and
+// the unit of the amount; nothing when no fuel is chosen.
+function fuelOf(node) {
+  const f = name => node.querySelector(`[name="${name}"]`);
+  const key = f("fuel_pick").value, unit = f("fuel_unit");
+  if (!key) return null;
+  if (key === ownFuel) return { fuel: f("fuel_name").value.trim(), unit: unit.value };
+  return { fuel: unit.value, unit: unit.selectedOptions[0] ? unit.selectedOptions[0].dataset.unit : "" };
+}
+
+// pickMany makes el a chooser of several values: a select that adds one,
+// and the chosen ones below it, each with a button to take it away.
+// el.picked holds them.
+function pickMany(el, options, placeholder) {
+  const chosen = el.picked || (el.picked = []);
+  el.innerHTML = `<select id="${el.id}-add"><option value="">${esc(placeholder)}</option>${options}</select><ul class="chips"></ul>`;
+  const sel = el.firstElementChild, list = el.lastElementChild;
+  const draw = () => {
+    list.innerHTML = chosen.map((v, i) =>
+      `<li>${esc(vehicleLabel(v))} <button type="button" data-i="${i}" aria-label="Remove ${esc(vehicleLabel(v))}">×</button></li>`).join("");
+  };
+  sel.addEventListener("change", () => {
+    if (sel.value && !chosen.includes(sel.value)) chosen.push(sel.value);
+    sel.value = "";
+    draw();
+  });
+  list.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (b) { chosen.splice(Number(b.dataset.i), 1); draw(); }
+  });
+  draw();
+}
 const modeName = { road: "Road", rail: "Rail", sea: "Sea", air: "Air", inland_waterway: "Inland waterway" };
 const distName = { given: "given", great_circle: "great-circle", great_circle_adjusted: "great-circle, adjusted",
   osrm: "road routing", osrm_rail: "rail routing", osrm_waterway: "waterway routing", sea_network: "sea route" };
@@ -50,14 +182,10 @@ function addLeg(values = {}) {
   });
   const vt = node.querySelector('[name="vehicle_type"]');
   const pick = node.querySelector('[name="vehicle_pick"]');
+  const other = node.querySelector('[name="vehicle_other"]');
   const mode = node.querySelector('[name="mode"]');
-  const list = document.createElement("datalist");
-  list.id = `leg${n}-vehicles`;
-  vt.setAttribute("list", list.id);
-  node.appendChild(list);
   const fillList = () => {
     const vs = vehicleLists[mode.value] || [];
-    list.innerHTML = vs.map(v => `<option value="${esc(v)}">`).join("");
     // A vehicle of another mode can't be right: take this mode's first.
     if (vs.length && !vs.includes(vt.value.trim())) vt.value = vs[0];
     fillPick();
@@ -66,28 +194,41 @@ function addLeg(values = {}) {
     node.querySelector(".only-road-rail").hidden = !["road", "rail"].includes(mode.value);
     payloadHint(node);
   };
-  // The vehicle by name: the dataset's short names, or any dataset vehicle type ("Other").
+  // The vehicle by name: the dataset's short names, or under "Other" any of
+  // its vehicle types. The hidden vehicle_type field holds the choice.
   function fillPick() {
-    const aliases = (vehicleLists[mode.value] || []).filter(v => v in vehicleNames);
+    const all = vehicleLists[mode.value] || [];
+    const aliases = all.filter(v => v in vehicleNames), types = all.filter(v => !(v in vehicleNames));
     const cur = vt.value.trim();
-    const opts = (aliases.length ? aliases : cur ? [cur] : []).map(v => `<option value="${esc(v)}">${esc(vehicleLabel(v))}</option>`);
-    pick.innerHTML = opts.join("") + `<option value="__other">Other vehicle type…</option>`;
-    const known = aliases.includes(cur) || (!aliases.length && cur);
+    const known = aliases.includes(cur) || (!all.length && cur);
+    pick.innerHTML = (aliases.length ? aliases : known ? [cur] : []).map(v => `<option value="${esc(v)}">${esc(vehicleLabel(v))}</option>`).join("") +
+      (types.length ? `<option value="__other">Other vehicle type…</option>` : "");
     pick.value = known ? cur : "__other";
-    vt.hidden = !!known;
+    other.innerHTML = typeOptions(types, cur);
+    other.hidden = !!known;
   }
   pick.addEventListener("change", () => {
-    if (pick.value === "__other") { vt.hidden = false; vt.value = ""; vt.focus(); }
-    else { vt.hidden = true; vt.value = pick.value; }
+    other.hidden = pick.value !== "__other";
+    vt.value = other.hidden ? pick.value : other.value;
     payloadHint(node);
   });
+  other.addEventListener("change", () => { vt.value = other.value; payloadHint(node); });
   mode.addEventListener("change", fillList);
   fillList();
   for (const ev of ["input", "change"]) {
-    vt.addEventListener(ev, () => payloadHint(node));
     node.querySelector('[name="load_factor"]').addEventListener(ev, () => payloadHint(node));
   }
   payloadHint(node);
+  // The fuel and its unit, and the country of the grid, from the dataset's lists.
+  const fuel = node.querySelector('[name="fuel"]');
+  const setFuel = () => { fuel.value = (fuelOf(node) || { fuel: "" }).fuel; };
+  node.querySelector('[name="fuel_pick"]').addEventListener("change", () => { fillFuelUnits(node, ""); setFuel(); });
+  node.querySelector('[name="fuel_unit"]').addEventListener("change", setFuel);
+  node.querySelector('[name="fuel_name"]').addEventListener("input", setFuel);
+  fillFuel(node);
+  const country = node.querySelector('[name="country"]');
+  if (values.country) country.dataset.want = values.country;
+  fillCountry(country);
   node.querySelectorAll(".place").forEach(el => placeSearch(el, node));
   node.querySelector(".remove").addEventListener("click", () => { node.remove(); renumber(); });
   node.querySelectorAll("details").forEach(d => {
@@ -188,14 +329,15 @@ function buildShipment() {
     const keys = l.mode === "road" ? ["load_tonnes", "load_factor", "empty_trip_factor", "repositioning_km", "energy_kwh_per_tkm"]
       : l.mode === "rail" ? ["energy_kwh_per_tkm"] : [];
     for (const k of keys) { const v = num(f(k)); if (v) l[k] = v; }
-    const country = f("country").value.trim();
-    if (country && keys.includes("energy_kwh_per_tkm")) l.country = country.toUpperCase();
-    const fuel = f("fuel").value.trim();
+    const country = f("country").value;
+    if (country && keys.includes("energy_kwh_per_tkm")) l.country = country;
+    const fuel = fuelOf(leg);
     if (fuel) {
-      l.fuel = { fuel, amount: num(f("fuel_amount")) || 0, vehicle_tonne_km: num(f("vehicle_tonne_km")) };
+      l.fuel = { fuel: fuel.fuel, amount: num(f("fuel_amount")) || 0, vehicle_tonne_km: num(f("vehicle_tonne_km")) };
       const fw = num(f("fuel_wtw"));
-      if (fw !== undefined || f("fuel_source").value.trim()) {
-        l.fuel.factor = { unit: f("fuel_unit").value.trim(), wtw_kg_per_unit: fw || 0, ttw_kg_per_unit: num(f("fuel_ttw")),
+      // A supplier's own fuel has no default value: it always goes with the supplier's factor.
+      if (fw !== undefined || f("fuel_source").value.trim() || f("fuel_pick").value === ownFuel) {
+        l.fuel.factor = { unit: fuel.unit, wtw_kg_per_unit: fw || 0, ttw_kg_per_unit: num(f("fuel_ttw")),
           source: f("fuel_source").value.trim() };
       }
     }
@@ -219,6 +361,13 @@ async function calculate(e, source) {
   const req = buildShipment();
   const btn = $("#csubmit");
   if (btn.disabled) return; // one calculation at a time
+  const half = req.legs.findIndex(l => l.fuel && l.fuel.factor && !(l.fuel.fuel && l.fuel.factor.wtw_kg_per_unit > 0 &&
+    l.fuel.factor.ttw_kg_per_unit !== undefined && l.fuel.factor.source));
+  if (half >= 0) {
+    $("#error").textContent = `Leg ${half + 1}: a supplier's own emission factor needs the fuel's name, ` +
+      "its well-to-wheel and tank-to-wheel values per unit, and the source.";
+    return 400;
+  }
   btn.disabled = true; btn.textContent = "Calculating…";
   let res, body;
   try {
@@ -510,9 +659,31 @@ async function loadFactors() {
     loadModels = (d.load_models || []).filter(m => m.mode === "road");
     for (const f of d.legs || []) (lists[f.mode] ||= []).push(f.vehicle_type);
     vehicleLists = lists;
+    fuelChoices = fuelIndex(d);
+    regionLabels = Object.fromEntries((d.regions || []).map(r => [r.name, r.label || r.name]));
+    countries = (d.grids || []).map(g => ({ code: g.country, name: (g.source || "").includes(": ") ? g.source.split(": ").pop() : g.country }))
+      .sort((a, b) => a.name.localeCompare(b.name));
     document.querySelectorAll('[name="mode"]').forEach(m => m.dispatchEvent(new Event("change")));
-    document.querySelectorAll(".leg").forEach(payloadHint);
-  } catch { /* suggestions are optional */ }
+    document.querySelectorAll(".leg").forEach(leg => { payloadHint(leg); fillFuel(leg); fillCountry(leg.querySelector('[name="country"]')); });
+    scenarioLists(d);
+  } catch { /* the lists stay empty: the form still takes what the examples set */ }
+}
+
+// scenarioLists fills the scenario form's lists: the grid country and the
+// road vehicle types a change can be limited to (for fuller trucks, those
+// the dataset has a load model for).
+function scenarioLists(d = {}) {
+  fillCountry($("#s-el-country"));
+  const road = vehicleLists.road || [];
+  const options = (aliases, types) => (aliases.length ? `<optgroup label="Common">` +
+    aliases.map(v => `<option value="${esc(v)}">${esc(vehicleLabel(v))}</option>`).join("") + `</optgroup>` : "") + typeOptions(types);
+  const types = road.filter(v => !(v in vehicleNames));
+  const all = options(road.filter(v => v in vehicleNames), types);
+  pickMany($("#s-el-vt"), all, "Add a vehicle type…");
+  pickMany($("#s-fuel-vt"), all, "Add a vehicle type…");
+  const modelled = new Set((d.vehicle_aliases || []).filter(a => a.mode === "road" && a.load_model).map(a => a.alias));
+  pickMany($("#s-load-vt"), options(road.filter(v => modelled.has(v)),
+    types.filter(v => loadModels.some(m => v === m.vehicle_type || v.startsWith(m.vehicle_type + "/")))), "Add a vehicle type…");
 }
 
 // ---- Report ----
@@ -755,7 +926,6 @@ $("#rexample").addEventListener("click", () => {
 });
 
 // ---- Scenarios ----
-const splitList = v => v.split(",").map(x => x.trim()).filter(Boolean);
 const shareOf = id => Math.min(100, Math.max(0, Number($(id).value) || 0)) / 100;
 
 function scenarioPlan() {
@@ -763,22 +933,22 @@ function scenarioPlan() {
   if ($("#s-rail").checked) changes.push({ type: "road_to_rail", min_road_km: Number($("#s-rail-km").value),
     share: shareOf("#s-rail-share"), min_rail_km: Number($("#s-rail-min").value) });
   if ($("#s-el").checked) {
-    const c = { type: "electrify", kwh_per_tkm: Number($("#s-el-kwh").value), country: $("#s-el-country").value.trim().toUpperCase(),
+    const c = { type: "electrify", kwh_per_tkm: Number($("#s-el-kwh").value), country: $("#s-el-country").value,
       share: shareOf("#s-el-share"), source: $("#s-el-src").value.trim() };
-    const vt = splitList($("#s-el-vt").value); if (vt.length) c.vehicle_types = vt;
+    const vt = $("#s-el-vt").picked; if (vt.length) c.vehicle_types = vt;
     changes.push(c);
   }
   if ($("#s-fuel").checked) {
     const c = { type: "fuel_switch", fuel: $("#s-fuel-name").value, share: shareOf("#s-fuel-share"),
       energy_ratio: Number($("#s-fuel-ratio").value) || 1 };
     const src = $("#s-fuel-src").value.trim(); if (src) c.source = src;
-    const vt = splitList($("#s-fuel-vt").value); if (vt.length) c.vehicle_types = vt;
+    const vt = $("#s-fuel-vt").picked; if (vt.length) c.vehicle_types = vt;
     changes.push(c);
   }
   if ($("#s-load").checked) {
     const c = { type: "load", load_tonnes: Number($("#s-load-t").value) };
     if ($("#s-load-etf").value !== "") c.empty_trip_factor = Number($("#s-load-etf").value);
-    const vt = splitList($("#s-load-vt").value); if (vt.length) c.vehicle_types = vt;
+    const vt = $("#s-load-vt").picked; if (vt.length) c.vehicle_types = vt;
     changes.push(c);
   }
   return { name: "web", changes };
@@ -837,7 +1007,7 @@ function renderScenario(r) {
   const down = r.diff_kg < 0;
   const changes = (r.changes || []).map(c => `<li><strong>${esc(changeName[c.type] || c.type)}</strong>, ${fmt(c.share * 100, 0)}% of the cargo:
     ${c.shipments_affected} shipments, ${legs(c.legs_affected)}.
-    <details><summary>Based on</summary><ul>${c.sources.map(x => `<li>${esc(x)}</li>`).join("")}</ul></details></li>`).join("");
+    ${(c.sources || []).length ? `<details><summary>Based on</summary><ul>${c.sources.map(x => `<li>${esc(x)}</li>`).join("")}</ul></details>` : ""}</li>`).join("");
   const failed = (r.shipments || []).filter(x => x.error).map(x => `<li>${esc(x.shipment_id)}: ${esc(x.error)}</li>`).join("");
   const notes = (r.shipments || []).flatMap(x => (x.notes || []).map(n => `<li>${esc(x.shipment_id)}: ${esc(n)}</li>`)).join("");
   $("#scenario").innerHTML = `
@@ -880,6 +1050,7 @@ fetch("../site-nav.json").then(r => r.ok ? r.json() : null).then(d => {
   $("#sitenav").innerHTML = d.links.filter(l => typeof l.href === "string" && /^\//.test(l.href))
     .map(l => `<a href="${esc(l.href)}"${l.current ? ' aria-current="page"' : ""}>${esc(l.label)}</a>`).join("");
 }).catch(() => {});
+scenarioLists();
 try { loadExample(0); } finally { document.documentElement.classList.remove("js-loading"); }
 // The examples leave their distances to the server's routers, and the first
 // needs road, rail and sea routing. A server that routes less (one small
