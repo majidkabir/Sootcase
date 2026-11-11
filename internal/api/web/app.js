@@ -4,6 +4,12 @@ const $ = (s, el = document) => el.querySelector(s);
 const legsEl = $("#legs");
 let vehicleLists = {};
 let vehicleNames = {}, loadModels = []; // alias -> dataset vehicle type; road load models
+let aliasLoadModels = {}; // alias -> the vehicle type of its load model, for the names that have one
+// loadModelOf finds the load model of a vehicle by short name or dataset type.
+const loadModelOf = vt => {
+  const full = aliasLoadModels[vt] || vehicleNames[vt] || vt;
+  return loadModels.find(m => full === m.vehicle_type || full.startsWith(m.vehicle_type + "/"));
+};
 // What the dataset offers to choose from: its fuels (groups of {key, label},
 // and key -> the fuel's ids by unit) and the countries with a grid factor.
 let fuelChoices = { groups: [], units: {} }, countries = [], regionLabels = {};
@@ -12,8 +18,7 @@ let fuelChoices = { groups: [], units: {} }, countries = [], regionLabels = {};
 function payloadHint(node) {
   const el = node.querySelector(".payload-hint");
   const vt = node.querySelector('[name="vehicle_type"]').value.trim();
-  const full = vehicleNames[vt] || vt;
-  const m = loadModels.find(m => full === m.vehicle_type || full.startsWith(m.vehicle_type + "/"));
+  const m = loadModelOf(vt);
   if (!m) { el.textContent = ""; return; }
   const lf = parseFloat(node.querySelector('[name="load_factor"]').value);
   const now = lf > 0 ? `Load factor ${lf} here means ${fmt(lf * m.payload_t, 1)} t on the truck. ` : "";
@@ -115,13 +120,15 @@ function fillCountry(sel) {
 function fillFuel(node) {
   const f = name => node.querySelector(`[name="${name}"]`);
   const cur = f("fuel").value.trim();
-  f("fuel_pick").innerHTML = `<option value="">None</option>` + fuelChoices.groups.map(g =>
+  f("fuel_pick").innerHTML = fuelChoices.groups.map(g =>
     `<optgroup label="${esc(g.label)}">${g.fuels.map(x => `<option value="${esc(x.key)}">${esc(x.label)}</option>`).join("")}</optgroup>`).join("") +
     `<option value="${ownFuel}">Supplier's own fuel…</option>`;
-  const key = !cur ? "" : Object.keys(fuelChoices.units).find(k => fuelChoices.units[k].some(u => u.id === cur)) || ownFuel;
+  // No fuel yet: the first of the list. One the list doesn't have: a supplier's own.
+  const key = !cur ? f("fuel_pick").value : Object.keys(fuelChoices.units).find(k => fuelChoices.units[k].some(u => u.id === cur)) || ownFuel;
   f("fuel_pick").value = key;
   if (key === ownFuel && !f("fuel_name").value) f("fuel_name").value = cur;
   fillFuelUnits(node, cur);
+  f("fuel").value = (fuelOf(node) || { fuel: "" }).fuel;
 }
 
 function fillFuelUnits(node, cur) {
@@ -135,6 +142,11 @@ function fillFuelUnits(node, cur) {
   if (keep) f("fuel_unit").value = keep.id;
   f("fuel_unit").disabled = !units.length;
   f("fuel_name").hidden = !own;
+  // A supplier's own fuel has no default value: it goes with the supplier's factor.
+  const from = f("fuel_factor_from");
+  if (own) from.value = "supplier";
+  from.disabled = own;
+  from.dispatchEvent(new Event("change"));
 }
 
 // fuelOf reads a leg's fuel: its id (a supplier's own fuel: its name) and
@@ -174,9 +186,27 @@ const distName = { given: "given", great_circle: "great-circle", great_circle_ad
   osrm: "road routing", osrm_rail: "rail routing", osrm_waterway: "waterway routing", sea_network: "sea route" };
 const methodName = { intensity: "average factor", fuel: "measured fuel", load_model: "load model", energy: "electricity" };
 
+// choose makes a select show the fields of its choice only: the elements
+// marked data-show (in its row or, with a scope, in that element) are
+// hidden unless they name the select's value.
+function choose(sel, scope = sel.closest(".row")) {
+  const show = () => scope.querySelectorAll("[data-show]").forEach(el => { el.hidden = el.dataset.show !== sel.value; });
+  sel.addEventListener("change", show);
+  show();
+}
+
+// methodOf tells which way of calculating a leg's values ask for.
+function methodOf(v) {
+  const has = (...names) => names.some(n => v[n] !== undefined && v[n] !== "");
+  return has("fuel") ? "fuel" : has("own_wtw", "own_source") ? "own" : has("energy_kwh_per_tkm") ? "energy" :
+    has("load_tonnes", "load_factor", "empty_trip_factor", "repositioning_km") ? "load" : "default";
+}
+
 function addLeg(values = {}) {
   const node = $("#leg-t").content.firstElementChild.cloneNode(true);
   const n = legsEl.children.length + 1;
+  values = { method: methodOf(values), distance_from: values.distance_km ? "given" : "route",
+    load_as: values.load_factor ? "factor" : "tonnes", fuel_factor_from: values.fuel_wtw || values.fuel_source ? "supplier" : "default", ...values };
   node.querySelectorAll("input, select").forEach(el => {
     el.id = `leg${n}-${el.name}`;
     const lab = el.closest("div").querySelector("label");
@@ -192,16 +222,31 @@ function addLeg(values = {}) {
     // A vehicle of another mode can't be right: take this mode's first.
     if (vs.length && !vs.includes(vt.value.trim())) vt.value = vs[0];
     fillPick();
-    // Load model fields are for trucks; energy per tonne-km for road and rail.
-    node.querySelector(".only-road").hidden = mode.value !== "road";
-    node.querySelector(".only-road-rail").hidden = !["road", "rail"].includes(mode.value);
+    // The ways of calculating that the mode has: load models are for
+    // trucks, energy per tonne-km for road and rail.
+    for (const o of method.options) o.hidden = o.disabled = !!o.dataset.modes && !o.dataset.modes.split(" ").includes(mode.value);
+    if (method.selectedOptions[0].disabled) method.value = "default";
+    showMethod();
     payloadHint(node);
   };
+  // One way of calculating at a time: only its fields show, and the vehicle
+  // only where a value of the vehicle is used.
+  const method = node.querySelector('[name="method"]');
+  const showMethod = () => {
+    node.querySelectorAll(".method").forEach(el => { el.hidden = el.dataset.method !== method.value; });
+    node.querySelector(".vehicle").hidden = !["default", "load"].includes(method.value);
+  };
+  method.addEventListener("change", () => { showMethod(); fillPick(); payloadHint(node); });
+  choose(node.querySelector('[name="distance_from"]'));
+  choose(node.querySelector('[name="load_as"]'));
+  choose(node.querySelector('[name="fuel_factor_from"]'), node.querySelector('[data-method="fuel"]'));
   // The vehicle by name: the dataset's short names, or under "Other" any of
   // its vehicle types. The hidden vehicle_type field holds the choice.
   function fillPick() {
-    const all = vehicleLists[mode.value] || [];
+    // Calculating from the truck's load takes a vehicle the dataset has a load model for.
+    const all = (vehicleLists[mode.value] || []).filter(v => method.value !== "load" || loadModelOf(v));
     const aliases = all.filter(v => v in vehicleNames), types = all.filter(v => !(v in vehicleNames));
+    if (all.length && !all.includes(vt.value.trim())) vt.value = all[0];
     const cur = vt.value.trim();
     const known = aliases.includes(cur) || (!all.length && cur);
     pick.innerHTML = (aliases.length ? aliases : known ? [cur] : []).map(v => `<option value="${esc(v)}">${esc(vehicleLabel(v))}</option>`).join("") +
@@ -234,9 +279,6 @@ function addLeg(values = {}) {
   fillCountry(country);
   node.querySelectorAll(".place").forEach(el => placeSearch(el, node));
   node.querySelector(".remove").addEventListener("click", () => { node.remove(); renumber(); });
-  node.querySelectorAll("details").forEach(d => {
-    if ([...d.querySelectorAll("input")].some(i => i.value !== "" && !/_(lat|lon)$/.test(i.name))) d.open = true;
-  });
   legsEl.appendChild(node);
   renumber();
 }
@@ -319,9 +361,11 @@ function buildShipment() {
   if ($("#cargotype").value) s.cargo_type = $("#cargotype").value;
   [...legsEl.children].forEach((leg, i) => {
     const f = name => leg.querySelector(`[name="${name}"]`);
-    const l = { id: `leg-${i + 1}`, mode: f("mode").value, vehicle_type: f("vehicle_type").value.trim() };
+    const method = f("method").value;
+    const l = { id: `leg-${i + 1}`, mode: f("mode").value };
+    if (method === "default" || method === "load") l.vehicle_type = f("vehicle_type").value.trim();
     const d = num(f("distance_km"));
-    if (d) l.distance_km = d;
+    if (d && f("distance_from").value === "given") l.distance_km = d;
     const coords = ["from_lat", "from_lon", "to_lat", "to_lon"].map(n => num(f(n)));
     if (coords.every(c => c !== undefined)) {
       l.from = { lat: coords[0], lon: coords[1] }; l.to = { lat: coords[2], lon: coords[3] };
@@ -329,24 +373,22 @@ function buildShipment() {
       if (fq) l.from.name = fq;
       if (tq) l.to.name = tq;
     }
-    const keys = l.mode === "road" ? ["load_tonnes", "load_factor", "empty_trip_factor", "repositioning_km", "energy_kwh_per_tkm"]
-      : l.mode === "rail" ? ["energy_kwh_per_tkm"] : [];
-    for (const k of keys) { const v = num(f(k)); if (v) l[k] = v; }
-    const country = f("country").value;
-    if (country && keys.includes("energy_kwh_per_tkm")) l.country = country;
-    const fuel = fuelOf(leg);
-    if (fuel) {
+    // Only what the chosen way of calculating takes.
+    const take = (...keys) => { for (const k of keys) { const v = num(f(k)); if (v) l[k] = v; } };
+    if (method === "load") {
+      take(f("load_as").value === "factor" ? "load_factor" : "load_tonnes", "empty_trip_factor", "repositioning_km");
+    } else if (method === "energy") {
+      take("energy_kwh_per_tkm");
+      if (f("country").value) l.country = f("country").value;
+    } else if (method === "fuel") {
+      const fuel = fuelOf(leg) || { fuel: "", unit: "" };
       l.fuel = { fuel: fuel.fuel, amount: num(f("fuel_amount")) || 0, vehicle_tonne_km: num(f("vehicle_tonne_km")) };
-      const fw = num(f("fuel_wtw"));
-      // A supplier's own fuel has no default value: it always goes with the supplier's factor.
-      if (fw !== undefined || f("fuel_source").value.trim() || f("fuel_pick").value === ownFuel) {
-        l.fuel.factor = { unit: fuel.unit, wtw_kg_per_unit: fw || 0, ttw_kg_per_unit: num(f("fuel_ttw")),
+      if (f("fuel_factor_from").value === "supplier") {
+        l.fuel.factor = { unit: fuel.unit, wtw_kg_per_unit: num(f("fuel_wtw")) || 0, ttw_kg_per_unit: num(f("fuel_ttw")),
           source: f("fuel_source").value.trim() };
       }
-    }
-    const ow = num(f("own_wtw"));
-    if (ow !== undefined || f("own_source").value.trim()) {
-      l.own_factor = { wtw_g_per_tkm: ow || 0, ttw_g_per_tkm: num(f("own_ttw")), source: f("own_source").value.trim() };
+    } else if (method === "own") {
+      l.own_factor = { wtw_g_per_tkm: num(f("own_wtw")) || 0, ttw_g_per_tkm: num(f("own_ttw")), source: f("own_source").value.trim() };
       if (f("own_basis").value) l.own_factor.distance_basis = f("own_basis").value;
     }
     s.legs.push(l);
@@ -654,7 +696,8 @@ async function loadFactors() {
     const d = await (await fetch("v1/factors")).json();
     $("#dataset").textContent = `Factors: ${d.name}.`;
     const lists = {};
-    for (const a of d.vehicle_aliases || []) { (lists[a.mode] ||= []).push(a.alias); vehicleNames[a.alias] = a.vehicle_type; }
+    for (const a of d.vehicle_aliases || []) { (lists[a.mode] ||= []).push(a.alias); vehicleNames[a.alias] = a.vehicle_type;
+      if (a.load_model) aliasLoadModels[a.alias] = a.load_model; }
     for (const c of d.cargo_types || []) {
       if (c.name === "average") continue;
       const o = document.createElement("option"); o.value = c.name; o.textContent = c.label || c.name; $("#cargotype").append(o);
@@ -1054,6 +1097,13 @@ fetch("../site-nav.json").then(r => r.ok ? r.json() : null).then(d => {
     .map(l => `<a href="${esc(l.href)}"${l.current ? ' aria-current="page"' : ""}>${esc(l.label)}</a>`).join("");
 }).catch(() => {});
 scenarioLists();
+// A change's settings show only while the change is ticked.
+document.querySelectorAll(".change").forEach(box => {
+  const tick = box.querySelector('input[type="checkbox"]');
+  const show = () => [...box.children].slice(1).forEach(el => { el.hidden = !tick.checked; });
+  tick.addEventListener("change", show);
+  show();
+});
 try { loadExample(0); } finally { document.documentElement.classList.remove("js-loading"); }
 // The examples leave their distances to the server's routers, and the first
 // needs road, rail and sea routing. A server that routes less (one small
