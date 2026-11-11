@@ -128,8 +128,11 @@ function fillFuelUnits(node, cur) {
   const f = name => node.querySelector(`[name="${name}"]`);
   const key = f("fuel_pick").value, own = key === ownFuel;
   const units = own ? ownUnits.map(u => ({ id: u, unit: u })) : fuelChoices.units[key] || [];
+  // Another fuel keeps the unit the amount was in when it has it, else litres: the amount stays as typed.
+  const before = f("fuel_unit").selectedOptions[0] ? unitName(f("fuel_unit").selectedOptions[0].dataset.unit) : "";
   f("fuel_unit").innerHTML = units.map(u => `<option value="${esc(u.id)}" data-unit="${esc(u.unit)}">${esc(unitName(u.unit))}</option>`).join("");
-  if (units.some(u => u.id === cur)) f("fuel_unit").value = cur;
+  const keep = units.find(u => u.id === cur) || units.find(u => unitName(u.unit) === before) || units.find(u => unitName(u.unit) === "litres");
+  if (keep) f("fuel_unit").value = keep.id;
   f("fuel_unit").disabled = !units.length;
   f("fuel_name").hidden = !own;
 }
