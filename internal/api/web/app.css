@@ -182,3 +182,9 @@ footer.credits a { color: var(--blue); }
 .map { height: 340px; border-radius: 6px; border: 1px solid var(--rule); margin: 4px 0 8px; z-index: 0; }
 .map-legend { margin-top: 0; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+/* Several values chosen from a list: the select adds, the chips take away. */
+.chips { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chips li { display: inline-flex; align-items: center; gap: 2px; padding: 1px 2px 1px 10px; border: 1px solid var(--rule); border-radius: 999px; font-size: .85rem; }
+.chips button { border: 0; background: none; cursor: pointer; padding: 4px 8px; font-size: 1rem; line-height: 1; color: var(--muted); border-radius: 999px; }
+.chips button:hover { color: var(--ink); }
+select:disabled { opacity: .55; }
