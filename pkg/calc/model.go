@@ -12,6 +12,16 @@ const (
 	InlandWaterway Mode = "inland_waterway"
 )
 
+// KnownMode says whether m is one of the modes above. A dataset may still
+// carry factors for a mode of its own.
+func KnownMode(m Mode) bool {
+	switch m {
+	case Road, Rail, Sea, Air, InlandWaterway:
+		return true
+	}
+	return false
+}
+
 // Location is a point on the map. Instead of coordinates it can give a
 // Code, a UN/LOCODE ("NLRTM") or an IATA airport code ("CPH"), which the
 // Calculator's Places turns into coordinates.

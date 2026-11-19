@@ -859,3 +859,23 @@ func TestRailPerSFD(t *testing.T) {
 		t.Errorf("given distance: %v %+v", err, r.Legs)
 	}
 }
+
+// A mode none of Sootcase's and none of the dataset's is named as such,
+// before the vehicle type; a known mode in another case gets its spelling.
+func TestUnknownMode(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds}
+	for mode, want := range map[calc.Mode]string{
+		"boat": `mode "boat": use road, rail, sea, air or inland_waterway`,
+		"Road": `mode "Road": did you mean "road"?`,
+		"road": "vehicle_type is missing",
+	} {
+		_, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 1000, Legs: []calc.Leg{{Mode: mode, DistanceKm: 10}}})
+		if !errors.Is(err, calc.ErrInvalidInput) || !strings.Contains(err.Error(), want) {
+			t.Errorf("mode %q: got %v, want %q", mode, err, want)
+		}
+	}
+}

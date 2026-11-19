@@ -667,16 +667,33 @@ func (d *Dataset) LegFactor(m calc.Mode, vt string) (calc.Factor, error) {
 	if f, ok := d.legIdx[legKey(m, vt)]; ok {
 		return f, nil
 	}
-	if vt == "" {
-		return calc.Factor{}, errNoVehicleType(m)
-	}
+	hasMode := false
 	for _, f := range d.Legs {
 		if f.Mode == m {
-			return calc.Factor{}, fmt.Errorf("%w: no factor for %s/%s in dataset %q%s", calc.ErrInvalidInput, m, vt, d.Name, d.didYouMean(m, vt))
+			hasMode = true
+			break
 		}
+	}
+	switch {
+	case !hasMode && !calc.KnownMode(m):
+		return calc.Factor{}, errUnknownMode(m)
+	case vt == "":
+		return calc.Factor{}, errNoVehicleType(m)
+	case hasMode:
+		return calc.Factor{}, fmt.Errorf("%w: no factor for %s/%s in dataset %q%s", calc.ErrInvalidInput, m, vt, d.Name, d.didYouMean(m, vt))
 	}
 	return calc.Factor{}, fmt.Errorf("dataset %q has no %s factors; add a layer with your own (-factors %s,mine.json) "+
 		"or build one from fuel data with sootcase toc", d.Name, m, d.Name)
+}
+
+// errUnknownMode is the error for a mode that is none of Sootcase's and
+// that no factor in the dataset has.
+func errUnknownMode(m calc.Mode) error {
+	norm := calc.Mode(strings.ToLower(strings.TrimSpace(string(m))))
+	if calc.KnownMode(norm) {
+		return fmt.Errorf("%w: mode %q: did you mean %q?", calc.ErrInvalidInput, m, norm)
+	}
+	return fmt.Errorf("%w: mode %q: use road, rail, sea, air or inland_waterway", calc.ErrInvalidInput, m)
 }
 
 // errNoVehicleType is the error for a leg that needs a vehicle type's value
