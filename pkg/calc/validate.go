@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 )
 
 // ErrInvalidInput reports a malformed number or location in a shipment.
@@ -28,6 +29,9 @@ func validate(s Shipment) error {
 		}
 		if l.Mode == "" {
 			return bad("%s: mode is missing (road, rail, sea, air or inland_waterway)", where)
+		}
+		if norm := Mode(strings.ToLower(strings.TrimSpace(string(l.Mode)))); norm != l.Mode && KnownMode(norm) {
+			return bad("%s: mode %q: did you mean %q?", where, l.Mode, norm)
 		}
 		nums := map[string]float64{
 			"distance_km": l.DistanceKm, "load_factor": l.LoadFactor, "load_tonnes": l.LoadTonnes,

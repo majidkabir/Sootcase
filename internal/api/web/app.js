@@ -185,6 +185,9 @@ const modeName = { road: "Road", rail: "Rail", sea: "Sea", air: "Air", inland_wa
 const distName = { given: "given", great_circle: "great-circle", great_circle_adjusted: "great-circle, adjusted",
   osrm: "road routing", osrm_rail: "rail routing", osrm_waterway: "waterway routing", sea_network: "sea route" };
 const methodName = { intensity: "average factor", fuel: "measured fuel", load_model: "load model", energy: "electricity" };
+// noResult empties a result area when a run fails, so an earlier result
+// isn't read as this one's.
+const noResult = el => { el.innerHTML = `<p class="empty">No result: the run failed. The reason is next to its button.</p>`; };
 
 // choose makes a select show the fields of its choice only: the elements
 // marked data-show (in its row or, with a scope, in that element) are
@@ -411,6 +414,7 @@ async function calculate(e, source) {
   if (half >= 0) {
     $("#error").textContent = `Leg ${half + 1}: a supplier's own emission factor needs the fuel's name, ` +
       "its well-to-wheel and tank-to-wheel values per unit, and the source.";
+    noResult($("#result"));
     return 400;
   }
   btn.disabled = true; btn.textContent = "Calculating…";
@@ -420,11 +424,12 @@ async function calculate(e, source) {
     body = await res.json();
   } catch (err) {
     $("#error").textContent = "Couldn't reach the Sootcase server. Check it's still running.";
+    noResult($("#result"));
     return 0;
   } finally {
     btn.disabled = false; btn.textContent = "Calculate";
   }
-  if (!res.ok) { $("#error").textContent = body.error || `Request failed (HTTP ${res.status}).`; return res.status; }
+  if (!res.ok) { $("#error").textContent = body.error || `Request failed (HTTP ${res.status}).`; noResult($("#result")); return res.status; }
   render(req, body);
   if (e && window.matchMedia("(max-width: 900px)").matches) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -802,6 +807,7 @@ async function makeReport(e, body) {
     r = await res.json();
   } catch {
     $("#rerror").textContent = "Couldn't reach the Sootcase server, or it took too long. Try again.";
+    noResult($("#report")); lastReportBody = null;
     return;
   } finally {
     clearInterval(timer);
@@ -811,7 +817,7 @@ async function makeReport(e, body) {
     $("#rform").removeAttribute("aria-busy");
     reportBusy = false;
   }
-  if (!res.ok) { $("#rerror").textContent = r.error || `Request failed (HTTP ${res.status}).`; return; }
+  if (!res.ok) { $("#rerror").textContent = r.error || `Request failed (HTTP ${res.status}).`; noResult($("#report")); lastReportBody = null; return; }
   lastReportBody = body;
   renderReport(r);
 }
@@ -1031,6 +1037,7 @@ async function compare(e, body) {
     r = await res.json();
   } catch {
     $("#serror").textContent = "Couldn't reach the Sootcase server, or it took too long. Try again.";
+    noResult($("#scenario")); lastScenario = null;
     return;
   } finally {
     clearInterval(timer);
@@ -1039,7 +1046,7 @@ async function compare(e, body) {
     $("#sform").removeAttribute("aria-busy");
     scenarioBusy = false;
   }
-  if (!res.ok) { $("#serror").textContent = r.error || `Request failed (HTTP ${res.status}).`; return; }
+  if (!res.ok) { $("#serror").textContent = r.error || `Request failed (HTTP ${res.status}).`; noResult($("#scenario")); lastScenario = null; return; }
   lastScenario = r;
   renderScenario(r);
 }
