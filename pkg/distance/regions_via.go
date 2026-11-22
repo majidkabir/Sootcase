@@ -176,10 +176,17 @@ const maxViaEntries = 10_000
 
 // routeVia routes from and to through a gateway when no region holds both.
 // noRegion is returned when no pair of overlapping regions does.
+// A route joined across regions has no alternatives: the halves are
+// routed for their summary only, which is joined too.
 func (rs Regions) routeVia(ctx context.Context, m calc.Mode, from, to calc.Location, noRegion error) (calc.Route, error) {
+	opts := calc.RouteOptionsOf(ctx)
+	if opts.Alternatives > 1 {
+		opts.Alternatives = 1
+		ctx = calc.WithRouteOptions(ctx, opts)
+	}
 	var key string
 	if len(rs) > 0 {
-		key = fmt.Sprintf("%p|%s", rs[0].OSRM, cacheKey(from, to))
+		key = fmt.Sprintf("%p|%s|%t", rs[0].OSRM, cacheKey(from, to), opts.AvoidFerries)
 	}
 	viaCache.Lock()
 	g, ok := viaCache.m[key]
@@ -246,6 +253,16 @@ func (rs Regions) routeVia(ctx context.Context, m calc.Mode, from, to calc.Locat
 	}
 	if len(r1.Path) > 0 || len(r2.Path) > 0 {
 		r.Path = append(append([][2]float64{}, r1.Path...), r2.Path...)
+	}
+	if r1.Summary != nil && r2.Summary != nil {
+		r.Summary = &calc.RouteSummary{Roads: append([]string{}, r1.Summary.Roads...),
+			Ferries: append(append([]calc.FerryCrossing{}, r1.Summary.Ferries...), r2.Summary.Ferries...)}
+		for _, road := range r2.Summary.Roads {
+			if len(r.Summary.Roads) == 0 || r.Summary.Roads[len(r.Summary.Roads)-1] != road {
+				r.Summary.Roads = append(r.Summary.Roads, road)
+			}
+		}
+		r.DurationH = r1.DurationH + r2.DurationH
 	}
 	return r, nil
 }

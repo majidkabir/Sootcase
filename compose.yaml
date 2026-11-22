@@ -45,7 +45,7 @@ services:
     depends_on:
       prepare-osrm:
         condition: service_completed_successfully
-    command: ["osrm-routed", "--algorithm", "mld", "/data/region.osrm"]
+    command: ["osrm-routed", "--algorithm", "mld", "--max-alternatives", "5", "/data/region.osrm"]
     volumes:
       - osrm-data:/data:ro
     restart: unless-stopped

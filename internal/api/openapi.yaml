@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.12.0
+  version: 0.14.0
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -76,6 +76,22 @@ paths:
           in: query
           schema: { type: boolean, default: false }
           description: "Add each road and rail leg's routed distance by country (legs[].country_km), and in Belgium by region (legs[].region_km), e.g. for road tolls. Borders are Natural Earth 1:10m (about 1 km accurate); Belgium's regions are Statbel's statistical sectors (1:10,000, CC BY 4.0). Routing takes longer."
+        - name: alternatives
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 5, default: 1 }
+          description: >
+            Since v0.14.0. How many routes to look for per routed road leg, its own included. Above 1, each road leg gets
+            summary and duration_h, and up to N - 1 other routes in legs[].alternatives, each calculated exactly like the
+            leg's own route (same fields, same method). Alternatives are no longer than 1.5 x the leg's route; two routes
+            sharing 80% or more of their length count as one, unless they cross different ferries. A route with a ferry
+            gets the best land-only route among its alternatives, a land-only route a ferry route when the router finds one,
+            and each other set of ferry crossings its best route; the rest go by the router's cost. Fewer come back when
+            there are fewer different routes. The shipment's totals stay those of each leg's own route. 1 (or no
+            parameter) changes nothing. Routes joined across routing regions have no alternatives.
+        - name: avoid
+          in: query
+          schema: { type: string, enum: [ferries] }
+          description: "Since v0.14.0. ferries routes road legs on land only; a leg with no land route is refused (422, naming the leg)."
       requestBody:
         required: true
         content:
@@ -652,6 +668,30 @@ components:
           description: Parts calculated separately and included in the leg's totals
           items: { $ref: "#/components/schemas/LegPart" }
         repositioning_km: { type: number, description: "Empty km given for the leg (included in the empty trip factor)" }
+        id: { type: string, description: "With ?alternatives only: an alternative route's id (alt1, alt2, ...), stable within the response. The leg's own route has none." }
+        summary: { $ref: "#/components/schemas/RouteSummary" }
+        duration_h:
+          type: number
+          description: "With ?alternatives only: the router's driving time in hours, ferry time included. The router uses a car profile, so this is car speed, not truck speed."
+        alternatives:
+          type: array
+          description: "With ?alternatives=2 to 5 only, on routed road legs: other routes, each with the fields of a leg result (calculated the same way), an id, summary and duration_h; ordered by the router's cost."
+          items: { $ref: "#/components/schemas/LegResult" }
+    RouteSummary:
+      type: object
+      description: "With ?alternatives only: what tells a route apart, from OpenStreetMap."
+      properties:
+        roads: { type: array, items: { type: string }, description: "Main roads by reference (e.g. E 47, A 7), in the order driven" }
+        ferries:
+          type: array
+          description: "Ferry crossings, [] for a land-only route"
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              from: { type: string, description: "First port, when the name gives the ports" }
+              to: { type: string }
+              distance_km: { type: number }
     LegPart:
       type: object
       properties:

@@ -9,6 +9,8 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -137,10 +139,16 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	// Routes split by country need each step's geometry; they are cached
 	// apart from plain routes.
 	withCountries := calc.WantCountryKm(ctx) && o.Countries != nil
-	// Routes with a path (single calculations, for a map) skip the cache:
-	// cached routes have no path.
+	// Route options (alternatives, land only) are for road legs.
+	opts := calc.RouteOptionsOf(ctx)
+	if m != calc.Road {
+		opts = calc.RouteOptions{}
+	}
+	// Routes with a path (single calculations, for a map) and routes with
+	// options skip the cache: cached routes have neither.
 	withPath := calc.WantPath(ctx)
-	if !withPath {
+	cached := !withPath && opts == (calc.RouteOptions{})
+	if cached {
 		o.mu.Lock()
 		cache := o.cache
 		if withCountries {
@@ -153,30 +161,118 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 		o.mu.Unlock()
 	}
 
+	q := routeQuery{path: calc.PathDetailOf(ctx), countries: withCountries,
+		summary: opts.Alternatives >= 1, avoidFerries: opts.AvoidFerries}
+	if opts.Alternatives > 1 {
+		// A few more than asked for: some are dropped as too long or too
+		// like another.
+		q.alternatives, q.nodes = min(opts.Alternatives, calc.MaxAlternatives), true
+	}
+	routes, err := o.fetch(ctx, m, key, q)
+	if err != nil && q.alternatives > osrmDefaultMaxAlternatives && !calc.Temporary(err) && !isNoRoute(err) && ctx.Err() == nil {
+		// A server left at osrm-routed's default --max-alternatives
+		// refuses more: ask for what it allows.
+		q.alternatives = osrmDefaultMaxAlternatives
+		routes, err = o.fetch(ctx, m, key, q)
+	}
+	if err != nil {
+		if opts.AvoidFerries && !calc.Temporary(err) && isNoRoute(err) {
+			return calc.Route{}, fmt.Errorf("no land route (ferries avoided): %w", err)
+		}
+		return calc.Route{}, err
+	}
+	r := routes[0].route
+	if opts.Alternatives > 1 {
+		cands := routes[1:]
+		// Ferry against land: a route with a ferry gets the best land-only
+		// route among its alternatives, when there is one.
+		if !opts.AvoidFerries && r.Parts[calc.PartFerry] > 0 {
+			land := q
+			land.alternatives, land.avoidFerries = 0, true
+			lr, err := o.fetch(ctx, m, key, land)
+			switch {
+			case err == nil:
+				cands = append(cands, lr[0])
+			case calc.Temporary(err) || ctx.Err() != nil:
+				return calc.Route{}, err // not a shorter list instead
+			}
+		}
+		r.Alternatives = pickAlternatives(routes[0], cands, opts.Alternatives-1)
+	}
+
+	if cached {
+		o.mu.Lock()
+		cache, maxEntries := &o.cache, maxCacheEntries
+		if withCountries { // apart, so that split routes don't push plain ones out
+			cache, maxEntries = &o.splitCache, maxSplitCacheEntries
+		}
+		if *cache == nil || len(*cache) >= maxEntries {
+			*cache = make(map[string]calc.Route)
+		}
+		(*cache)[key] = r
+		o.mu.Unlock()
+	}
+	return r, nil
+}
+
+// osrmDefaultMaxAlternatives is osrm-routed's default --max-alternatives;
+// run it with --max-alternatives 5 for calc.MaxAlternatives.
+const osrmDefaultMaxAlternatives = 3
+
+// routeQuery is what a route request asks OSRM for.
+type routeQuery struct {
+	path         calc.PathDetail // "" for no path
+	countries    bool            // km by country: each step's geometry
+	summary      bool            // roads, ferries and duration
+	alternatives int             // other routes to look for (0: none)
+	nodes        bool            // node annotations, to compare routes
+	avoidFerries bool
+}
+
+// osrmRoute is one route of a response, with what is needed to compare it
+// with others.
+type osrmRoute struct {
+	route   calc.Route
+	weight  float64              // OSRM's cost, which it ranks routes by
+	edges   map[[2]int64]float64 // metres by node pair (with nodes)
+	ferries string               // its ferry crossings' names, as a key
+}
+
+// fetch asks OSRM for the route from key's points, and others when q asks.
+func (o *OSRM) fetch(ctx context.Context, m calc.Mode, key string, q routeQuery) ([]osrmRoute, error) {
 	profile := o.Profile
 	if profile == "" {
 		profile = "driving"
 	}
 	steps, limit := "false", int64(maxResponse)
-	if len(o.PartModes) > 0 {
+	if len(o.PartModes) > 0 || q.summary {
 		steps, limit = "true", maxStepsResponse
 	}
 	overview, geometries := "false", "polyline"
-	if withCountries {
+	if q.countries {
 		steps, limit, geometries = "true", maxStepsResponse, "geojson"
 	}
-	detail := calc.PathDetailOf(ctx)
-	if withPath {
+	if q.path != "" {
 		overview, geometries, limit = "simplified", "geojson", maxStepsResponse
-		if detail != calc.PathSimplified {
+		if q.path != calc.PathSimplified {
 			overview = "full"
 		}
 	}
-	u := fmt.Sprintf("%s/route/v1/%s/%s?overview=%s&alternatives=false&steps=%s&geometries=%s",
-		o.BaseURL, url.PathEscape(profile), key, overview, steps, geometries)
+	alternatives := "false"
+	if q.alternatives > 0 {
+		alternatives = strconv.Itoa(q.alternatives)
+	}
+	u := fmt.Sprintf("%s/route/v1/%s/%s?overview=%s&alternatives=%s&steps=%s&geometries=%s",
+		o.BaseURL, url.PathEscape(profile), key, overview, alternatives, steps, geometries)
+	if q.nodes {
+		u += "&annotations=nodes,distance"
+	}
+	if q.avoidFerries {
+		u += "&exclude=ferry"
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
-		return calc.Route{}, err
+		return nil, err
 	}
 	client := o.Client
 	if client == nil {
@@ -184,7 +280,7 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	}
 	release, err := o.acquire(ctx)
 	if err != nil {
-		return calc.Route{}, fmt.Errorf("osrm: %w", err)
+		return nil, fmt.Errorf("osrm: %w", err)
 	}
 	// The slot is held until the response is read: OSRM is still sending
 	// it (MaxInFlight limits the requests the server works on).
@@ -192,94 +288,123 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	resp, err := client.Do(req)
 	if err != nil {
 		if ctx.Err() != nil {
-			return calc.Route{}, fmt.Errorf("osrm: %w", ctx.Err())
+			return nil, fmt.Errorf("osrm: %w", ctx.Err())
 		}
 		// Not reachable, reset or too slow: it may answer next time.
-		return calc.Route{}, fmt.Errorf("osrm: %w (%v)", calc.ErrTemporary, err)
+		return nil, fmt.Errorf("osrm: %w (%v)", calc.ErrTemporary, err)
 	}
 	defer resp.Body.Close()
 	// An overloaded or restarting server, or a proxy in front of it.
 	busy := resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500
 
 	var body struct {
-		Code    string `json:"code"`
-		Message string `json:"message"`
-		Routes  []struct {
-			Distance float64      `json:"distance"` // metres
-			Geometry lineGeometry `json:"geometry"`
-			Legs     []struct {
-				Steps []osrmStep `json:"steps"`
-			} `json:"legs"`
-		} `json:"routes"`
+		Code      string     `json:"code"`
+		Message   string     `json:"message"`
+		Routes    []rawRoute `json:"routes"`
 		Waypoints []struct {
 			Distance float64 `json:"distance"` // metres from the input point to the network
 		} `json:"waypoints"`
 	}
 	if err := json.NewDecoder(io.LimitReader(resp.Body, limit)).Decode(&body); err != nil {
 		if busy || resp.StatusCode == http.StatusOK { // cut off or garbled on the way
-			return calc.Route{}, fmt.Errorf("osrm: %w (HTTP %d, unreadable response: %v)", calc.ErrTemporary, resp.StatusCode, err)
+			return nil, fmt.Errorf("osrm: %w (HTTP %d, unreadable response: %v)", calc.ErrTemporary, resp.StatusCode, err)
 		}
-		return calc.Route{}, fmt.Errorf("osrm: HTTP %d, unreadable response: %w", resp.StatusCode, err)
+		return nil, fmt.Errorf("osrm: HTTP %d, unreadable response: %w", resp.StatusCode, err)
 	}
 	if body.Code != "Ok" {
 		// NoRoute, NoSegment, InvalidQuery and the like are answers about
 		// the input; an error with a 5xx status is the server's.
 		if busy {
-			return calc.Route{}, fmt.Errorf("osrm: %w (HTTP %d, %s: %s)", calc.ErrTemporary, resp.StatusCode, body.Code, body.Message)
+			return nil, fmt.Errorf("osrm: %w (HTTP %d, %s: %s)", calc.ErrTemporary, resp.StatusCode, body.Code, body.Message)
 		}
-		return calc.Route{}, fmt.Errorf("osrm: %s: %s", body.Code, body.Message)
+		return nil, fmt.Errorf("osrm: %s: %s", body.Code, body.Message)
 	}
 	if len(body.Routes) == 0 {
-		return calc.Route{}, errors.New("osrm: no route")
+		return nil, errors.New("osrm: no route")
 	}
 	if o.MaxSnapKm > 0 && len(body.Waypoints) == 2 {
 		e := &calc.OffNetworkError{Mode: m, FromKm: body.Waypoints[0].Distance / 1000, ToKm: body.Waypoints[1].Distance / 1000, MaxKm: o.MaxSnapKm}
 		if e.FromOff() || e.ToOff() {
-			return calc.Route{}, e
+			return nil, e
 		}
 	}
-	r := calc.Route{Km: body.Routes[0].Distance / 1000}
-	if withPath {
-		r.Path = body.Routes[0].Geometry.Coordinates
-		if detail == calc.PathDetailed {
+	out := make([]osrmRoute, len(body.Routes))
+	for i, raw := range body.Routes {
+		out[i] = o.build(raw, q)
+	}
+	return out, nil
+}
+
+// rawRoute is a route as OSRM sends it.
+type rawRoute struct {
+	Distance float64      `json:"distance"` // metres
+	Duration float64      `json:"duration"` // seconds
+	Weight   float64      `json:"weight"`
+	Geometry lineGeometry `json:"geometry"`
+	Legs     []struct {
+		Steps      []osrmStep `json:"steps"`
+		Annotation struct {
+			Nodes    []int64   `json:"nodes"`
+			Distance []float64 `json:"distance"` // metres between consecutive nodes
+		} `json:"annotation"`
+	} `json:"legs"`
+}
+
+// build reads one route of a response.
+func (o *OSRM) build(raw rawRoute, q routeQuery) osrmRoute {
+	r := calc.Route{Km: raw.Distance / 1000}
+	if q.path != "" {
+		r.Path = raw.Geometry.Coordinates
+		if q.path == calc.PathDetailed {
 			r.Path = calc.ThinPath(r.Path, calc.MaxDetailedPoints)
 		}
 	}
-	for _, leg := range body.Routes[0].Legs {
-		for _, st := range leg.Steps {
-			if kind, ok := o.PartModes[st.Mode]; ok && st.Distance > 0 {
-				if r.Parts == nil {
-					r.Parts = map[string]float64{}
-				}
-				r.Parts[kind] += st.Distance / 1000
+	var steps []osrmStep
+	for _, leg := range raw.Legs {
+		steps = append(steps, leg.Steps...)
+	}
+	for _, st := range steps {
+		if kind, ok := o.PartModes[st.Mode]; ok && st.Distance > 0 {
+			if r.Parts == nil {
+				r.Parts = map[string]float64{}
 			}
+			r.Parts[kind] += st.Distance / 1000
 		}
 	}
 	for k, v := range r.Parts { // step distances are rounded; keep parts within the route
 		r.Parts[k] = math.Min(v, r.Km)
 	}
-	if withCountries {
-		var steps []osrmStep
-		for _, leg := range body.Routes[0].Legs {
-			steps = append(steps, leg.Steps...)
-		}
+	if q.countries {
 		o.splitByCountry(&r, steps)
 	}
+	out := osrmRoute{weight: raw.Weight}
+	if q.summary {
+		r.Summary = o.summary(steps, r.Km)
+		r.DurationH = raw.Duration / 3600
+		var names []string
+		for _, f := range r.Summary.Ferries {
+			names = append(names, f.Name)
+		}
+		sort.Strings(names)
+		out.ferries = strings.Join(names, "|")
+	}
+	if q.nodes {
+		out.edges = map[[2]int64]float64{}
+		for _, leg := range raw.Legs {
+			a := leg.Annotation
+			for i := 0; i+1 < len(a.Nodes) && i < len(a.Distance); i++ {
+				out.edges[[2]int64{a.Nodes[i], a.Nodes[i+1]}] += a.Distance[i]
+			}
+		}
+	}
+	out.route = r
+	return out
+}
 
-	if withPath {
-		return r, nil
-	}
-	o.mu.Lock()
-	cache, maxEntries := &o.cache, maxCacheEntries
-	if withCountries { // apart, so that split routes don't push plain ones out
-		cache, maxEntries = &o.splitCache, maxSplitCacheEntries
-	}
-	if *cache == nil || len(*cache) >= maxEntries {
-		*cache = make(map[string]calc.Route)
-	}
-	(*cache)[key] = r
-	o.mu.Unlock()
-	return r, nil
+// isNoRoute says whether err is OSRM finding no route between the points.
+func isNoRoute(err error) bool {
+	s := err.Error()
+	return strings.Contains(s, "NoRoute") || strings.Contains(s, "no route")
 }
 
 // osrmStep is a route step as OSRM sends it. Geometry is GeoJSON when
@@ -288,6 +413,8 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 type osrmStep struct {
 	Distance float64         `json:"distance"` // metres
 	Mode     string          `json:"mode"`
+	Name     string          `json:"name"`
+	Ref      string          `json:"ref"`
 	Geometry json.RawMessage `json:"geometry"`
 }
 
