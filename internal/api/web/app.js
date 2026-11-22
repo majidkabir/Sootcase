@@ -327,7 +327,7 @@ function placeSearch(box, leg) {
     };
     list.innerHTML = items.length ? items.map((p, i) => `<li role="option" id="${list.id}-${i}">${esc(p.name)}${p.alt_name && p.alt_name !== p.name ? " · " + esc(p.alt_name) : ""}${p.code ? `<span class="code">${esc(p.code)}</span>` : ""}
         <span class="where">${esc(kinds(p))} · ${esc([p.region, p.country_name || p.country].filter(Boolean).join(", "))}</span></li>`).join("")
-      : `<li class="none">Nothing found${kindsFor[mode] ? " for " + modeName[mode].toLowerCase() : ""}. Try a city or a code like NLRTM or CPH.</li>`;
+      : `<li class="none">${kindsFor[mode] ? `Nothing found (${modeName[mode]}).` : "Nothing found."} Try a city or a code like NLRTM or CPH.</li>`;
     [...list.querySelectorAll("li[role=option]")].forEach((li, i) => li.addEventListener("mousedown", e => { e.preventDefault(); choose(items[i]); }));
     list.hidden = false; input.setAttribute("aria-expanded", "true"); highlight(items.length ? 0 : -1);
   }
@@ -447,7 +447,7 @@ function legInfo(req, l) {
 
 function render(req, r) {
   const parts = [
-    ...r.legs.map(l => ({ label: `${legInfo(req, l).name}, ${(modeName[l.mode] || l.mode).toLowerCase()}`, ttw: l.ttw_kg, wtt: l.wtt_kg, wtw: l.wtw_kg })),
+    ...r.legs.map(l => ({ label: `${legInfo(req, l).name}, ${modeName[l.mode] || l.mode}`, ttw: l.ttw_kg, wtt: l.wtt_kg, wtw: l.wtw_kg })),
     // Hub factors are well-to-wheel totals with no TTW/WTT split (GLEC v3.3 Table 3): drawn as a total.
     ...(r.hubs || []).map(h => ({ label: h.hub_type, ttw: 0, wtt: 0, wtw: h.wtw_kg, hub: true })),
   ];
@@ -488,7 +488,7 @@ function render(req, r) {
     const vname = vehicleLabels[info.req.vehicle_type] || vehicleLabels[l.vehicle_type] || "";
     if (l.note) how = `<div class="note">${esc(l.note)}</div>` + how;
     return `<tr>
-      <td><strong>${info.name}</strong> ${esc((modeName[l.mode] || "").toLowerCase())}${l.added ? `<br><span class="dtype added">added</span>` : ""}</td>
+      <td><strong>${info.name}</strong> ${esc(modeName[l.mode] || "")}${l.added ? `<br><span class="dtype added">added</span>` : ""}</td>
       <td class="num">${fmt(l.distance_km, 0)} km<div class="id">${esc(distName[l.distance_method] || l.distance_method || "")}</div></td>
       <td>${esc(methodName[l.method] || l.method)}<br><span class="dtype ${esc(l.data_type)}">${esc(l.data_type)}</span></td>
       <td class="num">${kg(l.ttw_kg)}</td><td class="num">${kg(l.wtt_kg)}</td><td class="num"><strong>${kg(l.wtw_kg)}</strong></td>
@@ -504,7 +504,7 @@ function render(req, r) {
   const warnings = (r.warnings || []).map(w => `<li>${esc(w)}</li>`).join("");
   $("#result").innerHTML = `
     <p class="answer">This shipment emits <strong>${kg(r.wtw_kg)}</strong> CO₂e well-to-wheel.</p>
-    ${added ? `<p class="warn">${added === 1 ? "A road leg was" : `${added} road legs were`} added to join up the trip; they are marked <em>added</em> below and included in the total.</p>` : ""}
+    ${added ? `<p class="warn">${added === 1 ? "A road leg was added to join up the trip; it is marked <em>added</em> below and included in the total." : `${added} road legs were added to join up the trip; they are marked <em>added</em> below and included in the total.`}</p>` : ""}
     ${warnings ? `<div class="warn">Check these, they may make the result too low:<ul>${warnings}</ul></div>` : ""}
     <p class="answer-sub">${fmt(r.weight_kg / 1000, 2)} t over ${fmt(r.tonne_km, 0)} tonne-km:
       ${kg(r.ttw_kg)} from the vehicles, ${kg(r.wtt_kg)} from producing their fuel or electricity,${(r.hubs || []).length ?
@@ -846,15 +846,15 @@ async function downloadILEAP() {
   download(JSON.stringify(r, null, 2), "application/json", "ileap.json");
   const gaps = (r.gaps || []).length;
   msg.textContent = r.conformant ? "Downloaded: complete, every value iLEAP requires is in it."
-    : `Downloaded. ${gaps} value${gaps === 1 ? "" : "s"} iLEAP requires ${gaps === 1 ? "isn't" : "aren't"} in the data: listed under "gaps" in the file, not guessed`
+    : (gaps === 1 ? "Downloaded. 1 value iLEAP requires isn't in the data: listed under “gaps” in the file, not guessed" : `Downloaded. ${gaps} values iLEAP requires aren't in the data: listed under “gaps” in the file, not guessed`)
       + (!org || !$("#rfrom").value || !$("#rto").value ? " (fill in organisation and period to add those)." : ".");
 }
 
 const pct = v => fmt(v * 100, 1) + "%";
-const legs = n => `${n} leg${n === 1 ? "" : "s"}`;
+const legs = n => n === 1 ? "1 leg" : `${n} legs`;
 const distLabel = m => Object.entries(m || {}).sort((a, b) => b[1] - a[1])
-  .map(([k, v]) => (Object.keys(m).length > 1 ? `${{ sfd: "SFD", gcd: "GCD", actual: "actual" }[k] || "unspecified"} ${pct(v)}`
-    : ({ sfd: "SFD", gcd: "GCD", actual: "actual" }[k] || "unspecified"))).join(", ");
+  .map(([k, v]) => (Object.keys(m).length > 1 ? `${{ sfd: "SFD", gcd: "GCD", actual: "Actual" }[k] || "Unspecified"} ${pct(v)}`
+    : ({ sfd: "SFD", gcd: "GCD", actual: "Actual" }[k] || "Unspecified"))).join(", ");
 
 function renderReport(r) {
   const t = r.total, c = r.coverage, d = r.data_quality;
