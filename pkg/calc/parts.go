@@ -19,6 +19,14 @@ type Route struct {
 	// (Belgium), by region (ISO 3166-2, e.g. BE-VLG); the regions of a
 	// country add up to its CountryKm.
 	RegionKm map[string]float64
+	// Summary and DurationH are set when alternatives were asked for
+	// (RouteOptions.Alternatives > 1): the route's main roads and ferries,
+	// and the router's driving time, ferry time included, in hours.
+	Summary   *RouteSummary
+	DurationH float64
+	// Alternatives are other routes for the same trip, when asked for,
+	// each with the same detail as this one.
+	Alternatives []Route
 }
 
 // CountryUnknown is the CountryKm key for distance that is in no

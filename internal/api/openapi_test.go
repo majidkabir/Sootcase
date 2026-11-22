@@ -80,7 +80,7 @@ func TestOpenAPIMatchesTypes(t *testing.T) {
 	types := map[string]any{
 		"Location": calc.Location{}, "Place": places.Place{}, "FuelUse": calc.FuelUse{}, "OwnFactor": calc.OwnFactor{},
 		"Leg": calc.Leg{}, "HubStop": calc.HubStop{}, "Shipment": calc.Shipment{}, "Factor": calc.Factor{},
-		"FuelFactor": calc.FuelFactor{}, "HubFactor": calc.HubFactor{}, "LegResult": calc.LegResult{}, "LegPart": calc.LegPart{},
+		"FuelFactor": calc.FuelFactor{}, "HubFactor": calc.HubFactor{}, "LegResult": calc.LegResult{}, "LegPart": calc.LegPart{}, "RouteSummary": calc.RouteSummary{},
 		"Result": calc.Result{}, "Dataset": factors.Dataset{}, "Report": report.Report{}, "RecommendSettings": recommend.Settings{},
 		"RecommendRoute": recommend.Route{}, "ScenarioChange": scenario.Change{}, "ScenarioPlan": scenario.Plan{},
 		"ScenarioTotals": scenario.Totals{}, "ScenarioResult": scenario.Result{},

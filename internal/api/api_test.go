@@ -419,3 +419,30 @@ func TestReport_ResultsWithoutIDs(t *testing.T) {
 		t.Errorf("results: %d, want 3", n)
 	}
 }
+
+// alternatives takes 1 to 5; 1 changes nothing; avoid takes ferries.
+func TestCalculate_RouteOptions(t *testing.T) {
+	srv := newTestServer(t)
+	body := `{"id":"s1","weight_kg":10000,"legs":[{"id":"l1","mode":"road","vehicle_type":"truck_40t","distance_km":500}]}`
+	get := func(q string) (int, string) {
+		resp, err := http.Post(srv.URL+"/v1/calculate"+q, "application/json", strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		b, _ := io.ReadAll(resp.Body)
+		return resp.StatusCode, string(b)
+	}
+	for _, q := range []string{"?alternatives=0", "?alternatives=6", "?alternatives=two", "?alternatives=", "?avoid=tolls", "?avoid="} {
+		if code, b := get(q); code != http.StatusBadRequest && !(q == "?avoid=" && code == 200) {
+			t.Errorf("%s: %d %s", q, code, b)
+		}
+	}
+	_, plain := get("")
+	for _, q := range []string{"?alternatives=1", "?alternatives=3", "?avoid=ferries&alternatives=5"} {
+		// A given distance isn't routed: the same result, field for field.
+		if code, b := get(q); code != 200 || b != plain {
+			t.Errorf("%s: %d %s", q, code, b)
+		}
+	}
+}

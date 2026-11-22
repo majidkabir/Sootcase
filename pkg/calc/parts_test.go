@@ -156,3 +156,33 @@ func TestKmWithin(t *testing.T) {
 		t.Errorf("within rounding: %v, %v", sum, err)
 	}
 }
+
+// Each alternative route is calculated exactly like the leg's own: here a
+// 100 km route with 20 km of ferry, and a 150 km land route. The totals
+// stay the leg's own route's.
+func TestCalculate_Alternatives(t *testing.T) {
+	land := Route{Km: 150, Summary: &RouteSummary{Roads: []string{"E 20"}, Ferries: []FerryCrossing{}}, DurationH: 2.5}
+	primary := Route{Km: 100, Parts: map[string]float64{PartFerry: 20}, DurationH: 2,
+		Summary:      &RouteSummary{Roads: []string{"E 47"}, Ferries: []FerryCrossing{{Name: "A - B", From: "A", To: "B", DistanceKm: 20}}},
+		Alternatives: []Route{land}}
+	c := Calculator{Factors: partFactors, Distances: fakeRouter(primary)}
+	s := Shipment{WeightKg: 10_000, Legs: []Leg{{ID: "road", Mode: Road, VehicleType: "truck", From: cph, To: aar}}}
+	r, err := c.Calculate(context.Background(), s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l := r.Legs[0]
+	if !approx(l.WTWKg, 134) || l.Summary.Roads[0] != "E 47" || l.DurationH != 2 || l.ID != "" || len(l.Alternatives) != 1 {
+		t.Fatalf("leg %+v", l)
+	}
+	// 150 km x 10 t x 75 g = 112.5 kg, as the same leg on that route alone.
+	a := l.Alternatives[0]
+	alone, _ := Calculator{Factors: partFactors, Distances: fakeRouter(land)}.Calculate(context.Background(), s)
+	if a.ID != "alt1" || a.LegID != "road" || !approx(a.WTWKg, 112.5) || !approx(a.WTWKg, alone.Legs[0].WTWKg) ||
+		!approx(a.TTWKg, alone.Legs[0].TTWKg) || len(a.Parts) != 0 || a.DurationH != 2.5 || a.Summary.Roads[0] != "E 20" || a.Alternatives != nil {
+		t.Errorf("alternative %+v", a)
+	}
+	if !approx(r.WTWKg, 134) {
+		t.Errorf("total %v, want the leg's own route's", r.WTWKg)
+	}
+}

@@ -319,6 +319,9 @@ func (s *Server) calculate(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if ctx, ok = withRouteOptions(ctx, w, r); !ok {
+		return
+	}
 	res, err := s.Calc.CalculateRetrying(ctx, sh)
 	if err != nil {
 		writeError(w, calcStatus(err), err)
@@ -698,6 +701,37 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_, _ = w.Write(append(b, '\n'))
+}
+
+// withRouteOptions reads the alternatives (1 to calc.MaxAlternatives
+// routes per road leg) and avoid (ferries) query parameters. It writes a
+// 400 for a bad value. alternatives=1 and no avoid leave the calculation
+// as without them.
+func withRouteOptions(ctx context.Context, w http.ResponseWriter, r *http.Request) (context.Context, bool) {
+	var o calc.RouteOptions
+	q := r.URL.Query()
+	if q.Has("alternatives") {
+		n, err := calc.ParseAlternatives(q.Get("alternatives"))
+		if err != nil {
+			writeError(w, http.StatusBadRequest, err)
+			return ctx, false
+		}
+		if n > 1 {
+			o.Alternatives = n
+		}
+	}
+	switch v := q.Get("avoid"); v {
+	case "":
+	case "ferries":
+		o.AvoidFerries = true
+	default:
+		writeError(w, http.StatusBadRequest, fmt.Errorf("%w: avoid must be ferries, not %q", calc.ErrInvalidInput, v))
+		return ctx, false
+	}
+	if o != (calc.RouteOptions{}) {
+		ctx = calc.WithRouteOptions(ctx, o)
+	}
+	return ctx, true
 }
 
 // withCountryKm reads the country_km query parameter: true asks for each

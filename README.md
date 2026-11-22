@@ -161,7 +161,7 @@ Run your own OSRM server; the public demo server isn't meant for production traf
 docker run -t -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-extract -p /opt/car.lua /data/denmark-latest.osm.pbf
 docker run -t -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-partition /data/denmark-latest.osrm
 docker run -t -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-customize /data/denmark-latest.osrm
-docker run -t -p 5000:5000 -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-routed --algorithm mld /data/denmark-latest.osrm
+docker run -t -p 5000:5000 -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-routed --algorithm mld --max-alternatives 5 /data/denmark-latest.osrm
 sootcase serve -osrm http://localhost:5000
 ```
 
@@ -385,7 +385,7 @@ Each output line is `{"line": n, "shipment_id": "...", "result": {...}}`, or `{"
 
 | Method | Path | |
 |---|---|---|
-| `POST` | `/v1/calculate` | one shipment; `?explain=true` adds the step-by-step calculation sheet (`explanation`); `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point); `?country_km=true` adds each road and rail leg's km by country (`legs[].country_km`, ISO 3166-1 alpha-2, `XK` for Kosovo, Natural Earth's three-letter code for the few areas without one; ferry km stay in `route_parts_km`), and in Belgium by region (`legs[].region_km`: `BE-VLG`, `BE-WAL`, `BE-BRU`, ISO 3166-2; from Statbel's statistical sectors, CC BY 4.0) |
+| `POST` | `/v1/calculate` | one shipment; `?explain=true` adds the step-by-step calculation sheet (`explanation`); `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point); `?country_km=true` adds each road and rail leg's km by country (`legs[].country_km`, ISO 3166-1 alpha-2, `XK` for Kosovo, Natural Earth's three-letter code for the few areas without one; ferry km stay in `route_parts_km`), and in Belgium by region (`legs[].region_km`: `BE-VLG`, `BE-WAL`, `BE-BRU`, ISO 3166-2; from Statbel's statistical sectors, CC BY 4.0); `?alternatives=2`…`5` (since v0.14.0) adds other routes per routed road leg (`legs[].alternatives`, each calculated like the leg's own route, with `id`, `summary` of main roads and ferries, and `duration_h`; see [Alternative routes](#alternative-routes)); `?avoid=ferries` (since v0.14.0) routes road legs on land only, refusing a leg with no land route |
 | `POST` | `/v1/calculate/batch` | `{"shipments": [...]}`, up to 10,000; `?country_km=true` as for one shipment |
 | `POST` | `/v1/ileap` | the shipments as iLEAP ShipmentFootprints with their TOCs and HOCs (`company`, `company_ids`, `period_from`, `period_to`, `shipments`), and the `gaps` iLEAP requires that the data lacks |
 | `POST` | `/v1/ileap/operations` | an operator's measured data (`operations`, as for `sootcase toc`) as iLEAP TOCs and HOCs |
@@ -397,6 +397,17 @@ Each output line is `{"line": n, "shipment_id": "...", "result": {...}}`, or `{"
 | `GET` | `/openapi.yaml` | spec |
 | `GET` | `/healthz` | liveness |
 | `GET` | `/` | web page |
+
+### Alternative routes
+
+`POST /v1/calculate?alternatives=N` (N from 1 to 5; since v0.14.0) looks for up to N routes per routed road leg, its own included, for comparing them (e.g. their tolls and fares). Each road leg then has `summary` (its main roads by reference, in the order driven, and its ferry crossings with their names, ports and km, from OpenStreetMap), `duration_h` (the router's driving time with ferry time; the car profile's, not a truck's), and `alternatives`: the other routes, each with the fields of a leg result, calculated exactly like the leg's own route, an `id` (`alt1`, `alt2`, …) and its own `summary` and `duration_h`. Which routes count:
+
+- no longer than 1.5 × the leg's route;
+- two routes sharing 80% or more of their length are one route, unless they cross different ferries;
+- a route with a ferry gets the best land-only route among its alternatives; a land-only route gets a ferry route when the router offers one; each other set of ferry crossings gets its best route; the rest go by the router's cost (OSRM's weight), and the chosen are listed in that order;
+- fewer come back when there are fewer different routes, and the same request on the same map gives the same routes.
+
+The shipment's totals stay those of each leg's own route. `alternatives=1`, or no parameter, changes nothing. `avoid=ferries` routes road legs on land only (OSRM's `exclude=ferry`; a leg without a land route is refused, 422) and combines with `alternatives`. Road legs routed across two routing regions have no alternatives. The OSRM server needs `--max-alternatives 5` for five routes (its default allows 3, and Sootcase then asks for 3).
 
 A leg's `from` and `to` can be a code instead of coordinates: `{"code": "NLRTM"}` (UN/LOCODE) or `{"code": "CPH"}` (IATA); in CSV, `from_code` and `to_code`. The place list is embedded (about 180,000 places: GeoNames cities of 5,000 people or more, UN/LOCODE transport locations with coordinates, airports with IATA codes) and rebuilt monthly by `tools/gazetteer`; searches need no outside service.
 

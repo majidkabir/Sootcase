@@ -436,6 +436,25 @@ func (c Calculator) leg(ctx context.Context, tonnes float64, leg Leg) (LegResult
 	if err != nil {
 		return LegResult{}, err
 	}
+	lr, err := c.onRoute(ctx, tonnes, leg, rt, method, dtype)
+	if err != nil {
+		return LegResult{}, err
+	}
+	// Other routes, when asked for: each calculated exactly like the
+	// leg's own.
+	for i, alt := range rt.Alternatives {
+		a, err := c.onRoute(ctx, tonnes, leg, alt, method, dtype)
+		if err != nil {
+			return LegResult{}, fmt.Errorf("alternative route %d: %w", i+1, err)
+		}
+		a.ID = fmt.Sprintf("alt%d", i+1)
+		lr.Alternatives = append(lr.Alternatives, a)
+	}
+	return lr, nil
+}
+
+// onRoute calculates a leg over the route rt.
+func (c Calculator) onRoute(ctx context.Context, tonnes float64, leg Leg, rt Route, method, dtype string) (LegResult, error) {
 	dist, routeParts := rt.Km, rt.Parts
 
 	// Split off parts calculated differently, and calculate the rest of the
@@ -484,6 +503,7 @@ func (c Calculator) leg(ctx context.Context, tonnes float64, leg Leg) (LegResult
 	lr.RouteParts = routeParts
 	lr.CountryKm, lr.RegionKm = rt.CountryKm, rt.RegionKm
 	lr.Path = rt.Path
+	lr.Summary, lr.DurationH = rt.Summary, round3(rt.DurationH)
 	if WantPath(ctx) && len(lr.Path) == 0 && !isZero(leg.From) && !isZero(leg.To) {
 		lr.Path = [][2]float64{{leg.From.Lon, leg.From.Lat}, {leg.To.Lon, leg.To.Lat}}
 	}
@@ -771,18 +791,10 @@ func (c Calculator) distance(ctx context.Context, leg Leg) (rt Route, method, dt
 	if err != nil {
 		return Route{}, "", "", fmt.Errorf("distance: %w", err)
 	}
-	d := rt.Km
-	for k, v := range rt.Parts {
-		if !(v >= 0) || v > d*(1+1e-9) {
-			return Route{}, "", "", fmt.Errorf("distance: route part %s of %v km in a %v km route", k, v, d)
+	for _, r := range append([]Route{rt}, rt.Alternatives...) {
+		if err := checkRoute(r); err != nil {
+			return Route{}, "", "", err
 		}
-	}
-	countries, err := kmWithin(rt.CountryKm, d, "country", "route")
-	if err != nil {
-		return Route{}, "", "", err
-	}
-	if _, err := kmWithin(rt.RegionKm, countries, "region", "km by country"); err != nil {
-		return Route{}, "", "", err
 	}
 	if dm, ok := c.Distances.(DistanceMethoder); ok {
 		method = dm.DistanceMethod(leg.Mode)
@@ -791,6 +803,23 @@ func (c Calculator) distance(ctx context.Context, leg Leg) (rt Route, method, dt
 		dtype = dt.DistanceType(leg.Mode)
 	}
 	return rt, method, dtype, nil
+}
+
+// checkRoute checks what a router returned: parts within the route, and
+// km by country and region adding up.
+func checkRoute(rt Route) error {
+	d := rt.Km
+	for k, v := range rt.Parts {
+		if !(v >= 0) || v > d*(1+1e-9) {
+			return fmt.Errorf("distance: route part %s of %v km in a %v km route", k, v, d)
+		}
+	}
+	countries, err := kmWithin(rt.CountryKm, d, "country", "route")
+	if err != nil {
+		return err
+	}
+	_, err = kmWithin(rt.RegionKm, countries, "region", "km by country")
+	return err
 }
 
 func round3(v float64) float64 { return math.Round(v*1000) / 1000 }

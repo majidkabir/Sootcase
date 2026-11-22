@@ -303,6 +303,15 @@ type LegResult struct {
 	// a ferry crossing on a road leg, or the electrified track of a rail
 	// leg. Method and Factor above describe the rest of the leg.
 	Parts []LegPart `json:"parts,omitempty"`
+	// Set on routed road legs when alternatives were asked for
+	// (RouteOptions.Alternatives > 1): what tells the route apart, the
+	// router's driving time in hours (ferry time included), and the other
+	// routes, each calculated exactly like this one. ID names an
+	// alternative ("alt1", "alt2"); the leg's own route has none.
+	ID           string        `json:"id,omitempty"`
+	Summary      *RouteSummary `json:"summary,omitempty"`
+	DurationH    float64       `json:"duration_h,omitempty"`
+	Alternatives []LegResult   `json:"alternatives,omitempty"`
 }
 
 // HubResult is the outcome for one hub stop.
