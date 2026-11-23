@@ -190,7 +190,7 @@ It works with any region, and combines with the waterway file. CI routes Saarbr√
 With Docker Compose, add the override file and pick a region with navigable waterways:
 
 ```sh
-OSRM_PBF_URL=https://download.geofabrik.de/europe/netherlands-latest.osm.pbf \
+OSRM_PBF_URL=https://download.geofabrik.de/europe/netherlands/netherlands-latest.osm.pbf \
   docker compose -f compose.yaml -f compose.waterway.yaml up -d
 ```
 

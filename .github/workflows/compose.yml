@@ -94,7 +94,7 @@ jobs:
     timeout-minutes: 30
     env:
       # The Saar is a class Vb federal waterway through Saarland.
-      OSRM_PBF_URL: https://download.openstreetmap.fr/extracts/europe/germany/saarland-latest.osm.pbf
+      OSRM_PBF_URL: https://download.geofabrik.de/europe/germany/saarland/saarland-latest.osm.pbf
       SEA_RESOLUTION_KM: "100"
       COMPOSE_FILE: compose.yaml:compose.waterway.yaml:compose.rail.yaml
     steps:
@@ -160,7 +160,7 @@ jobs:
     timeout-minutes: 30
     env:
       # Suduroy has no road link: Torshavn-Tvoroyri needs the Smyril ferry.
-      OSRM_PBF_URL: https://download.openstreetmap.fr/extracts/europe/faroe_islands-latest.osm.pbf
+      OSRM_PBF_URL: https://download.geofabrik.de/europe/faroe-islands/faroe-islands-latest.osm.pbf
       SEA_RESOLUTION_KM: "100"
     steps:
       - uses: actions/checkout@v4
