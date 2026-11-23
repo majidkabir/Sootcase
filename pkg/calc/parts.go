@@ -27,6 +27,9 @@ type Route struct {
 	// Alternatives are other routes for the same trip, when asked for,
 	// each with the same detail as this one.
 	Alternatives []Route
+	// Warnings are about the route as a whole, e.g. a stop moved to a road
+	// the vehicle may use.
+	Warnings []Warning
 }
 
 // CountryUnknown is the CountryKm key for distance that is in no

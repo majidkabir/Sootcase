@@ -536,6 +536,46 @@ components:
           type: string
           description: ISO 3166-1 alpha-3 country whose grid powers the leg, e.g. DNK
         own_factor: { $ref: "#/components/schemas/OwnFactor" }
+        vehicle: { $ref: "#/components/schemas/Vehicle" }
+    Vehicle:
+      type: object
+      description: "Road legs (since v0.15.0): the truck, so that the route keeps to roads it may use (OpenStreetMap's hgv access, maxheight, maxwidth, maxlength, maxweight, maxaxleload and hazmat tags; see README, Truck restrictions). Every field is optional; one left out puts no limit for it. Routing is built for one truck profile (4.0 m, 2.60 m, 18.75 m, 40 t, 11.5 t per axle), so any vehicle gets the roads that profile may use, and a vehicle beyond it is refused (422). vehicle_type still picks the emission factors. A value out of range: 400."
+      properties:
+        height_m: { type: number, minimum: 1.5, maximum: 5.0, description: "Height with load" }
+        width_m: { type: number, minimum: 1.5, maximum: 3.5, description: "Width without mirrors" }
+        length_m: { type: number, minimum: 4, maximum: 30, description: "Length of the whole combination" }
+        gross_weight_kg: { type: number, minimum: 3500, maximum: 60000, description: "Actual gross weight: truck, trailer and cargo" }
+        axle_load_kg: { type: number, minimum: 1000, maximum: 15000, description: "Heaviest axle load" }
+        axles: { type: integer, minimum: 2, maximum: 12 }
+        trailer: { type: string, enum: [none, semi, drawbar] }
+        hazmat: { type: boolean, description: "Carries dangerous goods under ADR: roads tagged hazmat=no are left out" }
+        tunnel_code: { type: string, enum: [B, C, D, E], description: "The load's ADR tunnel restriction code (ADR 1.9.5); implies hazmat. Tunnels tagged hazmat:<code>=no are left out. Can't be combined with ?avoid=ferries (422)." }
+    Restrictions:
+      type: object
+      description: "What a road leg with a vehicle was routed for: the vehicle's fields as read, the limits the roads were chosen for, and the router's classes left out."
+      properties:
+        height_m: { type: number }
+        width_m: { type: number }
+        length_m: { type: number }
+        gross_weight_kg: { type: number }
+        axle_load_kg: { type: number }
+        axles: { type: integer }
+        trailer: { type: string }
+        hazmat: { type: boolean }
+        tunnel_code: { type: string }
+        routed_for:
+          type: object
+          description: "A road was left out when its limit is below one of these"
+          properties:
+            height_m: { type: number }
+            width_m: { type: number }
+            length_m: { type: number }
+            gross_weight_kg: { type: number }
+            axle_load_kg: { type: number }
+            hgv_access: { type: boolean, description: "hgv=no, hgv=destination and hgv=delivery roads left out (a stop on one is reached from the nearest road the truck may use, with a warning)" }
+            tunnel_code: { type: string, description: "Tunnels barring this ADR code left out" }
+            hazmat_no: { type: boolean, description: "hazmat=no roads left out" }
+        excluded: { type: array, items: { type: string }, description: "The road router's classes left out (truck, hzb to hze; see the core's deploy/truck.lua)" }
     HubStop:
       type: object
       required: [hub_type]
@@ -677,6 +717,7 @@ components:
           type: array
           description: "With ?alternatives=2 to 5 only, on routed road legs: other routes, each with the fields of a leg result (calculated the same way), an id, summary and duration_h; ordered by the router's cost."
           items: { $ref: "#/components/schemas/LegResult" }
+        restrictions: { $ref: "#/components/schemas/Restrictions" }
     RouteSummary:
       type: object
       description: "With ?alternatives only: what tells a route apart, from OpenStreetMap."

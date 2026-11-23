@@ -158,12 +158,14 @@ On the 20 km network, distances are within 0.3% of SeaRoute's own output for 7 o
 Run your own OSRM server; the public demo server isn't meant for production traffic:
 
 ```sh
-docker run -t -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-extract -p /opt/car.lua /data/denmark-latest.osm.pbf
+docker run -t -v "$PWD:/data" -v "$PWD/deploy:/profiles:ro" ghcr.io/project-osrm/osrm-backend osrm-extract -p /profiles/truck.lua /data/denmark-latest.osm.pbf
 docker run -t -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-partition /data/denmark-latest.osrm
 docker run -t -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-customize /data/denmark-latest.osrm
 docker run -t -p 5000:5000 -v "$PWD:/data" ghcr.io/project-osrm/osrm-backend osrm-routed --algorithm mld --max-alternatives 5 /data/denmark-latest.osrm
 sootcase serve -osrm http://localhost:5000
 ```
+
+[`deploy/truck.lua`](deploy/truck.lua) is OSRM's car profile with classes for roads a truck may not use, so that legs with a `vehicle` can leave them out ([Truck restrictions](#truck-restrictions)); without a vehicle its routes are the car profile's. `/opt/car.lua` works too, without truck restrictions.
 
 OSRM takes any point to the nearest road it knows, however far away, so a point outside its map would get a distance that means nothing. A road leg that starts or ends more than 25 km from a road is therefore refused; `-road-max-snap-km` changes the limit.
 
@@ -385,7 +387,7 @@ Each output line is `{"line": n, "shipment_id": "...", "result": {...}}`, or `{"
 
 | Method | Path | |
 |---|---|---|
-| `POST` | `/v1/calculate` | one shipment; `?explain=true` adds the step-by-step calculation sheet (`explanation`); `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point); `?country_km=true` adds each road and rail leg's km by country (`legs[].country_km`, ISO 3166-1 alpha-2, `XK` for Kosovo, Natural Earth's three-letter code for the few areas without one; ferry km stay in `route_parts_km`), and in Belgium by region (`legs[].region_km`: `BE-VLG`, `BE-WAL`, `BE-BRU`, ISO 3166-2; from Statbel's statistical sectors, CC BY 4.0); `?alternatives=2`…`5` (since v0.14.0) adds other routes per routed road leg (`legs[].alternatives`, each calculated like the leg's own route, with `id`, `summary` of main roads and ferries, and `duration_h`; see [Alternative routes](#alternative-routes)); `?avoid=ferries` (since v0.14.0) routes road legs on land only, refusing a leg with no land route |
+| `POST` | `/v1/calculate` | one shipment; `?explain=true` adds the step-by-step calculation sheet (`explanation`); `?path=true` adds each leg's route as GeoJSON `[lon, lat]` points (`legs[].path`): `true`/`simplified` (a few dozen points), `detailed` (at most 1,000) or `full` (every point); `?country_km=true` adds each road and rail leg's km by country (`legs[].country_km`, ISO 3166-1 alpha-2, `XK` for Kosovo, Natural Earth's three-letter code for the few areas without one; ferry km stay in `route_parts_km`), and in Belgium by region (`legs[].region_km`: `BE-VLG`, `BE-WAL`, `BE-BRU`, ISO 3166-2; from Statbel's statistical sectors, CC BY 4.0); `?alternatives=2`…`5` (since v0.14.0) adds other routes per routed road leg (`legs[].alternatives`, each calculated like the leg's own route, with `id`, `summary` of main roads and ferries, and `duration_h`; see [Alternative routes](#alternative-routes)); `?avoid=ferries` (since v0.14.0) routes road legs on land only, refusing a leg with no land route; a leg's `vehicle` (since v0.15.0) routes it on roads that truck may use and adds `legs[].restrictions` (see [Truck restrictions](#truck-restrictions)) |
 | `POST` | `/v1/calculate/batch` | `{"shipments": [...]}`, up to 10,000; `?country_km=true` as for one shipment |
 | `POST` | `/v1/ileap` | the shipments as iLEAP ShipmentFootprints with their TOCs and HOCs (`company`, `company_ids`, `period_from`, `period_to`, `shipments`), and the `gaps` iLEAP requires that the data lacks |
 | `POST` | `/v1/ileap/operations` | an operator's measured data (`operations`, as for `sootcase toc`) as iLEAP TOCs and HOCs |
@@ -408,6 +410,40 @@ Each output line is `{"line": n, "shipment_id": "...", "result": {...}}`, or `{"
 - fewer come back when there are fewer different routes, and the same request on the same map gives the same routes.
 
 The shipment's totals stay those of each leg's own route. `alternatives=1`, or no parameter, changes nothing. `avoid=ferries` routes road legs on land only (OSRM's `exclude=ferry`; a leg without a land route is refused, 422) and combines with `alternatives`. Road legs routed across two routing regions have no alternatives. The OSRM server needs `--max-alternatives 5` for five routes (its default allows 3, and Sootcase then asks for 3).
+
+### Truck restrictions
+
+A road leg can say what truck drives it (since v0.15.0), so that its route keeps to roads that truck may use:
+
+```json
+"vehicle": {"height_m": 4.0, "width_m": 2.55, "length_m": 16.5, "gross_weight_kg": 40000,
+            "axle_load_kg": 11500, "axles": 5, "trailer": "semi", "tunnel_code": "D"}
+```
+
+Every field is optional; `vehicle_type` still picks the emission factors. A value out of range (height 1.5–5.0 m, width 1.5–3.5 m, length 4–30 m, gross weight 3,500–60,000 kg, axle load 1,000–15,000 kg, axles 2–12, trailer `none`, `semi` or `drawbar`, tunnel code B–E) is refused with HTTP 400 naming the field.
+
+The road router ([`deploy/truck.lua`](deploy/truck.lua)) sorts roads into classes from their OpenStreetMap tags when its data is built, and a leg with a vehicle leaves the classes out (OSRM's `exclude`). OSRM allows 7 classes and 7 combinations of them, so routing is built for one truck profile: Directive 96/53/EC's limits, with the refrigerated width and the road-train length.
+
+| Left out for every vehicle | OpenStreetMap tags |
+|---|---|
+| roads closed to trucks | `hgv=no`, `hgv=destination`, `hgv=delivery` |
+| lower than 4.0 m | `maxheight`, `maxheight:physical` below 4.0 m |
+| narrower than 2.60 m | `maxwidth`, `maxwidth:physical` below 2.60 m |
+| shorter than 18.75 m | `maxlength`, `maxlength:hgv` below 18.75 m |
+| lighter than 40 t | `maxweight`, `maxweight:hgv`, `maxweightrating(:hgv)` below 40 t |
+| lighter than 11.5 t per axle | `maxaxleload`, `maxaxleload:hgv` below 11.5 t |
+| **With dangerous goods** | |
+| tunnels barring the load's code | `hazmat:B=no` … `hazmat:E=no` for tunnel code B … E (OpenStreetMap tags every code a tunnel bars); `hazmat=no` |
+
+So any truck within those limits gets roads it may use; a smaller or lighter one gets the same roads (a road it could use may be left out), and one beyond them (e.g. 4.2 m high or 44 t) is refused with HTTP 422, as the router has no profile for it. `hazmat: true` without a code leaves out `hazmat=no` roads and code E tunnels. `:forward` and `:backward` limits count for their direction, `:conditional` limits count as always on, values in feet and inches (`13'6"`), cm, kg, lbs or short tons (`st`) are converted, and `default`, `below_default`, `none` and the like put no limit. Ferries are never left out by these (a ship's own rules aren't in the map). Limits tagged on nodes (a `barrier=height_restrictor`) can't be classes: only the car profile's own 2.0 m check applies to them.
+
+- **A stop on a road the truck may not use** (e.g. a street signed `hgv=destination`, or a dead end behind a low bridge): the route starts or ends on the nearest road it may use, and a `warnings` entry (`truck_stop_moved`) says so and how far.
+- **No route keeps to the limits:** HTTP 422 naming the leg and what every route uses, e.g. `leg "road": no route for this vehicle: every route uses tunnels closed to tunnel code D`.
+- Each road leg routed with a vehicle has `restrictions`: the vehicle's fields as read, `routed_for` (the limits the roads were chosen for) and `excluded` (the router's classes).
+- `vehicle` combines with `alternatives` (every route keeps to the limits; the same rules choose among them) and with `avoid=ferries`, except with dangerous goods: no class combination is left for a tunnel code without ferries, so that is refused (422), and a dangerous-goods leg whose route has a ferry gets no land-only alternative.
+- A route joined across two routing regions keeps to the limits on both halves; the crossing point is chosen without them.
+- A vehicle on a leg with a given `distance_km` changes nothing (the leg isn't routed). Road legs added to join legs up (`add_road_legs`) are routed without a vehicle.
+- Speed: a route with a vehicle asks the router once more for each end farther than 50 m from the road it starts or ends on (to see whether the stop was moved), and, when no route is found, once per class left out (to say which one blocks).
 
 A leg's `from` and `to` can be a code instead of coordinates: `{"code": "NLRTM"}` (UN/LOCODE) or `{"code": "CPH"}` (IATA); in CSV, `from_code` and `to_code`. The place list is embedded (about 180,000 places: GeoNames cities of 5,000 people or more, UN/LOCODE transport locations with coordinates, airports with IATA codes) and rebuilt monthly by `tools/gazetteer`; searches need no outside service.
 
