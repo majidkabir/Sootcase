@@ -261,6 +261,8 @@ func (s *Server) checkSize(sh calc.Shipment) error {
 // calcStatus maps a calculation error to an HTTP status.
 func calcStatus(err error) int {
 	switch {
+	case errors.Is(err, calc.ErrInvalidVehicle):
+		return http.StatusBadRequest // a vehicle field out of range
 	case calc.Temporary(err):
 		return http.StatusServiceUnavailable // not the input's fault: try again
 	case errors.Is(err, context.DeadlineExceeded):

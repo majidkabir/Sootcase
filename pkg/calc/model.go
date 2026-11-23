@@ -72,6 +72,9 @@ type Leg struct {
 	// OwnFactor is the carrier's or your own intensity for this leg, used
 	// instead of a default value (primary data, ISO 14083 7.2.3).
 	OwnFactor *OwnFactor `json:"own_factor,omitempty"`
+	// Vehicle (road legs) routes the leg on roads this truck may use: its
+	// size, weight and dangerous goods (see Vehicle). Routed legs only.
+	Vehicle *Vehicle `json:"vehicle,omitempty"`
 	// AtTerminals (rail, inland waterway, sea) makes the leg start and end
 	// at a rail terminal or port: an end that isn't at one moves to the
 	// nearest one, with a road leg to it, even when the end is on the
@@ -312,6 +315,11 @@ type LegResult struct {
 	Summary      *RouteSummary `json:"summary,omitempty"`
 	DurationH    float64       `json:"duration_h,omitempty"`
 	Alternatives []LegResult   `json:"alternatives,omitempty"`
+	// Restrictions is what a road leg with a vehicle was routed for (see
+	// Leg.Vehicle); left out when the leg has none or wasn't routed.
+	Restrictions *Restrictions `json:"restrictions,omitempty"`
+	// warnings are the route's, for the result's Warnings.
+	warnings []Warning
 }
 
 // HubResult is the outcome for one hub stop.

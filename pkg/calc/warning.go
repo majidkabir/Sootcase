@@ -9,6 +9,7 @@ const (
 	WarnSeaInland      = "sea_inland"       // a sea leg ends away from the sea network; counted as sea distance
 	WarnGapNotCounted  = "gap_not_counted"  // legs don't join up and adding road legs is off
 	WarnAddedLegFailed = "added_leg_failed" // a road leg to add couldn't be calculated
+	WarnTruckStop      = "truck_stop_moved" // a stop is on a road the leg's vehicle may not use; routed from the nearest it may
 )
 
 // Warning is something left as given that may make the result too low. In

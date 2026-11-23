@@ -144,10 +144,25 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	if m != calc.Road {
 		opts = calc.RouteOptions{}
 	}
-	// Routes with a path (single calculations, for a map) and routes with
-	// options skip the cache: cached routes have neither.
+	// A vehicle (road legs) leaves out the router's classes for roads it
+	// may not use.
+	var truck []string
+	if v := calc.VehicleOf(ctx); v != nil && m == calc.Road {
+		ex, _, err := v.Exclude()
+		if err != nil {
+			return calc.Route{}, err
+		}
+		truck = ex
+		if len(truck) > 1 && opts.AvoidFerries {
+			// The truck profile has no set for a tunnel code with ferries
+			// left out (OSRM allows 7 sets; deploy/truck.lua).
+			return calc.Route{}, fmt.Errorf("%w: road routing has no profile for dangerous goods with ferries avoided", calc.ErrNoTruckRoute)
+		}
+	}
+	// Routes with a path (single calculations, for a map), with options or
+	// for a vehicle skip the cache: cached routes have none of these.
 	withPath := calc.WantPath(ctx)
-	cached := !withPath && opts == (calc.RouteOptions{})
+	cached := !withPath && opts == (calc.RouteOptions{}) && truck == nil
 	if cached {
 		o.mu.Lock()
 		cache := o.cache
@@ -162,7 +177,7 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	}
 
 	q := routeQuery{path: calc.PathDetailOf(ctx), countries: withCountries,
-		summary: opts.Alternatives >= 1, avoidFerries: opts.AvoidFerries}
+		summary: opts.Alternatives >= 1, avoidFerries: opts.AvoidFerries, exclude: truck}
 	if opts.Alternatives > 1 {
 		// A few more than asked for: some are dropped as too long or too
 		// like another.
@@ -175,6 +190,9 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 		q.alternatives = osrmDefaultMaxAlternatives
 		routes, err = o.fetch(ctx, m, key, q)
 	}
+	if err != nil && truck != nil && !errors.Is(err, calc.ErrNoTruckRoute) && !calc.Temporary(err) && isNoRoute(err) && ctx.Err() == nil {
+		return calc.Route{}, o.noTruckRoute(ctx, m, key, q, err)
+	}
 	if err != nil {
 		if opts.AvoidFerries && !calc.Temporary(err) && isNoRoute(err) {
 			return calc.Route{}, fmt.Errorf("no land route (ferries avoided): %w", err)
@@ -182,11 +200,20 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 		return calc.Route{}, err
 	}
 	r := routes[0].route
+	if truck != nil {
+		w, err := o.movedStops(ctx, from, to, routes[0].snapM)
+		if err != nil {
+			return calc.Route{}, err
+		}
+		r.Warnings = w
+	}
 	if opts.Alternatives > 1 {
 		cands := routes[1:]
 		// Ferry against land: a route with a ferry gets the best land-only
 		// route among its alternatives, when there is one.
-		if !opts.AvoidFerries && r.Parts[calc.PartFerry] > 0 {
+		// (Not for dangerous goods: the truck profile can't leave out
+		// ferries and their tunnels together.)
+		if !opts.AvoidFerries && r.Parts[calc.PartFerry] > 0 && len(truck) <= 1 {
 			land := q
 			land.alternatives, land.avoidFerries = 0, true
 			lr, err := o.fetch(ctx, m, key, land)
@@ -227,6 +254,7 @@ type routeQuery struct {
 	alternatives int             // other routes to look for (0: none)
 	nodes        bool            // node annotations, to compare routes
 	avoidFerries bool
+	exclude      []string // the router's classes to leave out (a vehicle's)
 }
 
 // osrmRoute is one route of a response, with what is needed to compare it
@@ -236,6 +264,7 @@ type osrmRoute struct {
 	weight  float64              // OSRM's cost, which it ranks routes by
 	edges   map[[2]int64]float64 // metres by node pair (with nodes)
 	ferries string               // its ferry crossings' names, as a key
+	snapM   [2]float64           // metres from the start and end to the network
 }
 
 // fetch asks OSRM for the route from key's points, and others when q asks.
@@ -267,8 +296,8 @@ func (o *OSRM) fetch(ctx context.Context, m calc.Mode, key string, q routeQuery)
 	if q.nodes {
 		u += "&annotations=nodes,distance"
 	}
-	if q.avoidFerries {
-		u += "&exclude=ferry"
+	if ex := q.excluded(); len(ex) > 0 {
+		u += "&exclude=" + strings.Join(ex, ",")
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
@@ -317,6 +346,10 @@ func (o *OSRM) fetch(ctx context.Context, m calc.Mode, key string, q routeQuery)
 		if busy {
 			return nil, fmt.Errorf("osrm: %w (HTTP %d, %s: %s)", calc.ErrTemporary, resp.StatusCode, body.Code, body.Message)
 		}
+		if len(q.exclude) > 0 && body.Code == "InvalidValue" && strings.Contains(strings.ToLower(body.Message), "exclude") {
+			// Data built without the truck profile's classes.
+			return nil, fmt.Errorf("%w: this server's road routing has no truck data (%s)", calc.ErrNoTruckRoute, body.Message)
+		}
 		return nil, fmt.Errorf("osrm: %s: %s", body.Code, body.Message)
 	}
 	if len(body.Routes) == 0 {
@@ -331,6 +364,9 @@ func (o *OSRM) fetch(ctx context.Context, m calc.Mode, key string, q routeQuery)
 	out := make([]osrmRoute, len(body.Routes))
 	for i, raw := range body.Routes {
 		out[i] = o.build(raw, q)
+		if len(body.Waypoints) == 2 {
+			out[i].snapM = [2]float64{body.Waypoints[0].Distance, body.Waypoints[1].Distance}
+		}
 	}
 	return out, nil
 }

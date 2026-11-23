@@ -12,7 +12,7 @@ on:
     inputs:
       region:
         description: Geofabrik .osm.pbf URL
-        default: https://download.geofabrik.de/europe/netherlands-latest.osm.pbf
+        default: https://download.geofabrik.de/europe/netherlands/netherlands-latest.osm.pbf
       bbox:
         description: minLon,minLat,maxLon,maxLat for random points
         default: "3.4,50.8,7.2,53.5"

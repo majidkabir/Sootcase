@@ -85,6 +85,7 @@ func TestOpenAPIMatchesTypes(t *testing.T) {
 		"RecommendRoute": recommend.Route{}, "ScenarioChange": scenario.Change{}, "ScenarioPlan": scenario.Plan{},
 		"ScenarioTotals": scenario.Totals{}, "ScenarioResult": scenario.Result{},
 		"ILEAPResponse": ILEAPResponse{}, "ILEAPGap": ileap.Gap{},
+		"Vehicle": calc.Vehicle{}, "Restrictions": calc.Restrictions{},
 	}
 	for name, v := range types {
 		props, ok := spec[name]

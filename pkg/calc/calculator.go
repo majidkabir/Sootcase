@@ -238,6 +238,13 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 			return Result{}, fmt.Errorf("leg %q: %w", p.ID, err)
 		}
 		lr.Added, lr.Note = p.added, p.note
+		for _, w := range lr.warnings {
+			name := p.ID
+			if name == "" {
+				name = fmt.Sprint(own)
+			}
+			res.Warnings = append(res.Warnings, Warning{w.Code, fmt.Sprintf("leg %s: %s", name, w.Text)})
+		}
 		if !isZero(p.From) && !isZero(p.To) {
 			from, to := p.From, p.To
 			lr.From, lr.To = &from, &to
@@ -440,6 +447,12 @@ func (c Calculator) leg(ctx context.Context, tonnes float64, leg Leg) (LegResult
 	if err != nil {
 		return LegResult{}, err
 	}
+	var restr *Restrictions
+	if leg.Vehicle != nil && leg.Mode == Road && leg.DistanceKm == 0 {
+		ex, lim, _ := leg.Vehicle.Exclude() // routed with them, so no error
+		restr = &Restrictions{Vehicle: *leg.Vehicle, RoutedFor: lim, Excluded: ex}
+	}
+	lr.Restrictions, lr.warnings = restr, rt.Warnings
 	// Other routes, when asked for: each calculated exactly like the
 	// leg's own.
 	for i, alt := range rt.Alternatives {
@@ -448,6 +461,7 @@ func (c Calculator) leg(ctx context.Context, tonnes float64, leg Leg) (LegResult
 			return LegResult{}, fmt.Errorf("alternative route %d: %w", i+1, err)
 		}
 		a.ID = fmt.Sprintf("alt%d", i+1)
+		a.Restrictions = restr
 		lr.Alternatives = append(lr.Alternatives, a)
 	}
 	return lr, nil
@@ -783,8 +797,13 @@ func (c Calculator) distance(ctx context.Context, leg Leg) (rt Route, method, dt
 	if c.Distances == nil {
 		return Route{}, "", "", errors.New("no distance given and no distance provider")
 	}
+	if leg.Vehicle != nil && leg.Mode == Road {
+		ctx = WithVehicle(ctx, leg.Vehicle)
+	}
 	if r, ok := c.Distances.(Router); ok {
 		rt, err = r.Route(ctx, leg.Mode, leg.From, leg.To)
+	} else if leg.Vehicle != nil && leg.Mode == Road {
+		return Route{}, "", "", fmt.Errorf("%w: road routing here can't keep to a vehicle's limits", ErrNoTruckRoute)
 	} else {
 		rt.Km, err = c.Distances.Distance(ctx, leg.Mode, leg.From, leg.To)
 	}

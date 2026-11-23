@@ -17,7 +17,7 @@ services:
   download-map:
     image: *python-image
     command: ["python", "-I", "/deploy/download.py",
-              "${OSRM_PBF_URL:-https://download.geofabrik.de/europe/denmark-latest.osm.pbf}", "/data/region.osm.pbf"]
+              "${OSRM_PBF_URL:-https://download.geofabrik.de/europe/denmark/denmark-latest.osm.pbf}", "/data/region.osm.pbf"]
     volumes:
       - osrm-data:/data
       - ./deploy:/deploy:ro

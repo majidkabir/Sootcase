@@ -47,6 +47,14 @@ func validate(s Shipment) error {
 				return bad("%s: %s must be a finite number, got %v", where, name, v)
 			}
 		}
+		if l.Vehicle != nil {
+			if l.Mode != Road {
+				return fmt.Errorf("%w: %s: vehicle is for road legs", ErrInvalidVehicle, where)
+			}
+			if err := l.Vehicle.check(); err != nil {
+				return fmt.Errorf("%s: %w", where, err)
+			}
+		}
 		if !validDistanceType(l.DistanceType) {
 			return bad("%s: distance_type must be sfd, gcd or actual, got %q", where, l.DistanceType)
 		}
