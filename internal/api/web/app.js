@@ -1063,9 +1063,10 @@ function renderScenario(r) {
     ${(c.sources || []).length ? `<details><summary>Based on</summary><ul>${c.sources.map(x => `<li>${esc(x)}</li>`).join("")}</ul></details>` : ""}</li>`).join("");
   const failed = (r.shipments || []).filter(x => x.error).map(x => `<li>${esc(x.shipment_id)}: ${esc(x.error)}</li>`).join("");
   const notes = (r.shipments || []).flatMap(x => (x.notes || []).map(n => `<li>${esc(x.shipment_id)}: ${esc(n)}</li>`)).join("");
+  const change = `<strong>${kg(Math.abs(r.diff_kg))}</strong> (${fmt(Math.abs(r.diff_pct), 1)}%)`;
+  const verdict = down ? `The changes would cut emissions by ${change} well-to-wheel.` : `The changes would raise emissions by ${change} well-to-wheel.`;
   $("#scenario").innerHTML = `
-    <p class="answer">The changes would ${down ? "cut" : "raise"} emissions by <strong>${kg(Math.abs(r.diff_kg))}</strong>
-      (${fmt(Math.abs(r.diff_pct), 1)}%) well-to-wheel.</p>
+    <p class="answer">${verdict}</p>
     <p class="answer-sub">${esc(r.label)}</p>
     <div class="cmp"><span>Now</span>${bar(b)}<span>Scenario</span>${bar(sc)}</div>
     <div class="legend"><span><i style="background:var(--ttw)"></i>Vehicles (tank-to-wheel)</span>
