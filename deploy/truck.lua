@@ -10,9 +10,8 @@
 --   truck   hgv=no, hgv=destination, hgv=delivery (Sootcase reaches a
 --           stop on such a street from the nearest road it may use, and
 --           warns); maxheight(:physical) < 4.0 m; maxwidth(:physical)
---           < 2.60 m; maxlength(:hgv) < 18.75 m
---   weight  maxweight(:hgv), maxweightrating(:hgv) < 40 t;
---           maxaxleload(:hgv) < 11.5 t
+--           < 2.60 m; maxlength(:hgv) < 18.75 m; maxweight(:hgv),
+--           maxweightrating(:hgv) < 40 t; maxaxleload(:hgv) < 11.5 t
 --   hzb-hze hazmat:B=no ... hazmat:E=no (ADR 1.9.5 tunnel restriction
 --           codes); hazmat=no puts a way in all four
 --   ferry   route=ferry (as in the car profile)
@@ -20,8 +19,11 @@
 -- So a request is routed for a truck up to 4.0 m high, 2.60 m wide,
 -- 18.75 m long, 40 t and 11.5 t per axle (Directive 96/53/EC's limits,
 -- with the refrigerated width and the road-train length), and for each
--- ADR tunnel code. Smaller trucks get the same roads (a fixed profile,
--- which can leave out a road they could use); bigger ones can't be routed.
+-- ADR tunnel code. Smaller or lighter trucks get the same roads (a fixed
+-- profile, which can leave out a road they could use); bigger ones can't
+-- be routed. OSRM allows 7 classes and 7 excludable sets, hence one class
+-- for size, weight and hgv access, and no set for dangerous goods with
+-- ferries left out.
 -- *:conditional values count as always on. Units: m, cm, ft and in
 -- (13'6"), t, kg, lbs, st (short tons); default, below_default, none,
 -- unsigned and other words put no limit. Ferries are never in these
@@ -175,35 +177,21 @@ function setup()
       'vehicle'
     },
 
-    -- TRUCK: Sootcase's classes (see the top); OSRM allows 7.
+    -- TRUCK: Sootcase's classes (see the top).
     classes = Sequence {
-        'ferry', 'truck', 'weight', 'hzb', 'hzc', 'hzd', 'hze'
+        'ferry', 'truck', 'hzb', 'hzc', 'hzd', 'hze'
     },
 
-    -- TRUCK: the sets a request may exclude. For a vehicle, Sootcase always
-    -- excludes truck and adds weight, one tunnel code and ferry as asked.
+    -- TRUCK: the sets a request may exclude (OSRM allows 7). For a vehicle,
+    -- Sootcase excludes truck, with the load's tunnel code or ferries.
     excludable = Sequence {
         Set {'ferry'},
         Set {'truck'},
         Set {'truck', 'ferry'},
         Set {'truck', 'hzb'},
-        Set {'truck', 'hzb', 'ferry'},
         Set {'truck', 'hzc'},
-        Set {'truck', 'hzc', 'ferry'},
         Set {'truck', 'hzd'},
-        Set {'truck', 'hzd', 'ferry'},
-        Set {'truck', 'hze'},
-        Set {'truck', 'hze', 'ferry'},
-        Set {'truck', 'weight'},
-        Set {'truck', 'weight', 'ferry'},
-        Set {'truck', 'weight', 'hzb'},
-        Set {'truck', 'weight', 'hzb', 'ferry'},
-        Set {'truck', 'weight', 'hzc'},
-        Set {'truck', 'weight', 'hzc', 'ferry'},
-        Set {'truck', 'weight', 'hzd'},
-        Set {'truck', 'weight', 'hzd', 'ferry'},
-        Set {'truck', 'weight', 'hze'},
-        Set {'truck', 'weight', 'hze', 'ferry'}
+        Set {'truck', 'hze'}
     },
 
     avoid = Set {
@@ -563,7 +551,7 @@ function truck_classes(way, result, data)
     local h, w, l, m, a = hf, wf, lf, mf, af
     if not fwd then h, w, l, m, a = hb, wb, lb, mb, ab end
     if (h and h < TRUCK.height) or (w and w < TRUCK.width) or (l and l < TRUCK.length) then classes['truck'] = true end
-    if (m and m < TRUCK.weight) or (a and a < TRUCK.axle) then classes['weight'] = true end
+    if (m and m < TRUCK.weight) or (a and a < TRUCK.axle) then classes['truck'] = true end
     for _, v in ipairs(words(way, 'hgv', fwd)) do
       if v == 'no' then classes['truck'] = true
       elseif v == 'destination' or v == 'delivery' then classes['truck'] = true end
