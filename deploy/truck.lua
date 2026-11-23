@@ -7,10 +7,10 @@
 -- keeps a metric per excludable set). The classes, by the OpenStreetMap
 -- tags that put a way in them:
 --
---   truck   hgv=no; maxheight(:physical) < 4.0 m; maxwidth(:physical)
+--   truck   hgv=no, hgv=destination, hgv=delivery (Sootcase reaches a
+--           stop on such a street from the nearest road it may use, and
+--           warns); maxheight(:physical) < 4.0 m; maxwidth(:physical)
 --           < 2.60 m; maxlength(:hgv) < 18.75 m
---   local   hgv=destination or hgv=delivery (Sootcase reaches a stop on
---           such a street from the nearest allowed road and warns)
 --   weight  maxweight(:hgv), maxweightrating(:hgv) < 40 t;
 --           maxaxleload(:hgv) < 11.5 t
 --   hzb-hze hazmat:B=no ... hazmat:E=no (ADR 1.9.5 tunnel restriction
@@ -175,36 +175,35 @@ function setup()
       'vehicle'
     },
 
-    -- TRUCK: Sootcase's classes (see the top); OSRM allows 8.
+    -- TRUCK: Sootcase's classes (see the top); OSRM allows 7.
     classes = Sequence {
-        'ferry', 'truck', 'local', 'weight', 'hzb', 'hzc', 'hzd', 'hze'
+        'ferry', 'truck', 'weight', 'hzb', 'hzc', 'hzd', 'hze'
     },
 
     -- TRUCK: the sets a request may exclude. For a vehicle, Sootcase always
-    -- excludes truck and local and adds weight, one tunnel code and ferry
-    -- as asked.
+    -- excludes truck and adds weight, one tunnel code and ferry as asked.
     excludable = Sequence {
         Set {'ferry'},
-        Set {'truck', 'local'},
-        Set {'truck', 'local', 'ferry'},
-        Set {'truck', 'local', 'hzb'},
-        Set {'truck', 'local', 'hzb', 'ferry'},
-        Set {'truck', 'local', 'hzc'},
-        Set {'truck', 'local', 'hzc', 'ferry'},
-        Set {'truck', 'local', 'hzd'},
-        Set {'truck', 'local', 'hzd', 'ferry'},
-        Set {'truck', 'local', 'hze'},
-        Set {'truck', 'local', 'hze', 'ferry'},
-        Set {'truck', 'local', 'weight'},
-        Set {'truck', 'local', 'weight', 'ferry'},
-        Set {'truck', 'local', 'weight', 'hzb'},
-        Set {'truck', 'local', 'weight', 'hzb', 'ferry'},
-        Set {'truck', 'local', 'weight', 'hzc'},
-        Set {'truck', 'local', 'weight', 'hzc', 'ferry'},
-        Set {'truck', 'local', 'weight', 'hzd'},
-        Set {'truck', 'local', 'weight', 'hzd', 'ferry'},
-        Set {'truck', 'local', 'weight', 'hze'},
-        Set {'truck', 'local', 'weight', 'hze', 'ferry'}
+        Set {'truck'},
+        Set {'truck', 'ferry'},
+        Set {'truck', 'hzb'},
+        Set {'truck', 'hzb', 'ferry'},
+        Set {'truck', 'hzc'},
+        Set {'truck', 'hzc', 'ferry'},
+        Set {'truck', 'hzd'},
+        Set {'truck', 'hzd', 'ferry'},
+        Set {'truck', 'hze'},
+        Set {'truck', 'hze', 'ferry'},
+        Set {'truck', 'weight'},
+        Set {'truck', 'weight', 'ferry'},
+        Set {'truck', 'weight', 'hzb'},
+        Set {'truck', 'weight', 'hzb', 'ferry'},
+        Set {'truck', 'weight', 'hzc'},
+        Set {'truck', 'weight', 'hzc', 'ferry'},
+        Set {'truck', 'weight', 'hzd'},
+        Set {'truck', 'weight', 'hzd', 'ferry'},
+        Set {'truck', 'weight', 'hze'},
+        Set {'truck', 'weight', 'hze', 'ferry'}
     },
 
     avoid = Set {
@@ -567,7 +566,7 @@ function truck_classes(way, result, data)
     if (m and m < TRUCK.weight) or (a and a < TRUCK.axle) then classes['weight'] = true end
     for _, v in ipairs(words(way, 'hgv', fwd)) do
       if v == 'no' then classes['truck'] = true
-      elseif v == 'destination' or v == 'delivery' then classes['local'] = true end
+      elseif v == 'destination' or v == 'delivery' then classes['truck'] = true end
     end
     for _, v in ipairs(words(way, 'hazmat', fwd)) do
       if v == 'no' then classes['hzb'] = true; classes['hzc'] = true; classes['hzd'] = true; classes['hze'] = true end
