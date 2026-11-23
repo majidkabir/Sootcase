@@ -27,7 +27,9 @@ function payloadHint(node) {
     `for a 40 t truck), so the same percentage means more tonnes there. If you know the weight, give the tonnes.`;
 }
 
-const fmt = (v, d = 1) => Number(v).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+// Numbers in the page's language when a translated copy is shown; English pages keep the browser's locale.
+const LOC = document.documentElement.lang && document.documentElement.lang !== "en" ? document.documentElement.lang : undefined;
+const fmt = (v, d = 1) => Number(v).toLocaleString(LOC, { minimumFractionDigits: d, maximumFractionDigits: d });
 const kg = v => v >= 10000 ? fmt(v / 1000, 2) + " t" : fmt(v, 1) + " kg";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Names people know for the dataset's short vehicle names.
