@@ -130,6 +130,11 @@ func (v Vehicle) Exclude() ([]string, TruckLimits, error) {
 	lim := TruckLimits{HeightM: p.HeightM, WidthM: p.WidthM, LengthM: p.LengthM,
 		GrossWeightKg: p.GrossWeightKg, AxleLoadKg: p.AxleLoadKg, HGVAccess: true}
 	switch {
+	case v.TunnelCode == "C":
+		// The router holds codes B and C in one class (OSRM allows 6 sets),
+		// so a code C load is routed as code B: a few more tunnels left out.
+		ex = append(ex, "hzb")
+		lim.TunnelCode, lim.HazmatNo = "B", true
 	case v.TunnelCode != "":
 		ex = append(ex, "hz"+strings.ToLower(v.TunnelCode))
 		lim.TunnelCode, lim.HazmatNo = v.TunnelCode, true

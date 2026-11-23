@@ -12,8 +12,11 @@
 --           warns); maxheight(:physical) < 4.0 m; maxwidth(:physical)
 --           < 2.60 m; maxlength(:hgv) < 18.75 m; maxweight(:hgv),
 --           maxweightrating(:hgv) < 40 t; maxaxleload(:hgv) < 11.5 t
---   hzb-hze hazmat:B=no ... hazmat:E=no (ADR 1.9.5 tunnel restriction
---           codes); hazmat=no puts a way in all four
+--   hzb     hazmat:B=no or hazmat:C=no (ADR 1.9.5 tunnel restriction
+--           codes B and C: a load with code C is routed as code B,
+--           leaving out a few more tunnels than it must)
+--   hzd     hazmat:D=no
+--   hze     hazmat:E=no; hazmat=no puts a way in all three
 --   ferry   route=ferry (as in the car profile)
 --
 -- So a request is routed for a truck up to 4.0 m high, 2.60 m wide,
@@ -21,9 +24,9 @@
 -- with the refrigerated width and the road-train length), and for each
 -- ADR tunnel code. Smaller or lighter trucks get the same roads (a fixed
 -- profile, which can leave out a road they could use); bigger ones can't
--- be routed. OSRM allows 7 classes and 7 excludable sets, hence one class
--- for size, weight and hgv access, and no set for dangerous goods with
--- ferries left out.
+-- be routed. OSRM allows 7 classes and 6 excludable sets, hence one class
+-- for size, weight and hgv access, codes B and C together, and no set for
+-- dangerous goods with ferries left out.
 -- *:conditional values count as always on. Units: m, cm, ft and in
 -- (13'6"), t, kg, lbs, st (short tons); default, below_default, none,
 -- unsigned and other words put no limit. Ferries are never in these
@@ -179,17 +182,16 @@ function setup()
 
     -- TRUCK: Sootcase's classes (see the top).
     classes = Sequence {
-        'ferry', 'truck', 'hzb', 'hzc', 'hzd', 'hze'
+        'ferry', 'truck', 'hzb', 'hzd', 'hze'
     },
 
-    -- TRUCK: the sets a request may exclude (OSRM allows 7). For a vehicle,
+    -- TRUCK: the sets a request may exclude (OSRM allows 6). For a vehicle,
     -- Sootcase excludes truck, with the load's tunnel code or ferries.
     excludable = Sequence {
         Set {'ferry'},
         Set {'truck'},
         Set {'truck', 'ferry'},
         Set {'truck', 'hzb'},
-        Set {'truck', 'hzc'},
         Set {'truck', 'hzd'},
         Set {'truck', 'hze'}
     },
@@ -557,11 +559,11 @@ function truck_classes(way, result, data)
       elseif v == 'destination' or v == 'delivery' then classes['truck'] = true end
     end
     for _, v in ipairs(words(way, 'hazmat', fwd)) do
-      if v == 'no' then classes['hzb'] = true; classes['hzc'] = true; classes['hzd'] = true; classes['hze'] = true end
+      if v == 'no' then classes['hzb'] = true; classes['hzd'] = true; classes['hze'] = true end
     end
     for _, code in ipairs({ 'B', 'C', 'D', 'E' }) do
       for _, v in ipairs(words(way, 'hazmat:' .. code, fwd)) do
-        if v == 'no' then classes['hz' .. code:lower()] = true end
+        if v == 'no' then classes[code == 'C' and 'hzb' or 'hz' .. code:lower()] = true end
       end
     end
   end

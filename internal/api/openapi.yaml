@@ -549,7 +549,7 @@ components:
         axles: { type: integer, minimum: 2, maximum: 12 }
         trailer: { type: string, enum: [none, semi, drawbar] }
         hazmat: { type: boolean, description: "Carries dangerous goods under ADR: roads tagged hazmat=no are left out" }
-        tunnel_code: { type: string, enum: [B, C, D, E], description: "The load's ADR tunnel restriction code (ADR 1.9.5); implies hazmat. Tunnels tagged hazmat:<code>=no are left out. Can't be combined with ?avoid=ferries (422)." }
+        tunnel_code: { type: string, enum: [B, C, D, E], description: "The load's ADR tunnel restriction code (ADR 1.9.5); implies hazmat. Tunnels tagged hazmat:<code>=no are left out; code C is routed as code B (the router holds them in one class). Can't be combined with ?avoid=ferries (422)." }
     Restrictions:
       type: object
       description: "What a road leg with a vehicle was routed for: the vehicle's fields as read, the limits the roads were chosen for, and the router's classes left out."
@@ -575,7 +575,7 @@ components:
             hgv_access: { type: boolean, description: "hgv=no, hgv=destination and hgv=delivery roads left out (a stop on one is reached from the nearest road the truck may use, with a warning)" }
             tunnel_code: { type: string, description: "Tunnels barring this ADR code left out" }
             hazmat_no: { type: boolean, description: "hazmat=no roads left out" }
-        excluded: { type: array, items: { type: string }, description: "The road router's classes left out (truck, hzb to hze; see the core's deploy/truck.lua)" }
+        excluded: { type: array, items: { type: string }, description: "The road router's classes left out (truck, hzb, hzd, hze; see the core's deploy/truck.lua)" }
     HubStop:
       type: object
       required: [hub_type]

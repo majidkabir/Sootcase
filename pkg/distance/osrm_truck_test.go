@@ -33,7 +33,7 @@ func truckServer(t *testing.T, seen *[]string) *httptest.Server {
 		case "truck,hzd":
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = io.WriteString(w, `{"code":"NoRoute","message":"Impossible route between points"}`)
-		case "truck,hzb":
+		case "truck,hze":
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = io.WriteString(w, `{"code":"InvalidValue","message":"Exclude flag combination is not supported."}`)
 		case "truck":
@@ -80,7 +80,7 @@ func TestOSRM_Truck(t *testing.T) {
 	}
 
 	// A router without the truck classes.
-	ctx = calc.WithVehicle(context.Background(), &calc.Vehicle{TunnelCode: "B"})
+	ctx = calc.WithVehicle(context.Background(), &calc.Vehicle{TunnelCode: "E"})
 	if _, err = o.Route(ctx, calc.Road, copenhagen, hamburg); !errors.Is(err, calc.ErrNoTruckRoute) || !strings.Contains(err.Error(), "no truck data") {
 		t.Errorf("no truck data: %v", err)
 	}

@@ -422,7 +422,7 @@ A road leg can say what truck drives it (since v0.15.0), so that its route keeps
 
 Every field is optional; `vehicle_type` still picks the emission factors. A value out of range (height 1.5–5.0 m, width 1.5–3.5 m, length 4–30 m, gross weight 3,500–60,000 kg, axle load 1,000–15,000 kg, axles 2–12, trailer `none`, `semi` or `drawbar`, tunnel code B–E) is refused with HTTP 400 naming the field.
 
-The road router ([`deploy/truck.lua`](deploy/truck.lua)) sorts roads into classes from their OpenStreetMap tags when its data is built, and a leg with a vehicle leaves the classes out (OSRM's `exclude`). OSRM allows 7 classes and 7 combinations of them, so routing is built for one truck profile: Directive 96/53/EC's limits, with the refrigerated width and the road-train length.
+The road router ([`deploy/truck.lua`](deploy/truck.lua)) sorts roads into classes from their OpenStreetMap tags when its data is built, and a leg with a vehicle leaves the classes out (OSRM's `exclude`). OSRM allows 7 classes and 6 combinations of them to leave out, so routing is built for one truck profile: Directive 96/53/EC's limits, with the refrigerated width and the road-train length.
 
 | Left out for every vehicle | OpenStreetMap tags |
 |---|---|
@@ -433,7 +433,7 @@ The road router ([`deploy/truck.lua`](deploy/truck.lua)) sorts roads into classe
 | lighter than 40 t | `maxweight`, `maxweight:hgv`, `maxweightrating(:hgv)` below 40 t |
 | lighter than 11.5 t per axle | `maxaxleload`, `maxaxleload:hgv` below 11.5 t |
 | **With dangerous goods** | |
-| tunnels barring the load's code | `hazmat:B=no` … `hazmat:E=no` for tunnel code B … E (OpenStreetMap tags every code a tunnel bars); `hazmat=no` |
+| tunnels barring the load's code | `hazmat:B=no` … `hazmat:E=no` for tunnel code B … E (OpenStreetMap tags every code a tunnel bars); `hazmat=no`. Codes B and C share one class, so a code C load is routed as code B (it also avoids tunnels that bar only code B) |
 
 So any truck within those limits gets roads it may use; a smaller or lighter one gets the same roads (a road it could use may be left out), and one beyond them (e.g. 4.2 m high or 44 t) is refused with HTTP 422, as the router has no profile for it. `hazmat: true` without a code leaves out `hazmat=no` roads and code E tunnels. `:forward` and `:backward` limits count for their direction, `:conditional` limits count as always on, values in feet and inches (`13'6"`), cm, kg, lbs or short tons (`st`) are converted, and `default`, `below_default`, `none` and the like put no limit. Ferries are never left out by these (a ship's own rules aren't in the map). Limits tagged on nodes (a `barrier=height_restrictor`) can't be classes: only the car profile's own 2.0 m check applies to them.
 

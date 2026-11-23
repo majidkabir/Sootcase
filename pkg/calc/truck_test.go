@@ -46,7 +46,8 @@ func TestVehicleExclude(t *testing.T) {
 	}{
 		{Vehicle{}, []string{"truck"}, ""},
 		{Vehicle{HeightM: fp(3.5), GrossWeightKg: fp(12000)}, []string{"truck"}, ""},
-		{Vehicle{TunnelCode: "C"}, []string{"truck", "hzc"}, "C"},
+		{Vehicle{TunnelCode: "C"}, []string{"truck", "hzb"}, "B"},
+		{Vehicle{TunnelCode: "D"}, []string{"truck", "hzd"}, "D"},
 		{Vehicle{Hazmat: &yes}, []string{"truck", "hze"}, "E"},
 	} {
 		ex, lim, err := c.v.Exclude()
