@@ -49,6 +49,10 @@ Commands that calculate also take -osrm URL (road routing),
 routing); see "sootcase calc -h".`
 
 func main() {
+	calc.Version = version
+	if version != "" && version[0] >= '0' && version[0] <= '9' { // goreleaser's {{.Version}} has no "v"
+		calc.Version = "v" + version
+	}
 	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, usageText)
 		os.Exit(2)

@@ -41,6 +41,10 @@ type ILEAPOperationsRequest struct {
 type ILEAPResponse struct {
 	ileap.Export
 	Failed []BatchItem `json:"failed,omitempty"`
+	// Basis and Certification as in calc.Result (beside the iLEAP data,
+	// not in it).
+	Basis         calc.Basis `json:"basis"`
+	Certification string     `json:"certification"`
 }
 
 func (m ILEAPMeta) options(fuels ileap.FuelLookup) (ileap.Options, error) {
@@ -121,7 +125,7 @@ func (s *Server) ileapShipments(w http.ResponseWriter, r *http.Request) {
 	}) {
 		return
 	}
-	writeJSON(w, http.StatusOK, ILEAPResponse{Export: ileap.FromResults(results, o), Failed: failed})
+	writeJSON(w, http.StatusOK, ILEAPResponse{Export: ileap.FromResults(results, o), Failed: failed, Basis: calc.CurrentBasis(), Certification: calc.Certification})
 }
 
 // ileapOperations returns an operator's measured data (the operations
@@ -146,5 +150,5 @@ func (s *Server) ileapOperations(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, ILEAPResponse{Export: ileap.FromOperations(ops, fuels, o)})
+	writeJSON(w, http.StatusOK, ILEAPResponse{Export: ileap.FromOperations(ops, fuels, o), Basis: calc.CurrentBasis(), Certification: calc.Certification})
 }

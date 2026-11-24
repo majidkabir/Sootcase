@@ -526,12 +526,13 @@ function render(req, r) {
         <th class="num">Vehicle</th><th class="num">Supply</th><th class="num">Total</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
     ${ghgHTML(r.ghg_protocol)}
+    ${basisHTML(r)}
     ${sheetHTML(r.explanation)}
     <details class="json"><summary>Show request and response JSON</summary>
       <pre>${esc(JSON.stringify(req, null, 2))}</pre><pre>${esc(JSON.stringify(r, (k, v) =>
         k === "path" && Array.isArray(v) ? `[${v.length} points]` : k === "explanation" ? "(see above)" : v, 2))}</pre></details>`;
   if (r.explanation) {
-    $("#sheet-md").addEventListener("click", () => download(sheetMarkdown(r.explanation), "text/markdown",
+    $("#sheet-md").addEventListener("click", () => download(sheetMarkdown(r.explanation, r), "text/markdown",
       `calculation-${(r.shipment_id || "shipment").replace(/[^\w.-]+/g, "_")}.md`));
     $("#sheet-print").addEventListener("click", () => { $("#sheet").open = true; window.print(); });
   }
@@ -573,7 +574,18 @@ function sheetHTML(sh) {
     <p class="basis">${esc(sh.note)}</p>
     <p class="basis">References: ${sh.references.map(esc).join("; ")}.</p></details>`;
 }
-function sheetMarkdown(sh) {
+// basisText says what a result was calculated by and that Sootcase isn't
+// certified under Regulation (EU) 2026/1030 (the API's own words).
+function basisText(r) {
+  if (!r || !r.basis) return "";
+  return `Basis: ${r.basis.standard}, ${r.basis.framework}, Sootcase ${r.basis.sootcase}. ${r.certification}.`;
+}
+function basisHTML(r) {
+  const t = basisText(r);
+  return t ? `<p class="basis">${esc(t)}</p>` : "";
+}
+
+function sheetMarkdown(sh, r) {
   const out = [`# Calculation: ${sh.shipment_id || "shipment"}`, "", sh.summary, ""];
   let group = "";
   for (const st of sh.steps) {
@@ -585,7 +597,7 @@ function sheetMarkdown(sh) {
     if ((st.basis || []).length) out.push("");
   }
   out.push("---", "", sh.note, "", "References:", "", ...sh.references.map(r => `- ${r}`), "",
-    "Calculated with Sootcase (https://sootcase.org).", "");
+    "Calculated with Sootcase (https://sootcase.org).", "", ...(basisText(r) ? [basisText(r), ""] : []));
   return out.join("\n");
 }
 
@@ -917,7 +929,8 @@ function renderReport(r) {
       <div class="scroll"><table class="report-table long-names"><tbody>${(c.failures || []).map(x =>
         `<tr><td>${esc(x.shipment_id)}</td><td>${esc(x.error)}</td></tr>`).join("")}</tbody></table></div></details>` : ""}
     ${notes ? `<h3 class="sub">Notes, omissions and deviations</h3><ul class="notes">${notes}</ul>` : ""}
-    <p class="statement">${esc(r.statement)}</p>`;
+    <p class="statement">${esc(r.statement)}</p>
+    ${basisHTML(r)}`;
   const { results, markdown, ...rep } = r;
   $("#dl-json").addEventListener("click", () => download(JSON.stringify(rep, null, 2), "application/json", "emissions-report.json"));
   $("#dl-md").addEventListener("click", () => download(markdown || "", "text/markdown", "emissions-report.md"));
@@ -933,7 +946,7 @@ function resultsCSV(results) {
   const cols = ["shipment_id", "weight_kg", "shipment_wtw_kg", "row", "leg_id", "added", "mode", "vehicle_type", "factor",
     "from", "from_lat", "from_lon", "to", "to_lat", "to_lon", "distance_km", "distance_method", "distance_type", "daf",
     "tonne_km", "method", "data_type", "ttw_kg", "wtt_kg", "wtw_kg", "intensity_g_per_tkm", "factor_source", "parts",
-    "note", "warnings", "error", "retryable"];
+    "note", "warnings", "error", "retryable", "basis", "certification"];
   const cell = v => {
     if (v === undefined || v === null) return "";
     if (typeof v === "number") return Number.isFinite(v) ? String(Math.round(v * 1e4) / 1e4) : "";
@@ -947,7 +960,8 @@ function resultsCSV(results) {
     const res = it.result;
     if (!res) { row({ shipment_id: it.shipment_id, error: it.error, retryable: it.retryable ? "yes" : "no" }); continue; }
     const base = { shipment_id: it.shipment_id, weight_kg: res.weight_kg, shipment_wtw_kg: res.wtw_kg,
-      warnings: (res.warnings || []).join(" | ") };
+      warnings: (res.warnings || []).join(" | "),
+      basis: res.basis && `${res.basis.standard}, ${res.basis.framework}, Sootcase ${res.basis.sootcase}`, certification: res.certification };
     for (const l of res.legs || []) {
       const f = l.factor || l.fuel_factor || {};
       row({ ...base, row: "leg", leg_id: l.leg_id, added: l.added, mode: l.mode, vehicle_type: l.vehicle_type, factor: f.vehicle_type || f.fuel,
@@ -1083,6 +1097,7 @@ function renderScenario(r) {
     <h3>Changes</h3><ul>${changes}</ul>
     ${notes ? `<h3>Notes</h3><ul>${notes}</ul>` : ""}
     ${failed ? `<h3>${r.failed} shipments left out</h3><ul>${failed}</ul>` : ""}
+    ${basisHTML(r)}
     <div class="actions"><button type="button" class="btn" id="dl-sjson">Comparison as JSON</button></div>`;
   $("#dl-sjson").addEventListener("click", () => download(JSON.stringify(lastScenario, null, 2), "application/json", "scenario.json"));
 }

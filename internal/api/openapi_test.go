@@ -85,7 +85,7 @@ func TestOpenAPIMatchesTypes(t *testing.T) {
 		"RecommendRoute": recommend.Route{}, "ScenarioChange": scenario.Change{}, "ScenarioPlan": scenario.Plan{},
 		"ScenarioTotals": scenario.Totals{}, "ScenarioResult": scenario.Result{},
 		"ILEAPResponse": ILEAPResponse{}, "ILEAPGap": ileap.Gap{},
-		"Vehicle": calc.Vehicle{}, "Restrictions": calc.Restrictions{},
+		"Vehicle": calc.Vehicle{}, "Restrictions": calc.Restrictions{}, "Basis": calc.Basis{},
 		"CountrySection": calc.CountrySection{}, "RegionSection": calc.RegionSection{},
 	}
 	for name, v := range types {

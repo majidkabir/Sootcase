@@ -370,10 +370,12 @@ func (r rowReader) float(name string) (float64, error) {
 // added_road_legs counts the road legs the calculator added; warnings are
 // the result's warnings, joined by " | ". The operator_* columns split WTW
 // by GHG Protocol scope for the operator of the vehicles (calc.GHGScopes);
-// for a shipper all of wtw_kg is scope 3, category 4 or 9.
+// for a shipper all of wtw_kg is scope 3, category 4 or 9. basis and
+// certification are this build's (calc.CurrentBasis, calc.Certification),
+// the same on every row.
 var ResultHeader = []string{"shipment_id", "weight_kg", "tonne_km", "ttw_kg", "wtt_kg", "wtw_kg",
 	"intensity_g_per_tkm", "primary_data_share", "dataset", "error", "added_road_legs", "warnings",
-	"operator_scope1_kg", "operator_scope2_kg", "operator_scope3_cat3_kg", "hubs_kg"}
+	"operator_scope1_kg", "operator_scope2_kg", "operator_scope3_cat3_kg", "hubs_kg", "basis", "certification"}
 
 // Writer writes one summary row per shipment.
 type Writer struct{ cw *csv.Writer }
@@ -390,7 +392,8 @@ func NewWriter(w io.Writer) (*Writer, error) {
 // Write writes a result, or the error for that shipment.
 func (w *Writer) Write(id string, r calc.Result, err error) error {
 	if err != nil {
-		return w.cw.Write([]string{id, "", "", "", "", "", "", "", "", err.Error(), "", "", "", "", "", ""})
+		return w.cw.Write([]string{id, "", "", "", "", "", "", "", "", err.Error(), "", "", "", "", "", "",
+			calc.CurrentBasis().String(), calc.Certification})
 	}
 	added := 0
 	for _, l := range r.Legs {
@@ -400,7 +403,8 @@ func (w *Writer) Write(id string, r calc.Result, err error) error {
 	}
 	return w.cw.Write([]string{id, num(r.WeightKg), num(r.TonneKm), num(r.TTWKg), num(r.WTTKg), num(r.WTWKg),
 		num(r.IntensityG), num(r.PrimaryDataShare), r.Dataset, "", strconv.Itoa(added), strings.Join(calc.WarningTexts(r.Warnings), " | "),
-		num(r.GHGProtocol.OperatorScope1Kg), num(r.GHGProtocol.OperatorScope2Kg), num(r.GHGProtocol.OperatorScope3Cat3Kg), num(r.GHGProtocol.HubsKg)})
+		num(r.GHGProtocol.OperatorScope1Kg), num(r.GHGProtocol.OperatorScope2Kg), num(r.GHGProtocol.OperatorScope3Cat3Kg), num(r.GHGProtocol.HubsKg),
+		calc.CurrentBasis().String(), calc.Certification})
 }
 
 // Flush flushes buffered rows and reports any write error.

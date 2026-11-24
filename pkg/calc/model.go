@@ -385,6 +385,10 @@ type Result struct {
 	PrimaryDataShare float64 `json:"primary_data_share"`
 	// Dataset names the factor dataset used, when the provider reports it.
 	Dataset string `json:"dataset,omitempty"`
+	// Basis is what the result was calculated by (CurrentBasis), and
+	// Certification what it says about Regulation (EU) 2026/1030.
+	Basis         Basis  `json:"basis"`
+	Certification string `json:"certification"`
 	// Warnings are things left as given that may make the result too low:
 	// gaps between legs not covered, sea legs starting or ending inland.
 	Warnings []Warning `json:"warnings,omitempty"`

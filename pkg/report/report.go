@@ -69,14 +69,17 @@ type GHG struct {
 // Report is the finished report. Emissions are kg CO2e, intensities g CO2e
 // per tonne-km (transport) or per tonne (hubs).
 type Report struct {
-	Title        string    `json:"title"`
-	Organisation string    `json:"organisation,omitempty"`
-	Period       Period    `json:"period"`
-	Level        string    `json:"level"`
-	Statement    string    `json:"statement"`
-	Reference    string    `json:"reference"`
-	Datasets     []string  `json:"datasets"`
-	Generated    time.Time `json:"generated"`
+	Title        string   `json:"title"`
+	Organisation string   `json:"organisation,omitempty"`
+	Period       Period   `json:"period"`
+	Level        string   `json:"level"`
+	Statement    string   `json:"statement"`
+	Reference    string   `json:"reference"`
+	Datasets     []string `json:"datasets"`
+	// Basis and Certification as in calc.Result.
+	Basis         calc.Basis `json:"basis"`
+	Certification string     `json:"certification"`
+	Generated     time.Time  `json:"generated"`
 
 	Coverage Coverage `json:"coverage"`
 	Total    Total    `json:"total"`
@@ -557,16 +560,18 @@ func (b *Builder) Report() Report {
 		return x.Reason < y.Reason
 	})
 	r := Report{
-		Title:        b.meta.Title,
-		Organisation: b.meta.Organisation,
-		Period:       Period{From: b.meta.PeriodFrom, To: b.meta.PeriodTo},
-		Level:        "transport_or_hub_services",
-		Statement:    MethodStatement,
-		Reference:    b.meta.Reference,
-		Generated:    b.now().UTC().Truncate(time.Second),
-		Coverage:     b.cov,
-		Total:        b.tot,
-		GHG:          GHG{Scope3Category: b.meta.Scope3Category, GHGScopes: b.ghg},
+		Title:         b.meta.Title,
+		Organisation:  b.meta.Organisation,
+		Period:        Period{From: b.meta.PeriodFrom, To: b.meta.PeriodTo},
+		Level:         "transport_or_hub_services",
+		Statement:     MethodStatement,
+		Reference:     b.meta.Reference,
+		Basis:         calc.CurrentBasis(),
+		Certification: calc.Certification,
+		Generated:     b.now().UTC().Truncate(time.Second),
+		Coverage:      b.cov,
+		Total:         b.tot,
+		GHG:           GHG{Scope3Category: b.meta.Scope3Category, GHGScopes: b.ghg},
 	}
 	if r.Title == "" {
 		r.Title = "Freight GHG emissions report"

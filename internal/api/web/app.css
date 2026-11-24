@@ -91,6 +91,7 @@ input:hover, select:hover { border-color: var(--muted); }
 .answer { font-size: 1.35rem; line-height: 1.35; }
 .answer strong { font-size: 1.9rem; font-weight: 600; }
 .answer-sub { color: var(--muted); margin: 6px 0 22px; }
+.basis { color: var(--muted); font-size: .85rem; margin: 12px 0; }
 
 .ribbon { display: flex; height: 64px; border-radius: 4px; overflow: hidden; background: var(--paper); }
 .seg { display: flex; flex-direction: column; min-width: 4px; border-right: 2px solid var(--sheet); transform-origin: left; }
