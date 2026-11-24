@@ -13,9 +13,12 @@
 // accuracy of a split of a route by country.
 //
 // Some countries are also split into regions, keyed by ISO 3166-2 code,
-// where road charges differ by region: Belgium's Flanders (BE-VLG),
-// Wallonia (BE-WAL) and Brussels-Capital (BE-BRU), merged from Statbel's
-// statistical sectors (drawn on 1:10,000 maps), in data/regions.bin.gz.
+// in data/regions.bin.gz: Belgium's Flanders (BE-VLG), Wallonia (BE-WAL)
+// and Brussels-Capital (BE-BRU), merged from Statbel's statistical
+// sectors (drawn on 1:10,000 maps), where road charges differ by region
+// (SplitKmRegions); and Germany's 16 states (DE-BY, DE-HH, ...), from
+// Natural Earth's 1:10m admin-1 states and provinces (public domain),
+// where public holidays differ by state (SplitStretches only).
 package borders
 
 import (
@@ -46,7 +49,13 @@ const Source = "Natural Earth 1:10m admin-0 countries v5.1.2 (public domain)"
 const UnknownRegion = "unknown"
 
 // RegionSource describes the embedded regions, for notices and results.
-const RegionSource = "Belgian regions: Statbel (Statistics Belgium), statistical sectors 2026, situation 1 January 2026, CC BY 4.0"
+const RegionSource = "Belgian regions: Statbel (Statistics Belgium), statistical sectors 2026, situation 1 January 2026, CC BY 4.0; " +
+	"German states: Natural Earth 1:10m admin-1 states and provinces v5.1.2 (public domain)"
+
+// KmRegionCountries are the countries whose embedded regions
+// SplitKmRegions splits the km by (road charges differ by region). The
+// other embedded regions (Germany's states) are only in SplitStretches.
+var KmRegionCountries = map[string]bool{"BE": true}
 
 // Polygon is a polygon's rings as [lon, lat] points: its outer ring
 // first, then its holes.
@@ -218,7 +227,7 @@ func Default() (*Index, error) {
 			defErr = fmt.Errorf("borders: embedded regions: %w", err)
 			return
 		}
-		def = NewIndex(cs).WithRegions(rs)
+		def = NewIndex(cs).WithRegionsFor(rs, KmRegionCountries)
 	})
 	return def, defErr
 }
@@ -341,13 +350,32 @@ type Index struct {
 	// codes, "BE-VLG"), see WithRegions.
 	regions  *Index
 	regioned map[string]bool
+	// kmRegioned are the countries in regioned that SplitKmRegions splits
+	// by region (all of them when nil).
+	kmRegioned map[string]bool
+}
+
+// Stretch is a run of a line in one country (and region): Country as in
+// SplitKm, Region the region's code in countries with regions (as in
+// SplitKmRegions), else "".
+type Stretch struct {
+	Country, Region string
+	Km              float64
 }
 
 // WithRegions returns the index with regions inside its countries: each
 // region's code is its country's code, a hyphen and the region's (ISO
-// 3166-2). SplitKmRegions uses them.
+// 3166-2). SplitKmRegions and SplitStretches use them.
 func (ix *Index) WithRegions(rs []Country) *Index {
+	return ix.WithRegionsFor(rs, nil)
+}
+
+// WithRegionsFor is WithRegions with SplitKmRegions splitting only the
+// countries in km by region (all when km is nil); SplitStretches has the
+// regions of every country.
+func (ix *Index) WithRegionsFor(rs []Country, km map[string]bool) *Index {
 	out := *ix
+	out.kmRegioned = km
 	out.regions = NewIndex(rs)
 	out.regioned = map[string]bool{}
 	for _, r := range rs {
@@ -509,22 +537,30 @@ const NearestKm = 30
 // outside every country count for the nearest one within NearestKm;
 // farther ones are at sea and count for "".
 func (ix *Index) SplitKm(line [][2]float64) map[string]float64 {
-	countries, _ := ix.split(line, false)
+	countries, _ := ix.split(line, false, nil)
 	return countries
 }
 
-// SplitKmRegions is SplitKm, and the km in the countries that have
-// regions split by region (ISO 3166-2 code) as well: each segment counts
-// for the region its midpoint is in, else the nearest region within
-// NearestKm (the regions and the countries come from different sources
-// and their outer borders differ by up to about a kilometre), else the
-// country code, a hyphen and UnknownRegion ("BE-unknown"). The regions of
-// a country add up to its km.
+// SplitKmRegions is SplitKm, and the km in the countries with regions
+// (for the embedded ones, those in KmRegionCountries) split by region (ISO 3166-2 code) as well: each
+// segment counts for the region its midpoint is in, else the nearest
+// region within NearestKm (the regions and the countries come from
+// different sources and their outer borders differ by up to about a
+// kilometre), else the country code, a hyphen and UnknownRegion
+// ("BE-unknown"). The regions of a country add up to its km.
 func (ix *Index) SplitKmRegions(line [][2]float64) (countries, regions map[string]float64) {
-	return ix.split(line, true)
+	return ix.split(line, true, nil)
 }
 
-func (ix *Index) split(line [][2]float64, withRegions bool) (countries, regions map[string]float64) {
+// SplitStretches is SplitKmRegions, and the line's stretches by country in
+// order along it, with the region (found as in SplitKmRegions) in every
+// country that has regions. A country's stretches add up to its km.
+func (ix *Index) SplitStretches(line [][2]float64) (countries, regions map[string]float64, stretches []Stretch) {
+	countries, regions = ix.split(line, true, &stretches)
+	return countries, regions, stretches
+}
+
+func (ix *Index) split(line [][2]float64, withRegions bool, stretches *[]Stretch) (countries, regions map[string]float64) {
 	out := map[string]float64{}
 	if withRegions && ix.regions != nil {
 		regions = map[string]float64{}
@@ -551,18 +587,29 @@ func (ix *Index) split(line [][2]float64, withRegions bool) (countries, regions 
 			code, hint = ix.countries[c].code, c
 		}
 		out[code] += km
-		if regions != nil && ix.regioned[code] {
+		rc := ""
+		regionKm := ix.kmRegioned == nil || ix.kmRegioned[code]
+		if regions != nil && ix.regioned[code] && (stretches != nil || regionKm) {
 			r, ok := ix.regions.find(mLon, mLat, rhint)
 			if !ok {
 				if r = ix.regions.nearest(mLon, mLat, 3); r < 0 {
 					r = ix.regions.nearest(mLon, mLat, NearestKm)
 				}
 			}
-			rc := code + "-" + UnknownRegion
+			rc = code + "-" + UnknownRegion
 			if r >= 0 {
 				rc, rhint = ix.regions.countries[r].code, r
 			}
-			regions[rc] += km
+			if regionKm {
+				regions[rc] += km
+			}
+		}
+		if stretches != nil {
+			if n := len(*stretches); n > 0 && (*stretches)[n-1].Country == code && (*stretches)[n-1].Region == rc {
+				(*stretches)[n-1].Km += km
+			} else {
+				*stretches = append(*stretches, Stretch{Country: code, Region: rc, Km: km})
+			}
 		}
 	}
 	return out, regions
