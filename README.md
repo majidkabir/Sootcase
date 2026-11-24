@@ -420,7 +420,7 @@ A road leg can say what truck drives it (since v0.15.0), so that its route keeps
             "axle_load_kg": 11500, "axles": 5, "trailer": "semi", "tunnel_code": "D"}
 ```
 
-Every field is optional; `vehicle_type` still picks the emission factors. A value out of range (height 1.5–5.0 m, width 1.5–3.5 m, length 4–30 m, gross weight 3,500–60,000 kg, axle load 1,000–15,000 kg, axles 2–12, trailer `none`, `semi` or `drawbar`, tunnel code B–E) is refused with HTTP 400 naming the field.
+Every field is optional, and `"vehicle": {}` routes exactly like no vehicle; `vehicle_type` still picks the emission factors. A value out of range (height 1.5–5.0 m, width 1.5–3.5 m, length 4–30 m, gross weight 3,500–60,000 kg, axle load 1,000–15,000 kg, axles 2–12, trailer `none`, `semi` or `drawbar`, tunnel code B–E) is refused with HTTP 400 naming the field.
 
 The road router ([`deploy/truck.lua`](deploy/truck.lua)) sorts roads into classes from their OpenStreetMap tags when its data is built, and a leg with a vehicle leaves the classes out (OSRM's `exclude`). OSRM allows 7 classes and 6 combinations of them to leave out, so routing is built for one truck profile: Directive 96/53/EC's limits, with the refrigerated width and the road-train length.
 
@@ -442,6 +442,8 @@ So any truck within those limits gets roads it may use; a smaller or lighter one
 - Each road leg routed with a vehicle has `restrictions`: the vehicle's fields as read, `routed_for` (the limits the roads were chosen for) and `excluded` (the router's classes).
 - `vehicle` combines with `alternatives` (every route keeps to the limits; the same rules choose among them) and with `avoid=ferries`, except with dangerous goods: no class combination is left for a tunnel code without ferries, so that is refused (422), and a dangerous-goods leg whose route has a ferry gets no land-only alternative.
 - A route joined across two routing regions keeps to the limits on both halves; the crossing point is chosen without them.
+- **The road data must be built with `deploy/truck.lua`** (`docker compose up` does that since v0.15.1, and rebuilds data made with another profile). On data built with `/opt/car.lua`, a leg with a vehicle gets HTTP 422 "this server's road routing has no truck data".
+- **OSRM 26.6.0 to 26.8.0 can mix up exclusions** ([Project-OSRM/osrm-backend#7817](https://github.com/Project-OSRM/osrm-backend/issues/7817)): its MLD path-unpacking cache doesn't separate requests by excluded classes, so once a router has served requests with different exclusions (with or without a vehicle, or `avoid=ferries`), a route can use roads its vehicle may not, and plain routes can change slightly. A freshly started router, or one that only ever gets one kind of request, is right. Until OSRM fixes it, run a build of 26.8.0 that never creates that cache (sootcase.org does), or restart the router after mixed traffic.
 - A vehicle on a leg with a given `distance_km` changes nothing (the leg isn't routed). Road legs added to join legs up (`add_road_legs`) are routed without a vehicle.
 - Speed: a route with a vehicle asks the router once more for each end farther than 50 m from the road it starts or ends on (to see whether the stop was moved), and, when no route is found, once per class left out (to say which one blocks).
 

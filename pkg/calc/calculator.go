@@ -185,7 +185,7 @@ var (
 // Hub values that come as a WTW total only count in WTW and in neither
 // TTW nor WTT.
 func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
-	s, err := c.resolve(s)
+	s, err := c.resolve(dropEmptyVehicles(s))
 	if err != nil {
 		return Result{}, err
 	}

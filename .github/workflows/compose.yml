@@ -58,6 +58,21 @@ jobs:
           echo "$out" | jq '.legs[0] | {distance_km, distance_method}'
           echo "$out" | jq -e '.legs[0].distance_method == "osrm" and .legs[0].distance_km > 1.5 and .legs[0].distance_km < 10'
 
+      - name: Road leg with a truck is routed on the truck data
+        run: |
+          # The standard setup builds roads with deploy/truck.lua, so a vehicle is routed, not refused.
+          leg='"mode":"road","vehicle_type":"hgv","from":{"lat":43.7396,"lon":7.4277},"to":{"lat":43.7275,"lon":7.4155}'
+          for v in '{"height_m":4.0}' '{"hazmat":true,"tunnel_code":"D"}'; do
+            out=$(curl -fsS -X POST localhost:8080/v1/calculate -d "{\"weight_kg\":1000,\"legs\":[{$leg,\"vehicle\":$v}]}")
+            echo "$out" | jq -c '.legs[0] | {distance_km, restrictions: .restrictions.excluded}'
+            echo "$out" | jq -e '.legs[0].distance_km > 1.5 and (.legs[0].restrictions.excluded | index("truck"))'
+          done
+          # An empty vehicle routes exactly like no vehicle.
+          plain=$(curl -fsS -X POST localhost:8080/v1/calculate -d "{\"weight_kg\":1000,\"legs\":[{$leg}]}" | jq -c '.legs[0].distance_km, .wtw_kg')
+          empty=$(curl -fsS -X POST localhost:8080/v1/calculate -d "{\"weight_kg\":1000,\"legs\":[{$leg,\"vehicle\":{}}]}")
+          echo "$empty" | jq -e '.legs[0].restrictions == null'
+          [ "$plain" = "$(echo "$empty" | jq -c '.legs[0].distance_km, .wtw_kg')" ] || { echo "vehicle {} differs: $plain"; exit 1; }
+
       - name: Road leg from outside the map is refused
         run: |
           # Paris isn't on Monaco's map: OSRM would take it to the nearest road it has.
