@@ -1,6 +1,7 @@
 package calc
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"strings"
@@ -70,5 +71,55 @@ func TestValidateVehicleOnRoad(t *testing.T) {
 	s.Legs[0] = Leg{ID: "road", Mode: Road, DistanceKm: 100, Vehicle: &Vehicle{HeightM: fp(9)}}
 	if err := validate(s); !errors.Is(err, ErrInvalidVehicle) || !strings.Contains(err.Error(), `leg "road"`) {
 		t.Errorf("height 9: %v", err)
+	}
+}
+
+// seeVehicle routes every road leg 100 km and keeps the vehicle it was asked to route for.
+type seeVehicle struct{ got **Vehicle }
+
+func (s seeVehicle) Route(ctx context.Context, m Mode, a, b Location) (Route, error) {
+	*s.got = VehicleOf(ctx)
+	return Route{Km: 100}, nil
+}
+
+func (s seeVehicle) Distance(ctx context.Context, m Mode, a, b Location) (float64, error) {
+	rt, err := s.Route(ctx, m, a, b)
+	return rt.Km, err
+}
+
+// An empty vehicle routes exactly like no vehicle: no exclusions, no restrictions in the result.
+func TestEmptyVehicleIsNone(t *testing.T) {
+	var got *Vehicle
+	c := Calculator{Factors: testFactors, Distances: seeVehicle{&got}}
+	leg := Leg{ID: "road", Mode: Road, VehicleType: "truck_40t", From: Location{Lat: 55.68, Lon: 12.57}, To: Location{Lat: 53.55, Lon: 10.0}}
+	plain, err := c.Calculate(context.Background(), Shipment{ID: "s", WeightKg: 1000, Legs: []Leg{leg}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	empty := &Vehicle{}
+	leg.Vehicle = empty
+	s := Shipment{ID: "s", WeightKg: 1000, Legs: []Leg{leg}}
+	res, err := c.Calculate(context.Background(), s)
+	if err != nil {
+		t.Fatalf("vehicle {}: %v", err)
+	}
+	if got != nil {
+		t.Errorf("vehicle {} was routed as a truck: %+v", got)
+	}
+	if res.Legs[0].Restrictions != nil || res.WTWKg != plain.WTWKg {
+		t.Errorf("vehicle {}: restrictions %+v, %v kg; want none, %v kg", res.Legs[0].Restrictions, res.WTWKg, plain.WTWKg)
+	}
+	if s.Legs[0].Vehicle != empty {
+		t.Error("the caller's leg was changed")
+	}
+	// A vehicle with a field is still a truck.
+	s.Legs[0].Vehicle = &Vehicle{HeightM: fp(4)}
+	if _, err := c.Calculate(context.Background(), s); err != nil || got == nil {
+		t.Errorf("height 4: routed for %+v, %v", got, err)
+	}
+	// {} on a sea leg is no vehicle either, so not refused.
+	sea := Shipment{ID: "s", WeightKg: 1000, Legs: []Leg{{ID: "sea", Mode: Sea, VehicleType: "container", DistanceKm: 100, Vehicle: &Vehicle{}}}}
+	if _, err := c.Calculate(context.Background(), sea); err != nil {
+		t.Errorf("vehicle {} on a sea leg: %v", err)
 	}
 }

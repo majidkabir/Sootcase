@@ -67,6 +67,27 @@ type TruckLimits struct {
 	HazmatNo      bool    `json:"hazmat_no,omitempty"`   // hazmat=no left out
 }
 
+// empty reports a vehicle with no fields: it routes like a leg without one.
+func (v Vehicle) empty() bool { return v == (Vehicle{}) }
+
+// dropEmptyVehicles returns s with every empty vehicle taken out, so that
+// "vehicle": {} routes exactly like no vehicle. s's legs are not changed.
+func dropEmptyVehicles(s Shipment) Shipment {
+	for i, l := range s.Legs {
+		if l.Vehicle != nil && l.Vehicle.empty() {
+			legs := append([]Leg(nil), s.Legs...)
+			for j := i; j < len(legs); j++ {
+				if legs[j].Vehicle != nil && legs[j].Vehicle.empty() {
+					legs[j].Vehicle = nil
+				}
+			}
+			s.Legs = legs
+			return s
+		}
+	}
+	return s
+}
+
 func (v Vehicle) check() error {
 	bad := func(field string, format string, a ...any) error {
 		return fmt.Errorf("%w.%s: "+format, append([]any{ErrInvalidVehicle, field}, a...)...)

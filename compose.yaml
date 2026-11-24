@@ -31,14 +31,20 @@ services:
     command:
       - |
         set -e
-        if [ -f /data/region.osrm.mldgr ] && [ /data/region.osrm.mldgr -nt /data/region.osm.pbf ]; then
+        # Road data with truck classes (deploy/truck.lua), so legs with a vehicle can
+        # leave out roads a truck may not use. Rebuilt when the map or the profile changes.
+        sha256sum /profiles/truck.lua | cut -d' ' -f1 > /tmp/profile
+        if [ -f /data/region.osrm.mldgr ] && [ /data/region.osrm.mldgr -nt /data/region.osm.pbf ] &&
+           cmp -s /tmp/profile /data/region.profile; then
           echo "OSRM data up to date"; exit 0
         fi
-        osrm-extract -p /opt/car.lua /data/region.osm.pbf
+        osrm-extract -p /profiles/truck.lua /data/region.osm.pbf
         osrm-partition /data/region.osrm
         osrm-customize /data/region.osrm
+        cp /tmp/profile /data/region.profile
     volumes:
       - osrm-data:/data
+      - ./deploy:/profiles:ro
 
   osrm:
     image: *osrm-image
