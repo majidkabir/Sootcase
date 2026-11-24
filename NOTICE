@@ -69,6 +69,10 @@ statistical sectors 2026, situation 1 January 2026
 three regions, simplified to 2 m and converted to WGS 84. This use does not imply any
 endorsement by Statbel.
 
+Germany's states (also in pkg/borders/data/regions.bin.gz, built by tools/borders) are
+Natural Earth's 1:10m admin-1 states and provinces, v5.1.2
+(https://www.naturalearthdata.com), public domain.
+
 Map tiles and routing data: (c) OpenStreetMap contributors, under the Open Database
 License (https://www.openstreetmap.org/copyright). They are not bundled; the map tiles are
 loaded from openstreetmap.org and the routing graphs are built where Sootcase is deployed.

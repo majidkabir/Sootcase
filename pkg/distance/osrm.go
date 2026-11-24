@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/majidkabir/sootcase/pkg/borders"
 	"github.com/majidkabir/sootcase/pkg/calc"
 )
 
@@ -66,6 +67,14 @@ type CountrySplitter interface {
 type RegionSplitter interface {
 	CountrySplitter
 	SplitKmRegions(line [][2]float64) (countries, regions map[string]float64)
+}
+
+// StretchSplitter is a RegionSplitter that also gives a line's stretches
+// by country (and region) in order. *borders.Index implements it; routes
+// then get CountrySections.
+type StretchSplitter interface {
+	RegionSplitter
+	SplitStretches(line [][2]float64) (countries, regions map[string]float64, stretches []borders.Stretch)
 }
 
 // DefaultMaxInFlight is OSRM.MaxInFlight's default.
@@ -465,17 +474,29 @@ type osrmStep struct {
 func (o *OSRM) splitByCountry(r *calc.Route, steps []osrmStep) {
 	ck, rk := map[string]float64{}, map[string]float64{}
 	rs, _ := o.Countries.(RegionSplitter)
+	ss, _ := o.Countries.(StretchSplitter)
+	var secs []section // in route order, when ss
 	for _, st := range steps {
-		if st.Distance <= 0 || o.PartModes[st.Mode] == calc.PartFerry {
+		if st.Distance <= 0 {
 			continue
 		}
 		km := st.Distance / 1000
+		if o.PartModes[st.Mode] == calc.PartFerry {
+			if ss != nil {
+				secs = append(secs, section{ferry: true, km: km})
+			}
+			continue
+		}
 		var g lineGeometry
 		_ = json.Unmarshal(st.Geometry, &g) // a polyline or nothing: no line
 		var countries, regions map[string]float64
-		if rs != nil {
+		var stretches []borders.Stretch
+		switch {
+		case ss != nil:
+			countries, regions, stretches = ss.SplitStretches(g.Coordinates)
+		case rs != nil:
 			countries, regions = rs.SplitKmRegions(g.Coordinates)
-		} else {
+		default:
 			countries = o.Countries.SplitKm(g.Coordinates)
 		}
 		var lineKm float64
@@ -484,6 +505,9 @@ func (o *OSRM) splitByCountry(r *calc.Route, steps []osrmStep) {
 		}
 		if lineKm <= 0 {
 			ck[calc.CountryUnknown] += km
+			if ss != nil {
+				secs = append(secs, section{country: calc.CountryUnknown, km: km})
+			}
 			continue
 		}
 		for c, v := range countries {
@@ -492,8 +516,12 @@ func (o *OSRM) splitByCountry(r *calc.Route, steps []osrmStep) {
 		for c, v := range regions {
 			rk[unknownIfEmpty(c)] += v / lineKm * km
 		}
+		for _, x := range stretches {
+			secs = append(secs, section{country: unknownIfEmpty(x.Country), region: x.Region, km: x.Km / lineKm * km})
+		}
 	}
-	land := r.Km - math.Min(r.Parts[calc.PartFerry], r.Km)
+	ferry := math.Min(r.Parts[calc.PartFerry], r.Km)
+	land := r.Km - ferry
 	if land <= 0 {
 		return
 	}
@@ -528,6 +556,74 @@ func (o *OSRM) splitByCountry(r *calc.Route, steps []osrmStep) {
 			}
 		}
 	}
+	if ss != nil {
+		var ferrySteps float64
+		for _, x := range secs {
+			if x.ferry {
+				ferrySteps += x.km
+			}
+		}
+		for i := range secs { // as the km on land and the ferry part
+			if secs[i].ferry {
+				secs[i].km *= ferry / ferrySteps
+			} else {
+				secs[i].km *= land / sum
+			}
+		}
+		r.CountrySections = countrySections(secs, r.Km)
+	}
+}
+
+// section is a stretch of a route in one country and region, or a ferry.
+type section struct {
+	country, region string
+	ferry           bool
+	km              float64
+}
+
+// countrySections lays secs end to end from 0 (km rounded to 0.1 m, the
+// last ending at total), leaves out stretches that round to nothing and
+// joins neighbours in the same country (and region).
+func countrySections(secs []section, total float64) []calc.CountrySection {
+	round := func(v float64) float64 { return math.Round(v*1e4) / 1e4 }
+	var out []calc.CountrySection
+	var at float64
+	for i, x := range secs {
+		from := round(at)
+		at += x.km
+		to := round(at)
+		if i == len(secs)-1 {
+			to = total
+		}
+		if to <= from {
+			continue
+		}
+		country := x.country
+		if x.ferry {
+			country = ""
+		}
+		if n := len(out); n > 0 && out[n-1].Ferry == x.ferry && out[n-1].Country == country {
+			out[n-1].ToKm = to
+		} else {
+			out = append(out, calc.CountrySection{Country: country, FromKm: from, ToKm: to, Ferry: x.ferry})
+		}
+		cs := &out[len(out)-1]
+		if x.region == "" {
+			continue
+		}
+		if n := len(cs.Regions); n > 0 && cs.Regions[n-1].Region == x.region {
+			cs.Regions[n-1].ToKm = to
+		} else {
+			cs.Regions = append(cs.Regions, calc.RegionSection{Region: x.region, FromKm: from, ToKm: to})
+		}
+	}
+	if n := len(out); n > 0 { // the last ends at total even when its own last stretch was left out
+		out[n-1].ToKm = total
+		if m := len(out[n-1].Regions); m > 0 {
+			out[n-1].Regions[m-1].ToKm = total
+		}
+	}
+	return out
 }
 
 func unknownIfEmpty(code string) string {

@@ -298,6 +298,14 @@ type LegResult struct {
 	// Brussels-Capital (BE-BRU), by ISO 3166-2 code. A country's regions add
 	// up to its CountryKm. Only with CountryKm, for legs in such a country.
 	RegionKm map[string]float64 `json:"region_km,omitempty"`
+	// CountrySections is the leg's route by country in route order, with
+	// CountryKm: each section's km along the leg (DistanceKm), the first
+	// from 0, each from where the one before ends, the last to DistanceKm.
+	// A ferry crossing is a section of its own (Ferry, no country). A
+	// country's land sections add up to its CountryKm; a country the route
+	// enters twice has two sections. Sections in Germany and Belgium have
+	// their regions (ISO 3166-2) the same way.
+	CountrySections []CountrySection `json:"country_sections,omitempty"`
 	// Path is the leg's route as GeoJSON [lon, lat] points, when asked for
 	// (single calculations only). Two points mean a straight line: the
 	// distance was given or estimated, not routed.
@@ -385,4 +393,24 @@ type Result struct {
 // DatasetNamer is optionally implemented by a FactorProvider.
 type DatasetNamer interface {
 	DatasetName() string
+}
+
+// CountrySection is a stretch of a leg's route in one country (see
+// LegResult.CountrySections), km from the leg's start.
+type CountrySection struct {
+	// Country is ISO 3166-1 alpha-2 as in CountryKm ("" on a ferry).
+	Country string  `json:"country"`
+	FromKm  float64 `json:"from_km"`
+	ToKm    float64 `json:"to_km"`
+	Ferry   bool    `json:"ferry,omitempty"`
+	// Regions split the section by region (ISO 3166-2, e.g. DE-BY), in
+	// route order, where the borders have regions (Germany, Belgium).
+	Regions []RegionSection `json:"regions,omitempty"`
+}
+
+// RegionSection is a stretch of a CountrySection in one region.
+type RegionSection struct {
+	Region string  `json:"region"`
+	FromKm float64 `json:"from_km"`
+	ToKm   float64 `json:"to_km"`
 }

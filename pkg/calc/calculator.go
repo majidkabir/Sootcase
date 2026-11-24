@@ -515,7 +515,7 @@ func (c Calculator) onRoute(ctx context.Context, tonnes float64, leg Leg, rt Rou
 	lr.DistanceKm, lr.DistanceMethod, lr.DistanceType = dist, method, dtype
 	lr.TonneKm = tonnes * dist
 	lr.RouteParts = routeParts
-	lr.CountryKm, lr.RegionKm = rt.CountryKm, rt.RegionKm
+	lr.CountryKm, lr.RegionKm, lr.CountrySections = rt.CountryKm, rt.RegionKm, rt.CountrySections
 	lr.Path = rt.Path
 	lr.Summary, lr.DurationH = rt.Summary, round3(rt.DurationH)
 	if WantPath(ctx) && len(lr.Path) == 0 && !isZero(leg.From) && !isZero(leg.To) {
@@ -837,8 +837,36 @@ func checkRoute(rt Route) error {
 	if err != nil {
 		return err
 	}
-	_, err = kmWithin(rt.RegionKm, countries, "region", "km by country")
-	return err
+	if _, err = kmWithin(rt.RegionKm, countries, "region", "km by country"); err != nil {
+		return err
+	}
+	return sectionsWithin(rt.CountrySections, d)
+}
+
+// sectionsWithin checks a route's country sections: end to end from 0 to
+// the route's km, and each section's regions end to end over it.
+func sectionsWithin(secs []CountrySection, km float64) error {
+	at := 0.0
+	for _, s := range secs {
+		if !(s.FromKm == at && s.ToKm > s.FromKm) {
+			return fmt.Errorf("distance: country section %s %v-%v km after %v km", s.Country, s.FromKm, s.ToKm, at)
+		}
+		rat := s.FromKm
+		for _, r := range s.Regions {
+			if !(r.FromKm == rat && r.ToKm > r.FromKm) {
+				return fmt.Errorf("distance: region section %s %v-%v km after %v km", r.Region, r.FromKm, r.ToKm, rat)
+			}
+			rat = r.ToKm
+		}
+		if len(s.Regions) > 0 && rat != s.ToKm {
+			return fmt.Errorf("distance: regions of country section %s end at %v km, the section at %v km", s.Country, rat, s.ToKm)
+		}
+		at = s.ToKm
+	}
+	if len(secs) > 0 && math.Abs(at-km) > 1e-6*km+1e-3 {
+		return fmt.Errorf("distance: country sections end at %v km in a %v km route", at, km)
+	}
+	return nil
 }
 
 func round3(v float64) float64 { return math.Round(v*1000) / 1000 }

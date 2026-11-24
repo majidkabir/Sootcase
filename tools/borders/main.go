@@ -18,6 +18,15 @@
 // GeoJSON that tools/borders/regions.py writes:
 //
 //	go run ./tools/borders -in be_regions.geojson -key code -out pkg/borders/data/regions.bin.gz
+//
+// Germany's states come from Natural Earth's 1:10m admin-1 states and
+// provinces (v5.1.2, public domain), added to the Belgian regions (-keep
+// keeps an existing file's areas, -only takes the features whose code
+// starts with it):
+//
+//	curl -LO https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_1_states_provinces.geojson
+//	go run ./tools/borders -in ne_10m_admin_1_states_provinces.geojson -key iso_3166_2 -only DE- \
+//	  -keep pkg/borders/data/regions.bin.gz -out pkg/borders/data/regions.bin.gz
 package main
 
 import (
@@ -31,6 +40,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/majidkabir/sootcase/pkg/borders"
@@ -43,6 +53,8 @@ func main() {
 	in := flag.String("in", "ne_10m_admin_0_countries.geojson", "GeoJSON file (without -fetch)")
 	out := flag.String("out", "pkg/borders/data/borders.bin.gz", "output file")
 	key := flag.String("key", "", "property that holds each feature's code (default: Natural Earth's ISO_A2_EH, else ADM0_A3)")
+	only := flag.String("only", "", "only features whose code starts with this (with -key)")
+	keep := flag.String("keep", "", "an existing .bin.gz whose areas are kept, unless the input has the same code")
 	flag.Parse()
 
 	var raw []byte
@@ -55,9 +67,29 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cs, err := build(raw, *key)
+	cs, err := build(raw, *key, *only)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if *keep != "" {
+		old, err := os.ReadFile(*keep)
+		if err != nil {
+			log.Fatal(err)
+		}
+		kept, err := borders.Decode(old)
+		if err != nil {
+			log.Fatal(err)
+		}
+		have := map[string]bool{}
+		for _, c := range cs {
+			have[c.Code] = true
+		}
+		for _, c := range kept {
+			if !have[c.Code] {
+				cs = append(cs, c)
+			}
+		}
+		sort.Slice(cs, func(i, j int) bool { return cs[i].Code < cs[j].Code })
 	}
 	var buf bytes.Buffer
 	if err := borders.Encode(&buf, cs); err != nil {
@@ -98,7 +130,7 @@ type feature struct {
 	} `json:"geometry"`
 }
 
-func build(raw []byte, key string) ([]borders.Country, error) {
+func build(raw []byte, key, only string) ([]borders.Country, error) {
 	var fc struct {
 		Features []feature `json:"features"`
 	}
@@ -125,6 +157,9 @@ func build(raw []byte, key string) ([]borders.Country, error) {
 			if code = alpha2[iso]; code == "" {
 				code, _ = f.Properties["ADM0_A3"].(string)
 			}
+		}
+		if only != "" && !strings.HasPrefix(code, only) {
+			continue
 		}
 		if code == "" {
 			return nil, fmt.Errorf("feature %v has no code", f.Properties["NAME"])

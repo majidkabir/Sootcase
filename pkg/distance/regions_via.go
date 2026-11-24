@@ -247,9 +247,10 @@ func (rs Regions) routeVia(ctx context.Context, m calc.Mode, from, to calc.Locat
 		return calc.Route{}, err
 	}
 	r := calc.Route{Km: r1.Km + r2.Km,
-		Parts:     addKm(r1.Parts, r2.Parts, false),
-		CountryKm: addKm(r1.CountryKm, r2.CountryKm, true),
-		RegionKm:  addKm(r1.RegionKm, r2.RegionKm, true),
+		Parts:           addKm(r1.Parts, r2.Parts, false),
+		CountryKm:       addKm(r1.CountryKm, r2.CountryKm, true),
+		RegionKm:        addKm(r1.RegionKm, r2.RegionKm, true),
+		CountrySections: joinSections(r1.CountrySections, r2.CountrySections, r1.Km),
 	}
 	if len(r1.Path) > 0 || len(r2.Path) > 0 {
 		r.Path = append(append([][2]float64{}, r1.Path...), r2.Path...)
@@ -265,6 +266,54 @@ func (rs Regions) routeVia(ctx context.Context, m calc.Mode, from, to calc.Locat
 		r.DurationH = r1.DurationH + r2.DurationH
 	}
 	return r, nil
+}
+
+// joinSections puts b's sections after a's (km from at, a's end), joining
+// a section and region that go on across the join. Nil if either has none
+// (a route without them can't be placed in order).
+func joinSections(a, b []calc.CountrySection, at float64) []calc.CountrySection {
+	if len(a) == 0 || len(b) == 0 {
+		return nil
+	}
+	out := make([]calc.CountrySection, 0, len(a)+len(b))
+	for _, s := range a {
+		s.Regions = append([]calc.RegionSection(nil), s.Regions...)
+		out = append(out, s)
+	}
+	round := func(v float64) float64 { return math.Round(v*1e4) / 1e4 }
+	for i, s := range b {
+		s.FromKm, s.ToKm = round(s.FromKm+at), round(s.ToKm+at)
+		if i == 0 {
+			s.FromKm = out[len(out)-1].ToKm
+		}
+		if i == len(b)-1 {
+			s.ToKm = at + b[len(b)-1].ToKm
+		}
+		regions := make([]calc.RegionSection, len(s.Regions))
+		for j, r := range s.Regions {
+			r.FromKm, r.ToKm = round(r.FromKm+at), round(r.ToKm+at)
+			if j == 0 {
+				r.FromKm = s.FromKm
+			}
+			if j == len(s.Regions)-1 {
+				r.ToKm = s.ToKm
+			}
+			regions[j] = r
+		}
+		s.Regions = regions
+		last := &out[len(out)-1]
+		if i == 0 && last.Country == s.Country && last.Ferry == s.Ferry {
+			last.ToKm = s.ToKm
+			if n := len(last.Regions); n > 0 && len(s.Regions) > 0 && last.Regions[n-1].Region == s.Regions[0].Region {
+				last.Regions[n-1].ToKm = s.Regions[0].ToKm
+				s.Regions = s.Regions[1:]
+			}
+			last.Regions = append(last.Regions, s.Regions...)
+			continue
+		}
+		out = append(out, s)
+	}
+	return out
 }
 
 // addKm adds two routes' km by key, nil if both have none. round rounds

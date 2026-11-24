@@ -2,7 +2,9 @@ package borders
 
 import (
 	"bytes"
+	"fmt"
 	"math"
+	"strings"
 	"testing"
 )
 
@@ -265,5 +267,57 @@ func TestUnknownRegion(t *testing.T) {
 	_, regions := ix.SplitKmRegions([][2]float64{{0.4, 0.5}, {0.6, 0.5}, {8, 8}, {8.2, 8}})
 	if regions["AA-X"] <= 0 || regions["AA-"+UnknownRegion] <= 0 || len(regions) != 2 {
 		t.Errorf("regions %v, want AA-X and AA-unknown", regions)
+	}
+}
+
+// Stretches come in order, add up to SplitKm's countries, have Germany's
+// states (not in SplitKmRegions' regions) and Belgium's regions.
+func TestSplitStretches(t *testing.T) {
+	ix, err := Default()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var line [][2]float64
+	// Brussels to Hamburg to Munich, about every km.
+	for _, ab := range [][2][2]float64{{{4.35, 50.85}, {9.99, 53.55}}, {{9.99, 53.55}, {11.58, 48.14}}} {
+		for k := 0; k < 600; k++ {
+			f := float64(k) / 600
+			line = append(line, [2]float64{ab[0][0] + f*(ab[1][0]-ab[0][0]), ab[0][1] + f*(ab[1][1]-ab[0][1])})
+		}
+	}
+	line = append(line, [2]float64{11.58, 48.14})
+	countries, regions, stretches := ix.SplitStretches(line)
+	want, wantRegions := ix.SplitKmRegions(line)
+	if fmt.Sprint(countries) != fmt.Sprint(want) || fmt.Sprint(regions) != fmt.Sprint(wantRegions) {
+		t.Errorf("SplitStretches %v %v, SplitKmRegions %v %v", countries, regions, want, wantRegions)
+	}
+	for r := range regions {
+		if !strings.HasPrefix(r, "BE-") {
+			t.Errorf("region km %s: only Belgium's regions", r)
+		}
+	}
+	sum := map[string]float64{}
+	var order []string
+	for _, s := range stretches {
+		sum[s.Country] += s.Km
+		if s.Country == "DE" || s.Country == "BE" {
+			if !strings.HasPrefix(s.Region, s.Country+"-") {
+				t.Errorf("stretch %+v without its region", s)
+			}
+			if len(order) == 0 || order[len(order)-1] != s.Region {
+				order = append(order, s.Region)
+			}
+		} else if s.Region != "" {
+			t.Errorf("stretch %+v: region outside Belgium and Germany", s)
+		}
+	}
+	for c, v := range countries {
+		if math.Abs(sum[c]-v) > 1e-9 {
+			t.Errorf("%s: stretches %v, SplitKm %v", c, sum[c], v)
+		}
+	}
+	got := strings.Join(order, " ")
+	if !strings.HasPrefix(got, "BE-BRU BE-VLG") || !strings.HasSuffix(got, "DE-BY") || !strings.Contains(got, "DE-HH") {
+		t.Errorf("regions in order %s: want Brussels, Flanders first, Hamburg on the way, Bavaria last", got)
 	}
 }
