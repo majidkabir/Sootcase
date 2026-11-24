@@ -22,6 +22,7 @@ func WriteMarkdown(w io.Writer, r Report) error {
 	p("**Factor datasets:** %s  \n", esc(strings.Join(r.Datasets, ", ")))
 	p("**Generated:** %s\n\n", r.Generated.Format("2006-01-02 15:04 UTC"))
 	p("%s\n\n", esc(r.Statement))
+	p("Basis: %s. %s.\n\n", esc(r.Basis.String()), esc(r.Certification))
 
 	c := r.Coverage
 	p("## Coverage\n\n")

@@ -56,7 +56,8 @@ func Run(ctx context.Context, c calc.Calculator, shipments []calc.Shipment, set 
 		}
 		set.Kinds = kinds
 	}
-	res := Result{Label: Label, Settings: set, Skipped: skipped, Sources: sources(c.Factors, set), Limitations: Limitations()}
+	res := Result{Label: Label, Settings: set, Skipped: skipped, Sources: sources(c.Factors, set), Limitations: Limitations(),
+		Basis: calc.CurrentBasis(), Certification: calc.Certification}
 
 	// Group shipments that only differ in weight.
 	type group struct {

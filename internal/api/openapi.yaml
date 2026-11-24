@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.16.0
+  version: 0.17.0
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -772,6 +772,13 @@ components:
         daf_source: { type: string }
         energy_kwh_per_tkm: { type: number }
         country: { type: string }
+    Basis:
+      type: object
+      description: "What a result was calculated by (since v0.17.0)"
+      properties:
+        standard: { type: string, example: "EN ISO 14083:2023" }
+        framework: { type: string, example: "GLEC Framework v3.3" }
+        sootcase: { type: string, description: "The Sootcase version", example: "v0.17.0" }
     Result:
       type: object
       properties:
@@ -817,6 +824,8 @@ components:
             operator_scope3_cat3_kg: { type: number }
             hubs_kg: { type: number }
         dataset: { type: string }
+        basis: { $ref: "#/components/schemas/Basis" }
+        certification: { type: string, description: "What the result says about Regulation (EU) 2026/1030: Not certified under Regulation (EU) 2026/1030 (applies from 2 December 2030). Sootcase never gives out the Regulation's Art. 10(1) statement: only certified tools on the Commission's list may (Art. 9(2), 11)." }
         warnings:
           type: array
           items: { type: string }
@@ -897,6 +906,8 @@ components:
     ILEAPResponse:
       type: object
       properties:
+        basis: { $ref: "#/components/schemas/Basis" }
+        certification: { type: string, description: "What the result says about Regulation (EU) 2026/1030: Not certified under Regulation (EU) 2026/1030 (applies from 2 December 2030). Sootcase never gives out the Regulation's Art. 10(1) statement: only certified tools on the Commission's list may (Art. 9(2), 11)." }
         ileap_spec_version: { type: string, example: "1.1.0" }
         conformant: { type: boolean, description: "True when nothing iLEAP requires is missing and every object passes Sootcase's check of the data model" }
         shipment_footprints: { type: array, items: { type: object }, description: "iLEAP ShipmentFootprints (iLEAP 6.1), each with its TCEs (6.2)" }
@@ -934,6 +945,8 @@ components:
         statement: { type: string }
         reference: { type: string }
         datasets: { type: array, items: { type: string } }
+        basis: { $ref: "#/components/schemas/Basis" }
+        certification: { type: string, description: "What the result says about Regulation (EU) 2026/1030: Not certified under Regulation (EU) 2026/1030 (applies from 2 December 2030). Sootcase never gives out the Regulation's Art. 10(1) statement: only certified tools on the Commission's list may (Art. 9(2), 11)." }
         generated: { type: string, format: date-time }
         coverage:
           type: object
@@ -1015,6 +1028,8 @@ components:
     RecommendResult:
       type: object
       properties:
+        basis: { $ref: "#/components/schemas/Basis" }
+        certification: { type: string, description: "What the result says about Regulation (EU) 2026/1030: Not certified under Regulation (EU) 2026/1030 (applies from 2 December 2030). Sootcase never gives out the Regulation's Art. 10(1) statement: only certified tools on the Commission's list may (Art. 9(2), 11)." }
         label: { type: string }
         settings: { $ref: "#/components/schemas/RecommendSettings" }
         skipped: { type: object, additionalProperties: { type: string } }
@@ -1096,6 +1111,8 @@ components:
         diff_kg: { type: number, description: Scenario minus base, WTW }
         diff_pct: { type: number }
         failed: { type: integer }
+        basis: { $ref: "#/components/schemas/Basis" }
+        certification: { type: string, description: "What the result says about Regulation (EU) 2026/1030: Not certified under Regulation (EU) 2026/1030 (applies from 2 December 2030). Sootcase never gives out the Regulation's Art. 10(1) statement: only certified tools on the Commission's list may (Art. 9(2), 11)." }
         changes:
           type: array
           items:

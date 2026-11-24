@@ -200,7 +200,8 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 		return Result{}, ErrNoLegs
 	}
 	tonnes := weightKg / 1000
-	res := Result{ShipmentID: s.ID, WeightKg: weightKg, WeightBasis: basis, ContainerLoad: profile}
+	res := Result{ShipmentID: s.ID, WeightKg: weightKg, WeightBasis: basis, ContainerLoad: profile,
+		Basis: CurrentBasis(), Certification: Certification}
 	if basis == "teu" {
 		res.TEU = s.TEU
 	}

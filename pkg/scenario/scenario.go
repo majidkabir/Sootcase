@@ -178,6 +178,9 @@ type Result struct {
 	Changes   []ChangeReport   `json:"changes"`
 	Shipments []ShipmentResult `json:"shipments"`
 	Failed    int              `json:"failed"`
+	// Basis and Certification as in calc.Result.
+	Basis         calc.Basis `json:"basis"`
+	Certification string     `json:"certification"`
 }
 
 // ErrInvalidPlan reports a plan that can't be applied.
@@ -394,7 +397,7 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 		}
 	}
 
-	res := Result{Plan: p.Name, Label: scenarioTag}
+	res := Result{Plan: p.Name, Label: scenarioTag, Basis: calc.CurrentBasis(), Certification: calc.Certification}
 	reports := make([]ChangeReport, len(changes))
 	for i, ch := range changes {
 		reports[i] = ChangeReport{Change: ch, Sources: ch.sources(f)}

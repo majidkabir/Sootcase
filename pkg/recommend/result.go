@@ -108,7 +108,10 @@ type Result struct {
 	Sources     []string         `json:"sources"`
 	Limitations []string         `json:"limitations"`
 	Shipments   []ShipmentResult `json:"shipments"`
-	Failed      int              `json:"failed"`
+	// Basis and Certification as in calc.Result.
+	Basis         calc.Basis `json:"basis"`
+	Certification string     `json:"certification"`
+	Failed        int        `json:"failed"`
 }
 
 // Limitations are what the recommendations don't take into account.

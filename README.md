@@ -229,6 +229,15 @@ Results are shaped for ISO 14083-style reporting:
 
 Sootcase isn't certified or verified against ISO 14083. Treat results as calculations for your own reporting process.
 
+**Basis and Regulation (EU) 2026/1030** (since v0.17.0). Every result, report, scenario, recommendation and iLEAP export
+carries `basis` (`standard` EN ISO 14083:2023, `framework` GLEC Framework v3.3, `sootcase` the version) and
+`certification`: "Not certified under Regulation (EU) 2026/1030 (applies from 2 December 2030)". The batch CSV has them as
+the `basis` and `certification` columns, the Markdown report and the calculator page as a line. The Regulation
+(CountEmissions EU) bases calculations on EN ISO 14083:2023 (Art. 3(1)) and applies from 2 December 2030 (Art. 20(2)).
+Its Art. 10(1) statement is only for output from a calculation tool certified under Art. 11 and on the Commission's
+list (Art. 9(2), 11(4)), so Sootcase never gives it out; a test checks that no output, page or document does. A
+build from `main` without a release tag names the last release in `RELEASE`.
+
 ### Report over many shipments
 
 `sootcase report` (or `POST /v1/report`) turns a set of shipments into a report with the basic content ISO 14083 asks for at the level of transport or hub services (GLEC v3.3, Section 2, Chapter 1):
