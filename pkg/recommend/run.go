@@ -98,6 +98,10 @@ func Run(ctx context.Context, c calc.Calculator, shipments []calc.Shipment, set 
 			for g := range jobs {
 				first := analyse(ctx, c, shipments[g.first], set)
 				for _, i := range g.all {
+					if i == g.first {
+						out[i] = first // its own result, with its calculated weight (a TEU shipment's input weight is 0)
+						continue
+					}
 					out[i] = rescale(first, shipments[i])
 				}
 			}
@@ -156,6 +160,9 @@ func groupKey(s calc.Shipment) (string, bool) {
 func rescale(r ShipmentResult, s calc.Shipment) ShipmentResult {
 	out := r
 	out.ShipmentID = s.ID
+	if s.WeightKg <= 0 { // not given by weight: never grouped, its result as it is
+		return out
+	}
 	if r.WeightKg <= 0 || s.WeightKg == r.WeightKg || r.Error != "" {
 		out.WeightKg = s.WeightKg
 		return out
