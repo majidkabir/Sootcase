@@ -238,7 +238,7 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 			}
 			return Result{}, fmt.Errorf("leg %q: %w", p.ID, err)
 		}
-		lr.Added, lr.Note = p.added, p.note
+		lr.Added, lr.Note = p.added, strings.TrimSpace(p.note+" "+lr.Note)
 		for _, w := range lr.warnings {
 			name := p.ID
 			if name == "" {
@@ -449,9 +449,12 @@ func (c Calculator) leg(ctx context.Context, tonnes float64, leg Leg) (LegResult
 		return LegResult{}, err
 	}
 	var restr *Restrictions
-	if leg.Vehicle != nil && leg.Mode == Road && leg.DistanceKm == 0 {
+	switch {
+	case leg.Vehicle != nil && leg.Mode == Road && leg.DistanceKm == 0:
 		ex, lim, _ := leg.Vehicle.Exclude() // routed with them, so no error
 		restr = &Restrictions{Vehicle: *leg.Vehicle, RoutedFor: lim, Excluded: ex}
+	case leg.Vehicle != nil && leg.DistanceKm > 0:
+		lr.Note = "The vehicle isn't applied: distance_km is given, so the leg isn't routed."
 	}
 	lr.Restrictions, lr.warnings = restr, rt.Warnings
 	// Other routes, when asked for: each calculated exactly like the

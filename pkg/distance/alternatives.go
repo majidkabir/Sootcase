@@ -137,8 +137,9 @@ func sharedShare(a, b osrmRoute) float64 {
 }
 
 // Summary rules: a road is named when the route drives at least
-// summaryMinKm on it, or summaryMinShare of its length, at most
-// summaryMaxRoads of them.
+// summaryMinKm on it and at least summaryMinShare of the route's length
+// (so a long route names only its main roads), at most summaryMaxRoads of
+// them; a route with none of these names its longest road.
 const (
 	summaryMinKm    = 20
 	summaryMinShare = 0.05

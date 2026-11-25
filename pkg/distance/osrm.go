@@ -186,7 +186,7 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 	}
 
 	q := routeQuery{path: calc.PathDetailOf(ctx), countries: withCountries,
-		summary: opts.Alternatives >= 1, avoidFerries: opts.AvoidFerries, exclude: truck}
+		summary: m == calc.Road, avoidFerries: opts.AvoidFerries, exclude: truck}
 	if opts.Alternatives > 1 {
 		// A few more than asked for: some are dropped as too long or too
 		// like another.
@@ -397,7 +397,9 @@ type rawRoute struct {
 
 // build reads one route of a response.
 func (o *OSRM) build(raw rawRoute, q routeQuery) osrmRoute {
-	r := calc.Route{Km: raw.Distance / 1000}
+	// OSRM gives metres to 0.1 m; km rounded to that, without float noise
+	// (240890.1 m is 240.8901 km, not 240.89010000000002).
+	r := calc.Route{Km: math.Round(raw.Distance*10) / 1e4}
 	if q.path != "" {
 		r.Path = raw.Geometry.Coordinates
 		if q.path == calc.PathDetailed {
