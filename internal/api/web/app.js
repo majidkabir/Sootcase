@@ -470,9 +470,12 @@ function render(req, r) {
     if (ff) {
       how = `${fmt(ff.wtt_kg_per_unit + ff.ttw_kg_per_unit, 3)} kg CO₂e per ${esc(unit(ff.unit))}` +
         (l.allocation_share < 1 ? `, ${fmt(l.allocation_share * 100, 1)}% of the trip allocated` : "") + `. ${esc(ff.source)}`;
+    } else if (l.factor_tonnes && f.tonnes_per_teu) {
+      how = `${fmt(((f.ttw_g_per_tkm || 0) + (f.wtt_g_per_tkm || 0)) * f.tonnes_per_teu, 1)} g CO₂e per TEU-km, as published (the cargo is given in TEU). ${esc(f.source)}`;
     } else {
       how = `${fmt((f.ttw_g_per_tkm || 0) + (f.wtt_g_per_tkm || 0), 2)} g CO₂e per tonne-km. ${esc(f.source)}`;
     }
+    if (l.factor_note) how += `<br>${esc(l.factor_note)}`;
     const partName = { ferry: "by ferry", electrified: "on electrified track" };
     for (const p of l.parts || []) {
       const pf = p.factor || {};

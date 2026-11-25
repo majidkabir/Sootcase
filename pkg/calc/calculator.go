@@ -499,6 +499,14 @@ func (c Calculator) onRoute(ctx context.Context, tonnes float64, leg Leg, rt Rou
 		mainKm -= ferryKm
 	}
 	givenVT := leg.VehicleType // as given, for the result
+	if leg.Mode == Rail && leg.EnergyKWhPerTkm != 0 {
+		// One way of calculating per leg, checked before the energy is
+		// split off below (main checks what is left).
+		if err := oneMethod(leg); err != nil {
+			return LegResult{}, err
+		}
+	}
+	dieselNote := ""
 	// Electric rail with known non-electrified track: that track runs on
 	// a diesel train's factor (dieselTrain), the rest on electricity. Track
 	// with unknown electrification follows the input (electric).
@@ -510,16 +518,19 @@ func (c Calculator) onRoute(ctx context.Context, tonnes float64, leg Leg, rt Rou
 		parts = append(parts, p)
 		mainKm = dieselKm
 		leg.EnergyKWhPerTkm, leg.Country = 0, ""
-		leg.VehicleType = c.dieselTrain(leg.VehicleType)
+		leg.VehicleType, dieselNote = c.dieselTrain(leg, dieselKm)
 	} else if leg.Mode == Rail && leg.EnergyKWhPerTkm != 0 && dieselKm >= dist {
 		// No electrified track at all: a diesel train for all of it.
 		leg.EnergyKWhPerTkm, leg.Country = 0, ""
-		leg.VehicleType = c.dieselTrain(leg.VehicleType)
+		leg.VehicleType, dieselNote = c.dieselTrain(leg, dieselKm)
 	}
 
 	lr, err := c.main(tonnes, mainKm, dtype, leg)
 	if err != nil {
 		return LegResult{}, err
+	}
+	if dieselNote != "" {
+		lr.FactorNote = strings.TrimSpace(dieselNote + " " + lr.FactorNote)
 	}
 	if leg.CargoType != "" && lr.Method != MethodIntensity {
 		lr.FactorNote = strings.TrimSpace(lr.FactorNote + fmt.Sprintf(" Cargo type %q isn't applied here: it chooses default values, "+
@@ -561,7 +572,6 @@ func (c Calculator) legFactor(leg Leg, km float64) (Factor, string, error) {
 func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult, error) {
 	lr := LegResult{TonneKm: tonnes * dist}
 
-	methods := 0
 	if leg.LoadFactor != 0 && leg.LoadTonnes != 0 {
 		return LegResult{}, fmt.Errorf("%w: give load_factor or load_tonnes, not both", ErrInvalidLoad)
 	}
@@ -576,13 +586,8 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 			leg.LoadTonnes = tonnes // a dedicated truck: the shipment is its whole load
 		}
 	}
-	for _, set := range []bool{leg.Fuel != nil, leg.LoadFactor != 0 || leg.LoadTonnes != 0, leg.EnergyKWhPerTkm != 0, leg.OwnFactor != nil} {
-		if set {
-			methods++
-		}
-	}
-	if methods > 1 {
-		return LegResult{}, fmt.Errorf("%w: a leg takes one of fuel, a load (load_factor or load_tonnes), energy_kwh_per_tkm and own_factor, not several", ErrInvalidInput)
+	if err := oneMethod(leg); err != nil { // after repositioning's load: own_factor with it is two ways
+		return LegResult{}, err
 	}
 	if leg.OwnFactor != nil {
 		return c.ownLeg(lr, leg, tonnes, dist, dtype)
@@ -652,17 +657,62 @@ func finish(lr *LegResult) {
 	}
 }
 
+// oneMethod refuses a leg given more than one way of calculating it.
+func oneMethod(leg Leg) error {
+	if leg.LoadFactor != 0 && leg.LoadTonnes != 0 {
+		return fmt.Errorf("%w: give load_factor or load_tonnes, not both", ErrInvalidLoad)
+	}
+	methods := 0
+	for _, set := range []bool{leg.Fuel != nil, leg.LoadFactor != 0 || leg.LoadTonnes != 0, leg.EnergyKWhPerTkm != 0, leg.OwnFactor != nil} {
+		if set {
+			methods++
+		}
+	}
+	if methods > 1 {
+		return fmt.Errorf("%w: a leg takes one of fuel, a load (load_factor or load_tonnes), energy_kwh_per_tkm and own_factor, not several", ErrInvalidInput)
+	}
+	return nil
+}
+
 // dieselTrain is the vehicle type for track that isn't electrified on a
-// rail leg calculated from electricity: a diesel train (the dataset's
-// "freight_train_diesel"), unless the leg's own type is a diesel one.
-func (c Calculator) dieselTrain(vt string) string {
-	if strings.Contains(vt, "diesel") {
-		return vt
+// rail leg calculated from electricity, and a note when it isn't the
+// leg's own: when the leg's own value includes electric traction (an
+// electric row, or an average with an electric part), its diesel
+// counterpart for the same region, commodity and temperature control
+// (".../electric/..." → ".../diesel/...", "average_traction_unknown" →
+// "diesel/average_mixed"), else the dataset's "freight_train_diesel".
+// A diesel value (GLEC's North American average) or one that can't be
+// split (India's) stays as it is.
+func (c Calculator) dieselTrain(leg Leg, km float64) (string, string) {
+	if leg.VehicleType == "" {
+		if _, err := c.Factors.LegFactor(Rail, "freight_train_diesel"); err == nil {
+			return "freight_train_diesel", ""
+		}
+		return "", ""
 	}
-	if _, err := c.Factors.LegFactor(Rail, "freight_train_diesel"); err == nil {
-		return "freight_train_diesel"
+	f, _, err := c.legFactor(leg, km)
+	if err != nil || !(electricFactor(f.VehicleType) || f.ElectricityG > 0) {
+		return leg.VehicleType, "" // main reports an error
 	}
-	return vt
+	var try []string
+	parts := strings.Split(f.VehicleType, "/")
+	for i, p := range parts {
+		if p == "electric" {
+			q := append([]string(nil), parts...)
+			q[i] = "diesel"
+			try = append(try, strings.Join(q, "/"))
+		}
+	}
+	if strings.Contains(f.VehicleType, "average_traction_unknown") {
+		try = append(try, strings.Replace(f.VehicleType, "average_traction_unknown", "diesel/average_mixed", 1))
+	}
+	try = append(try, "freight_train_diesel")
+	for _, vt := range try {
+		if d, err := c.Factors.LegFactor(Rail, vt); err == nil && !electricFactor(d.VehicleType) && d.ElectricityG == 0 {
+			return vt, fmt.Sprintf("Track that isn't electrified: %s (diesel), the diesel counterpart of %s.", d.VehicleType, f.VehicleType)
+		}
+	}
+	return leg.VehicleType, ""
 }
 
 // perTonneKm fills in a leg calculated from an emission intensity:

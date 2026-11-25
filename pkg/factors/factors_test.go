@@ -953,3 +953,68 @@ func TestContainerPerTEU(t *testing.T) {
 		}
 	}
 }
+
+type partsRouter calc.Route
+
+func (r partsRouter) Distance(context.Context, calc.Mode, calc.Location, calc.Location) (float64, error) {
+	return r.Km, nil
+}
+func (r partsRouter) Route(context.Context, calc.Mode, calc.Location, calc.Location) (calc.Route, error) {
+	return calc.Route(r), nil
+}
+func (partsRouter) DistanceType(calc.Mode) string { return calc.DistSFD }
+
+// Rail from electricity on track partly not electrified: that track takes
+// the diesel counterpart of the leg's own GLEC value (same region,
+// commodity, temperature control); a diesel value stays as it is.
+func TestRailNotElectrified_GLEC33(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ham, muc := calc.Location{Code: "DEHAM"}, calc.Location{Code: "DEMUC"}
+	chi, la := calc.Location{Code: "USCHI"}, calc.Location{Code: "USLAX"}
+	half := partsRouter{Km: 1000, Parts: map[string]float64{calc.PartElectrified: 500, calc.PartNotElectrified: 500}}
+	none := partsRouter{Km: 1000, Parts: map[string]float64{calc.PartNotElectrified: 1000}}
+	for _, tc := range []struct {
+		vt, country, cargo string
+		from, to           calc.Location
+		r                  partsRouter
+		want               string
+	}{
+		{"freight_train", "DEU", "", ham, muc, half, "glec/rail/eu/diesel/average_mixed"},
+		{"freight_train_reefer", "DEU", "", ham, muc, half, "glec/rail/eu/temperature_controlled/diesel/average_mixed"},
+		{"freight_train", "DEU", "temperature_controlled", ham, muc, half, "glec/rail/eu/temperature_controlled/diesel/average_mixed"},
+		{"glec/rail/eu/electric/chemicals", "DEU", "", ham, muc, half, "glec/rail/eu/diesel/chemicals"},
+		{"freight_train_electric", "DEU", "container", ham, muc, none, "glec/rail/eu/diesel/container"},
+		{"freight_train", "USA", "", chi, la, none, "glec/rail/na/average"},
+	} {
+		c := calc.Calculator{Factors: ds, Distances: tc.r, Places: places.Codes{}}
+		r, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 1000, CargoType: tc.cargo,
+			Legs: []calc.Leg{{Mode: calc.Rail, VehicleType: tc.vt, EnergyKWhPerTkm: 0.02, Country: tc.country, From: tc.from, To: tc.to}}})
+		if err != nil {
+			t.Errorf("%s: %v", tc.vt, err)
+			continue
+		}
+		l := r.Legs[0]
+		if l.Factor == nil || l.Factor.VehicleType != tc.want {
+			t.Errorf("%s %s: diesel part %+v, want %s (%s)", tc.vt, tc.cargo, l.Factor, tc.want, l.FactorNote)
+		}
+	}
+	// US: GLEC's value is diesel already: 1 t x 1,000 km x 16.1 g.
+	c := calc.Calculator{Factors: ds, Distances: none, Places: places.Codes{}}
+	r, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 1000,
+		Legs: []calc.Leg{{Mode: calc.Rail, VehicleType: "freight_train", EnergyKWhPerTkm: 0.02, Country: "USA", From: chi, To: la}}})
+	if err != nil || math.Abs(r.WTWKg-16.1) > 1e-9 {
+		t.Errorf("US rail = %v %v, want 16.1 kg", r.WTWKg, err)
+	}
+	// Energy and measured fuel on one leg: refused, whatever the track.
+	for _, rt := range []partsRouter{half, none, {Km: 1000}} {
+		c := calc.Calculator{Factors: ds, Distances: rt, Places: places.Codes{}}
+		_, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 1000, Legs: []calc.Leg{{Mode: calc.Rail, VehicleType: "freight_train",
+			EnergyKWhPerTkm: 0.02, Country: "DEU", Fuel: &calc.FuelUse{Fuel: "diesel", Amount: 100}, From: ham, To: muc}}})
+		if !errors.Is(err, calc.ErrInvalidInput) {
+			t.Errorf("energy + fuel, parts %v: want an error, got %v", rt.Parts, err)
+		}
+	}
+}
