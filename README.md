@@ -223,8 +223,8 @@ Turn it off with `"add_road_legs": false` on a shipment, `?add_road_legs=false` 
 Results are shaped for ISO 14083-style reporting:
 
 - **Per element**: every leg and hub reports its emissions separately.
-- **Three components**: tank-to-wheel (`ttw_kg`), well-to-tank (`wtt_kg`) and well-to-wheel (`wtw_kg`), plus WTW intensity per tonne-km, for each leg and in total. Hub factors are WTW only.
-- **Data type** per element: `primary` (measured fuel), `modelled` (load or energy model from shipment inputs) or `default` (published factor), and `primary_data_share` of total WTW.
+- **Three components**: tank-to-wheel (`ttw_kg`), well-to-tank (`wtt_kg`) and well-to-wheel (`wtw_kg`), plus WTW intensity per tonne-km, for each leg and in total. GLEC's hub values are WTW only, so those hubs count in WTW alone; an operator's own hub values (`sootcase toc`) keep their TTW/WTT split in the totals.
+- **Data type** per element: `primary` (measured fuel, or the carrier's own intensity), `modelled` (load or energy model from shipment inputs) or `default` (published factor), and `primary_data_share` of total WTW.
 - **Traceability**: each leg carries its factor with source and year, its `distance_method`, and the result names the `dataset`.
 
 Sootcase isn't certified or verified against ISO 14083. Treat results as calculations for your own reporting process.

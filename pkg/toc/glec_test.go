@@ -250,7 +250,8 @@ func TestGLEC_Hub(t *testing.T) {
 	near(t, "intensity 'refrigerated freight' (kg/t)", byID["terminal_reefer_extra"], 1.33, 2)
 
 	c := calc.Calculator{Factors: ds}
-	leg := []calc.Leg{{Mode: calc.Road, DistanceKm: 1, Fuel: &calc.FuelUse{Fuel: "diesel", Amount: 0}}}
+	// A leg of next to no fuel (a shipment needs a leg; 0 is refused).
+	leg := []calc.Leg{{Mode: calc.Road, DistanceKm: 1, Fuel: &calc.FuelUse{Fuel: "diesel", Amount: 1e-9}}}
 	ambient, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 87_000, Legs: leg,
 		Hubs: []calc.HubStop{{HubType: "terminal_general"}}})
 	if err != nil {
@@ -270,6 +271,10 @@ func TestGLEC_Hub(t *testing.T) {
 	near(t, "refrigerated intensity (kg/t)", byID["terminal_general"]+byID["terminal_reefer_extra"], 1.55, 2)
 	// GLEC: 100 t x 1.55 kg/t = 155 kg; unrounded 154.7 kg.
 	near(t, "refrigerated client transfer (kg)", reefer.WTWKg, 154.7, 1)
+	// The HOCs split TTW and WTT, so the shipment's totals carry the hubs' split.
+	if h := reefer.Hubs[0]; h.TTWKg == nil || math.Abs(reefer.TTWKg+reefer.WTTKg-reefer.WTWKg) > 1e-6 || reefer.TTWKg < *h.TTWKg {
+		t.Errorf("totals ttw %v + wtt %v != wtw %v (hub ttw %v)", reefer.TTWKg, reefer.WTTKg, reefer.WTWKg, h.TTWKg)
+	}
 	if reefer.Hubs[0].DataType != calc.DataPrimary {
 		t.Errorf("HOC from measured energy should be primary data, got %q", reefer.Hubs[0].DataType)
 	}
