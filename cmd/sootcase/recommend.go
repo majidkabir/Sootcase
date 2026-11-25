@@ -41,9 +41,7 @@ func runRecommend(args []string) error {
 			return err
 		}
 		defer sf.Close()
-		dec := json.NewDecoder(sf)
-		dec.DisallowUnknownFields()
-		if err := dec.Decode(&set); err != nil {
+		if err := decodeStrict(sf, &set); err != nil {
 			return fmt.Errorf("recommend: settings: %w", err)
 		}
 	}

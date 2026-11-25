@@ -39,9 +39,7 @@ func runScenario(args []string) error {
 	}
 	defer pf.Close()
 	var plan scenario.Plan
-	dec := json.NewDecoder(pf)
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(&plan); err != nil {
+	if err := decodeStrict(pf, &plan); err != nil {
 		return fmt.Errorf("scenario: plan: %w", err)
 	}
 	f, err := open(fs.Arg(0))

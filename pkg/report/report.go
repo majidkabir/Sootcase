@@ -700,9 +700,9 @@ func (b *Builder) notes(r Report) []string {
 			countOf(c.Warned, "shipment has", "shipments have"), strings.Join(what, "; ")))
 	}
 	if r.Total.HubWTWKg > 0 {
-		n = append(n, "Hub emissions are reported well-to-wheel only: the hub factors used carry no split "+
-			"into operational and energy provision emissions. Operational (TTW) and energy provision (WTT) "+
-			"totals therefore cover transport only.")
+		n = append(n, "Hub emissions are reported well-to-wheel only (GLEC's hub values carry no split "+
+			"into operational and energy provision emissions). Operational (TTW) and energy provision (WTT) "+
+			"totals cover transport only.")
 	}
 	if u := r.Total.DistanceTypes[Unspecified]; u > 0 {
 		n = append(n, "For "+pct(u)+" of tonne-km the type of distance was not stated "+

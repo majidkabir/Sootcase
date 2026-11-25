@@ -121,7 +121,7 @@ func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result, main map[str
 }
 
 func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settings) ShipmentResult {
-	sr := ShipmentResult{ShipmentID: s.ID, WeightKg: s.WeightKg}
+	sr := ShipmentResult{ShipmentID: s.ID, WeightKg: s.WeightKg, CargoType: s.CargoType}
 	s.Legs = append([]calc.Leg(nil), s.Legs...)
 	for i := range s.Legs {
 		if s.Legs[i].ID == "" {
@@ -196,7 +196,7 @@ func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settin
 		})
 	}
 	if a.temporary != nil {
-		return ShipmentResult{ShipmentID: s.ID, WeightKg: sr.WeightKg, Error: a.temporary.Error(), Retryable: true}
+		return ShipmentResult{ShipmentID: s.ID, WeightKg: sr.WeightKg, CargoType: s.CargoType, Error: a.temporary.Error(), Retryable: true}
 	}
 	sort.SliceStable(sr.Options, func(i, j int) bool { return sr.Options[i].SavedKg > sr.Options[j].SavedKg })
 	return sr

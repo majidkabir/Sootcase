@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -272,7 +273,7 @@ func runCalc(args []string) error {
 	}
 	defer f.Close()
 	var s calc.Shipment
-	if err := json.NewDecoder(f).Decode(&s); err != nil {
+	if err := decodeStrict(f, &s); err != nil {
 		return fmt.Errorf("parse shipment: %w", err)
 	}
 	res, err := calculator.CalculateRetrying(context.Background(), s)
@@ -372,4 +373,22 @@ func printJSON(v any) error {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	return enc.Encode(v)
+}
+
+// decodeStrict decodes one JSON value from r into v, as the API does:
+// unknown fields and anything after the value are errors, so a typo is
+// never silently ignored.
+func decodeStrict(r io.Reader, v any) error {
+	dec := json.NewDecoder(r)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(v); err != nil {
+		return err
+	}
+	if _, err := dec.Token(); !errors.Is(err, io.EOF) {
+		if err == nil {
+			err = errors.New("more data after the JSON value")
+		}
+		return err
+	}
+	return nil
 }
