@@ -46,6 +46,20 @@ for l in d["legs"]:
             bad.append(f"{vt}: {kwh} kWh/t-km")
         continue
     checked += 1
+    printed = re.search(r"WTW ([\d.]+) as printed \(WTT printed as ([\d.]+)", l["source"])
+    if printed:  # WTT = printed WTW - TTW: check the printed WTT, TTW and WTW
+        wtw, w = float(printed.group(1)), float(printed.group(2))
+        if vt.startswith("glec/sea/container/"):
+            t = round(t * 10, 3)
+            txt = P(113, 114)
+        elif vt.startswith("glec/sea/"):
+            txt = P(109, 110, 111, 112)
+        else:
+            txt = P(*next(v for k, v in ranges.items() if vt.startswith(k)))
+        if not any(re.search(r"(?<![\d.])" + re.escape(fa) + " " + re.escape(fb) + " " + re.escape(fc) + r"(?![\d.])", txt)
+                   for fa in forms(w) for fb in forms(t) for fc in forms(wtw)):
+            bad.append(f"{vt}: {w} {t} {wtw}")
+        continue
     if vt in ("glec/rail/na/average", "glec/rail/in/average"):
         flow = norm(subprocess.run(["pdftotext", "-f", "98", "-l", "98", sys.argv[1], "-"], capture_output=True, text=True).stdout)
         ok = f"WTT = {w:g} and TTW = {t:g}" in flow

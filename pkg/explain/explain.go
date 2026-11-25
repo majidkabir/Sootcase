@@ -328,8 +328,11 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 		}
 		basis := []string{bDefault, bDataCats}
 		kind := "Default value"
-		if l.DataType == calc.DataPrimary {
+		switch l.DataType {
+		case calc.DataPrimary:
 			basis, kind = []string{bPrimary, bDataCats}, "The operator's own intensity (primary data)"
+		case calc.DataModelled:
+			basis, kind = []string{bModel, bDataCats}, "The operator's own intensity (modelled data)"
 		}
 		s := Step{Group: group, Title: "Emission intensity",
 			Text: strings.TrimSpace(fmt.Sprintf("%s %s for %s: %s. %s", l.FactorNote, kind, fac.VehicleType, fac.Source, basisText(fac.DistanceBasis))),

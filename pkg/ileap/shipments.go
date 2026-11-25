@@ -169,6 +169,14 @@ func (b *builder) shipment(r calc.Result) {
 			TransportActivity: dec(l.TonneKm), CO2eWTW: dec(l.WTWKg), CO2eTTW: dec(l.TTWKg),
 			Distance: b.distance(id, l), Origin: b.location(l.From), Destination: b.location(l.To),
 		}
+		if _, op := b.legOperatorTOC(l); op && l.DAF > 0 && l.DAF != 1 && l.Factor.DistanceBasis != "" {
+			// The operator's TOC is per tonne-km of its own distance type: the
+			// leg's distance in that type (× the DAF), so TCE = activity × intensity.
+			c := l
+			c.DistanceKm, c.DistanceType, c.TonneKm = l.DistanceKm*l.DAF, l.Factor.DistanceBasis, l.TonneKm*l.DAF
+			t.TransportActivity, t.Distance = dec(c.TonneKm), b.distance(id, c)
+			b.note(fmt.Sprintf("Legs calculated with an operator's TOC on another distance type than the leg's give the distance in the TOC's type, converted with the distance adjustment factor (%s).", l.DAFSource))
+		}
 		if teu > 0 && r.TEU > 0 {
 			t.PackagingOrTrEq, t.PackagingAmount = "Container-TEU", dec(teu)
 		} else if teu > 0 {
@@ -334,16 +342,23 @@ func (b *builder) containerTEU(r calc.Result, l calc.LegResult) float64 {
 	return r.WeightKg / 1000 / 10
 }
 
+// legOperatorTOC is the operator's own TOC a leg was calculated with, if any.
+func (b *builder) legOperatorTOC(l calc.LegResult) (TOC, bool) {
+	if l.Factor == nil || l.Factor.DataType == "" || l.Factor.DataType == calc.DataDefault {
+		return TOC{}, false
+	}
+	t, ok := b.opts.Operator[l.Factor.VehicleType].(TOC)
+	return t, ok
+}
+
 // legTOC returns the id of the TOC a leg was calculated with, adding it
 // to the export, and the secondary sources it rests on. With teu > 0 the
 // TOC is per TEU-km (container legs on sea and inland waterways), so the
 // leg's emissions = TEU x distance x intensity; else per tonne-km.
 func (b *builder) legTOC(l calc.LegResult, teu float64) (string, []SourceRef) {
-	if l.Factor != nil && l.Factor.DataType != "" && l.Factor.DataType != calc.DataDefault {
-		if t, ok := b.opts.Operator[l.Factor.VehicleType].(TOC); ok {
-			b.addTOC(t)
-			return t.TOCID, t.SecondaryEmissionFactorSources
-		}
+	if t, ok := b.legOperatorTOC(l); ok {
+		b.addTOC(t)
+		return t.TOCID, t.SecondaryEmissionFactorSources
 	}
 	if l.TonneKm <= 0 {
 		id := "sootcase-toc-" + hash(string(l.Mode), l.LegID, "no-activity")
@@ -552,7 +567,7 @@ func factorCarrier(f calc.Factor) string {
 	if c := vehicleCarrier(f.VehicleType, f.Mode); c != "" {
 		return c
 	}
-	src := strings.ToLower(f.Source)
+	src, _, _ := strings.Cut(strings.ToLower(f.Source), "; wtw ") // without the note on GLEC's printed WTW
 	switch {
 	case !strings.HasPrefix(f.Source, "GLEC Framework") || strings.Contains(src, "electric"):
 		return ""

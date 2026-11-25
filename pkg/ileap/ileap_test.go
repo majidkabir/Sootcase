@@ -246,6 +246,39 @@ func TestOperations(t *testing.T) {
 	if sx.ShipmentFootprints[0].TCEs[0].TOCID != "dk_road_electric" || len(sx.TOCs) != 1 || !sx.Conformant {
 		t.Errorf("shipment on operator TOC: %+v gaps %+v", sx.TOCs, sx.Gaps)
 	}
+	// A leg on another distance type than the TOC's: the TCE gives the
+	// distance in the TOC's type, so TCE = activity × the TOC's intensity.
+	ops.TOCs[0].DistanceBasis = calc.DistActual
+	ex = FromOperations(ops, ds, opts(ds))
+	o.Operator = Operator(ex)
+	if layer, err = toc.Build(ops, ds); err != nil {
+		t.Fatal(err)
+	}
+	raw, _ = json.Marshal(layer)
+	if err := os.WriteFile(path, raw, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if both, err = factors.Open(factors.Default + "," + path); err != nil {
+		t.Fatal(err)
+	}
+	for _, dt := range []string{calc.DistSFD, calc.DistActual} {
+		r := calculate(t, both, calc.Shipment{ID: "S4", WeightKg: 5000, Legs: []calc.Leg{
+			{ID: "l1", Mode: calc.Road, VehicleType: "dk_road_ambient", From: cph, To: ham, DistanceKm: 100, DistanceType: dt}}})
+		sx := FromResults([]calc.Result{r}, o)
+		tce := sx.ShipmentFootprints[0].TCEs[0]
+		var in TOC
+		for _, x := range sx.TOCs {
+			if x.TOCID == tce.TOCID {
+				in = x
+			}
+		}
+		act, _ := num(tce.TransportActivity)
+		i, _ := num(in.CO2eIntensityWTW)
+		w, _ := num(tce.CO2eWTW)
+		if in.TOCID != "dk_road_ambient" || math.Abs(act*i-w) > 1e-6*w || tce.Distance.Actual == "" {
+			t.Errorf("%s: TCE %+v, TOC %s %s: %v x %v != %v", dt, tce, in.TOCID, in.CO2eIntensityWTW, act, i, w)
+		}
+	}
 }
 
 func TestDecimal(t *testing.T) {

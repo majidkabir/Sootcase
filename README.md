@@ -563,7 +563,7 @@ go run ./tools/loadtest -kind batch -batch 1000 -c 4 -d 20s
 | `pkg/recommend` | Route changes that lower emissions: alternatives per shipment, calculated with the same method. |
 | `tools/loadtest` | Load generator for a running server. |
 | `tools/gazetteer` | Builds the embedded place list. |
-| `tools/glec` | Builds the GLEC v3.3 dataset from the transcribed tables (`build.py`) and checks every value against the PDF (`check.py`). |
+| `tools/glec` | Builds the GLEC v3.3 dataset from the transcribed tables (`build.py`) and checks every value against the PDF (`check.py`). Where a table's printed WTW isn't its printed WTT + TTW (the columns are rounded separately; 86 rows), the total is GLEC's printed WTW and WTT is taken as WTW − TTW, as for the Module 1 fuels; the source text says so. |
 | `tools/mrv` | Builds the EU MRV container ship dataset from EMSA's data. |
 | `tools/borders` | Builds the embedded country and Belgian region borders. |
 | `tools/osrmbench` | Measures an OSRM server's throughput. |

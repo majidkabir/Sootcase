@@ -569,7 +569,7 @@ func TestInlandWaterway_GLEC33(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for vt, want := range map[string][2]float64{"barge": {16.4, 4.9}, "container_barge": {22.5, 6.8}} {
+	for vt, want := range map[string][2]float64{"barge": {16.4, 5}, "container_barge": {22.5, 6.8}} {
 		f, err := ds.LegFactor(calc.InlandWaterway, vt)
 		if err != nil || f.TTW != want[0] || f.WTT != want[1] || f.DistanceBasis != calc.DistSFD {
 			t.Errorf("%s = %+v, %v", vt, f, err)
@@ -580,7 +580,7 @@ func TestInlandWaterway_GLEC33(t *testing.T) {
 	for _, dt := range []string{calc.DistActual, calc.DistSFD} {
 		r, err := c.Calculate(ctx, calc.Shipment{WeightKg: 1_000_000,
 			Legs: []calc.Leg{{Mode: calc.InlandWaterway, VehicleType: "barge", DistanceKm: 220, DistanceType: dt}}})
-		if err != nil || math.Abs(r.WTWKg-1000*220*21.3/1000) > 1e-6 {
+		if err != nil || math.Abs(r.WTWKg-1000*220*21.4/1000) > 1e-6 {
 			t.Errorf("%s distance: %v kg, %v", dt, r.WTWKg, err)
 		}
 	}
@@ -649,9 +649,8 @@ func TestRegionalAliases_GLEC33(t *testing.T) {
 
 // GLEC v3.3 Section 3 Module 4 (sea, p. 134 example): 10 TEU Hamburg to
 // Shanghai, 21,000 km, Asia to-from North Europe 42.9 g CO2e/TEU-km = 9.01 t;
-// 5 reefer TEU at 105.9 g = 11.12 t. With the 10 t per TEU average profile
-// the per-tonne-km factors give the same (reefer: WTT + TTW = 106.0 g, the
-// table's WTW rounds to 105.9).
+// 5 reefer TEU at 105.9 g = 11.12 t (11,119.5 kg: GLEC's printed WTW;
+// its WTT + TTW columns add up to 106.0).
 func TestModule4Container_GLEC33(t *testing.T) {
 	ds, err := Open(Default)
 	if err != nil {
@@ -662,7 +661,7 @@ func TestModule4Container_GLEC33(t *testing.T) {
 		vt   string
 		teu  float64
 		want float64
-	}{{"container_ship", 10, 9009}, {"container_ship_reefer", 5, 11130}} {
+	}{{"container_ship", 10, 9009}, {"container_ship_reefer", 5, 11119.5}} {
 		r, err := c.Calculate(context.Background(), calc.Shipment{TEU: tc.teu, Legs: []calc.Leg{{Mode: calc.Sea, VehicleType: tc.vt,
 			From: calc.Location{Code: "DEHAM"}, To: calc.Location{Code: "CNSGH"}, DistanceKm: 21000, DistanceType: calc.DistSFD}}})
 		if err != nil || math.Abs(r.WTWKg-tc.want) > 1e-6 {
@@ -988,6 +987,8 @@ func TestRailNotElectrified_GLEC33(t *testing.T) {
 		{"glec/rail/eu/electric/chemicals", "DEU", "", ham, muc, half, "glec/rail/eu/diesel/chemicals"},
 		{"freight_train_electric", "DEU", "container", ham, muc, none, "glec/rail/eu/diesel/container"},
 		{"freight_train", "USA", "", chi, la, none, "glec/rail/na/average"},
+		{"", "USA", "", chi, la, half, "glec/rail/na/average"},
+		{"", "DEU", "", ham, muc, half, "glec/rail/eu/diesel/average_mixed"},
 	} {
 		c := calc.Calculator{Factors: ds, Distances: tc.r, Places: places.Codes{}}
 		r, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 1000, CargoType: tc.cargo,
@@ -997,7 +998,7 @@ func TestRailNotElectrified_GLEC33(t *testing.T) {
 			continue
 		}
 		l := r.Legs[0]
-		if l.Factor == nil || l.Factor.VehicleType != tc.want {
+		if l.Factor == nil || l.Factor.VehicleType != tc.want || !strings.Contains(l.FactorNote, "isn't electrified") {
 			t.Errorf("%s %s: diesel part %+v, want %s (%s)", tc.vt, tc.cargo, l.Factor, tc.want, l.FactorNote)
 		}
 	}
