@@ -208,6 +208,12 @@ func (s *Server) limited(h http.HandlerFunc) http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.WithValue(r.Context(), slotKey{}, sl), s.Limits.Timeout)
 		defer cancel()
 		w.Header().Set("Cache-Control", "no-store")
+		// Alternative routes are for one shipment at a time: elsewhere the
+		// parameters would be ignored, so they are refused.
+		if q := r.URL.Query(); r.URL.Path != "/v1/calculate" && (q.Has("alternatives") || q.Has("avoid")) {
+			writeError(w, http.StatusBadRequest, fmt.Errorf("%w: alternatives and avoid are for POST /v1/calculate only", calc.ErrInvalidInput))
+			return
+		}
 		// ?add_road_legs=false: no road legs added for shipments that don't
 		// say (see calc.Shipment.AddRoadLegs).
 		if v := r.URL.Query().Get("add_road_legs"); v != "" {
@@ -543,6 +549,10 @@ const maxMetaLen = 1000
 func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 	flags, ok := boolParams(w, r.URL.Query(), "results", "markdown", "declare_iso")
 	if !ok {
+		return
+	}
+	if f := r.URL.Query().Get("format"); f != "" && f != "json" && f != "md" {
+		writeError(w, http.StatusBadRequest, fmt.Errorf("%w: format must be json or md, not %q", calc.ErrInvalidInput, f))
 		return
 	}
 	var req ReportRequest

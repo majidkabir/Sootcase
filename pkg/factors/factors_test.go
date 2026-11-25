@@ -734,7 +734,7 @@ func TestGLEC33Additions(t *testing.T) {
 	}
 	// Temperature-controlled rail: +12%, not for North America.
 	f, _, err = ds.LegFactorAt(calc.Rail, "freight_train_reefer", 800, w("DE", 50, 8.5), w("IT", 45, 9))
-	if err != nil || math.Abs(f.WTW()-1.12*(0.38*7.1+0.62*10.8+0.38*23.6)) > 1e-3 {
+	if err != nil || math.Abs(f.WTW()-1.12*18.4) > 1e-3 {
 		t.Errorf("reefer rail Europe = %v, %v", f.WTW(), err)
 	}
 	if _, _, err := ds.LegFactorAt(calc.Rail, "freight_train_reefer", 800, w("US", 41.9, -87.6), w("US", 40.7, -74)); !errors.Is(err, calc.ErrInvalidInput) {
@@ -877,5 +877,32 @@ func TestUnknownMode(t *testing.T) {
 		if !errors.Is(err, calc.ErrInvalidInput) || !strings.Contains(err.Error(), want) {
 			t.Errorf("mode %q: got %v, want %q", mode, err, want)
 		}
+	}
+}
+
+// A flight given by its actual distance takes GLEC's haul by the great
+// circle the factor is per (actual - 95 km): 1,550 km flown is a
+// 1,455 km great circle, short-haul.
+func TestAirHaulByGreatCircle(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds}
+	at := func(km float64, dt string) calc.Result {
+		t.Helper()
+		r, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 1000, Legs: []calc.Leg{{Mode: calc.Air, VehicleType: "air_freighter",
+			From: calc.Location{Lat: 50.03, Lon: 8.57}, To: calc.Location{Lat: 41.8, Lon: 12.25}, DistanceKm: km, DistanceType: dt}}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return r
+	}
+	actual, gcd := at(1550, calc.DistActual), at(1455, calc.DistGCD)
+	if a, g := actual.Legs[0].Factor, gcd.Legs[0].Factor; a == nil || g == nil || a.VehicleType != g.VehicleType || !strings.Contains(a.VehicleType, "short") {
+		t.Errorf("1,550 km flown: factor %+v, want the short-haul one of 1,455 km great circle (%+v)", a, g)
+	}
+	if long := at(1700, calc.DistActual); !strings.Contains(long.Legs[0].Factor.VehicleType, "long") {
+		t.Errorf("1,700 km flown (1,605 great circle): %s, want long-haul", long.Legs[0].Factor.VehicleType)
 	}
 }

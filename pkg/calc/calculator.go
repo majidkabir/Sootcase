@@ -276,12 +276,17 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 		}
 		res.Hubs = append(res.Hubs, hr)
 		res.WTWKg += hr.WTWKg
+		if hr.TTWKg != nil {
+			res.TTWKg += *hr.TTWKg // a hub value with a split (an operator's HOC)
+		}
 	}
-	// Hub factors are WTW only, so hubs add to WTW and, for lack of a
-	// split, are not attributed to TTW or WTT.
+	// A hub value given as a WTW total only (GLEC's) adds to WTW and, for
+	// lack of a split, to neither TTW nor WTT.
 	res.WTTKg = res.WTWKg - res.TTWKg
 	for _, h := range res.Hubs {
-		res.WTTKg -= h.WTWKg
+		if h.TTWKg == nil {
+			res.WTTKg -= h.WTWKg
+		}
 	}
 	res.PrimaryDataShare = primaryShare(res)
 	res.GHGProtocol = ghgScopes(res)
@@ -533,6 +538,19 @@ func (c Calculator) onRoute(ctx context.Context, tonnes float64, leg Leg, rt Rou
 	return lr, nil
 }
 
+// legFactor is the factor for a leg of km, by the leg's places where the
+// dataset has regional values.
+func (c Calculator) legFactor(leg Leg, km float64) (Factor, string, error) {
+	if pp, ok := c.Factors.(PlaceFactorProvider); ok {
+		return pp.LegFactorAt(leg.Mode, leg.VehicleType, km, c.where(leg.From), c.where(leg.To))
+	}
+	if dp, ok := c.Factors.(DistanceFactorProvider); ok {
+		return dp.LegFactorFor(leg.Mode, leg.VehicleType, km)
+	}
+	f, err := c.Factors.LegFactor(leg.Mode, leg.VehicleType)
+	return f, "", err
+}
+
 // main calculates a leg, or the part of it left after LegParts, over km.
 func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult, error) {
 	lr := LegResult{TonneKm: tonnes * dist}
@@ -587,18 +605,18 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 		return c.loadLeg(lr, leg, tonnes, dist, dtype)
 	}
 
-	var f Factor
-	var err error
-	if pp, ok := c.Factors.(PlaceFactorProvider); ok {
-		f, lr.FactorNote, err = pp.LegFactorAt(leg.Mode, leg.VehicleType, dist, c.where(leg.From), c.where(leg.To))
-	} else if dp, ok := c.Factors.(DistanceFactorProvider); ok {
-		f, lr.FactorNote, err = dp.LegFactorFor(leg.Mode, leg.VehicleType, dist)
-	} else {
-		f, err = c.Factors.LegFactor(leg.Mode, leg.VehicleType)
+	f, note, err := c.legFactor(leg, dist)
+	if err == nil && leg.Mode == Air && dtype == DistActual && f.DistanceBasis == DistGCD {
+		// A factor by haul (GLEC's air rows: short < 1,500 km, long) is
+		// per great-circle km: choose it by the flight's great circle.
+		if gcd, _, aerr := c.adjust(Air, DistActual, DistGCD, dist); aerr == nil && gcd != dist {
+			f, note, err = c.legFactor(leg, gcd)
+		}
 	}
 	if err != nil {
 		return LegResult{}, err
 	}
+	lr.FactorNote = note
 	if cp, ok := c.Factors.(CargoProvider); ok && leg.CargoType != "" {
 		var note string
 		if f, note, err = cp.CargoFactor(leg.Mode, f, leg.CargoType); err != nil {
@@ -678,8 +696,8 @@ func (c Calculator) ownLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype st
 }
 
 func (c Calculator) fuelLeg(lr LegResult, fu FuelUse, from, to Where) (LegResult, error) {
-	if fu.Amount < 0 || fu.VehicleTonneKm < 0 {
-		return LegResult{}, fmt.Errorf("%w: amount and vehicle_tonne_km must be >= 0", ErrInvalidFuel)
+	if !(fu.Amount > 0) || math.IsInf(fu.Amount, 0) || !(fu.VehicleTonneKm >= 0) {
+		return LegResult{}, fmt.Errorf("%w: amount must be > 0 and vehicle_tonne_km >= 0", ErrInvalidFuel)
 	}
 	share := 1.0
 	if fu.VehicleTonneKm > 0 {

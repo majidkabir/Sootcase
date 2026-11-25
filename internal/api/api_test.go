@@ -446,3 +446,25 @@ func TestCalculate_RouteOptions(t *testing.T) {
 		}
 	}
 }
+
+// Parameters a request can't use are refused, not ignored: alternative
+// routes off /v1/calculate, a report format other than json or md, and
+// measured fuel of nothing.
+func TestRefusedParameters(t *testing.T) {
+	srv := newTestServer(t)
+	ship := `{"id":"A","weight_kg":1000,"legs":[{"mode":"air","from":{"lat":50,"lon":8},"to":{"lat":51,"lon":0}}]}`
+	for _, c := range []struct{ path, body string }{
+		{"/v1/calculate/batch?alternatives=3", `{"shipments":[` + ship + `]}`},
+		{"/v1/calculate/batch?avoid=ferries", `{"shipments":[` + ship + `]}`},
+		{"/v1/report?alternatives=2", `{"shipments":[` + ship + `]}`},
+		{"/v1/report?format=xml", `{"shipments":[` + ship + `]}`},
+		{"/v1/calculate", `{"id":"F","weight_kg":1000,"legs":[{"mode":"road","distance_km":100,"fuel":{"fuel":"diesel","amount":0}}]}`},
+	} {
+		if resp, out := post(t, srv.URL+c.path, c.body); resp.StatusCode != http.StatusBadRequest && resp.StatusCode != http.StatusUnprocessableEntity {
+			t.Errorf("%s %s: HTTP %d %v, want it refused", c.path, c.body, resp.StatusCode, out)
+		}
+	}
+	if resp, out := post(t, srv.URL+"/v1/report?format=json", `{"shipments":[`+ship+`]}`); resp.StatusCode != 200 {
+		t.Errorf("format=json: HTTP %d %v", resp.StatusCode, out)
+	}
+}

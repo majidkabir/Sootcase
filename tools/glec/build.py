@@ -257,11 +257,13 @@ for vid, label, wtt, ttw, el in RAIL_TYPES:
         f"all of it is electricity generation and distribution (well-to-tank); {RAIL_SFD}", "sfd")
 # EU average where the traction is unknown: 18.4 g WTW (p.98), which GLEC derives from 62% of EU track being
 # electrified (UIC 2017). GLEC gives no TTW/WTT split; this split weights the Table 4 and Table 5 average/mixed rows
-# 38% / 62% the same way (8.97 + 9.39 = 18.36 g).
-leg("rail", "glec/rail/eu/average_traction_unknown", 0.38 * 7.1 + 0.62 * 10.8, 0.38 * 23.6,
+# 38% / 62% the same way (8.97 + 9.39 = 18.36 g) and is scaled to GLEC's 18.4.
+EU_UNKNOWN = 18.4 / (0.38 * (7.1 + 23.6) + 0.62 * 10.8)
+leg("rail", "glec/rail/eu/average_traction_unknown", (0.38 * 7.1 + 0.62 * 10.8) * EU_UNKNOWN, 0.38 * 23.6 * EU_UNKNOWN,
     f"{RAIL}, Europe: EU average where the traction is unknown, 18.4 g CO2e/t-km WTW (p. 98, based on 62% of EU track "
-    f"being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%; {RAIL_SFD}", "sfd",
-    electricity=0.62 * 10.8)
+    f"being electrified); the TTW/WTT split weights GLEC's Table 4 diesel and Table 5 electric average/mixed values 38% / 62%, "
+    f"scaled to 18.4; {RAIL_SFD}", "sfd",
+    electricity=0.62 * 10.8 * EU_UNKNOWN)
 for traction in ("diesel", "electric"):
     for vid, label, *_ in RAIL_TYPES:
         if vid != "average_mixed":
