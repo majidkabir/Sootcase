@@ -225,6 +225,7 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 		if p.Leg.CargoType == "" {
 			p.Leg.CargoType = s.CargoType
 		}
+		p.Leg.teu = res.TEU
 		lr, err := c.leg(ctx, tonnes, p.Leg)
 		if err != nil && p.added != "" && !Temporary(err) {
 			// An added leg that can't be calculated is left out, as it
@@ -250,13 +251,11 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 			from, to := p.From, p.To
 			lr.From, lr.To = &from, &to
 		}
-		lr.WTTKg = lr.WTWKg - lr.TTWKg
-		if lr.TonneKm > 0 {
-			lr.IntensityG = lr.WTWKg * 1000 / lr.TonneKm
-		}
-		lr.DataType = dataType(lr.Method)
-		if lr.Method == MethodIntensity && lr.Factor != nil && lr.Factor.DataType != "" {
-			lr.DataType = lr.Factor.DataType
+		finish(&lr)
+		for i := range lr.Alternatives { // each with the fields of a leg result
+			a := &lr.Alternatives[i]
+			a.From, a.To = lr.From, lr.To
+			finish(a)
 		}
 		res.Legs = append(res.Legs, lr)
 		res.TonneKm += lr.TonneKm
@@ -463,7 +462,11 @@ func (c Calculator) leg(ctx context.Context, tonnes float64, leg Leg) (LegResult
 	}
 	lr.Restrictions, lr.warnings = restr, rt.Warnings
 	// Other routes, when asked for: each calculated exactly like the
-	// leg's own.
+	// leg's own. Not for measured fuel: it was burnt on the route driven.
+	if leg.Fuel != nil && len(rt.Alternatives) > 0 {
+		lr.Note = strings.TrimSpace(lr.Note + " No alternative routes: the fuel was measured on the route driven.")
+		rt.Alternatives = nil
+	}
 	for i, alt := range rt.Alternatives {
 		a, err := c.onRoute(ctx, tonnes, leg, alt, method, dtype)
 		if err != nil {
@@ -495,9 +498,10 @@ func (c Calculator) onRoute(ctx context.Context, tonnes float64, leg Leg, rt Rou
 		parts = append(parts, p)
 		mainKm -= ferryKm
 	}
+	givenVT := leg.VehicleType // as given, for the result
 	// Electric rail with known non-electrified track: that track runs on
-	// the vehicle's own factor (diesel), the rest on electricity. Track with
-	// unknown electrification follows the input (electric).
+	// a diesel train's factor (dieselTrain), the rest on electricity. Track
+	// with unknown electrification follows the input (electric).
 	if dieselKm := routeParts[PartNotElectrified]; leg.Mode == Rail && leg.EnergyKWhPerTkm != 0 && dieselKm > 0 && dieselKm < dist {
 		p, err := c.electricPart(tonnes, dist-dieselKm, leg)
 		if err != nil {
@@ -506,9 +510,11 @@ func (c Calculator) onRoute(ctx context.Context, tonnes float64, leg Leg, rt Rou
 		parts = append(parts, p)
 		mainKm = dieselKm
 		leg.EnergyKWhPerTkm, leg.Country = 0, ""
+		leg.VehicleType = c.dieselTrain(leg.VehicleType)
 	} else if leg.Mode == Rail && leg.EnergyKWhPerTkm != 0 && dieselKm >= dist {
-		// No electrified track at all: the vehicle's own factor for all of it.
+		// No electrified track at all: a diesel train for all of it.
 		leg.EnergyKWhPerTkm, leg.Country = 0, ""
+		leg.VehicleType = c.dieselTrain(leg.VehicleType)
 	}
 
 	lr, err := c.main(tonnes, mainKm, dtype, leg)
@@ -520,7 +526,7 @@ func (c Calculator) onRoute(ctx context.Context, tonnes float64, leg Leg, rt Rou
 			"and this leg is calculated from its own %s.", leg.CargoType, map[string]string{MethodFuel: "fuel", MethodLoadModel: "load",
 			MethodEnergy: "energy use"}[lr.Method]))
 	}
-	lr.LegID, lr.Mode, lr.VehicleType = leg.ID, leg.Mode, leg.VehicleType
+	lr.LegID, lr.Mode, lr.VehicleType = leg.ID, leg.Mode, givenVT
 	lr.DistanceKm, lr.DistanceMethod, lr.DistanceType = dist, method, dtype
 	lr.TonneKm = tonnes * dist
 	lr.RouteParts = routeParts
@@ -624,7 +630,39 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 		}
 		lr.FactorNote = strings.TrimSpace(lr.FactorNote + " " + note)
 	}
+	if f.TonnesPerTEU > 0 && leg.teu > 0 {
+		// Published per TEU-km and the cargo is given in TEU: per TEU, not
+		// per tonne (GLEC Framework v3.3 p. 134: TEU × km × g/TEU-km).
+		tonnes = leg.teu * f.TonnesPerTEU
+		lr.FactorTonnes = tonnes
+		lr.FactorNote = strings.TrimSpace(lr.FactorNote + " " + fmt.Sprintf("Per TEU-km, as published: %g TEU × %g t per TEU the value is held at.", leg.teu, f.TonnesPerTEU))
+	}
 	return c.perTonneKm(lr, MethodIntensity, leg.Mode, f, tonnes, dist, dtype)
+}
+
+// finish fills in a leg result's WTT, intensity and data type.
+func finish(lr *LegResult) {
+	lr.WTTKg = lr.WTWKg - lr.TTWKg
+	if lr.TonneKm > 0 {
+		lr.IntensityG = lr.WTWKg * 1000 / lr.TonneKm
+	}
+	lr.DataType = dataType(lr.Method)
+	if lr.Method == MethodIntensity && lr.Factor != nil && lr.Factor.DataType != "" {
+		lr.DataType = lr.Factor.DataType
+	}
+}
+
+// dieselTrain is the vehicle type for track that isn't electrified on a
+// rail leg calculated from electricity: a diesel train (the dataset's
+// "freight_train_diesel"), unless the leg's own type is a diesel one.
+func (c Calculator) dieselTrain(vt string) string {
+	if strings.Contains(vt, "diesel") {
+		return vt
+	}
+	if _, err := c.Factors.LegFactor(Rail, "freight_train_diesel"); err == nil {
+		return "freight_train_diesel"
+	}
+	return vt
 }
 
 // perTonneKm fills in a leg calculated from an emission intensity:

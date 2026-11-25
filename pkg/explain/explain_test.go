@@ -164,3 +164,36 @@ func TestSheet_LegsWithoutIDs(t *testing.T) {
 		t.Errorf("fuel amounts on the sheet %v, want 100.000 then 50.000", amounts)
 	}
 }
+
+// A container ship value per TEU-km on cargo given in TEU: the sheet's
+// product uses the TEU's tonnes the value was applied to, and adds up.
+func TestSheet_PerTEU(t *testing.T) {
+	ds2, err := factors.Open(factors.Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds2, Distances: ds2.Distances(), NoRoadLegs: true, Places: places.Codes{}}
+	s := calc.Shipment{ID: "T", TEU: 2, TEUNetTonnes: 7, Legs: []calc.Leg{{Mode: calc.Sea, VehicleType: "container_ship", From: rtm, To: nyc, DistanceKm: 6200, DistanceType: calc.DistSFD}}}
+	r, err := c.Calculate(context.Background(), s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	num := `([\d,]+(?:\.\d+)?)`
+	product := regexp.MustCompile(num + ` t × ` + num + ` km × ` + num + ` g/tkm ÷ 1,000 = ` + num + ` kg`)
+	f := func(s string) float64 { v, _ := strconv.ParseFloat(strings.ReplaceAll(s, ",", ""), 64); return v }
+	checked := 0
+	for _, st := range Shipment(s, r, ds2).Steps {
+		for _, m := range product.FindAllStringSubmatch(st.Formula, -1) {
+			checked++
+			if got := f(m[1]) * f(m[2]) * f(m[3]) / 1000; math.Abs(got-f(m[4])) > 0.002*math.Max(1, f(m[4])) {
+				t.Errorf("%s → %v", m[0], got)
+			}
+			if f(m[1]) != 20 {
+				t.Errorf("%s: want the 2 TEU's 20 t, not the cargo's 14 t", m[0])
+			}
+		}
+	}
+	if checked == 0 {
+		t.Error("no product on the sheet")
+	}
+}

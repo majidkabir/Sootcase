@@ -82,6 +82,9 @@ type Leg struct {
 	// station or port, Council Directive 92/106/EEC, Article 1).
 	// Recommendations set it on their new legs; not part of the API.
 	AtTerminals bool `json:"-"`
+	// teu is the shipment's TEU when it was given in TEU, for values
+	// published per TEU-km (Factor.TonnesPerTEU).
+	teu float64
 }
 
 // FuelUse is measured fuel for the vehicle trip a leg is part of.
@@ -200,6 +203,11 @@ type Factor struct {
 	// scope 3 category 3. Factors for electric vehicles only leave it out;
 	// all of their emissions are electricity (see ghgScopes).
 	ElectricityG float64 `json:"electricity_g_per_tkm,omitempty"`
+	// TonnesPerTEU marks a value published per TEU-km (GLEC's container
+	// trade lanes), held here per tonne-km at this many tonnes per TEU. A
+	// shipment given in TEU is then calculated per TEU-km (TEU × km × the
+	// published value, GLEC Framework v3.3 p. 134), whatever its tonnes.
+	TonnesPerTEU float64 `json:"tonnes_per_teu,omitempty"`
 }
 
 // WTW is the well-to-wheel factor (WTT + TTW).
@@ -237,9 +245,13 @@ type LegResult struct {
 	Note  string `json:"note,omitempty"`
 	// FactorNote says which factor a vehicle type meant for this leg's
 	// distance, when that depends on it (e.g. "container_ship").
-	FactorNote string    `json:"factor_note,omitempty"`
-	From       *Location `json:"from,omitempty"`
-	To         *Location `json:"to,omitempty"`
+	FactorNote string `json:"factor_note,omitempty"`
+	// FactorTonnes is the tonnes the intensity was applied to when they
+	// aren't the cargo's: a value published per TEU-km on a shipment given
+	// in TEU (TEU × the value's tonnes per TEU).
+	FactorTonnes float64   `json:"factor_tonnes,omitempty"`
+	From         *Location `json:"from,omitempty"`
+	To           *Location `json:"to,omitempty"`
 	// Mode and VehicleType are the leg's, as given.
 	Mode        Mode    `json:"mode"`
 	VehicleType string  `json:"vehicle_type,omitempty"`

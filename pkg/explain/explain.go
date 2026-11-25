@@ -342,8 +342,14 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 			adjKm = km * l.DAF
 			steps = append(steps, ds)
 		}
+		ft := t
+		if l.FactorTonnes > 0 { // a value per TEU-km on cargo given in TEU
+			ft = l.FactorTonnes
+			emissions.Text += fmt.Sprintf(" The value is published per TEU-km and the cargo is given in TEU, so it is applied per TEU: "+
+				"%s t, the TEU at the %s t per TEU the value is held at, not the cargo's %s t (GLEC Framework v3.3 p. 134).", n(ft, 3), n(fac.TonnesPerTEU, 1), n(t, 3))
+		}
 		emissions.Formula = fmt.Sprintf("TTW = %s t × %s km × %s g/tkm ÷ 1,000 = %s kg\nWTT = %s t × %s km × %s g/tkm ÷ 1,000 = %s kg\nWTW = %s kg",
-			n(t, 3), n(adjKm, 1), n(fac.TTW, 3), n(ttwKg, 3), n(t, 3), n(adjKm, 1), n(fac.WTT, 3), n(wttKg, 3), n(wtwKg, 3))
+			n(ft, 3), n(adjKm, 1), n(fac.TTW, 3), n(ttwKg, 3), n(ft, 3), n(adjKm, 1), n(fac.WTT, 3), n(wttKg, 3), n(wtwKg, 3))
 		return append(steps, emissions)
 	}
 }

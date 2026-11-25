@@ -185,4 +185,37 @@ func TestCalculate_Alternatives(t *testing.T) {
 	if !approx(r.WTWKg, 134) {
 		t.Errorf("total %v, want the leg's own route's", r.WTWKg)
 	}
+	// With every field of a leg result, as the leg on that route alone.
+	o := alone.Legs[0]
+	if !approx(a.WTTKg, o.WTTKg) || a.WTTKg <= 0 || !approx(a.IntensityG, o.IntensityG) || a.DataType != o.DataType || a.DataType == "" || a.From == nil || a.To == nil {
+		t.Errorf("alternative wtt %v intensity %v data %q from %v; alone %v %v %q", a.WTTKg, a.IntensityG, a.DataType, a.From, o.WTTKg, o.IntensityG, o.DataType)
+	}
+	// Measured fuel was burnt on the route driven: no alternatives.
+	f := s
+	f.Legs = []Leg{{ID: "road", Mode: Road, VehicleType: "truck", From: cph, To: aar, Fuel: &FuelUse{Fuel: "diesel", Amount: 30, VehicleTonneKm: 1100}}}
+	r, err = c.Calculate(context.Background(), f)
+	if err != nil || len(r.Legs[0].Alternatives) != 0 || !strings.Contains(r.Legs[0].Note, "No alternative routes") {
+		t.Errorf("fuel leg: %v, %+v", err, r.Legs)
+	}
+}
+
+// Track tagged as not electrified is a diesel train's ("freight_train_diesel"
+// when the dataset has it), not the leg's average traction, and the leg
+// needs no vehicle type for it; the result keeps the type as given.
+func TestCalculate_RailNotElectrifiedIsDiesel(t *testing.T) {
+	f := withGrid{fakeFactors{legs: map[string]Factor{
+		"rail/freight_train":        {Mode: Rail, VehicleType: "freight_train", TTW: 9, WTT: 9.4, ElectricityG: 6.7},
+		"rail/freight_train_diesel": {Mode: Rail, VehicleType: "freight_train_diesel", TTW: 20, WTT: 5},
+	}}}
+	c := Calculator{Factors: f, Distances: fakeRouter{Km: 200, Parts: map[string]float64{PartElectrified: 170, PartNotElectrified: 30}}}
+	for _, vt := range []string{"", "freight_train"} {
+		r, err := c.Calculate(context.Background(), Shipment{WeightKg: 20_000, Legs: []Leg{{Mode: Rail, VehicleType: vt, EnergyKWhPerTkm: 0.03, Country: "DNK", From: cph, To: aar}}})
+		if err != nil {
+			t.Fatalf("%q: %v", vt, err)
+		}
+		// diesel 30 km: 600 tkm × 20/5 g = 12 / 3 kg
+		if l := r.Legs[0]; !approx(l.TTWKg, 12) || l.Factor == nil || l.Factor.VehicleType != "freight_train_diesel" || l.VehicleType != vt {
+			t.Errorf("%q: leg ttw %v, factor %+v, vehicle %q", vt, l.TTWKg, l.Factor, l.VehicleType)
+		}
+	}
 }

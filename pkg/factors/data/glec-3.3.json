@@ -4429,7 +4429,8 @@
    "wtt_g_per_tkm": 1.3,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): industry average (origin-destination pair unknown), dry, 13 + 60.4 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4438,7 +4439,8 @@
    "wtt_g_per_tkm": 2.68,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): industry average (origin-destination pair unknown), reefer, 26.8 + 124.7 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4447,7 +4449,8 @@
    "wtt_g_per_tkm": 1.75,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: Panama trade, dry, 17.5 + 81.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4456,7 +4459,8 @@
    "wtt_g_per_tkm": 3.22,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: Panama trade, reefer, 32.2 + 149.8 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4465,7 +4469,8 @@
    "wtt_g_per_tkm": 1.75,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: Trans-Atlantic, dry, 17.5 + 81.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4474,7 +4479,8 @@
    "wtt_g_per_tkm": 3.33,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: Trans-Atlantic, reefer, 33.3 + 154.7 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4483,7 +4489,8 @@
    "wtt_g_per_tkm": 0.87,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: Trans-Suez, dry, 8.7 + 40.4 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4492,7 +4499,8 @@
    "wtt_g_per_tkm": 2.04,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: Trans-Suez, reefer, 20.4 + 95 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4501,7 +4509,8 @@
    "wtt_g_per_tkm": 1.13,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: Trans-Pacific, dry, 11.3 + 52.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4510,7 +4519,8 @@
    "wtt_g_per_tkm": 2.38,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: Trans-Pacific, reefer, 23.8 + 110.8 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4519,7 +4529,8 @@
    "wtt_g_per_tkm": 1.59,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: other global, dry, 15.9 + 74.1 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4528,7 +4539,8 @@
    "wtt_g_per_tkm": 3.12,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): aggregated lanes: other global, reefer, 31.2 + 145.1 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4537,7 +4549,8 @@
    "wtt_g_per_tkm": 1.59,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from Africa, dry, 15.9 + 74 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4546,7 +4559,8 @@
    "wtt_g_per_tkm": 3.06,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from Africa, reefer, 30.6 + 142.2 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4555,7 +4569,8 @@
    "wtt_g_per_tkm": 0.91,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from Mediterranean/Black Sea, dry, 9.1 + 42.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4564,7 +4579,8 @@
    "wtt_g_per_tkm": 2.14,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from Mediterranean/Black Sea, reefer, 21.4 + 99.5 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4573,7 +4589,8 @@
    "wtt_g_per_tkm": 1.46,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from Middle East/India, dry, 14.6 + 68 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4582,7 +4599,8 @@
    "wtt_g_per_tkm": 2.95,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from Middle East/India, reefer, 29.5 + 137.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4591,7 +4609,8 @@
    "wtt_g_per_tkm": 1.09,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from North America EC/Gulf, dry, 10.9 + 50.6 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4600,7 +4619,8 @@
    "wtt_g_per_tkm": 2.45,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from North America EC/Gulf, reefer, 24.5 + 113.9 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4609,7 +4629,8 @@
    "wtt_g_per_tkm": 1.09,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from North America WC, dry, 10.9 + 50.8 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4618,7 +4639,8 @@
    "wtt_g_per_tkm": 2.31,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from North America WC, reefer, 23.1 + 107.2 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4627,7 +4649,8 @@
    "wtt_g_per_tkm": 0.76,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from North Europe, dry, 7.6 + 35.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4636,7 +4659,8 @@
    "wtt_g_per_tkm": 1.88,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from North Europe, reefer, 18.8 + 87.2 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4645,7 +4669,8 @@
    "wtt_g_per_tkm": 1.78,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from North Oceania, dry, 17.8 + 82.7 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4654,7 +4679,8 @@
    "wtt_g_per_tkm": 3.2,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from North Oceania, reefer, 32 + 148.9 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4663,7 +4689,8 @@
    "wtt_g_per_tkm": 1.24,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from South America (incl. Central America), dry, 12.4 + 57.4 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4672,7 +4699,8 @@
    "wtt_g_per_tkm": 2.61,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Asia to-from South America (incl. Central America), reefer, 26.1 + 121.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4681,7 +4709,8 @@
    "wtt_g_per_tkm": 2.2,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Europe (North & Med) to-from Africa, dry, 22 + 102.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4690,7 +4719,8 @@
    "wtt_g_per_tkm": 4.16,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Europe (North & Med) to-from Africa, reefer, 41.6 + 193.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4699,7 +4729,8 @@
    "wtt_g_per_tkm": 1.73,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Europe (North & Med) to-from South America (incl. Central America), dry, 17.3 + 80.4 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4708,7 +4739,8 @@
    "wtt_g_per_tkm": 3.35,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Europe (North & Med) to-from South America (incl. Central America), reefer, 33.5 + 155.8 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4717,7 +4749,8 @@
    "wtt_g_per_tkm": 1.23,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Europe (North & Med) to-from Middle East/India, dry, 12.3 + 57.2 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4726,7 +4759,8 @@
    "wtt_g_per_tkm": 2.53,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Europe (North & Med) to-from Middle East/India, reefer, 25.3 + 117.8 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4735,7 +4769,8 @@
    "wtt_g_per_tkm": 2.22,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Europe (North & Med) to-from Oceania (via Suez/via Panama), dry, 22.2 + 103.2 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4744,7 +4779,8 @@
    "wtt_g_per_tkm": 3.72,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Europe (North & Med) to-from Oceania (via Suez/via Panama), reefer, 37.2 + 173 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4753,7 +4789,8 @@
    "wtt_g_per_tkm": 1.88,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Mediterranean/Black Sea to-from North America EC/Gulf, dry, 18.8 + 87.2 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4762,7 +4799,8 @@
    "wtt_g_per_tkm": 3.56,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Mediterranean/Black Sea to-from North America EC/Gulf, reefer, 35.6 + 165.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4771,7 +4809,8 @@
    "wtt_g_per_tkm": 1.4,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Mediterranean/Black Sea to-from North America WC, dry, 14 + 65.2 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4780,7 +4819,8 @@
    "wtt_g_per_tkm": 2.87,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Mediterranean/Black Sea to-from North America WC, reefer, 28.7 + 133.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4789,7 +4829,8 @@
    "wtt_g_per_tkm": 2.39,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North America EC/Gulf/WC to-from Africa, dry, 23.9 + 111 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4798,7 +4839,8 @@
    "wtt_g_per_tkm": 4.36,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North America EC/Gulf/WC to-from Africa, reefer, 43.6 + 202.7 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4807,7 +4849,8 @@
    "wtt_g_per_tkm": 1.31,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North America EC/Gulf/WC to-from Oceania, dry, 13.1 + 60.8 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4816,7 +4859,8 @@
    "wtt_g_per_tkm": 2.56,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North America EC/Gulf/WC to-from Oceania, reefer, 25.6 + 119 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4825,7 +4869,8 @@
    "wtt_g_per_tkm": 2.1,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North America EC/Gulf/WC to-from South America (incl. Central America), dry, 21 + 97.4 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4834,7 +4879,8 @@
    "wtt_g_per_tkm": 3.88,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North America EC/Gulf/WC to-from South America (incl. Central America), reefer, 38.8 + 180.4 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4843,7 +4889,8 @@
    "wtt_g_per_tkm": 1.58,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North America EC/Gulf/WC to-from Middle East/India, dry, 15.8 + 73.5 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4852,7 +4899,8 @@
    "wtt_g_per_tkm": 2.69,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North America EC/Gulf/WC to-from Middle East/India, reefer, 26.9 + 124.9 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4861,7 +4909,8 @@
    "wtt_g_per_tkm": 1.8,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North Europe to-from North America EC/Gulf, dry, 18 + 83.9 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4870,7 +4919,8 @@
    "wtt_g_per_tkm": 3.34,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North Europe to-from North America EC/Gulf, reefer, 33.4 + 155.4 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4879,7 +4929,8 @@
    "wtt_g_per_tkm": 2.25,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North Europe to-from North America WC, dry, 22.5 + 104.5 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4888,7 +4939,8 @@
    "wtt_g_per_tkm": 3.97,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North Europe to-from North America WC, reefer, 39.7 + 184.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4897,7 +4949,8 @@
    "wtt_g_per_tkm": 4.29,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): South America (incl. Central America) to-from Africa, dry, 42.9 + 199.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4906,7 +4959,8 @@
    "wtt_g_per_tkm": 6.95,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): South America (incl. Central America) to-from Africa, reefer, 69.5 + 323.2 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4915,7 +4969,8 @@
    "wtt_g_per_tkm": 3.6,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra Africa, dry, 36 + 167.2 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4924,7 +4979,8 @@
    "wtt_g_per_tkm": 6.91,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra Africa, reefer, 69.1 + 321.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4933,7 +4989,8 @@
    "wtt_g_per_tkm": 5.69,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra North America EC/Gulf/WC, dry, 56.9 + 264.5 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4942,7 +4999,8 @@
    "wtt_g_per_tkm": 7.74,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra North America EC/Gulf/WC, reefer, 77.4 + 359.5 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4951,7 +5009,8 @@
    "wtt_g_per_tkm": 2.9,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra South America (incl. Central America), dry, 29 + 135 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4960,7 +5019,8 @@
    "wtt_g_per_tkm": 5.28,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra South America (incl. Central America), reefer, 52.8 + 245.1 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4969,7 +5029,8 @@
    "wtt_g_per_tkm": 1.96,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): SE Asia to-from NE Asia, dry, 19.6 + 90.9 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4978,7 +5039,8 @@
    "wtt_g_per_tkm": 3.61,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): SE Asia to-from NE Asia, reefer, 36.1 + 167.5 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4987,7 +5049,8 @@
    "wtt_g_per_tkm": 2.45,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra NE Asia, dry, 24.5 + 114 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -4996,7 +5059,8 @@
    "wtt_g_per_tkm": 4.56,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra NE Asia, reefer, 45.6 + 211.7 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5005,7 +5069,8 @@
    "wtt_g_per_tkm": 2.29,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra SE Asia, dry, 22.9 + 106.4 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5014,7 +5079,8 @@
    "wtt_g_per_tkm": 4.06,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra SE Asia, reefer, 40.6 + 188.8 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5023,7 +5089,8 @@
    "wtt_g_per_tkm": 2.06,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North Europe to-from Mediterranean/Black Sea, dry, 20.6 + 95.6 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5032,7 +5099,8 @@
    "wtt_g_per_tkm": 3.91,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): North Europe to-from Mediterranean/Black Sea, reefer, 39.1 + 181.8 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5041,7 +5109,8 @@
    "wtt_g_per_tkm": 3.56,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra Mediterranean/Black Sea, dry, 35.6 + 165.5 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5050,7 +5119,8 @@
    "wtt_g_per_tkm": 6.89,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra Mediterranean/Black Sea, reefer, 68.9 + 320 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5059,7 +5129,8 @@
    "wtt_g_per_tkm": 3.09,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra North Europe, dry, 30.9 + 143.8 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5068,7 +5139,8 @@
    "wtt_g_per_tkm": 5.44,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra North Europe, reefer, 54.4 + 252.7 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5077,7 +5149,8 @@
    "wtt_g_per_tkm": 2.67,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra Middle East/India, dry, 26.7 + 124.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5086,7 +5159,8 @@
    "wtt_g_per_tkm": 4.85,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Intra Middle East/India, reefer, 48.5 + 225.5 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5095,7 +5169,8 @@
    "wtt_g_per_tkm": 1.55,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Other (lanes not listed), dry, 15.5 + 71.9 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "sea",
@@ -5104,7 +5179,8 @@
    "wtt_g_per_tkm": 3.21,
    "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): Other (lanes not listed), reefer, 32.1 + 149.3 g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance",
    "year": 2026,
-   "distance_basis": "sfd"
+   "distance_basis": "sfd",
+   "tonnes_per_teu": 10.0
   },
   {
    "mode": "road",

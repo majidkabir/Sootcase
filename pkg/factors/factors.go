@@ -389,6 +389,10 @@ func (d *Dataset) indexLegs() (err error) {
 		if f.ElectricityG < 0 || f.ElectricityG > f.WTT {
 			return fmt.Errorf("factor %s/%s: electricity_g_per_tkm is a part of wtt_g_per_tkm, so between 0 and it", f.Mode, f.VehicleType)
 		}
+		if !(f.TonnesPerTEU >= 0) || math.IsInf(f.TonnesPerTEU, 0) {
+			return fmt.Errorf("factor %s/%s: tonnes_per_teu must be 0 or more", f.Mode, f.VehicleType)
+		}
+
 		switch f.DistanceBasis {
 		case "", calc.DistSFD, calc.DistGCD, calc.DistActual:
 			return nil
