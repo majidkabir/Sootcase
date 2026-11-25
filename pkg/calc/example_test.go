@@ -42,7 +42,7 @@ func Example_loadModel() {
 	ds, _ := factors.Open(factors.Default)
 	c := calc.Calculator{Factors: ds}
 	for _, lf := range []float64{1, 0.5} {
-		res, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 10_000, Legs: []calc.Leg{
+		res, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 8_000, Legs: []calc.Leg{
 			{Mode: calc.Road, VehicleType: "hgv_artic_33t", DistanceKm: 100, LoadFactor: lf, EmptyTripFactor: 0.25},
 		}})
 		if err != nil {

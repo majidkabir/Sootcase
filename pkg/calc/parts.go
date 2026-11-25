@@ -192,3 +192,32 @@ func (c Calculator) Prefetch(ctx context.Context, shipments []Shipment) context.
 	}
 	return ctx
 }
+
+// NamedLegs gives every leg its own id, for code that finds legs by id
+// (scenarios, recommendations): an empty id becomes "leg-N", and a repeated
+// one "<id>-N" (N the leg's position from 1), so two legs never share one.
+// The legs are changed in place.
+func NamedLegs(legs []Leg) {
+	used := map[string]bool{}
+	for _, l := range legs {
+		used[l.ID] = true
+	}
+	seen := map[string]bool{}
+	for i := range legs {
+		id := legs[i].ID
+		if id != "" && !seen[id] {
+			seen[id] = true
+			continue
+		}
+		base := id
+		if base == "" {
+			base = "leg"
+		}
+		next := fmt.Sprintf("%s-%d", base, i+1)
+		for k := 2; used[next] || seen[next]; k++ {
+			next = fmt.Sprintf("%s-%d-%d", base, i+1, k)
+		}
+		legs[i].ID = next
+		seen[next] = true
+	}
+}

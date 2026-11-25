@@ -245,8 +245,9 @@ type Hub struct {
 	IntensityGContainer float64 `json:"intensity_g_per_container,omitempty"`
 }
 
-// Energy is one energy carrier. Legs calculated from a published
-// intensity or load model don't state their carrier.
+// Energy is one energy carrier. Legs calculated from an intensity
+// (published or the operator's own) or a load model don't state their
+// carrier.
 type Energy struct {
 	Carrier string  `json:"carrier"`
 	TTWKg   float64 `json:"ttw_kg"`

@@ -471,11 +471,7 @@ func RunParallel(ctx context.Context, c calc.Calculator, shipments []calc.Shipme
 func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []Change, fx resolved, reports []ChangeReport) ShipmentResult {
 	sr := ShipmentResult{ShipmentID: s.ID}
 	s.Legs = append([]calc.Leg(nil), s.Legs...)
-	for i := range s.Legs {
-		if s.Legs[i].ID == "" {
-			s.Legs[i].ID = fmt.Sprintf("leg-%d", i+1)
-		}
-	}
+	calc.NamedLegs(s.Legs) // legs are found by id below: empty or repeated ids made unique
 	base, err := c.CalculateRetrying(ctx, s)
 	if err != nil {
 		sr.Error, sr.Retryable = err.Error(), calc.Temporary(err)
@@ -520,6 +516,10 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 			}
 			r := byID[l.ID]
 			if !ch.matches(l.VehicleType, r.Factor) {
+				continue
+			}
+			if ch.LoadFactor != nil && loadBelow(c, *l, *ch.LoadFactor, base.WeightKg/1000) {
+				sr.Notes = appendNew(sr.Notes, fmt.Sprintf("load not applied to leg %s: load_factor %g puts less on the vehicle than the shipment's own %g t", l.ID, *ch.LoadFactor, base.WeightKg/1000))
 				continue
 			}
 			l.LoadTonnes, l.LoadFactor = val(ch.LoadTonnes, 0), val(ch.LoadFactor, 0)
@@ -854,4 +854,15 @@ func hasNote(notes []string, id string) bool {
 		}
 	}
 	return false
+}
+
+// loadBelow says whether load factor lf of leg's load model carries less
+// than tonnes (refused by the calculator, as a load_tonnes below them is).
+func loadBelow(c calc.Calculator, l calc.Leg, lf, tonnes float64) bool {
+	lmp, ok := c.Factors.(calc.LoadModelProvider)
+	if !ok {
+		return false
+	}
+	m, err := lmp.LoadModel(l.Mode, l.VehicleType)
+	return err == nil && lf*m.PayloadT < tonnes*(1-1e-9)
 }

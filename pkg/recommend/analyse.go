@@ -123,11 +123,7 @@ func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result, main map[str
 func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settings) ShipmentResult {
 	sr := ShipmentResult{ShipmentID: s.ID, WeightKg: s.WeightKg, CargoType: s.CargoType}
 	s.Legs = append([]calc.Leg(nil), s.Legs...)
-	for i := range s.Legs {
-		if s.Legs[i].ID == "" {
-			s.Legs[i].ID = fmt.Sprintf("leg-%d", i+1)
-		}
-	}
+	calc.NamedLegs(s.Legs) // legs are found by id below: empty or repeated ids made unique
 	base, err := c.CalculateRetrying(ctx, s)
 	if err != nil {
 		sr.Error, sr.Retryable = err.Error(), calc.Temporary(err)
