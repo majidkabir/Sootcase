@@ -97,3 +97,22 @@ func TestFullerLoadsSkipLegs(t *testing.T) {
 		t.Errorf("options %+v, notes %v", sr.Options, sr.Notes)
 	}
 }
+
+// A shipment given in TEU is judged by its calculated weight, as one given
+// in kg: the rigid leg a load factor can't carry is left as it is.
+func TestFullerLoadsTEU(t *testing.T) {
+	c := setup(t)
+	artic := road("a", hamburg, munich, 0)
+	artic.VehicleType = "hgv_artic_33t"
+	rigid := road("v", munich, hamburg, 0)
+	rigid.VehicleType = "hgv_rigid"
+	for _, s := range []calc.Shipment{{ID: "kg", WeightKg: 10000, Legs: []calc.Leg{artic, rigid}}, {ID: "teu", TEU: 1, Legs: []calc.Leg{artic, rigid}}} {
+		res, err := Run(context.Background(), c, []calc.Shipment{s}, Settings{Kinds: []string{Load}, LoadFactor: ptr(0.9), Source: "own plan"}, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if sr := res.Shipments[0]; len(sr.Options) != 1 {
+			t.Errorf("%s: %d options, notes %v", s.ID, len(sr.Options), sr.Notes)
+		}
+	}
+}

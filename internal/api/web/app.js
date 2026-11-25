@@ -186,7 +186,7 @@ function pickMany(el, options, placeholder) {
 const modeName = { road: "Road", rail: "Rail", sea: "Sea", air: "Air", inland_waterway: "Inland waterway" };
 const distName = { given: "given", great_circle: "great-circle", great_circle_adjusted: "great-circle, adjusted",
   osrm: "road routing", osrm_rail: "rail routing", osrm_waterway: "waterway routing", sea_network: "sea route" };
-const methodName = { intensity: "average factor", fuel: "measured fuel", load_model: "load model", energy: "electricity" };
+const methodName = { intensity: "emission intensity", fuel: "measured fuel", load_model: "load model", energy: "electricity" };
 // noResult empties a result area when a run fails, so an earlier result
 // isn't read as this one's.
 const noResult = el => { el.innerHTML = `<p class="empty">No result: the run failed. The reason is next to its button.</p>`; };
