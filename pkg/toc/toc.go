@@ -261,10 +261,16 @@ func Build(ops Operations, fuels calc.FactorProvider) (factors.Dataset, error) {
 		if err != nil {
 			return factors.Dataset{}, fmt.Errorf("toc %q: %w", t.ID, err)
 		}
+		elec, err := electricityKg(t.Fuels, fuels)
+		if err != nil {
+			return factors.Dataset{}, fmt.Errorf("toc %q: %w", t.ID, err)
+		}
 		ds.Legs = append(ds.Legs, calc.Factor{
 			Mode: t.Mode, VehicleType: t.ID, Year: ops.Year, DataType: dataType(t.DataType), DistanceBasis: t.DistanceBasis,
 			TTW: ttw * 1000 / t.TonneKm, WTT: wtt * 1000 / t.TonneKm,
-			Source: fmt.Sprintf("TOC %s (%s, %s): %s over %.0f tonne-km", t.ID, ops.Name, ops.Period, desc, t.TonneKm),
+			// The vehicles' electricity: operator scope 2 (calc.GHGScopes).
+			ElectricityG: elec * 1000 / t.TonneKm,
+			Source:       fmt.Sprintf("TOC %s (%s, %s): %s over %.0f tonne-km", t.ID, ops.Name, ops.Period, desc, t.TonneKm),
 		})
 	}
 	for _, h := range ops.HOCs {
@@ -297,6 +303,36 @@ func Totals(uses []EnergyUse, refs []RefrigerantUse, fuels calc.FactorProvider) 
 // sum returns TTW and WTT kg CO2e for a list of energy uses and
 // refrigerant losses, and a short description of them. Refrigerant losses
 // are direct emissions (TTW); their production is not counted.
+// electricityKg is the kg CO2e of the electricity among uses (fuels named
+// "electricity/<ISO3>" or with an "electricity" part, as calc reads
+// them): all well-to-tank, the vehicles' purchased electricity.
+func electricityKg(uses []EnergyUse, fuels calc.FactorProvider) (float64, error) {
+	kg := 0.0
+	for _, u := range uses {
+		if !electricityFuel(u.Fuel) {
+			continue
+		}
+		f, err := fuels.FuelFactor(u.Fuel)
+		if err != nil {
+			return 0, err
+		}
+		kg += u.Amount * f.WTT
+	}
+	return kg, nil
+}
+
+func electricityFuel(id string) bool {
+	if strings.HasPrefix(id, "electricity") {
+		return true
+	}
+	for _, part := range strings.Split(id, "/") {
+		if part == "electricity" {
+			return true
+		}
+	}
+	return false
+}
+
 func sum(uses []EnergyUse, refs []RefrigerantUse, fuels calc.FactorProvider) (ttw, wtt float64, desc string, err error) {
 	var parts []string
 	for _, u := range uses {

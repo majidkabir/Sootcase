@@ -317,14 +317,18 @@ func addRow(s *calc.Shipment, row rowReader) error {
 	leg.RepositioningKm = get("repositioning_km")
 	leg.EnergyKWhPerTkm = get("energy_kwh_per_tkm")
 	leg.Country = row.str("country")
-	if fuel := row.str("fuel"); fuel != "" {
-		leg.Fuel = &calc.FuelUse{Fuel: fuel, Amount: get("fuel_amount"), VehicleTonneKm: get("vehicle_tonne_km")}
-		if src, wtw := row.str("fuel_factor_source"), get("fuel_wtw_kg_per_unit"); src != "" || wtw != 0 {
-			leg.Fuel.Factor = &calc.OwnFuelFactor{Unit: row.str("fuel_unit"), WTW: wtw, TTW: opt("fuel_ttw_kg_per_unit"), Source: src,
-				BiogenicCO2: get("fuel_biogenic_co2_kg_per_unit")}
+	// A way of calculating is on when any of its cells is filled, so a
+	// half-filled one is refused (as in JSON), not silently left out.
+	ownFuel := row.any("fuel_factor_source", "fuel_wtw_kg_per_unit", "fuel_ttw_kg_per_unit", "fuel_biogenic_co2_kg_per_unit", "fuel_unit")
+	if ownFuel || row.any("fuel", "fuel_amount", "vehicle_tonne_km") {
+		leg.Fuel = &calc.FuelUse{Fuel: row.str("fuel"), Amount: get("fuel_amount"), VehicleTonneKm: get("vehicle_tonne_km")}
+		if ownFuel {
+			leg.Fuel.Factor = &calc.OwnFuelFactor{Unit: row.str("fuel_unit"), WTW: get("fuel_wtw_kg_per_unit"), TTW: opt("fuel_ttw_kg_per_unit"),
+				Source: row.str("fuel_factor_source"), BiogenicCO2: get("fuel_biogenic_co2_kg_per_unit")}
 		}
 	}
-	if src, wtw := row.str("own_factor_source"), get("own_wtw_g_per_tkm"); src != "" || wtw != 0 {
+	if row.any("own_factor_source", "own_wtw_g_per_tkm", "own_ttw_g_per_tkm", "own_distance_basis") {
+		src, wtw := row.str("own_factor_source"), get("own_wtw_g_per_tkm")
 		leg.OwnFactor = &calc.OwnFactor{WTW: wtw, TTW: opt("own_ttw_g_per_tkm"), Source: src,
 			DistanceBasis: strings.ToLower(row.str("own_distance_basis"))}
 	}
@@ -333,6 +337,16 @@ func addRow(s *calc.Shipment, row rowReader) error {
 	}
 	s.Legs = append(s.Legs, leg)
 	return nil
+}
+
+// any says whether any of the named cells is filled.
+func (r rowReader) any(names ...string) bool {
+	for _, n := range names {
+		if r.str(n) != "" {
+			return true
+		}
+	}
+	return false
 }
 
 type rowReader struct {

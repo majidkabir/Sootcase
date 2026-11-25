@@ -288,3 +288,16 @@ func TestRetryableFailures(t *testing.T) {
 		t.Errorf("notes %q", r.Notes)
 	}
 }
+
+// A hub GLEC values per container is also shown per container, its own
+// unit (2 containers, 36.4 kg: 18,200 g each).
+func TestHubPerContainer(t *testing.T) {
+	b := New(Meta{})
+	b.Add("A", calc.Result{WeightKg: 20000, WTWKg: 36.4, Hubs: []calc.HubResult{{HubID: "t", HubType: "intermodal_terminal", WTWKg: 36.4, Containers: 2}}}, nil)
+	r := b.Report()
+	if len(r.Hubs) != 1 {
+		t.Fatalf("hubs %+v", r.Hubs)
+	}
+	near(t, "per container", r.Hubs[0].IntensityGContainer, 18200)
+	near(t, "per tonne", r.Hubs[0].IntensityGT, 1820)
+}

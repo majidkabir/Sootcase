@@ -696,6 +696,9 @@ func (c Calculator) ownLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype st
 }
 
 func (c Calculator) fuelLeg(lr LegResult, fu FuelUse, from, to Where) (LegResult, error) {
+	if strings.TrimSpace(fu.Fuel) == "" {
+		return LegResult{}, fmt.Errorf("%w: give the fuel's name (e.g. diesel)", ErrInvalidFuel)
+	}
 	if !(fu.Amount > 0) || math.IsInf(fu.Amount, 0) || !(fu.VehicleTonneKm >= 0) {
 		return LegResult{}, fmt.Errorf("%w: amount must be > 0 and vehicle_tonne_km >= 0", ErrInvalidFuel)
 	}
