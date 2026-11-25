@@ -104,6 +104,10 @@ func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result, main map[str
 		}
 		hs = append(hs, h)
 		kg += h.WTWKg
+		if h.TTWKg != nil && h.WTTKg != nil { // a hub value with a split, as in calc.Calculate
+			r.TTWKg += *h.TTWKg
+			r.WTTKg += *h.WTTKg
+		}
 	}
 	r.Hubs = append(r.Hubs, hs...)
 	r.WTWKg += kg

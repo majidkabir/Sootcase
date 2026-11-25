@@ -204,8 +204,9 @@ func warningKind(w calc.Warning) string {
 type Total struct {
 	WTWKg          float64 `json:"wtw_kg"`
 	TransportWTWKg float64 `json:"transport_wtw_kg"`
-	// TTWKg (operational) and WTTKg (energy provision) cover transport;
-	// hubs are reported WTW only, see Notes.
+	// TTWKg (operational) and WTTKg (energy provision) cover transport
+	// only; hubs are in HubWTWKg, WTW, even where a hub value splits it
+	// (the shipments' own ttw_kg/wtt_kg then include that split).
 	TTWKg      float64 `json:"ttw_kg"`
 	WTTKg      float64 `json:"wtt_kg"`
 	HubWTWKg   float64 `json:"hub_wtw_kg"`

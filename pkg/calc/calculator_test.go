@@ -414,17 +414,25 @@ func TestCalculate_OwnFuelFactor(t *testing.T) {
 		t.Errorf("got %+v %+v", l, l.FuelFactor)
 	}
 	for name, o := range map[string]OwnFuelFactor{
-		"no source": {Unit: "l", WTW: 1, TTW: ptr(0.8)},
-		"no unit":   {WTW: 1, TTW: ptr(0.8), Source: "x"},
-		"ttw > wtw": {Unit: "l", WTW: 1, TTW: ptr(2), Source: "x"},
-		"zero wtw":  {Unit: "l", TTW: ptr(0), Source: "x"},
-		"wtw only":  {Unit: "l", WTW: 1, Source: "x"},
+		"no source":         {Unit: "l", WTW: 1, TTW: ptr(0.8)},
+		"no unit":           {WTW: 1, TTW: ptr(0.8), Source: "x"},
+		"ttw > wtw":         {Unit: "l", WTW: 1, TTW: ptr(2), Source: "x"},
+		"zero wtw":          {Unit: "l", TTW: ptr(0), Source: "x"},
+		"wtw only":          {Unit: "l", WTW: 1, Source: "x"},
+		"biogenic infinite": {Unit: "l", WTW: 1, TTW: ptr(0.8), Source: "x", BiogenicCO2: math.Inf(1)},
 	} {
 		f := fu
 		f.Factor = &o
 		if _, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000, Legs: []Leg{{ID: "l1", Mode: Road, DistanceKm: 300, Fuel: &f}}}); !errors.Is(err, ErrInvalidFuel) {
 			t.Errorf("%s: %v", name, err)
 		}
+	}
+	// A finite factor whose biogenic CO2 overflows fails that shipment
+	// alone (a 500 for a whole batch or report before).
+	f := fu
+	f.Amount, f.Factor = 1e300, &OwnFuelFactor{Unit: "l", WTW: 1e-300, TTW: ptr(0), Source: "x", BiogenicCO2: 1e300}
+	if _, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000, Legs: []Leg{{ID: "l1", Mode: Road, DistanceKm: 300, Fuel: &f}}}); !errors.Is(err, ErrInvalidInput) {
+		t.Errorf("biogenic overflow: %v", err)
 	}
 }
 

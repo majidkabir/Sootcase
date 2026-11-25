@@ -718,7 +718,7 @@ func (c Calculator) fuelLeg(lr LegResult, fu FuelUse, from, to Where) (LegResult
 				"(0 only for energy not burnt in the vehicle, e.g. electricity): without it TTW, WTT and the GHG Protocol scopes can't be split", ErrInvalidFuel)
 		case !(*o.TTW >= 0) || *o.TTW > o.WTW:
 			return LegResult{}, fmt.Errorf("%w: fuel.factor.ttw_kg_per_unit must be between 0 and wtw_kg_per_unit", ErrInvalidFuel)
-		case !(o.BiogenicCO2 >= 0):
+		case !(o.BiogenicCO2 >= 0) || math.IsInf(o.BiogenicCO2, 0):
 			return LegResult{}, fmt.Errorf("%w: fuel.factor.biogenic_co2_kg_per_unit must be >= 0", ErrInvalidFuel)
 		case strings.TrimSpace(o.Source) == "" || strings.TrimSpace(o.Unit) == "":
 			return LegResult{}, fmt.Errorf("%w: fuel.factor needs a unit and a source", ErrInvalidFuel)
