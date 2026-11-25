@@ -270,7 +270,7 @@ func Build(ops Operations, fuels calc.FactorProvider) (factors.Dataset, error) {
 			TTW: ttw * 1000 / t.TonneKm, WTT: wtt * 1000 / t.TonneKm,
 			// The vehicles' electricity: operator scope 2 (calc.GHGScopes).
 			ElectricityG: elec * 1000 / t.TonneKm,
-			Source: fmt.Sprintf("TOC %s (%s, %s): %s over %.0f tonne-km", t.ID, ops.Name, ops.Period, desc, t.TonneKm),
+			Source:       fmt.Sprintf("TOC %s (%s, %s): %s over %.0f tonne-km", t.ID, ops.Name, ops.Period, desc, t.TonneKm),
 		})
 	}
 	for _, h := range ops.HOCs {
