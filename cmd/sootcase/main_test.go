@@ -77,6 +77,14 @@ func TestCalc(t *testing.T) {
 	if _, e, code := run(t, "", "calc", "missing.json"); code != 1 || !strings.Contains(e, "error:") {
 		t.Errorf("missing file: exit %d, %q", code, e)
 	}
+	// Read as strictly as the API: a misspelt field or more after the
+	// JSON is an error, not a default-value result.
+	typo := strings.Replace(string(in), `"weight_kg"`, `"weight_kgs"`, 1)
+	for name, bad := range map[string]string{"unknown field": typo, "trailing data": string(in) + " x"} {
+		if _, e, code := run(t, bad, "calc", "-"); code != 1 || !strings.Contains(e, "parse shipment") {
+			t.Errorf("%s: exit %d, %q", name, code, e)
+		}
+	}
 }
 
 func TestBatchAndReport(t *testing.T) {

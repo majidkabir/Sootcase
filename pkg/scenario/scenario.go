@@ -40,6 +40,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strings"
 	"sync"
@@ -225,7 +226,7 @@ func (p Plan) Validate() ([]Change, error) {
 			}
 		case Electrify:
 			if !(c.KWhPerTkm > 0) || c.KWhPerTkm > 10 {
-				return nil, bad("give kwh_per_tkm (kWh per tonne-km, > 0)")
+				return nil, bad("give kwh_per_tkm (kWh per tonne-km, more than 0, at most 10)")
 			}
 			if strings.TrimSpace(c.Country) == "" {
 				return nil, bad("give country (ISO 3166 alpha-3, e.g. DNK) for the grid factor")
@@ -239,7 +240,7 @@ func (p Plan) Validate() ([]Change, error) {
 			}
 			c.EnergyRatio = ptr(val(c.EnergyRatio, 1))
 			if !(*c.EnergyRatio > 0) || *c.EnergyRatio > 5 {
-				return nil, bad("energy_ratio must be > 0")
+				return nil, bad("energy_ratio must be more than 0 and at most 5")
 			}
 			if *c.EnergyRatio != 1 && strings.TrimSpace(c.Source) == "" {
 				return nil, bad("give source: where energy_ratio comes from")
@@ -250,6 +251,17 @@ func (p Plan) Validate() ([]Change, error) {
 			}
 			if c.LoadTonnes != nil && c.LoadFactor != nil {
 				return nil, bad("give load_tonnes or load_factor, not both")
+			}
+			// As the recommendations' settings check them: out of range,
+			// every shipment would fail (or nothing change) after a 200.
+			if c.LoadTonnes != nil && (!(*c.LoadTonnes > 0) || math.IsInf(*c.LoadTonnes, 0)) {
+				return nil, bad("load_tonnes must be > 0")
+			}
+			if c.LoadFactor != nil && (!(*c.LoadFactor > 0) || *c.LoadFactor > 1) {
+				return nil, bad("load_factor must be > 0 and <= 1")
+			}
+			if c.EmptyTripFactor != nil && (!(*c.EmptyTripFactor >= 0) || *c.EmptyTripFactor > 1) {
+				return nil, bad("empty_trip_factor must be 0 to 1")
 			}
 		default:
 			return nil, bad("unknown type; use %s, %s, %s or %s", RoadToRail, Electrify, FuelSwitch, LoadChange)

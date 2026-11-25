@@ -128,6 +128,9 @@ func groupKey(s calc.Shipment) (string, bool) {
 		if l.Fuel != nil || (l.RepositioningKm > 0 && l.LoadFactor == 0 && l.LoadTonnes == 0) {
 			return "", false
 		}
+		if l.LoadTonnes > 0 && s.WeightKg/1000 > l.LoadTonnes {
+			return "", false // refused for its weight: not the same as a lighter one's result
+		}
 	}
 	for _, h := range s.Hubs {
 		if h.Containers > 0 {
@@ -179,6 +182,10 @@ func (r Route) scale(k float64) Route {
 		for i, h := range r.Terminals {
 			h.WTWKg *= k
 			h.Containers *= k
+			if h.TTWKg != nil && h.WTTKg != nil { // copies: the pointers are the first shipment's
+				ttw, wtt := *h.TTWKg*k, *h.WTTKg*k
+				h.TTWKg, h.WTTKg = &ttw, &wtt
+			}
 			out.Terminals[i] = h
 		}
 	}

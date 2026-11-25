@@ -54,7 +54,9 @@ type ShipmentResult struct {
 	ShipmentID string  `json:"shipment_id"`
 	Lane       string  `json:"lane"`
 	WeightKg   float64 `json:"weight_kg"`
-	Now        Route   `json:"now"`
+	// CargoType is the shipment's own cargo_type, to calculate it again.
+	CargoType string `json:"cargo_type,omitempty"`
+	Now       Route  `json:"now"`
 	// Legs are the shipment's own legs, to calculate or map it again.
 	Legs    []calc.Leg `json:"legs,omitempty"`
 	Options []Option   `json:"options"`
