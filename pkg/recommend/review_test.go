@@ -116,3 +116,20 @@ func TestFullerLoadsTEU(t *testing.T) {
 		}
 	}
 }
+
+// A shipment given in TEU keeps its calculated weight and numbers (they
+// were scaled by its input weight, 0).
+func TestTEUNumbers(t *testing.T) {
+	c := setup(t)
+	teu := calc.Shipment{ID: "teu", TEU: 1, Legs: []calc.Leg{road("a", hamburg, munich, 0)}}
+	kg := calc.Shipment{ID: "kg", WeightKg: 10000, Legs: []calc.Leg{road("a", hamburg, munich, 0)}}
+	res, err := Run(context.Background(), c, []calc.Shipment{teu, kg}, Settings{Kinds: []string{Rail}}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a, b := res.Shipments[0], res.Shipments[1]
+	if a.WeightKg != 10000 || !(a.Now.Totals.WTWKg > 0) || math.Abs(a.Now.Totals.WTWKg-b.Now.Totals.WTWKg) > 1e-6 ||
+		len(a.Options) != len(b.Options) || len(a.Options) == 0 || math.Abs(a.Options[0].SavedKg-b.Options[0].SavedKg) > 1e-6 {
+		t.Errorf("TEU: weight %v, now %v, options %d; by weight: now %v, options %d", a.WeightKg, a.Now.Totals.WTWKg, len(a.Options), b.Now.Totals.WTWKg, len(b.Options))
+	}
+}
