@@ -126,16 +126,17 @@ func TestOSRM_Alternatives(t *testing.T) {
 		t.Error("not repeatable")
 	}
 
-	// Without options: one plain request, no summary, no alternatives.
+	// Without options: one plain request, no alternatives; road legs still
+	// get their route's summary and duration (R2, since v0.18.0).
 	*queries = nil
 	r, err = o.Route(context.Background(), calc.Road, copenhagen, hamburg)
-	if err != nil || r.Summary != nil || r.Alternatives != nil || r.DurationH != 0 || len(*queries) != 1 ||
+	if err != nil || r.Summary == nil || len(r.Summary.Ferries) != 1 || r.Alternatives != nil || r.DurationH <= 0 || len(*queries) != 1 ||
 		!strings.Contains((*queries)[0], "alternatives=false") || strings.Contains((*queries)[0], "annotations") {
 		t.Errorf("plain = %+v %v %q", r, err, *queries)
 	}
 	// Not for other modes.
 	*queries, o.cache = nil, nil
-	if r, _ := o.Route(ctx, calc.InlandWaterway, copenhagen, hamburg); r.Alternatives != nil || !strings.Contains((*queries)[0], "alternatives=false") {
+	if r, _ := o.Route(ctx, calc.InlandWaterway, copenhagen, hamburg); r.Alternatives != nil || r.Summary != nil || !strings.Contains((*queries)[0], "alternatives=false") {
 		t.Errorf("waterway = %+v %q", r, *queries)
 	}
 }
@@ -148,7 +149,7 @@ func TestOSRM_AvoidFerries(t *testing.T) {
 	o.PartModes = RoadParts
 	ctx := calc.WithRouteOptions(context.Background(), calc.RouteOptions{AvoidFerries: true})
 	r, err := o.Route(ctx, calc.Road, copenhagen, hamburg)
-	if err != nil || r.Km != 1100 || r.Parts[calc.PartFerry] != 0 || r.Summary != nil || len(*queries) != 1 {
+	if err != nil || r.Km != 1100 || r.Parts[calc.PartFerry] != 0 || r.Summary == nil || len(r.Summary.Ferries) != 0 || len(*queries) != 1 {
 		t.Errorf("land only = %+v %v %q", r, err, *queries)
 	}
 	// With alternatives, the primary is land-only and no land route is

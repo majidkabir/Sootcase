@@ -14,9 +14,9 @@ const MaxAlternatives = 5
 // road legs.
 type RouteOptions struct {
 	// Alternatives is how many routes to look for per road leg, the
-	// primary included (1 to MaxAlternatives). Above 1, each leg also gets
-	// its route's Summary and DurationH, and up to Alternatives-1 other
-	// routes in LegResult.Alternatives; 0 or 1 leaves the result as it is.
+	// primary included (1 to MaxAlternatives). Above 1, each leg gets up
+	// to Alternatives-1 other routes in LegResult.Alternatives; 0 or 1
+	// leaves the result as it is.
 	Alternatives int
 	// AvoidFerries routes road legs on land only.
 	AvoidFerries bool

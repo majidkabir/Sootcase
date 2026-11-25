@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.17.0
+  version: 0.18.0
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -81,7 +81,7 @@ paths:
           schema: { type: integer, minimum: 1, maximum: 5, default: 1 }
           description: >
             Since v0.14.0. How many routes to look for per routed road leg, its own included. Above 1, each road leg gets
-            summary and duration_h, and up to N - 1 other routes in legs[].alternatives, each calculated exactly like the
+            up to N - 1 other routes in legs[].alternatives (every routed road leg has its own summary and duration_h), each calculated exactly like the
             leg's own route (same fields, same method). Alternatives are no longer than 1.5 x the leg's route; two routes
             sharing 80% or more of their length count as one, unless they cross different ferries. A route with a ferry
             gets the best land-only route among its alternatives, a land-only route a ferry route when the router finds one,
@@ -655,7 +655,7 @@ components:
           type: string
           enum: [gap, access]
           description: "Set on road legs the calculator added: gap (the legs didn't join up) or access (to or from the port or terminal a leg was moved to)"
-        note: { type: string, description: Why the leg was added, or where its end was moved to }
+        note: { type: string, description: "Why the leg was added, or where its end was moved to; or that a vehicle isn't applied as the leg's distance_km is given" }
         factor_note: { type: string, description: "Which factor a short vehicle type meant for this leg, e.g. the GLEC region or container trade lane used" }
         from: { $ref: "#/components/schemas/Location", description: "Where the leg was calculated from (moved for a leg moved to a port or terminal), when known" }
         to: { $ref: "#/components/schemas/Location", description: Where the leg was calculated to, when known }
@@ -716,7 +716,7 @@ components:
         summary: { $ref: "#/components/schemas/RouteSummary" }
         duration_h:
           type: number
-          description: "With ?alternatives only: the router's driving time in hours, ferry time included. The router uses a car profile, so this is car speed, not truck speed."
+          description: "Routed road legs (since v0.18.0; before, with ?alternatives only): the router's driving time in hours, ferry time included. The router uses a car profile, so this is car speed, not truck speed."
         alternatives:
           type: array
           description: "With ?alternatives=2 to 5 only, on routed road legs: other routes, each with the fields of a leg result (calculated the same way), an id, summary and duration_h; ordered by the router's cost."
@@ -742,7 +742,7 @@ components:
         to_km: { type: number }
     RouteSummary:
       type: object
-      description: "With ?alternatives only: what tells a route apart, from OpenStreetMap."
+      description: "On every routed road leg (since v0.18.0; before, with ?alternatives only): what tells a route apart, from OpenStreetMap. A road is listed when the route drives at least 20 km and at least 5% of its length on it (at most 8, in the order driven); a short route lists its longest road."
       properties:
         roads: { type: array, items: { type: string }, description: "Main roads by reference (e.g. E 47, A 7), in the order driven" }
         ferries:

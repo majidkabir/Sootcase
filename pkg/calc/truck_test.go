@@ -123,3 +123,17 @@ func TestEmptyVehicleIsNone(t *testing.T) {
 		t.Errorf("vehicle {} on a sea leg: %v", err)
 	}
 }
+
+// A vehicle on a leg with a given distance isn't applied, and the leg says so.
+func TestVehicleWithGivenDistance(t *testing.T) {
+	c := Calculator{Factors: testFactors}
+	res, err := c.Calculate(context.Background(), Shipment{ID: "v", WeightKg: 10000, Legs: []Leg{
+		{Mode: Road, VehicleType: "truck_40t", DistanceKm: 100, Vehicle: &Vehicle{HeightM: fp(4)}}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	l := res.Legs[0]
+	if l.Restrictions != nil || !strings.Contains(l.Note, "vehicle isn't applied") {
+		t.Errorf("restrictions %+v, note %q", l.Restrictions, l.Note)
+	}
+}
