@@ -796,6 +796,12 @@ func (c Calculator) loadLeg(lr LegResult, leg Leg, tonnes, dist float64, dtype s
 		}
 		ttw, wtt, err = m.perTonneKm(lf, etf, MaxLoadFactor)
 	} else {
+		// The same rule as load_tonnes: the vehicle carries at least this
+		// shipment.
+		if onVehicle := leg.LoadFactor * m.PayloadT; onVehicle < tonnes*(1-1e-9) {
+			return LegResult{}, fmt.Errorf("%w: load_factor %g is %.2f t on the vehicle (of the model's %.1f t payload), less than the shipment's own %g t; give load_tonnes for all cargo on the vehicle",
+				ErrInvalidLoad, leg.LoadFactor, onVehicle, m.PayloadT, round3(tonnes))
+		}
 		ttw, wtt, err = m.PerTonneKm(lf, etf)
 	}
 	if err != nil {

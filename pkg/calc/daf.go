@@ -81,8 +81,8 @@ func (c Calculator) adjust(mode Mode, legType, basis string, km float64) (float6
 	// as the crow flies and 19,700 km by sea), unless the dataset has a DAF
 	// that makes it one.
 	straight := legType == DistGCD && mode != Air
-	noRoute := fmt.Errorf("%w: a straight line (great circle) is not a %s distance; give distance_km, "+
-		"the distance by %s, or set up routing for %s legs", ErrNoDistance, mode, mode, mode)
+	noRoute := fmt.Errorf("%w: a straight line (great circle) is not a %s distance; give the distance by %s "+
+		"(distance_km with distance_type sfd or actual), or set up routing for %s legs", ErrNoDistance, mode, mode, mode)
 	if basis == "" {
 		// A factor that states no basis takes the distance as it is.
 		if straight {

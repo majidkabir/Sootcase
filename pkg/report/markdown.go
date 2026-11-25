@@ -90,7 +90,7 @@ func WriteMarkdown(w io.Writer, r Report) error {
 		for _, e := range r.Energy {
 			name := e.Carrier
 			if name == Unspecified {
-				name = "not stated (published intensity or load model)"
+				name = "not stated (an intensity or load model, published or own)"
 			}
 			p("| %s | %s | %s | %s | %s |\n", esc(name), num(e.TTWKg, 1), num(e.WTTKg, 1), num(e.WTWKg, 1), pct(e.Share))
 		}

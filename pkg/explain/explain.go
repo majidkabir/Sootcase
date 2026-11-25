@@ -113,7 +113,7 @@ func Shipment(s calc.Shipment, r calc.Result, f calc.FactorProvider) Sheet {
 		if h.Containers > 0 {
 			st.Text = fmt.Sprintf("Containers handled times the hub operation's intensity per container, well-to-wheel only (%s data). Source: %s.",
 				h.DataType, h.Source)
-			st.Formula = fmt.Sprintf("WTW = %s containers × %s g/container ÷ 1,000 = %s kg", n(h.Containers, 0),
+			st.Formula = fmt.Sprintf("WTW = %s containers × %s g/container ÷ 1,000 = %s kg", n(h.Containers, 2),
 				n(div(h.WTWKg*1000, h.Containers), 1), n(h.WTWKg, 3))
 		}
 		if h.TTWKg != nil && h.WTTKg != nil { // the operator's own value splits it
@@ -377,7 +377,11 @@ func dafRule(f calc.FactorProvider, l calc.LegResult) string {
 				r = append(r, "× "+n(d.Multiplier, 4))
 			}
 			if d.AddKm != 0 {
-				r = append(r, fmt.Sprintf("%+g km", d.AddKm))
+				sign := "+"
+				if d.AddKm < 0 {
+					sign = "−"
+				}
+				r = append(r, fmt.Sprintf("%s %s km", sign, n(math.Abs(d.AddKm), 1)))
 			}
 			if len(r) > 0 {
 				return strings.Join(r, " ")

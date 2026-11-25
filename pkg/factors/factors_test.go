@@ -906,3 +906,19 @@ func TestAirHaulByGreatCircle(t *testing.T) {
 		t.Errorf("1,700 km flown (1,605 great circle): %s, want long-haul", long.Legs[0].Factor.VehicleType)
 	}
 }
+
+// A load factor that puts less on the vehicle than the shipment itself is
+// refused, as a load_tonnes below it is.
+func TestLoadFactorBelowShipment(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds}
+	for lf, ok := range map[float64]bool{0.1: false, 1: true} {
+		_, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 10_000, Legs: []calc.Leg{{Mode: calc.Road, VehicleType: "hgv_artic_33t", DistanceKm: 100, LoadFactor: lf}}})
+		if (err == nil) != ok || (!ok && !errors.Is(err, calc.ErrInvalidLoad)) {
+			t.Errorf("load_factor %v on 10 t: %v", lf, err)
+		}
+	}
+}

@@ -135,7 +135,7 @@ func TestReport_DeclareISOAndModels(t *testing.T) {
 	c := calc.Calculator{Factors: ds}
 	b := New(Meta{DeclareISO: true})
 	r1, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 10_000, Legs: []calc.Leg{
-		{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 300, LoadFactor: 0.6, EmptyTripFactor: 0.2},
+		{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 300, LoadFactor: 0.8, EmptyTripFactor: 0.2},
 		{Mode: calc.Rail, VehicleType: "freight_train", DistanceKm: 500, EnergyKWhPerTkm: 0.03, Country: "DNK"},
 		{Mode: calc.Air, VehicleType: "air_freight", DistanceKm: 1000, DistanceType: calc.DistActual},
 	}})
@@ -148,7 +148,7 @@ func TestReport_DeclareISOAndModels(t *testing.T) {
 		t.Errorf("statement %q datasets %v", r.Statement, r.Datasets)
 	}
 	if len(r.Data.Models) != 2 || r.Data.Models[0].Parameters["countries"] != "DNK" ||
-		r.Data.Models[1].Parameters["load_factor"] != "0.6" || r.Data.Models[1].Parameters["empty_trip_factor"] != "0.2" {
+		r.Data.Models[1].Parameters["load_factor"] != "0.8" || r.Data.Models[1].Parameters["empty_trip_factor"] != "0.2" {
 		t.Errorf("models %+v", r.Data.Models)
 	}
 	near(t, "modelled+default", r.Data.Modelled+r.Data.Default, 1)

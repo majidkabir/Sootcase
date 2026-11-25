@@ -54,3 +54,27 @@ func TestCargoTypeReturned(t *testing.T) {
 		t.Errorf("cargo_type %q, want %q", got, s.CargoType)
 	}
 }
+
+// Legs that share an id are each judged on their own: the same result
+// as with their own ids.
+func TestRepeatedLegIDs(t *testing.T) {
+	c := setup(t)
+	run := func(a, b string) ShipmentResult {
+		t.Helper()
+		s := calc.Shipment{ID: "dup", WeightKg: 20000, Legs: []calc.Leg{road(a, kiel, hamburg, 100), road(b, hamburg, munich, 780)}}
+		res, err := Run(context.Background(), c, []calc.Shipment{s}, Settings{Kinds: []string{Rail}}, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return res.Shipments[0]
+	}
+	same, own := run("x", "x"), run("a", "b")
+	if same.Lane != own.Lane || len(same.Options) != len(own.Options) {
+		t.Fatalf("repeated ids: lane %q, %d options; own ids: %q, %d", same.Lane, len(same.Options), own.Lane, len(own.Options))
+	}
+	for i := range same.Options {
+		if math.Abs(same.Options[i].WTWKg-own.Options[i].WTWKg) > 1e-6 {
+			t.Errorf("option %d: %v kg, with own ids %v", i, same.Options[i].WTWKg, own.Options[i].WTWKg)
+		}
+	}
+}

@@ -300,9 +300,6 @@ func Totals(uses []EnergyUse, refs []RefrigerantUse, fuels calc.FactorProvider) 
 	return
 }
 
-// sum returns TTW and WTT kg CO2e for a list of energy uses and
-// refrigerant losses, and a short description of them. Refrigerant losses
-// are direct emissions (TTW); their production is not counted.
 // electricityKg is the kg CO2e of the electricity among uses (fuels named
 // "electricity/<ISO3>" or with an "electricity" part, as calc reads
 // them): all well-to-tank, the vehicles' purchased electricity.
@@ -333,6 +330,9 @@ func electricityFuel(id string) bool {
 	return false
 }
 
+// sum returns TTW and WTT kg CO2e for a list of energy uses and
+// refrigerant losses, and a short description of them. Refrigerant losses
+// are direct emissions (TTW); their production is not counted.
 func sum(uses []EnergyUse, refs []RefrigerantUse, fuels calc.FactorProvider) (ttw, wtt float64, desc string, err error) {
 	var parts []string
 	for _, u := range uses {

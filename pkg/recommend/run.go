@@ -71,6 +71,9 @@ func Run(ctx context.Context, c calc.Calculator, shipments []calc.Shipment, set 
 		if set.has(Load) && set.LoadTonnes != nil && s.WeightKg/1000 > *set.LoadTonnes {
 			key += "|over load" // fuller loads aren't possible for these
 		}
+		if set.has(Load) && set.LoadFactor != nil {
+			ok = false // whether the load factor holds the shipment depends on its weight and the vehicle
+		}
 		if g := byKey[key]; ok && g != nil {
 			g.all = append(g.all, i)
 			continue
@@ -128,8 +131,8 @@ func groupKey(s calc.Shipment) (string, bool) {
 		if l.Fuel != nil || (l.RepositioningKm > 0 && l.LoadFactor == 0 && l.LoadTonnes == 0) {
 			return "", false
 		}
-		if l.LoadTonnes > 0 && s.WeightKg/1000 > l.LoadTonnes {
-			return "", false // refused for its weight: not the same as a lighter one's result
+		if (l.LoadTonnes > 0 && s.WeightKg/1000 > l.LoadTonnes) || l.LoadFactor > 0 {
+			return "", false // can be refused for its weight (a load factor by the vehicle's payload): not the same as a lighter one's result
 		}
 	}
 	for _, h := range s.Hubs {
