@@ -682,17 +682,21 @@ func oneMethod(leg Leg) error {
 // (".../electric/..." → ".../diesel/...", "average_traction_unknown" →
 // "diesel/average_mixed"), else the dataset's "freight_train_diesel".
 // A diesel value (GLEC's North American average) or one that can't be
-// split (India's) stays as it is.
+// split (India's) stays as it is. A leg without a type starts from the
+// dataset's "freight_train" (by region), else "freight_train_diesel".
 func (c Calculator) dieselTrain(leg Leg, km float64) (string, string) {
-	if leg.VehicleType == "" {
-		if _, err := c.Factors.LegFactor(Rail, "freight_train_diesel"); err == nil {
-			return "freight_train_diesel", ""
+	if leg.VehicleType == "" { // no type given: the dataset's regional rail value ("freight_train") where there is one
+		leg.VehicleType = "freight_train"
+		if _, err := c.Factors.LegFactor(Rail, leg.VehicleType); err != nil {
+			leg.VehicleType = "freight_train_diesel"
 		}
-		return "", ""
 	}
 	f, _, err := c.legFactor(leg, km)
-	if err != nil || !(electricFactor(f.VehicleType) || f.ElectricityG > 0) {
+	if err != nil {
 		return leg.VehicleType, "" // main reports an error
+	}
+	if !(electricFactor(f.VehicleType) || f.ElectricityG > 0) {
+		return leg.VehicleType, fmt.Sprintf("Track that isn't electrified: %s (diesel).", f.VehicleType)
 	}
 	var try []string
 	parts := strings.Split(f.VehicleType, "/")

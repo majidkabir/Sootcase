@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -196,4 +197,26 @@ func TestSheet_PerTEU(t *testing.T) {
 	if checked == 0 {
 		t.Error("no product on the sheet")
 	}
+}
+
+// An operator's intensity marked modelled is named as such, with ISO
+// 14083's modelled basis, not as a default value.
+func TestSheet_ModelledOwn(t *testing.T) {
+	f := calc.Factor{Mode: calc.Road, VehicleType: "op-toc", TTW: 80, WTT: 20, Source: "Operator", DataType: calc.DataModelled}
+	r := calc.Result{ShipmentID: "M", WeightKg: 1000, Legs: []calc.LegResult{{LegID: "l", Mode: calc.Road, Method: calc.MethodIntensity,
+		DataType: calc.DataModelled, Factor: &f, DistanceKm: 100, TonneKm: 100, TTWKg: 8, WTTKg: 2, WTWKg: 10}}}
+	s := calc.Shipment{ID: "M", WeightKg: 1000, Legs: []calc.Leg{{ID: "l", Mode: calc.Road, VehicleType: "op-toc", DistanceKm: 100}}}
+	ds, err := factors.Open("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, st := range Shipment(s, r, ds).Steps {
+		if st.Title == "Emission intensity" {
+			if !strings.Contains(st.Text, "modelled data") || !slices.Contains(st.Basis, bModel) {
+				t.Errorf("step %+v", st)
+			}
+			return
+		}
+	}
+	t.Error("no emission intensity step")
 }

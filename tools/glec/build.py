@@ -23,9 +23,105 @@ GLEC = "GLEC Framework v3.3 (Smart Freight Centre, 2026)"
 legs = []
 
 
+PRINTED_WTW = {  # GLEC's printed WTW where it isn't the printed WTT + TTW (the columns are rounded separately; per TEU-km for container lanes)
+    "glec/air/in/domestic": 1260,
+    "glec/iww/motor_vessel_135m": 21.8,
+    "glec/iww/motor_vessel_50_80m": 33.9,
+    "glec/iww/motor_vessel_50m": 77.1,
+    "glec/iww/motor_vessel_85_110m": 21.4,
+    "glec/iww/pushed_convoy_2_barges": 20.1,
+    "glec/iww/pushed_convoy_6_barges": 8.4,
+    "glec/rail/eu/diesel/trailer_on_train": 39.4,
+    "glec/road/cn/artic_24_25t/lng": 119.85,
+    "glec/road/cn/artic_43_46t/diesel": 75.05,
+    "glec/road/cn/dump_31_60t/lng": 54.83,
+    "glec/road/cn/dump_3_5_4_5t/diesel": 558.61,
+    "glec/road/cn/dump_7_8_5t/diesel": 305.04,
+    "glec/road/cn/rigid_10_5_12_5t/diesel": 231.7,
+    "glec/road/cn/rigid_16_20t/diesel": 152.34,
+    "glec/road/cn/rigid_20_25t/diesel": 106.67,
+    "glec/road/eu_sa/artic_34_40t_hpdi/bio_lng_diesel": 39,
+    "glec/road/eu_sa/artic_34_40t_hpdi/container/bio_lng_diesel": 39,
+    "glec/road/eu_sa/artic_34_40t_hpdi/container/cng_diesel": 87,
+    "glec/road/eu_sa/artic_34t/container/diesel": 123,
+    "glec/road/eu_sa/artic_40_44t/diesel": 89,
+    "glec/road/eu_sa/artic_40t_light_trailer/heavy/diesel": 80,
+    "glec/road/eu_sa/artic_72t/container/diesel": 54,
+    "glec/road/eu_sa/rigid_20_26t/diesel": 137,
+    "glec/road/eu_sa/rigid_26_32t/container/diesel": 123,
+    "glec/road/eu_sa/rigid_3_5_7_5t/diesel": 335,
+    "glec/road/eu_sa/rigid_7_5_12t/diesel": 223,
+    "glec/road/na/specialized": 132,
+    "glec/road/na/tanker": 71,
+    "glec/sea/bulk_carrier/10000-34999_dwt/mdo": 8.4,
+    "glec/sea/bulk_carrier/200000_plus_dwt/hfo": 3.1,
+    "glec/sea/bulk_carrier/200000_plus_dwt/vlsfo": 3.2,
+    "glec/sea/bulk_carrier/35000-59999_dwt/hfo": 6.3,
+    "glec/sea/bulk_carrier/35000-59999_dwt/mdo": 6.1,
+    "glec/sea/bulk_carrier/35000-59999_dwt/vlsfo": 6.5,
+    "glec/sea/chemical_tanker/40000_plus_dwt/vlsfo": 8.8,
+    "glec/sea/container/asia_me_india/dry": 82.7,
+    "glec/sea/container/asia_med_bs/reefer": 121,
+    "glec/sea/container/asia_na_wc/dry": 61.8,
+    "glec/sea/container/asia_na_wc/reefer": 130.2,
+    "glec/sea/container/asia_north_europe/reefer": 105.9,
+    "glec/sea/container/asia_oceania/reefer": 181,
+    "glec/sea/container/asia_south_america/dry": 69.7,
+    "glec/sea/container/europe_africa/dry": 124.4,
+    "glec/sea/container/europe_oceania/dry": 125.5,
+    "glec/sea/container/europe_oceania/reefer": 210.3,
+    "glec/sea/container/europe_south_america/reefer": 189.4,
+    "glec/sea/container/industry_average/reefer": 151.6,
+    "glec/sea/container/intra_africa/dry": 203.1,
+    "glec/sea/container/intra_africa/reefer": 390.5,
+    "glec/sea/container/med_bs_na_wc/dry": 79.3,
+    "glec/sea/container/na_africa/dry": 134.8,
+    "glec/sea/container/na_south_america/reefer": 219.3,
+    "glec/sea/container/north_europe_med_bs/dry": 116.1,
+    "glec/sea/container/north_europe_med_bs/reefer": 221,
+    "glec/sea/container/trans_atlantic/reefer": 187.9,
+    "glec/sea/ferry_ropax/0-1999_gt/hfo": 533.8,
+    "glec/sea/ferry_ropax/10000-19999_gt/hfo": 127.7,
+    "glec/sea/ferry_ropax/10000-19999_gt/mdo": 124.7,
+    "glec/sea/ferry_ropax/10000-19999_gt/vlsfo": 131.5,
+    "glec/sea/ferry_ropax/20000_plus_gt/mdo": 94.2,
+    "glec/sea/ferry_ropax/5000-9999_gt/hfo": 199.7,
+    "glec/sea/general_cargo/0-4999_dwt/mdo": 25.8,
+    "glec/sea/general_cargo/10000-19999_dwt/hfo": 18.9,
+    "glec/sea/general_cargo/5000-9999_dwt/vlsfo": 21.9,
+    "glec/sea/liquefied_gas_tanker/200000_plus_cbm/hfo": 11.5,
+    "glec/sea/liquefied_gas_tanker/50000-99999_cbm/hfo": 13.7,
+    "glec/sea/liquefied_gas_tanker/50000-99999_cbm/vlsfo": 14.1,
+    "glec/sea/oil_tanker/0-4999_dwt/hfo": 86.1,
+    "glec/sea/oil_tanker/120000-199999_dwt/vlsfo": 6.1,
+    "glec/sea/oil_tanker/20000-59999_dwt/hfo": 18.1,
+    "glec/sea/oil_tanker/5000-9999_dwt/hfo": 47.2,
+    "glec/sea/oil_tanker/60000-79999_dwt/hfo": 10.3,
+    "glec/sea/oil_tanker/60000-79999_dwt/vlsfo": 10.6,
+    "glec/sea/oil_tanker/80000-119999_dwt/mdo": 7.9,
+    "glec/sea/other_liquids_tanker/0-999_dwt/hfo": 1223.6,
+    "glec/sea/other_liquids_tanker/1000_plus_dwt/mdo": 32,
+    "glec/sea/other_liquids_tanker/1000_plus_dwt/vlsfo": 33.8,
+    "glec/sea/refrigerated_bulk/0-1999_dwt/mdo": 154.7,
+    "glec/sea/refrigerated_bulk/2000-5999_dwt/hfo": 76.8,
+    "glec/sea/roro/15000_plus_dwt/hfo": 19.5,
+    "glec/sea/roro/5000-9999_dwt/mdo": 43.4,
+    "glec/sea/vehicle_carrier/0-29999_gt/hfo": 98.7,
+    "glec/sea/vehicle_carrier/30000-49999_gt/hfo": 47.1,
+    "glec/sea/vehicle_carrier/30000-49999_gt/mdo": 46,
+    "glec/sea/vehicle_carrier/30000-49999_gt/vlsfo": 48.5,
+}
+
+
 def leg(mode, vt, wtt, ttw, source, basis, electricity=0, tonnes_per_teu=0):
     """electricity is the part of wtt that is the electricity the vehicle runs on, for a value that mixes fuel and
-    electric traction (the operator's scope 2)."""
+    electric traction (the operator's scope 2). Where GLEC's printed WTW isn't its printed WTT + TTW, WTT is taken as
+    WTW - TTW, so that the total is GLEC's printed WTW (as for the Module 1 fuels)."""
+    if vt in PRINTED_WTW:
+        per = tonnes_per_teu or 1
+        wtw = PRINTED_WTW[vt]
+        source += f"; WTW {wtw:g} as printed (WTT printed as {wtt * per:g}, taken as WTW - TTW)"
+        wtt = wtw / per - ttw
     f = {"mode": mode, "vehicle_type": vt, "ttw_g_per_tkm": round(ttw, 4), "wtt_g_per_tkm": round(wtt, 4),
          "source": source, "year": YEAR, "distance_basis": basis}
     if electricity:
@@ -90,6 +186,7 @@ for vid, label, wtt, ttw in EU_SA:
 # applied to the Europe and South America values.
 for vid, label, wtt, ttw in EU_SA:
     up = 1.13 if vid.startswith("van_") else 1.22
+    wtt = PRINTED_WTW.get("glec/road/eu_sa/" + vid, wtt + ttw) - ttw  # the Europe value's printed WTW
     leg("road", "glec/road/asia_africa/" + vid, wtt * up, ttw * up,
         f"{GLEC}, Section 3 Module 2, road, Asia (except China and India) and Africa: the Europe and South America value "
         f"({label}) with GLEC's +{round((up - 1) * 100)}% uplift for {'vans' if up == 1.13 else 'vehicles over 3.5 t GVW'} (p. 106); {ROAD_SFD}",
