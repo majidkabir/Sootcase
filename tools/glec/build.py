@@ -23,13 +23,15 @@ GLEC = "GLEC Framework v3.3 (Smart Freight Centre, 2026)"
 legs = []
 
 
-def leg(mode, vt, wtt, ttw, source, basis, electricity=0):
+def leg(mode, vt, wtt, ttw, source, basis, electricity=0, tonnes_per_teu=0):
     """electricity is the part of wtt that is the electricity the vehicle runs on, for a value that mixes fuel and
     electric traction (the operator's scope 2)."""
     f = {"mode": mode, "vehicle_type": vt, "ttw_g_per_tkm": round(ttw, 4), "wtt_g_per_tkm": round(wtt, 4),
          "source": source, "year": YEAR, "distance_basis": basis}
     if electricity:
         f["electricity_g_per_tkm"] = round(electricity, 4)
+    if tonnes_per_teu:  # published per TEU-km: a shipment given in TEU is calculated per TEU (GLEC p. 134)
+        f["tonnes_per_teu"] = tonnes_per_teu
     legs.append(f)
 
 
@@ -411,7 +413,7 @@ for lid, (label, dry, reefer) in LANES.items():
         leg("sea", f"glec/sea/container/{lid}/{kind}", wtt / TEU_T, ttw / TEU_T,
             f"{GLEC}, Section 3 Module 2, Tables 18-19, container vessels (Clean Cargo trade lane factors, reporting year 2025): "
             f"{label}, {kind}, {wtt:g} + {ttw:g} g CO2e/TEU-km (WTT + TTW) / 10 t per TEU (GLEC's average when the cargo mass is "
-            f"not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance", "sfd")
+            f"not known); includes GLEC's +15% distance conversion, so it is per shortest feasible distance", "sfd", tonnes_per_teu=TEU_T)
 
 for lid in LANES:
     variant(f"glec/sea/container/{lid}/dry", "temperature_controlled", f"glec/sea/container/{lid}/reefer")

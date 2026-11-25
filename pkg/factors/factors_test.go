@@ -922,3 +922,34 @@ func TestLoadFactorBelowShipment(t *testing.T) {
 		}
 	}
 }
+
+// A shipment given in TEU on a container ship is calculated per TEU-km
+// with GLEC's published value (p. 134), whatever its net tonnes per TEU;
+// by weight, per tonne-km at 10 t per TEU.
+func TestContainerPerTEU(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds}
+	leg := []calc.Leg{{Mode: calc.Sea, VehicleType: "container_ship", From: calc.Location{Lat: 53.54, Lon: 9.98}, To: calc.Location{Lat: 51.95, Lon: 4.14}, DistanceKm: 560, DistanceType: calc.DistSFD}}
+	var wtw []float64
+	var f calc.Factor
+	for _, s := range []calc.Shipment{{TEU: 2, Legs: leg}, {TEU: 2, TEUNetTonnes: 7, Legs: leg}, {TEU: 2, ContainerLoad: "heavy", Legs: leg}, {WeightKg: 20000, Legs: leg}} {
+		r, err := c.Calculate(context.Background(), s)
+		if err != nil {
+			t.Fatal(err)
+		}
+		wtw = append(wtw, r.WTWKg)
+		f = *r.Legs[0].Factor
+	}
+	if f.TonnesPerTEU != 10 {
+		t.Fatalf("factor %s: tonnes_per_teu %v", f.VehicleType, f.TonnesPerTEU)
+	}
+	want := 2 * 560 * f.WTW() * f.TonnesPerTEU / 1000 // 2 TEU × km × g/TEU-km
+	for i, v := range wtw {
+		if math.Abs(v-want) > 1e-6 {
+			t.Errorf("case %d: %v kg, want %v (2 TEU × 560 km × %v g/TEU-km)", i, v, want, f.WTW()*f.TonnesPerTEU)
+		}
+	}
+}

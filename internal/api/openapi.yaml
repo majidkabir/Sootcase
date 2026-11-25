@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.19.8
+  version: 0.20.0
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -623,6 +623,7 @@ components:
         year: { type: integer }
         distance_basis: { $ref: "#/components/schemas/DistanceType" }
         electricity_g_per_tkm: { type: number, description: "Part of wtt_g_per_tkm that is the electricity the vehicles run on, for a value that mixes fuel and electric traction (GLEC's European rail average): the operator's scope 2. Left out otherwise" }
+        tonnes_per_teu: { type: number, description: "Set on values published per TEU-km (GLEC's container trade lanes), held per tonne-km at this many tonnes per TEU: a shipment given in TEU is calculated per TEU (TEU × km × the published value, GLEC v3.3 p. 134), whatever its net tonnes" }
         data_type: { type: string, description: "primary for factors built from the operator's own measurements (transport operation categories); else left out" }
     FuelFactor:
       type: object
@@ -658,6 +659,7 @@ components:
           description: "Set on road legs the calculator added: gap (the legs didn't join up) or access (to or from the port or terminal a leg was moved to)"
         note: { type: string, description: "Why the leg was added, or where its end was moved to; or that a vehicle isn't applied as the leg's distance_km is given" }
         factor_note: { type: string, description: "Which factor a short vehicle type meant for this leg, e.g. the GLEC region or container trade lane used" }
+        factor_tonnes: { type: number, description: "Tonnes the intensity was applied to when not the cargo's: a value published per TEU-km on a shipment given in TEU (TEU × its tonnes_per_teu)" }
         from: { $ref: "#/components/schemas/Location", description: "Where the leg was calculated from (moved for a leg moved to a port or terminal), when known" }
         to: { $ref: "#/components/schemas/Location", description: Where the leg was calculated to, when known }
         mode: { $ref: "#/components/schemas/Mode" }
