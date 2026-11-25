@@ -85,6 +85,7 @@ func TestSheet_FormulasAddUp(t *testing.T) {
 	product := regexp.MustCompile(num + ` t × ` + num + ` km × ` + num + ` g/tkm ÷ 1,000 = ` + num + ` kg`)
 	loadEq := regexp.MustCompile(`\(` + num + ` \+ ` + num + ` × ` + num + `\) ÷ \(` + num + ` t\) = ` + num + ` g`)
 	activity := regexp.MustCompile(num + ` t × ` + num + ` km = ` + num + ` tkm`)
+	byTkm := regexp.MustCompile(num + ` tkm × ` + num + ` g/tkm ÷ 1,000 = ` + num + ` kg`)
 	f := func(s string) float64 { v, _ := strconv.ParseFloat(strings.ReplaceAll(s, ",", ""), 64); return v }
 	near := func(a, b float64) bool { return math.Abs(a-b) <= 0.002*math.Max(1, math.Abs(b)) }
 	checked := 0
@@ -98,6 +99,12 @@ func TestSheet_FormulasAddUp(t *testing.T) {
 		for _, m := range loadEq.FindAllStringSubmatch(s.Formula, -1) {
 			checked++
 			if got := (f(m[1]) + f(m[2])*f(m[3])) / f(m[4]); !near(got, f(m[5])) {
+				t.Errorf("%s: %s → %v", s.Group, m[0], got)
+			}
+		}
+		for _, m := range byTkm.FindAllStringSubmatch(s.Formula, -1) { // e.g. the load model's, after its distance adjustment
+			checked++
+			if got := f(m[1]) * f(m[2]) / 1000; !near(got, f(m[3])) {
 				t.Errorf("%s: %s → %v", s.Group, m[0], got)
 			}
 		}
@@ -128,5 +135,32 @@ func TestSheet_FactorNote(t *testing.T) {
 		if (s.Title == "Emission intensity") != has {
 			t.Errorf("%s: %q", s.Title, s.Text)
 		}
+	}
+}
+
+// Legs without ids (or with the same id) each show their own input: two
+// unnamed fuel legs, 100 l and 50 l.
+func TestSheet_LegsWithoutIDs(t *testing.T) {
+	ds, err := factors.Open("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds, Distances: ds.Distances(), NoRoadLegs: true, Places: places.Codes{}}
+	s := calc.Shipment{ID: "S", WeightKg: 10000, Legs: []calc.Leg{
+		{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 300, Fuel: &calc.FuelUse{Fuel: "diesel", Amount: 100}},
+		{Mode: calc.Road, VehicleType: "hgv", DistanceKm: 150, Fuel: &calc.FuelUse{Fuel: "diesel", Amount: 50}},
+	}}
+	r, err := c.Calculate(context.Background(), s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var amounts []string
+	for _, st := range Shipment(s, r, ds).Steps {
+		if m := regexp.MustCompile(`TTW = ([\d.,]+) l`).FindStringSubmatch(st.Formula); m != nil {
+			amounts = append(amounts, m[1])
+		}
+	}
+	if len(amounts) != 2 || amounts[0] != "100.000" || amounts[1] != "50.000" {
+		t.Errorf("fuel amounts on the sheet %v, want 100.000 then 50.000", amounts)
 	}
 }

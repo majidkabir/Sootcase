@@ -73,9 +73,13 @@ func WriteMarkdown(w io.Writer, r Report) error {
 
 	if len(r.Hubs) > 0 {
 		p("## By hub operation\n\n")
-		p("| Hub type | Stops | Tonnes | WTW kg | g CO2e/t |\n|---|---:|---:|---:|---:|\n")
+		p("| Hub type | Stops | Tonnes | WTW kg | g CO2e/t | g CO2e/container |\n|---|---:|---:|---:|---:|---:|\n")
 		for _, h := range r.Hubs {
-			p("| %s | %d | %s | %s | %s |\n", esc(h.HubType), h.Stops, num(h.Tonnes, 1), num(h.WTWKg, 1), num(h.IntensityGT, 1))
+			perC := "–" // only for hub types valued per container
+			if h.Containers > 0 {
+				perC = num(h.IntensityGContainer, 1)
+			}
+			p("| %s | %d | %s | %s | %s | %s |\n", esc(h.HubType), h.Stops, num(h.Tonnes, 1), num(h.WTWKg, 1), num(h.IntensityGT, 1), perC)
 		}
 		p("\n")
 	}

@@ -89,14 +89,16 @@ func Shipment(s calc.Shipment, r calc.Result, f calc.FactorProvider) Sheet {
 	}
 	sh.Steps = append(sh.Steps, cargo)
 
-	given := map[string]calc.Leg{}
-	for _, l := range s.Legs {
-		given[l.ID] = l
-	}
+	// The shipment's own legs are the results not added, in order (ids
+	// can be empty or repeated).
+	own := 0
 	for i, l := range r.Legs {
 		in := calc.Leg{}
 		if l.Added == "" {
-			in = given[l.LegID]
+			if own < len(s.Legs) {
+				in = s.Legs[own]
+			}
+			own++
 		}
 		sh.Steps = append(sh.Steps, legSteps(i, l, in, t, f)...)
 	}
@@ -297,7 +299,7 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 			Text: fmt.Sprintf("The vehicle's emissions per vehicle-km depend on its load; they are interpolated between the dataset's values "+
 				"empty, half and fully laden, and spread over the tonnes carried, with empty running added. Load factor %s of the model's "+
 				"%s t payload%s, %s empty km per loaded km%s. Source: %s.",
-				n(l.LoadFactor, 4), n(l.PayloadT, 2), loadTonnesText(l), n(l.EmptyTripFactor, 3), repositioningText(l), fac.Source),
+				n(l.LoadFactor, 4), n(l.PayloadT, 2), loadTonnesText(l), n(l.EmptyTripFactor, 3), repositioningText(l, km), fac.Source),
 			Basis: []string{bModel, bLoad, bDataCats}}
 		if lmp, ok := f.(calc.LoadModelProvider); ok && f != nil {
 			if m, err := lmp.LoadModel(l.Mode, l.VehicleType); err == nil {
@@ -311,9 +313,14 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 					n(ew, 2), n(l.EmptyTripFactor, 3), n(zw, 2), n(load, 3), n(fac.WTT, 3))
 			}
 		}
+		steps := []Step{s}
+		if ds, ok := dafStep(group, l, km, f); ok { // load models are per actual km
+			tkm = t * km * l.DAF
+			steps = append(steps, ds)
+		}
 		emissions.Formula = fmt.Sprintf("TTW = %s tkm × %s g/tkm ÷ 1,000 = %s kg\nWTT = %s tkm × %s g/tkm ÷ 1,000 = %s kg\nWTW = %s kg",
 			n(tkm, 1), n(fac.TTW, 3), n(ttwKg, 3), n(tkm, 1), n(fac.WTT, 3), n(wttKg, 3), n(wtwKg, 3))
-		return []Step{s, emissions}
+		return append(steps, emissions)
 
 	default: // intensity
 		if fac == nil {
@@ -331,26 +338,33 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 			Basis: basis}
 		steps := []Step{s}
 		adjKm := km
-		if l.DAF > 0 {
+		if ds, ok := dafStep(group, l, km, f); ok {
 			adjKm = km * l.DAF
-			ds := Step{Group: group, Title: "Distance adjustment",
-				Text: fmt.Sprintf("The distance is %s but the intensity is per %s tonne-km, so the distance is adjusted: %s.",
-					distBasis(l.DistanceType), distBasis(fac.DistanceBasis), l.DAFSource),
-				Basis: []string{bDAF}}
-			switch l.Mode {
-			case calc.Sea:
-				ds.Basis = append(ds.Basis, bDAFSea)
-			case calc.Air:
-				ds.Basis = append(ds.Basis, bDAFAir)
-			}
-			rule := dafRule(f, l)
-			ds.Formula = fmt.Sprintf("adjusted distance = %s km %s = %s km", n(km, 1), rule, n(adjKm, 1))
 			steps = append(steps, ds)
 		}
 		emissions.Formula = fmt.Sprintf("TTW = %s t × %s km × %s g/tkm ÷ 1,000 = %s kg\nWTT = %s t × %s km × %s g/tkm ÷ 1,000 = %s kg\nWTW = %s kg",
 			n(t, 3), n(adjKm, 1), n(fac.TTW, 3), n(ttwKg, 3), n(t, 3), n(adjKm, 1), n(fac.WTT, 3), n(wttKg, 3), n(wtwKg, 3))
 		return append(steps, emissions)
 	}
+}
+
+// dafStep explains the leg's distance adjustment (ok false without one).
+func dafStep(group string, l calc.LegResult, km float64, f calc.FactorProvider) (Step, bool) {
+	if !(l.DAF > 0) || l.Factor == nil {
+		return Step{}, false
+	}
+	ds := Step{Group: group, Title: "Distance adjustment",
+		Text: fmt.Sprintf("The distance is %s but the intensity is per %s tonne-km, so the distance is adjusted: %s.",
+			distBasis(l.DistanceType), distBasis(l.Factor.DistanceBasis), l.DAFSource),
+		Basis: []string{bDAF}}
+	switch l.Mode {
+	case calc.Sea:
+		ds.Basis = append(ds.Basis, bDAFSea)
+	case calc.Air:
+		ds.Basis = append(ds.Basis, bDAFAir)
+	}
+	ds.Formula = fmt.Sprintf("adjusted distance = %s km %s = %s km", n(km, 1), dafRule(f, l), n(km*l.DAF, 1))
+	return ds, true
 }
 
 // dafRule writes the DAF as the dataset defines it ("× 1.15", "+ 95 km"),
@@ -534,10 +548,10 @@ func n(v float64, dec int) string {
 }
 
 // repositioningText says how repositioning km entered the empty trip factor.
-func repositioningText(l calc.LegResult) string {
+func repositioningText(l calc.LegResult, km float64) string {
 	if l.RepositioningKm <= 0 {
 		return ""
 	}
 	return fmt.Sprintf(" (including %s km driven empty for this trip, over the leg's %s km actual distance)",
-		n(l.RepositioningKm, 1), n(l.DistanceKm*max(l.DAF, 1), 1))
+		n(l.RepositioningKm, 1), n(km*max(l.DAF, 1), 1)) // the leg's road km: without a ferry part
 }

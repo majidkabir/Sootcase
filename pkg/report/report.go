@@ -239,6 +239,10 @@ type Hub struct {
 	Tonnes      float64 `json:"tonnes"`
 	WTWKg       float64 `json:"wtw_kg"`
 	IntensityGT float64 `json:"intensity_g_per_t"`
+	// Containers and IntensityGContainer, for hub types GLEC gives per
+	// container (intermodal terminals): the value's own unit.
+	Containers          float64 `json:"containers,omitempty"`
+	IntensityGContainer float64 `json:"intensity_g_per_container,omitempty"`
 }
 
 // Energy is one energy carrier. Legs calculated from a published
@@ -404,6 +408,7 @@ func (b *Builder) Add(id string, r calc.Result, err error) {
 		}
 		hb.Stops++
 		hb.Tonnes += r.WeightKg / 1000
+		hb.Containers += h.Containers
 		hb.WTWKg += h.WTWKg
 		b.tot.HubWTWKg += h.WTWKg
 		b.byType[h.DataType] += h.WTWKg
@@ -599,6 +604,9 @@ func (b *Builder) Report() Report {
 
 	for _, h := range b.hubs {
 		h.IntensityGT = div(h.WTWKg*1000, h.Tonnes)
+		if h.Containers > 0 {
+			h.IntensityGContainer = h.WTWKg * 1000 / h.Containers
+		}
 		r.Hubs = append(r.Hubs, *h)
 	}
 	sort.Slice(r.Hubs, func(i, j int) bool { return r.Hubs[i].WTWKg > r.Hubs[j].WTWKg })

@@ -320,3 +320,21 @@ func TestSeparators(t *testing.T) {
 		}
 	}
 }
+
+// A way of calculating with only some of its cells filled is read as that
+// way, so the calculation refuses what's missing instead of quietly using
+// a default value.
+func TestRead_HalfFilledMethods(t *testing.T) {
+	in := "shipment_id,weight_kg,mode,vehicle_type,distance_km,own_ttw_g_per_tkm,fuel,fuel_amount,fuel_unit,fuel_ttw_kg_per_unit\n" +
+		"A,1000,road,hgv,100,,diesel,30,l,0.03\n" + // supplier factor without wtw or source
+		"B,1000,road,hgv,100,,,30,,\n" + // fuel amount without a fuel
+		"C,1000,road,hgv,100,56,,,,\n" // own intensity without wtw or source
+	items, err := Read(strings.NewReader(in))
+	if err != nil || len(items) != 3 {
+		t.Fatalf("%v %+v", err, items)
+	}
+	a, b, c := items[0].Shipment.Legs[0], items[1].Shipment.Legs[0], items[2].Shipment.Legs[0]
+	if a.Fuel == nil || a.Fuel.Factor == nil || b.Fuel == nil || b.Fuel.Fuel != "" || c.OwnFactor == nil {
+		t.Errorf("read as %+v / %+v / %+v", a.Fuel, b.Fuel, c.OwnFactor)
+	}
+}

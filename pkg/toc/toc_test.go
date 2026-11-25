@@ -306,3 +306,42 @@ func TestModelledData(t *testing.T) {
 		t.Errorf("legs %q hubs %q primary share %v", r.Legs[0].DataType, r.Hubs[0].DataType, r.PrimaryDataShare)
 	}
 }
+
+// A TOC's electricity is the operator's scope 2, as on any electric leg:
+// all of an electric truck's, and a mixed fleet's electricity part.
+func TestBuild_ElectricityScope2(t *testing.T) {
+	ds, err := factors.Open(factors.Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o, err := Parse(strings.NewReader(`{"name":"acme","period":"2025","year":2025,"tocs":[
+		{"id":"etruck","mode":"road","tonne_km":100000,"fuels":[{"fuel":"electricity/DNK","amount":10000}]},
+		{"id":"mixed","mode":"road","tonne_km":100000,"fuels":[{"fuel":"electricity/DNK","amount":10000},{"fuel":"diesel","amount":1000}]}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	layer, err := Build(o, ds)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(layer); err != nil {
+		t.Fatal(err)
+	}
+	merged, err := layered(t, buf.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	el, _ := ds.FuelFactor("electricity/DNK")
+	r, err := calc.Calculator{Factors: merged}.Calculate(context.Background(), calc.Shipment{WeightKg: 10_000, Legs: []calc.Leg{
+		{ID: "e", Mode: calc.Road, VehicleType: "etruck", DistanceKm: 100},
+		{ID: "m", Mode: calc.Road, VehicleType: "mixed", DistanceKm: 100}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 1,000 tkm on each: 1% of each TOC's electricity.
+	want := 2 * 10000 * el.WTW() / 100000 * 1000 // kg per tkm × 1,000 tkm, two legs
+	if g := r.GHGProtocol; math.Abs(g.OperatorScope2Kg-want) > 1e-6 {
+		t.Errorf("operator scope 2 %v kg, want %v (scopes %+v)", g.OperatorScope2Kg, want, g)
+	}
+}
