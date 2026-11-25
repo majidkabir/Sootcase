@@ -67,7 +67,7 @@ func (s *Server) scenarioRun(w http.ResponseWriter, r *http.Request) {
 		}
 		valid = append(valid, sh)
 	}
-	s.Calc.Prefetch(ctx, valid)
+	ctx = s.Calc.Prefetch(ctx, valid)
 	res, err := scenario.RunParallel(ctx, s.Calc, valid, req.Plan, s.Limits.BatchWorkers)
 	if err != nil {
 		if errors.Is(err, scenario.ErrInvalidPlan) {

@@ -69,7 +69,7 @@ func (s *Server) recommendRun(w http.ResponseWriter, r *http.Request) {
 		}
 		valid = append(valid, sh)
 	}
-	s.Calc.Prefetch(ctx, valid)
+	ctx = s.Calc.Prefetch(ctx, valid)
 	res, err := recommend.Run(ctx, s.Calc, valid, req.Settings, s.Limits.BatchWorkers)
 	if err != nil {
 		if errors.Is(err, recommend.ErrInvalidSettings) {

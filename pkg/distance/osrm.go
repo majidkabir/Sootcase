@@ -51,6 +51,7 @@ type OSRM struct {
 	mu         sync.Mutex
 	cache      map[string]calc.Route
 	splitCache map[string]calc.Route // routes split by country (WantCountryKm)
+	tableCache map[string]calc.Route // km from distance tables (Prefetch), for batches only
 	semOnce    sync.Once
 	sem        chan struct{}
 }
@@ -182,14 +183,18 @@ func (o *OSRM) Route(ctx context.Context, m calc.Mode, from, to calc.Location) (
 			o.mu.Unlock()
 			return r, nil
 		}
+		if r, ok := o.tableCache[key]; ok && !withCountries && calc.UseTableRoutes(ctx) {
+			o.mu.Unlock()
+			return r, nil
+		}
 		o.mu.Unlock()
 	}
 
 	q := routeQuery{path: calc.PathDetailOf(ctx), countries: withCountries,
 		summary: m == calc.Road, avoidFerries: opts.AvoidFerries, exclude: truck}
 	if opts.Alternatives > 1 {
-		// A few more than asked for: some are dropped as too long or too
-		// like another.
+		// OSRM's alternatives=N, N as asked (at most MaxAlternatives): some
+		// are dropped as too long or too like another.
 		q.alternatives, q.nodes = min(opts.Alternatives, calc.MaxAlternatives), true
 	}
 	routes, err := o.fetch(ctx, m, key, q)

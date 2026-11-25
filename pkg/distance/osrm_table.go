@@ -49,7 +49,9 @@ func (o *OSRM) Prefetch(ctx context.Context, lanes []calc.Lane) {
 	var todo []calc.Lane
 	o.mu.Lock()
 	for _, l := range lanes {
-		if _, ok := o.cache[cacheKey(l.From, l.To)]; !ok {
+		k := cacheKey(l.From, l.To)
+		_, routed := o.cache[k]
+		if _, tabled := o.tableCache[k]; !routed && !tabled {
 			todo = append(todo, l)
 		}
 	}
@@ -124,8 +126,10 @@ func (o *OSRM) prefetchChunk(ctx context.Context, lanes []calc.Lane, ferryCheck 
 	}
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	if o.cache == nil || len(o.cache)+len(lanes) > maxCacheEntries {
-		o.cache = make(map[string]calc.Route)
+	// Its own cache: a table has km only, no road leg's summary and
+	// driving time, so only batches take them (calc.UseTableRoutes).
+	if o.tableCache == nil || len(o.tableCache)+len(lanes) > maxCacheEntries {
+		o.tableCache = make(map[string]calc.Route)
 	}
 	for i, l := range lanes {
 		d := all[src[i]][dst[i]]
@@ -141,7 +145,7 @@ func (o *OSRM) prefetchChunk(ctx context.Context, lanes []calc.Lane, ferryCheck 
 				continue // the route uses a ferry: Route fetches its steps
 			}
 		}
-		o.cache[cacheKey(l.From, l.To)] = calc.Route{Km: *d / 1000}
+		o.tableCache[cacheKey(l.From, l.To)] = calc.Route{Km: math.Round(*d*10) / 1e4} // OSRM's 0.1 m, as Route
 	}
 }
 

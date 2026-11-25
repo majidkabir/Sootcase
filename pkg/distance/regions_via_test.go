@@ -183,3 +183,17 @@ func TestEdgePoints(t *testing.T) {
 		t.Error("touching regions overlap")
 	}
 }
+
+// A leg across regions keeps the warnings about its own stops, not those
+// about the point where the two halves meet.
+func TestEndWarnings(t *testing.T) {
+	w := func(end string) calc.Warning {
+		return calc.Warning{Code: calc.WarnTruckStop, Text: "the " + end + " point is on a road this vehicle may not use"}
+	}
+	r1 := []calc.Warning{w("start"), w("end")}
+	r2 := []calc.Warning{w("start"), w("end"), {Code: "other", Text: "x"}}
+	got := append(endWarnings(r1, "start"), endWarnings(r2, "end")...)
+	if len(got) != 3 || got[0] != w("start") || got[1] != w("end") || got[2].Code != "other" {
+		t.Errorf("warnings %v", got)
+	}
+}

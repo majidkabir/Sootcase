@@ -3,6 +3,7 @@ package recommend
 import (
 	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strings"
 )
@@ -136,8 +137,8 @@ func (s Settings) Validate() (Settings, map[string]string, error) {
 		if s.LoadFactor != nil && (!(*s.LoadFactor > 0) || *s.LoadFactor > 1) {
 			return s, nil, bad("load_factor must be > 0 and <= 1")
 		}
-		if s.EmptyTripFactor != nil && (!(*s.EmptyTripFactor >= 0) || *s.EmptyTripFactor > 1) {
-			return s, nil, bad("empty_trip_factor must be 0 to 1")
+		if s.EmptyTripFactor != nil && (!(*s.EmptyTripFactor >= 0) || math.IsInf(*s.EmptyTripFactor, 0)) {
+			return s, nil, bad("empty_trip_factor must be >= 0 (empty km per loaded km), as on a leg")
 		}
 	} else if s.EmptyTripFactor != nil || s.LoadVehicle != "" {
 		return s, nil, bad("empty_trip_factor and load_vehicle need load_tonnes or load_factor")

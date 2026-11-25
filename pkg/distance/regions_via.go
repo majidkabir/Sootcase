@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"sync"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
@@ -246,7 +247,8 @@ func (rs Regions) routeVia(ctx context.Context, m calc.Mode, from, to calc.Locat
 	if err != nil {
 		return calc.Route{}, err
 	}
-	r := calc.Route{Km: r1.Km + r2.Km,
+	r := calc.Route{Km: math.Round((r1.Km+r2.Km)*1e4) / 1e4, // OSRM's 0.1 m, as Route
+		Warnings:        append(endWarnings(r1.Warnings, "start"), endWarnings(r2.Warnings, "end")...),
 		Parts:           addKm(r1.Parts, r2.Parts, false),
 		CountryKm:       addKm(r1.CountryKm, r2.CountryKm, true),
 		RegionKm:        addKm(r1.RegionKm, r2.RegionKm, true),
@@ -331,6 +333,18 @@ func addKm(a, b map[string]float64, round bool) map[string]float64 {
 	if round {
 		for k, v := range out {
 			out[k] = math.Round(v*1e4) / 1e4
+		}
+	}
+	return out
+}
+
+// endWarnings are a half route's warnings about its stop at end ("start"
+// or "end"): the leg's own stops, not the point the halves meet at.
+func endWarnings(w []calc.Warning, end string) []calc.Warning {
+	var out []calc.Warning
+	for _, x := range w {
+		if x.Code != calc.WarnTruckStop || strings.HasPrefix(x.Text, "the "+end+" point") {
+			out = append(out, x)
 		}
 	}
 	return out

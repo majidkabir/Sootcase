@@ -180,3 +180,34 @@ func TestJoinSections(t *testing.T) {
 		t.Error("a half without sections: want none")
 	}
 }
+
+// Near a border the region and country polygons (different sources) don't
+// agree to the km: a country's sections only ever hold its own regions,
+// and region_km stays Belgian. Eupen → Kelmis → Aachen, and Burg-Reuland
+// over the BE-LU-DE corner into Germany.
+func TestOSRM_RegionsOfTheirCountry(t *testing.T) {
+	ix, _ := borders.Default()
+	for _, pts := range [][][2]float64{
+		{{6.0361, 50.6293}, {6.0105, 50.7186}, {6.0839, 50.7753}},
+		{{6.14, 50.20}, {6.098, 50.1495}, {6.25, 50.08}},
+		{{6.14, 50.20}, {6.0975, 50.149}, {6.0985, 50.150}, {6.16, 50.15}},
+	} {
+		body := `{"code":"Ok","routes":[{"distance":20000,"legs":[{"steps":[
+		{"distance":20000,"mode":"driving","geometry":` + line(pts...) + `}]}]}]}`
+		var calls int32
+		var path string
+		srv := fakeOSRM(t, body, 200, &calls, &path)
+		o, _ := NewOSRM(srv.URL)
+		o.PartModes, o.Countries = RoadParts, ix
+		r, err := o.Route(calc.WithCountryKm(context.Background()), calc.Road, copenhagen, hamburg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		checkSections(t, r)
+		for g := range r.RegionKm {
+			if !strings.HasPrefix(g, "BE-") {
+				t.Errorf("region_km %v: Belgium's only", r.RegionKm)
+			}
+		}
+	}
+}

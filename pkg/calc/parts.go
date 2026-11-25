@@ -137,13 +137,31 @@ type Prefetcher interface {
 	Prefetch(ctx context.Context, lanes []Lane)
 }
 
+type tableRoutesKey struct{}
+
+// WithTableRoutes lets routers answer from distances fetched by Prefetch:
+// km only, without a road leg's summary and driving time. Calculate a
+// batch with the context Prefetch returns; single calculations don't take
+// them.
+func WithTableRoutes(ctx context.Context) context.Context {
+	return context.WithValue(ctx, tableRoutesKey{}, true)
+}
+
+// UseTableRoutes says whether the calculation may use Prefetch's distances.
+func UseTableRoutes(ctx context.Context) bool {
+	v, _ := ctx.Value(tableRoutesKey{}).(bool)
+	return v
+}
+
 // Prefetch asks the distance provider, if it is a Prefetcher, for the
 // distinct lanes of shipments whose legs have no distance given. It is a
-// best-effort speed-up before calculating a batch.
-func (c Calculator) Prefetch(ctx context.Context, shipments []Shipment) {
+// best-effort speed-up before calculating a batch: calculate the batch with
+// the context it returns (WithTableRoutes).
+func (c Calculator) Prefetch(ctx context.Context, shipments []Shipment) context.Context {
+	ctx = WithTableRoutes(ctx)
 	p, ok := c.Distances.(Prefetcher)
 	if !ok {
-		return
+		return ctx
 	}
 	seen := map[Lane]bool{}
 	var lanes []Lane
@@ -172,4 +190,5 @@ func (c Calculator) Prefetch(ctx context.Context, shipments []Shipment) {
 	if len(lanes) > 0 {
 		p.Prefetch(ctx, lanes)
 	}
+	return ctx
 }

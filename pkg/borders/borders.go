@@ -448,6 +448,12 @@ func (ix *Index) find(lon, lat float64, hint int) (int, bool) {
 // outside every polygon; the nearest coast is the usual (equidistance)
 // basis of a sea border.
 func (ix *Index) nearest(lon, lat, maxKm float64) int {
+	return ix.nearestWhere(lon, lat, maxKm, "")
+}
+
+// nearestWhere is nearest among the entries whose code starts with prefix
+// ("" for all).
+func (ix *Index) nearestWhere(lon, lat, maxKm float64, prefix string) int {
 	dLat := maxKm / 111.2
 	cosLat := math.Max(math.Cos(lat*math.Pi/180), 0.01)
 	dLon := dLat / cosLat
@@ -461,6 +467,9 @@ func (ix *Index) nearest(lon, lat, maxKm float64) int {
 					continue
 				}
 				tried[ci] = true
+				if !strings.HasPrefix(ix.countries[ci].code, prefix) {
+					continue
+				}
 				for _, p := range ix.countries[ci].polys {
 					if !overlaps(p.box, near) {
 						continue
@@ -590,10 +599,12 @@ func (ix *Index) split(line [][2]float64, withRegions bool, stretches *[]Stretch
 		rc := ""
 		regionKm := ix.kmRegioned == nil || ix.kmRegioned[code]
 		if regions != nil && ix.regioned[code] && (stretches != nil || regionKm) {
+			// Only a region of this country: the region and country borders
+			// come from different sources and differ by up to a few km.
 			r, ok := ix.regions.find(mLon, mLat, rhint)
-			if !ok {
-				if r = ix.regions.nearest(mLon, mLat, 3); r < 0 {
-					r = ix.regions.nearest(mLon, mLat, NearestKm)
+			if !ok || !strings.HasPrefix(ix.regions.countries[r].code, code+"-") {
+				if r = ix.regions.nearestWhere(mLon, mLat, 3, code+"-"); r < 0 {
+					r = ix.regions.nearestWhere(mLon, mLat, NearestKm, code+"-")
 				}
 			}
 			rc = code + "-" + UnknownRegion
