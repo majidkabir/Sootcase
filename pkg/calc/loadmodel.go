@@ -112,3 +112,28 @@ func (m LoadModel) perTonneKm(lf, etf, max float64) (ttw, wtt float64, err error
 	t := m.PayloadT * lf
 	return (lt + etf*et) / t, (lw + etf*ew) / t, nil
 }
+
+// LoadFits says why a load can't be put on a leg, "" if it can: the
+// vehicle has no load model, the load factor carries less than the
+// shipment's own tonnes, or load_tonnes is more than the model goes (as the
+// calculator refuses them). For changes that put one load on many legs
+// (scenarios, recommendations), so a leg it doesn't fit is left as it was.
+func LoadFits(f FactorProvider, l Leg, loadTonnes, loadFactor, tonnes float64) string {
+	lmp, ok := f.(LoadModelProvider)
+	if !ok {
+		return "the dataset has no load models"
+	}
+	m, err := lmp.LoadModel(l.Mode, l.VehicleType)
+	if err != nil {
+		return fmt.Sprintf("no load model for %s", l.VehicleType)
+	}
+	switch {
+	case loadTonnes > 0 && loadTonnes > MaxLoadFactor*m.PayloadT:
+		return fmt.Sprintf("load_tonnes %g t is more than the %s load model goes (%.1f t)", loadTonnes, l.VehicleType, MaxLoadFactor*m.PayloadT)
+	case loadTonnes > 0 && loadTonnes < tonnes*(1-1e-9):
+		return fmt.Sprintf("load_tonnes %g t is less than the shipment's own %g t", loadTonnes, round3(tonnes))
+	case loadTonnes == 0 && loadFactor*m.PayloadT < tonnes*(1-1e-9):
+		return fmt.Sprintf("load_factor %g is %.2f t on a %s, less than the shipment's own %g t", loadFactor, loadFactor*m.PayloadT, l.VehicleType, round3(tonnes))
+	}
+	return ""
+}

@@ -78,3 +78,22 @@ func TestRepeatedLegIDs(t *testing.T) {
 		}
 	}
 }
+
+// Fuller loads leave a leg the load doesn't fit (a van: no load model) as
+// it is, with a note, and still give the option for the others.
+func TestFullerLoadsSkipLegs(t *testing.T) {
+	c := setup(t)
+	artic := road("a", hamburg, munich, 0)
+	artic.VehicleType = "hgv_artic_33t"
+	van := road("v", munich, hamburg, 0)
+	van.VehicleType = "van"
+	s := calc.Shipment{ID: "s", WeightKg: 1000, Legs: []calc.Leg{artic, van}}
+	res, err := Run(context.Background(), c, []calc.Shipment{s}, Settings{Kinds: []string{Load}, LoadTonnes: ptr(24.0), Source: "own plan"}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sr := res.Shipments[0]
+	if len(sr.Options) != 1 || sr.Options[0].Kind != Load {
+		t.Errorf("options %+v, notes %v", sr.Options, sr.Notes)
+	}
+}

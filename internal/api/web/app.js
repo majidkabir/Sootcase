@@ -878,7 +878,7 @@ function renderReport(r) {
     <td class="num">${fmt(m.intensity_g_per_tkm, 1)}</td></tr>`).join("");
   const hubs = (r.hubs || []).map(h => `<tr><td>${esc(h.hub_type)}</td><td class="num">${h.stops}</td>
     <td class="num">${fmt(h.tonnes, 1)}</td><td class="num"><strong>${kg(h.wtw_kg)}</strong></td><td class="num">${fmt(h.intensity_g_per_t, 0)}</td></tr>`).join("");
-  const energy = (r.energy_carriers || []).map(e => `<tr><td>${e.carrier === "unspecified" ? "Not stated (average factor or load model)" : esc(e.carrier)}</td>
+  const energy = (r.energy_carriers || []).map(e => `<tr><td>${e.carrier === "unspecified" ? "Not stated (an intensity or load model, default or own)" : esc(e.carrier)}</td>
     <td class="num">${kg(e.wtw_kg)}</td><td class="num">${pct(e.share)}</td></tr>`).join("");
   const sources = (d.default_sources || []).map(s => `<li>${esc(s.source)}: ${kg(s.wtw_kg)} (${pct(s.share)})</li>`).join("");
   const models = (d.models || []).map(m => `<li>${esc(m.model)}. ${legs(m.legs)}, ${kg(m.wtw_kg)}.<br>
