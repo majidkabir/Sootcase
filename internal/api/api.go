@@ -484,7 +484,7 @@ func (s *Server) each(w http.ResponseWriter, r *http.Request, shipments []calc.S
 		valid = append(valid, sh)
 	}
 	if !calc.WantCountryKm(ctx) { // a distance table has no geometry to split by country
-		s.Calc.Prefetch(ctx, valid)
+		ctx = s.Calc.Prefetch(ctx, valid)
 	}
 
 	workers := s.Limits.BatchWorkers

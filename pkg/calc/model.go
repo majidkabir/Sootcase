@@ -316,8 +316,9 @@ type LegResult struct {
 	Parts []LegPart `json:"parts,omitempty"`
 	// Summary (what tells the route apart: main roads and ferries) and
 	// DurationH (the router's driving time in hours, ferry time included)
-	// are set on every routed road leg (since v0.18.0; before, only when
-	// alternatives were asked for). Alternatives are the other routes, when
+	// are set on every routed road leg of a single calculation (since
+	// v0.18.0; before, only when alternatives were asked for); in a batch a
+	// leg whose km came from a distance table (Prefetch) has neither. Alternatives are the other routes, when
 	// asked for (RouteOptions.Alternatives > 1), each calculated exactly
 	// like this one. ID names an alternative ("alt1", "alt2"); the leg's
 	// own route has none.

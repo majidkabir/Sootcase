@@ -60,6 +60,9 @@ func fakeTableOSRM(t *testing.T, tables, routes *int32, excludeOK bool) *httptes
 	return srv
 }
 
+// batch is a batch's context: it takes the distances Prefetch fetched.
+var batch = calc.WithTableRoutes(context.Background())
+
 func TestOSRM_PrefetchFerryCheck(t *testing.T) {
 	var tables, routes int32
 	srv := fakeTableOSRM(t, &tables, &routes, true)
@@ -74,17 +77,22 @@ func TestOSRM_PrefetchFerryCheck(t *testing.T) {
 		t.Fatalf("tables = %d, want 2 (with and without ferries)", tables)
 	}
 	// Sources a,b; destinations b,c. a->b is (0,0), a->c (0,1), b->c (1,1).
-	r, err := o.Route(context.Background(), calc.Road, a, b)
+	r, err := o.Route(batch, calc.Road, a, b)
 	if err != nil || r.Km != 1 || r.Parts != nil || routes != 0 {
 		t.Errorf("a->b = %+v %v, routes %d", r, err, routes)
 	}
-	if r, _ := o.Route(context.Background(), calc.Road, b, c); r.Km != 4 || routes != 0 {
+	if r, _ := o.Route(batch, calc.Road, b, c); r.Km != 4 || routes != 0 {
 		t.Errorf("b->c = %+v, routes %d", r, routes)
 	}
 	// a->c differs without ferries: it was left for a full route with steps.
-	r, err = o.Route(context.Background(), calc.Road, a, c)
+	r, err = o.Route(batch, calc.Road, a, c)
 	if err != nil || routes != 1 || r.Parts[calc.PartFerry] != 10 {
 		t.Errorf("a->c = %+v %v, routes %d", r, err, routes)
+	}
+	// A single calculation doesn't take a table's km: it routes, for the
+	// leg's summary and driving time.
+	if _, err := o.Route(context.Background(), calc.Road, a, b); err != nil || routes != 2 {
+		t.Errorf("single a->b: %v, routes %d, want a route", err, routes)
 	}
 }
 
@@ -97,7 +105,7 @@ func TestOSRM_PrefetchNoExclude(t *testing.T) {
 	o.Prefetch(context.Background(), []calc.Lane{{Mode: calc.Road, From: a, To: b}})
 	// The profile can't exclude ferries, so nothing is cached and the route
 	// is fetched with steps.
-	if _, err := o.Route(context.Background(), calc.Road, a, b); err != nil || routes != 1 {
+	if _, err := o.Route(batch, calc.Road, a, b); err != nil || routes != 1 {
 		t.Errorf("routes = %d, %v", routes, err)
 	}
 
@@ -105,7 +113,7 @@ func TestOSRM_PrefetchNoExclude(t *testing.T) {
 	tables, routes = 0, 0
 	w, _ := NewOSRM(srv.URL)
 	w.Prefetch(context.Background(), []calc.Lane{{Mode: calc.InlandWaterway, From: a, To: b}})
-	if d, _ := w.Distance(context.Background(), calc.InlandWaterway, a, b); d != 1 || tables != 1 || routes != 0 {
+	if d, _ := w.Distance(batch, calc.InlandWaterway, a, b); d != 1 || tables != 1 || routes != 0 {
 		t.Errorf("d = %v, tables %d, routes %d", d, tables, routes)
 	}
 

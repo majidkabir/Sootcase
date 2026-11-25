@@ -25,7 +25,7 @@ func TestLoadPlanRefused(t *testing.T) {
 			t.Errorf("%s: %v, want an invalid plan", name, err)
 		}
 	}
-	if _, err := Run(context.Background(), c, ships, Plan{Changes: []Change{{Type: LoadChange, LoadFactor: f(0.8), EmptyTripFactor: f(0.2)}}}); err != nil {
-		t.Errorf("a valid load change: %v", err)
+	if _, err := Run(context.Background(), c, ships, Plan{Changes: []Change{{Type: LoadChange, LoadFactor: f(0.8), EmptyTripFactor: f(1.2)}}}); err != nil {
+		t.Errorf("a valid load change (more empty km than loaded, as a leg allows): %v", err)
 	}
 }

@@ -260,8 +260,8 @@ func (p Plan) Validate() ([]Change, error) {
 			if c.LoadFactor != nil && (!(*c.LoadFactor > 0) || *c.LoadFactor > 1) {
 				return nil, bad("load_factor must be > 0 and <= 1")
 			}
-			if c.EmptyTripFactor != nil && (!(*c.EmptyTripFactor >= 0) || *c.EmptyTripFactor > 1) {
-				return nil, bad("empty_trip_factor must be 0 to 1")
+			if c.EmptyTripFactor != nil && (!(*c.EmptyTripFactor >= 0) || math.IsInf(*c.EmptyTripFactor, 0)) {
+				return nil, bad("empty_trip_factor must be >= 0 (empty km per loaded km), as on a leg")
 			}
 		default:
 			return nil, bad("unknown type; use %s, %s, %s or %s", RoadToRail, Electrify, FuelSwitch, LoadChange)
