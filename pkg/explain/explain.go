@@ -114,6 +114,10 @@ func Shipment(s calc.Shipment, r calc.Result, f calc.FactorProvider) Sheet {
 			st.Formula = fmt.Sprintf("WTW = %s containers × %s g/container ÷ 1,000 = %s kg", n(h.Containers, 0),
 				n(div(h.WTWKg*1000, h.Containers), 1), n(h.WTWKg, 3))
 		}
+		if h.TTWKg != nil && h.WTTKg != nil { // the operator's own value splits it
+			st.Text = strings.Replace(st.Text, "well-to-wheel only", "split into tank-to-wheel and well-to-tank", 1)
+			st.Formula += fmt.Sprintf("; TTW %s kg + WTT %s kg", n(*h.TTWKg, 3), n(*h.WTTKg, 3))
+		}
 		sh.Steps = append(sh.Steps, st)
 	}
 

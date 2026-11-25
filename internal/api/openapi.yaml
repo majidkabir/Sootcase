@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.19.0
+  version: 0.19.1
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -807,7 +807,7 @@ components:
         ttw_kg: { type: number }
         wtw_kg: { type: number, description: Transport plus hubs }
         intensity_g_per_tkm: { type: number, description: Transport WTW only }
-        wtt_kg: { type: number, description: Transport well-to-tank (hubs are WTW only) }
+        wtt_kg: { type: number, description: "Well-to-tank: transport, and hubs whose values split TTW and WTT (GLEC's hub values are WTW only)" }
         primary_data_share: { type: number, description: Share of WTW emissions from primary data (0-1) }
         ghg_protocol:
           type: object

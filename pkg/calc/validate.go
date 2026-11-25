@@ -78,7 +78,7 @@ func validate(s Shipment) error {
 
 // checkResult guards against overflow from extreme but finite inputs.
 func checkResult(r Result) error {
-	for _, v := range []float64{r.WeightKg, r.TonneKm, r.TTWKg, r.WTTKg, r.WTWKg, r.IntensityG, r.PrimaryDataShare} {
+	for _, v := range []float64{r.WeightKg, r.TonneKm, r.TTWKg, r.WTTKg, r.WTWKg, r.IntensityG, r.PrimaryDataShare, r.BiogenicCO2Kg} {
 		if !finite(v) {
 			return fmt.Errorf("%w: result is not a finite number; check for extreme inputs", ErrInvalidInput)
 		}
