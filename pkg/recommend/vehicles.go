@@ -23,7 +23,7 @@ func (a *analyser) loads() {
 			l.VehicleType = a.set.LoadVehicle
 		}
 		// A leg the load doesn't fit (no load model, out of its range) stays as it is.
-		if why := calc.LoadFits(a.c.Factors, *l, val(a.set.LoadTonnes, 0), val(a.set.LoadFactor, 0), a.s.WeightKg/1000); why != "" {
+		if why := calc.LoadFits(a.c.Factors, *l, val(a.set.LoadTonnes, 0), val(a.set.LoadFactor, 0), a.base.WeightKg/1000); why != "" { // the calculated weight (TEU given: 10 t each)
 			l.VehicleType = vt
 			a.note("Fuller loads: leg %s left as it is: %s", l.ID, why)
 			continue
