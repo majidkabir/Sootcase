@@ -518,8 +518,8 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 			if !ch.matches(l.VehicleType, r.Factor) {
 				continue
 			}
-			if ch.LoadFactor != nil && loadBelow(c, *l, *ch.LoadFactor, base.WeightKg/1000) {
-				sr.Notes = appendNew(sr.Notes, fmt.Sprintf("load not applied to leg %s: load_factor %g puts less on the vehicle than the shipment's own %g t", l.ID, *ch.LoadFactor, base.WeightKg/1000))
+			if why := calc.LoadFits(c.Factors, *l, val(ch.LoadTonnes, 0), val(ch.LoadFactor, 0), base.WeightKg/1000); why != "" {
+				sr.Notes = appendNew(sr.Notes, fmt.Sprintf("load not applied to leg %s: %s", l.ID, why))
 				continue
 			}
 			l.LoadTonnes, l.LoadFactor = val(ch.LoadTonnes, 0), val(ch.LoadFactor, 0)
@@ -576,6 +576,10 @@ func runOne(ctx context.Context, c calc.Calculator, s calc.Shipment, changes []C
 			for j := range ls.Legs {
 				l := &ls.Legs[j]
 				if l.Mode != calc.Road || l.Fuel != nil || l.EnergyKWhPerTkm != 0 || l.OwnFactor != nil || !ch.matches(l.VehicleType, byID[l.ID].Factor) {
+					continue
+				}
+				if why := calc.LoadFits(v.c.Factors, *l, val(ch.LoadTonnes, 0), val(ch.LoadFactor, 0), base.WeightKg/1000); why != "" {
+					sr.Notes = appendNew(sr.Notes, fmt.Sprintf("load not applied to leg %s: %s", l.ID, why))
 					continue
 				}
 				l.LoadTonnes, l.LoadFactor = val(ch.LoadTonnes, 0), val(ch.LoadFactor, 0)
@@ -854,15 +858,4 @@ func hasNote(notes []string, id string) bool {
 		}
 	}
 	return false
-}
-
-// loadBelow says whether load factor lf of leg's load model carries less
-// than tonnes (refused by the calculator, as a load_tonnes below them is).
-func loadBelow(c calc.Calculator, l calc.Leg, lf, tonnes float64) bool {
-	lmp, ok := c.Factors.(calc.LoadModelProvider)
-	if !ok {
-		return false
-	}
-	m, err := lmp.LoadModel(l.Mode, l.VehicleType)
-	return err == nil && lf*m.PayloadT < tonnes*(1-1e-9)
 }

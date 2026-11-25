@@ -18,8 +18,15 @@ func (a *analyser) loads() {
 		if l.Mode != calc.Road || l.Fuel != nil || l.EnergyKWhPerTkm != 0 || l.OwnFactor != nil {
 			continue
 		}
+		vt := l.VehicleType
 		if a.set.LoadVehicle != "" {
 			l.VehicleType = a.set.LoadVehicle
+		}
+		// A leg the load doesn't fit (no load model, out of its range) stays as it is.
+		if why := calc.LoadFits(a.c.Factors, *l, val(a.set.LoadTonnes, 0), val(a.set.LoadFactor, 0), a.s.WeightKg/1000); why != "" {
+			l.VehicleType = vt
+			a.note("Fuller loads: leg %s left as it is: %s", l.ID, why)
+			continue
 		}
 		l.LoadTonnes, l.LoadFactor = val(a.set.LoadTonnes, 0), val(a.set.LoadFactor, 0)
 		l.EmptyTripFactor = val(a.set.EmptyTripFactor, 0)

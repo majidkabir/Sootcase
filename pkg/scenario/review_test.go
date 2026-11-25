@@ -62,3 +62,33 @@ func TestLoadFactorBelowShipment(t *testing.T) {
 		t.Errorf("error %q, %v -> %v kg, notes %v", sr.Error, sr.Base.WTWKg, sr.Scenario.WTWKg, sr.Notes)
 	}
 }
+
+// A load change leaves a leg it doesn't fit as it was, with a note, and
+// changes the others, at any share: no load model (van), a load factor
+// below the shipment, load_tonnes beyond the model's range.
+func TestLoadNotFitting(t *testing.T) {
+	c, _ := setup(t)
+	van := road("v", hamburg, munich, 100)
+	van.VehicleType = "van"
+	rigid := road("r", hamburg, munich, 300)
+	rigid.VehicleType = "hgv_rigid"
+	artic := road("a", hamburg, munich, 700)
+	artic.VehicleType = "hgv_artic_33t"
+	for name, tc := range map[string]struct {
+		weight float64
+		legs   []calc.Leg
+		ch     Change
+	}{
+		"van":               {1000, []calc.Leg{artic, van}, Change{Type: LoadChange, LoadTonnes: ptr(16)}},
+		"rigid over range":  {14000, []calc.Leg{artic, rigid}, Change{Type: LoadChange, LoadTonnes: ptr(16)}},
+		"factor, share 0.5": {20000, []calc.Leg{road("l", hamburg, munich, 700)}, Change{Type: LoadChange, LoadFactor: ptr(0.5), Share: ptr(0.5)}},
+	} {
+		res, err := Run(context.Background(), c, []calc.Shipment{{ID: "s", WeightKg: tc.weight, Legs: tc.legs}}, Plan{Changes: []Change{tc.ch}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if sr := res.Shipments[0]; sr.Error != "" || len(sr.Notes) == 0 {
+			t.Errorf("%s: error %q, notes %v", name, sr.Error, sr.Notes)
+		}
+	}
+}
