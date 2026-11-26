@@ -92,3 +92,23 @@ func TestLoadNotFitting(t *testing.T) {
 		}
 	}
 }
+
+// road_to_rail from a reefer truck given by its vehicle type: the rail leg
+// and its terminals are temperature-controlled, as with cargo_type.
+func TestRoadToRail_ReeferByVehicleType(t *testing.T) {
+	c, _ := setup(t)
+	run := func(vt, cargo string) float64 {
+		t.Helper()
+		l := road("r", munich, hamburg, 780)
+		l.VehicleType = vt
+		s := calc.Shipment{ID: "r", WeightKg: 10000, CargoType: cargo, Legs: []calc.Leg{l}}
+		res, err := Run(context.Background(), c, []calc.Shipment{s}, Plan{Changes: []Change{{Type: RoadToRail, Share: ptr(1)}}})
+		if err != nil || res.Shipments[0].Error != "" {
+			t.Fatal(err, res.Shipments[0].Error)
+		}
+		return res.Shipments[0].Scenario.WTWKg - res.Shipments[0].Base.WTWKg
+	}
+	if byType, byCargo := run("hgv_reefer", ""), run("hgv", "temperature_controlled"); math.Abs(byType-byCargo) > 1e-6 {
+		t.Errorf("change by vehicle type %v kg, by cargo type %v kg", byType, byCargo)
+	}
+}

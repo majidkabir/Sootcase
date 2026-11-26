@@ -1,6 +1,6 @@
 {
   "name": "nl-iww-2026",
-  "note": "Inland waterway factors from the Dutch CO2 emission factor list 2026 (www.co2emissiefactoren.nl), based on CE Delft (2021), STREAM Goederenvervoer 2020, versie 2. Per actual tonne-km, well-to-wheel, kg CO2e; include sailing empty (omvaren), exclude pre- and on-carriage.",
+  "note": "Inland waterway factors from the Dutch CO2 emission factor list 2026 (www.co2emissiefactoren.nl), based on CE Delft (2021), STREAM Goederenvervoer 2020, versie 2. Per actual tonne-km, well-to-wheel, g CO2e; include sailing empty (omvaren), exclude pre- and on-carriage.",
   "legs": [
     { "mode": "inland_waterway", "vehicle_type": "barge_bulk_small", "ttw_g_per_tkm": 31, "wtt_g_per_tkm": 10, "distance_basis": "actual", "year": 2026,
       "source": "www.co2emissiefactoren.nl 2026: Binnenvaart Klein, 300-600 ton (Spits-Kempenaar), bulk and general cargo; CE Delft 2021, STREAM Goederenvervoer 2020 v2, tabel 2 + 24" },
