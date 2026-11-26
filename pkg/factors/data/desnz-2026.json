@@ -2571,6 +2571,13 @@
       "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (air): without specific data, DAF = GCD / (GCD + 95 km), i.e. actual flown distance minus 95 km"
     },
     {
+      "mode": "air",
+      "from": "gcd",
+      "to": "actual",
+      "add_km": 95,
+      "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (air): without specific data, actual flown distance = GCD + 95 km"
+    },
+    {
       "mode": "road",
       "from": "sfd",
       "to": "actual",

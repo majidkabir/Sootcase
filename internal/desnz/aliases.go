@@ -43,6 +43,8 @@ var fuelAliases = map[string]string{
 var dafs = []calc.DAF{
 	{Mode: calc.Air, From: calc.DistActual, To: calc.DistGCD, AddKm: -95,
 		Source: "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (air): without specific data, DAF = GCD / (GCD + 95 km), i.e. actual flown distance minus 95 km"},
+	{Mode: calc.Air, From: calc.DistGCD, To: calc.DistActual, AddKm: 95,
+		Source: "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (air): without specific data, actual flown distance = GCD + 95 km"},
 	{Mode: calc.Road, From: calc.DistSFD, To: calc.DistActual, Multiplier: 1.05,
 		Source: "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 1 Chapter 4 (road): when the emission intensity is based on actual distance, a DAF must be applied; 5% as in GLEC's own road default values (Section 3 Module 2), which include a +5% distance conversion between actual and shortest feasible distance"},
 	{Mode: calc.Sea, From: calc.DistSFD, To: calc.DistActual, Multiplier: 1.15,
