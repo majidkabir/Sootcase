@@ -239,9 +239,6 @@ func cargoName(k string) string {
 // cargoOf is the cargo category of a value (calc.FactorCargo).
 func cargoOf(f *calc.Factor) string { return calc.FactorCargo(f) }
 
-// reefer is whether a value is for temperature-controlled freight.
-func reefer(f *calc.Factor) bool { return calc.FactorCargo(f) == cargoReefer }
-
 // electricSizes are GLEC v3.3's electric truck values by size: Europe
 // (Tables 10–11), China (Table 12), India (Table 13a).
 var electricSizes = []struct {
