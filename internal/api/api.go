@@ -601,11 +601,12 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, errors.New("scope3_category must be 4 (transport the company pays for) or 9 (sold products, transport it doesn't pay for)"))
 		return
 	}
-	for _, d := range []string{m.PeriodFrom, m.PeriodTo} {
-		if _, err := time.Parse(time.DateOnly, d); d != "" && err != nil {
-			writeError(w, http.StatusBadRequest, fmt.Errorf("period dates must be YYYY-MM-DD, got %q", d))
-			return
-		}
+	if err := report.CheckPeriod(m.PeriodFrom, m.PeriodTo); err != nil {
+		writeError(w, http.StatusBadRequest, err)
+		return
+	}
+	if flags["declare_iso"] {
+		m.DeclareISO = true // ?declare_iso=true with a JSON body too
 	}
 	b := report.New(m)
 	q := r.URL.Query()

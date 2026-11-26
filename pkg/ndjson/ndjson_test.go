@@ -37,13 +37,14 @@ func TestReader(t *testing.T) {
 		"{\"id\":\"b\",\"weight_kg\":1,\"legz\":[]}\n" + // unknown field
 		"{\"id\":\"c\",\n" + // broken JSON
 		"{\"id\":\"d\"} {\"id\":\"e\"}\n" + // two values
+		"{\"id\":\"g\",\"weight_kg\":1}}\n" + // a trailing brace
 		"{\"id\":\"f\",\"weight_kg\":2}" // last line without newline
 	items := readAll(t, in, 0)
 	want := []struct {
 		id   string
 		line int
 		bad  bool
-	}{{"a", 1, false}, {"b", 4, true}, {"c", 5, true}, {"d", 6, true}, {"f", 7, false}}
+	}{{"a", 1, false}, {"b", 4, true}, {"c", 5, true}, {"d", 6, true}, {"g", 7, true}, {"f", 8, false}}
 	if len(items) != len(want) {
 		t.Fatalf("got %d items: %+v", len(items), items)
 	}

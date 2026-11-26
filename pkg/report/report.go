@@ -705,7 +705,7 @@ func (b *Builder) notes(r Report) []string {
 			}
 			what = append(what, strconv.Itoa(w.Shipments)+" × "+w.Reason)
 		}
-		n = append(n, fmt.Sprintf("%s warnings that may make the results too low: %s.",
+		n = append(n, fmt.Sprintf("%s warnings (some may make the results too low): %s.",
 			countOf(c.Warned, "shipment has", "shipments have"), strings.Join(what, "; ")))
 	}
 	if r.Total.HubWTWKg > 0 {
@@ -778,4 +778,18 @@ func rangeAvg(lo, hi, avg float64) string {
 		return fmt.Sprintf("%.3g", lo)
 	}
 	return fmt.Sprintf("%.3g to %.3g (tonne-km weighted average %.3g)", lo, hi, avg)
+}
+
+// CheckPeriod refuses a period whose dates aren't YYYY-MM-DD or whose end
+// comes before its start.
+func CheckPeriod(from, to string) error {
+	for _, d := range []string{from, to} {
+		if _, err := time.Parse(time.DateOnly, d); d != "" && err != nil {
+			return fmt.Errorf("period dates must be YYYY-MM-DD, got %q", d)
+		}
+	}
+	if from != "" && to != "" && to < from {
+		return fmt.Errorf("period ends (%s) before it starts (%s)", to, from)
+	}
+	return nil
 }
