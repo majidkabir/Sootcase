@@ -177,7 +177,13 @@ func (ix *Index) Len() int { return len(ix.places) }
 // first two.
 func (ix *Index) Lookup(code string) (Place, bool) {
 	c := strings.TrimSpace(code)
-	if !strings.Contains(c, ":") {
+	if kind, rest, ok := strings.Cut(c, ":"); ok {
+		kind = strings.ToLower(kind)
+		if kind == "iata" || kind == "locode" { // codes are upper case; ids (geonames:…) as they are
+			rest = strings.ToUpper(strings.ReplaceAll(rest, " ", ""))
+		}
+		c = kind + ":" + rest
+	} else {
 		c = strings.ToUpper(strings.ReplaceAll(c, " ", ""))
 	}
 	i, ok := ix.byCode[c]

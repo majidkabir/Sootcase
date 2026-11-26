@@ -229,3 +229,16 @@ func TestTown(t *testing.T) {
 		t.Error("mid-Atlantic should have no town")
 	}
 }
+
+// Prefixed codes are found in any case.
+func TestLookup_PrefixCase(t *testing.T) {
+	ix, err := Default()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range []string{"iata:cph", "IATA:CPH", "iata:CPH"} {
+		if p, ok := ix.Lookup(c); !ok || p.Country != "DK" {
+			t.Errorf("%s: %+v %v", c, p, ok)
+		}
+	}
+}
