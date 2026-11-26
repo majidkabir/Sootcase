@@ -80,16 +80,16 @@ func TestWriter(t *testing.T) {
 	}
 	_ = w.Write("S1", calc.Result{WeightKg: 10000, TonneKm: 5000, TTWKg: 300, WTTKg: 75, WTWKg: 375, IntensityG: 75,
 		PrimaryDataShare: 0.5, Dataset: "d", Legs: []calc.LegResult{{Added: calc.AddedGap}, {}},
-		Warnings: []calc.Warning{{Text: "w1"}, {Text: "w2"}}, GHGProtocol: calc.GHGScopes{Scope3Kg: 375, OperatorScope1Kg: 300, OperatorScope3Cat3Kg: 75}}, nil)
+		Warnings: []calc.Warning{{Text: "w1"}, {Text: "w2"}}, GHGProtocol: calc.GHGScopes{Scope3Kg: 375, OperatorScope1Kg: 300, OperatorScope3Cat3Kg: 75}, BiogenicCO2Kg: 240.24}, nil)
 	_ = w.Write("S2", calc.Result{}, errors.New("boom"))
 	if err := w.Flush(); err != nil {
 		t.Fatal(err)
 	}
 	basis := `"EN ISO 14083:2023, GLEC Framework v3.3, Sootcase dev",Not certified under Regulation (EU) 2026/1030 (applies from 2 December 2030)`
 	want := "shipment_id,weight_kg,tonne_km,ttw_kg,wtt_kg,wtw_kg,intensity_g_per_tkm,primary_data_share,dataset,error,added_road_legs,warnings," +
-		"operator_scope1_kg,operator_scope2_kg,operator_scope3_cat3_kg,hubs_kg,basis,certification\n" +
-		"S1,10000.0000,5000.0000,300.0000,75.0000,375.0000,75.0000,0.5000,d,,1,w1 | w2,300.0000,0.0000,75.0000,0.0000," + basis + "\n" +
-		"S2,,,,,,,,,boom,,,,,,," + basis + "\n"
+		"operator_scope1_kg,operator_scope2_kg,operator_scope3_cat3_kg,hubs_kg,basis,certification,biogenic_co2_kg\n" +
+		"S1,10000.0000,5000.0000,300.0000,75.0000,375.0000,75.0000,0.5000,d,,1,w1 | w2,300.0000,0.0000,75.0000,0.0000," + basis + ",240.2400\n" +
+		"S2,,,,,,,,,boom,,,,,,," + basis + ",\n"
 	if buf.String() != want {
 		t.Errorf("got\n%s\nwant\n%s", buf.String(), want)
 	}
@@ -366,14 +366,15 @@ func TestRead_HubRowsAndThousands(t *testing.T) {
 			t.Errorf("%s: read without an error: %+v", name, items)
 		}
 	}
-	items, err := Read(strings.NewReader("shipment_id;weight_kg;mode;distance_km;hub_type\nA;12,5;road;1250,5;\nA;;;;warehouse\nB;12.5;road;7.25;\n"))
+	items, err := Read(strings.NewReader("shipment_id;weight_kg;mode;distance_km;hub_type;leg_id;from_lat;from_lon;to_lat;to_lon;empty_trip_factor\n" +
+		"A;12,5;road;1250,5;;;;;;;\nA;;;;warehouse;h1;;;;;\nB;0.500;road;7.25;;;55.676;12.568;48.137;11.575;0.250\n"))
 	if err != nil || len(items) != 2 || items[0].Err != nil || items[1].Err != nil {
 		t.Fatalf("%v %+v", err, items)
 	}
 	if s := items[0].Shipment; s.WeightKg != 12.5 || s.Legs[0].DistanceKm != 1250.5 || len(s.Hubs) != 1 {
 		t.Errorf("A = %+v", s)
 	}
-	if s := items[1].Shipment; s.WeightKg != 12.5 || s.Legs[0].DistanceKm != 7.25 {
+	if s := items[1].Shipment; s.WeightKg != 0.5 || s.Legs[0].DistanceKm != 7.25 || s.Legs[0].From.Lat != 55.676 || s.Legs[0].EmptyTripFactor != 0.25 {
 		t.Errorf("B = %+v", s)
 	}
 }

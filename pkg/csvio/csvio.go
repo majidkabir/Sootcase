@@ -377,8 +377,8 @@ func (r rowReader) str(name string) string {
 	return strings.TrimSpace(r.rec[i])
 }
 
-// legColumns are the columns only a leg row reads.
-var legColumns = []string{"leg_id", "mode", "vehicle_type", "distance_type", "distance_km", "from_code", "from_lat", "from_lon",
+// legColumns are the columns only a leg row reads (leg_id may name a hub row).
+var legColumns = []string{"mode", "vehicle_type", "distance_type", "distance_km", "from_code", "from_lat", "from_lon",
 	"to_code", "to_lat", "to_lon", "country", "empty_trip_factor", "energy_kwh_per_tkm", "fuel", "fuel_amount", "fuel_unit",
 	"fuel_wtw_kg_per_unit", "fuel_ttw_kg_per_unit", "fuel_factor_source", "leg_cargo_type", "load_factor", "load_tonnes",
 	"own_distance_basis", "own_factor_source", "own_ttw_g_per_tkm", "own_wtw_g_per_tkm", "repositioning_km", "vehicle_tonne_km"}
@@ -386,7 +386,8 @@ var legColumns = []string{"leg_id", "mode", "vehicle_type", "distance_type", "di
 // thousands is a number with dots between groups of three digits: in a
 // file separated by semicolons it may be 12.000 = 12,000 as a spreadsheet
 // shows it, or 12.000 = 12 with a decimal point.
-var thousands = regexp.MustCompile(`^[-+]?\d{1,3}(\.\d{3})+$`)
+// (0.500 can't be thousands, nor can a latitude or longitude).
+var thousands = regexp.MustCompile(`^[-+]?[1-9]\d{0,2}(\.\d{3})+$`)
 
 // float returns 0 for an empty or missing cell.
 func (r rowReader) float(name string) (float64, error) {
@@ -394,7 +395,7 @@ func (r rowReader) float(name string) (float64, error) {
 	if s == "" {
 		return 0, nil
 	}
-	if r.decimalComma && thousands.MatchString(s) {
+	if r.decimalComma && thousands.MatchString(s) && !strings.HasSuffix(name, "_lat") && !strings.HasSuffix(name, "_lon") {
 		return 0, fmt.Errorf("%s: %q could be thousands or a decimal point: write it without the dot (12000) or with a decimal comma (12,5)", name, s)
 	}
 	v, err := strconv.ParseFloat(s, 64)
@@ -413,10 +414,11 @@ func (r rowReader) float(name string) (float64, error) {
 // by GHG Protocol scope for the operator of the vehicles (calc.GHGScopes);
 // for a shipper all of wtw_kg is scope 3, category 4 or 9. basis and
 // certification are this build's (calc.CurrentBasis, calc.Certification),
-// the same on every row.
+// the same on every row. biogenic_co2_kg is reported apart from WTW (GLEC
+// p. 64).
 var ResultHeader = []string{"shipment_id", "weight_kg", "tonne_km", "ttw_kg", "wtt_kg", "wtw_kg",
 	"intensity_g_per_tkm", "primary_data_share", "dataset", "error", "added_road_legs", "warnings",
-	"operator_scope1_kg", "operator_scope2_kg", "operator_scope3_cat3_kg", "hubs_kg", "basis", "certification"}
+	"operator_scope1_kg", "operator_scope2_kg", "operator_scope3_cat3_kg", "hubs_kg", "basis", "certification", "biogenic_co2_kg"}
 
 // Writer writes one summary row per shipment.
 type Writer struct{ cw *csv.Writer }
@@ -434,7 +436,7 @@ func NewWriter(w io.Writer) (*Writer, error) {
 func (w *Writer) Write(id string, r calc.Result, err error) error {
 	if err != nil {
 		return w.cw.Write([]string{id, "", "", "", "", "", "", "", "", err.Error(), "", "", "", "", "", "",
-			calc.CurrentBasis().String(), calc.Certification})
+			calc.CurrentBasis().String(), calc.Certification, ""})
 	}
 	added := 0
 	for _, l := range r.Legs {
@@ -445,7 +447,7 @@ func (w *Writer) Write(id string, r calc.Result, err error) error {
 	return w.cw.Write([]string{id, num(r.WeightKg), num(r.TonneKm), num(r.TTWKg), num(r.WTTKg), num(r.WTWKg),
 		num(r.IntensityG), num(r.PrimaryDataShare), r.Dataset, "", strconv.Itoa(added), strings.Join(calc.WarningTexts(r.Warnings), " | "),
 		num(r.GHGProtocol.OperatorScope1Kg), num(r.GHGProtocol.OperatorScope2Kg), num(r.GHGProtocol.OperatorScope3Cat3Kg), num(r.GHGProtocol.HubsKg),
-		calc.CurrentBasis().String(), calc.Certification})
+		calc.CurrentBasis().String(), calc.Certification, num(r.BiogenicCO2Kg)})
 }
 
 // Flush flushes buffered rows and reports any write error.
