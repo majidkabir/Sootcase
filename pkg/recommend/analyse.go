@@ -310,9 +310,15 @@ func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.
 		a.note("%s: not possible: %v", kindName(kind), shortErr(err))
 		return false
 	}
-	if len(r.Warnings) > len(a.base.Warnings) {
-		a.note("%s: not possible: %s", kindName(kind), r.Warnings[len(r.Warnings)-1].Text)
-		return false
+	had := map[string]bool{}
+	for _, w := range a.base.Warnings {
+		had[w.Text] = true
+	}
+	for _, w := range r.Warnings { // a warning now doesn't have (a gap not counted may go: road legs are added here)
+		if !had[w.Text] {
+			a.note("%s: not possible: %s", kindName(kind), w.Text)
+			return false
+		}
 	}
 	for _, l := range r.Legs {
 		if !main[l.LegID] || l.Mode != m || l.From == nil || l.To == nil {
