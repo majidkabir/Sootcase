@@ -289,7 +289,7 @@ func joinSections(a, b []calc.CountrySection, at float64) []calc.CountrySection 
 			s.FromKm = out[len(out)-1].ToKm
 		}
 		if i == len(b)-1 {
-			s.ToKm = at + b[len(b)-1].ToKm
+			s.ToKm = round(at + b[len(b)-1].ToKm) // = the route's km, rounded the same way
 		}
 		regions := make([]calc.RegionSection, len(s.Regions))
 		for j, r := range s.Regions {
