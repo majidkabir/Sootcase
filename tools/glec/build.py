@@ -859,9 +859,10 @@ for vid, label, kwh in EV:
 for vid, label, kwh in EV:
     up = 1.15 if vid.startswith("van_") else 1.12
     leg("road", "glec/road/europe/temperature_controlled/electric/" + vid, kwh * EU_ELEC * up, 0,
-        f"{GLEC}, Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/{vid} with GLEC's "
-        f"+{round((up - 1) * 100)}% uplift for temperature-controlled {'vans' if up == 1.15 else 'vehicles over 3.5 t GVW'} "
-        f"(p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)", "sfd")
+        f"{GLEC}, Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/{vid} ({label}, {kwh:g} kWh/t-km) "
+        f"with GLEC's +{round((up - 1) * 100)}% uplift for temperature-controlled {'vans' if up == 1.15 else 'vehicles over 3.5 t GVW'} "
+        f"(p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; "
+        f"all of it is energy provision (WTT)", "sfd")
     variant("glec/road/europe/electric/" + vid, "temperature_controlled", "glec/road/europe/temperature_controlled/electric/" + vid)
 
 # ---------------------------------------------------------------- temperature-controlled rail (p. 99): +12%

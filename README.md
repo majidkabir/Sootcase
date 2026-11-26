@@ -330,7 +330,7 @@ iLEAP makes some properties mandatory that a calculation on default values can't
 | `electric_truck` | Same route, the electric truck or van of the leg's own vehicle's size class (GLEC v3.3 Tables 10–11 Europe, 12 China, 13a India) |
 | `bio_lng_truck` | Same route, bio-LNG articulated truck 34–40 t (GLEC v3.3 Table 8; Europe, South America, Asia, Africa) |
 
-The three vehicle kinds change only road legs on a default value, and only those the new vehicle makes lower; the others stay as they are. A temperature-controlled leg keeps GLEC's uplift (p. 106) on the new vehicle, or stays as it is.
+The three vehicle kinds change only road legs on a GLEC default value, and only those the new vehicle makes lower; the others stay as they are. A leg on a value for a cargo category (temperature-controlled, light, heavy, container) keeps it on the new vehicle (for temperature control GLEC's uplift, p. 106), or stays as it is.
 
 Kinds are grouped by the GLEC Framework's five reduction areas (v3.3, Section 2 Chapter 2, Figure 2, p. 67; results' `areas` and each option's `area`): optimize freight transport modes (the route changes), increase asset utilization (fuller loads), improve fleet energy efficiency (larger truck), reduce carbon content of energy (electric and bio-LNG trucks). The fifth, reduce freight transport demand, needs business data and has no kind.
 
