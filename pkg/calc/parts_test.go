@@ -290,3 +290,28 @@ func TestElectricFuel_Words(t *testing.T) {
 		}
 	}
 }
+
+// Round 28: electricity is per energy whatever the name says, and other
+// fuels' spellings in the site's languages are not electricity.
+func TestElectricFuel_UnitsAndSpellings(t *testing.T) {
+	for _, c := range []struct {
+		f    FuelFactor
+		want bool
+	}{
+		{FuelFactor{Fuel: "Ökostrom-Wasserstoff", Unit: "kg", WTT: 1.2}, false},
+		{FuelFactor{Fuel: "Strom-H2", Unit: "kg", WTT: 1.2}, false},
+		{FuelFactor{Fuel: "Green electricity", Unit: "l", WTT: 0.1}, false},
+		{FuelFactor{Fuel: "electricity", Unit: "t", WTT: 1}, false},
+		{FuelFactor{Fuel: "Biogaz", Unit: "kWh", WTT: 0.05}, false},
+		{FuelFactor{Fuel: "Bioetanol", Unit: "kWh", WTT: 0.05}, false},
+		{FuelFactor{Fuel: "bioéthanol", Unit: "kWh", WTT: 0.05}, false},
+		{FuelFactor{Fuel: "Amoniak", Unit: "kWh", WTT: 0.05}, false},
+		{FuelFactor{Fuel: "Green H₂", Unit: "kWh", WTT: 0.05}, false},
+		{FuelFactor{Fuel: "Ökostrom", Unit: "kWh (net CV)", WTT: 0.02}, true},
+		{FuelFactor{Fuel: "Renewable electricity", Unit: "GWh", WTT: 20000}, true},
+	} {
+		if got := ElectricFuel(c.f); got != c.want {
+			t.Errorf("%q %s: %v, want %v", c.f.Fuel, c.f.Unit, got, c.want)
+		}
+	}
+}

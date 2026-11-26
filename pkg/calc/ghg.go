@@ -50,13 +50,14 @@ func electricLeg(l LegResult) bool {
 }
 
 // ElectricFuel says whether a fuel factor is for electricity: nothing is
-// burnt in the vehicle (TTW 0), and its name says electricity
-// before it names another fuel (a dataset's "electricity/<country>";
-// "Ökostrom", "Grøn el", "Renewable electricity", but not "Wasserstoff aus
-// Ökostrom": hydrogen), or, naming neither, it is per kWh, MWh, GJ or MJ
-// (a green tariff's).
+// burnt in the vehicle (TTW 0), it is per energy (kWh, MWh, GWh, GJ, MJ:
+// electricity isn't measured in kg or litres), and its name says
+// electricity, or names no fuel at all, before it names another fuel (a
+// dataset's "electricity/<country>"; "Ökostrom", "Grøn el", "Renewable
+// electricity", a "Green tariff", but not "Wasserstoff aus Ökostrom" or
+// "Ökostrom-Wasserstoff": hydrogen).
 func ElectricFuel(f FuelFactor) bool {
-	if f.TTW != 0 || !(f.WTT >= 0) {
+	if f.TTW != 0 || !(f.WTT >= 0) || !energyUnit(f.Unit) {
 		return false
 	}
 	name := strings.ToLower(strings.TrimSpace(f.Fuel))
@@ -64,15 +65,16 @@ func ElectricFuel(f FuelFactor) bool {
 		return true
 	}
 	el, other := firstWord(name, electricWords), firstWord(name, otherFuelWords)
-	switch {
-	case el >= 0 && (other < 0 || el < other):
-		return true
-	case other >= 0:
-		return false
-	}
-	switch strings.ToLower(f.Unit) {
-	case "kwh", "mwh", "gwh", "gj", "mj":
-		return true
+	return other < 0 || (el >= 0 && el < other) // no fuel named, per energy: a green tariff
+}
+
+// energyUnit says whether a fuel unit is one of energy.
+func energyUnit(u string) bool {
+	u = strings.ToLower(strings.TrimSpace(u))
+	for _, e := range []string{"kwh", "mwh", "gwh", "gj", "mj"} {
+		if u == e || strings.HasPrefix(u, e+" ") {
+			return true
+		}
 	}
 	return false
 }
@@ -81,13 +83,16 @@ func ElectricFuel(f FuelFactor) bool {
 // ("el" only as a word of its own).
 var (
 	electricWords  = []string{"electric", "elektri", "elektry", "électri", "eléctri", "elettri", "strom", "strøm", "prąd", "stroom", " el "}
-	otherFuelWords = []string{"hydrog", "wasserstoff", "brint", "wodór", "waterstof", "idrog", "idróg", "h2", "methan", "méthan", "metan",
-		"gas", "lng", "cng", "lpg", "diesel", "petrol", "benzin", "hvo", "oil", "kerosene", "jet", "ammonia", "ethanol", "biodiesel"}
+	otherFuelWords = []string{"hydrog", "hydróg", "wasserstoff", "brint", "wodór", "waterstof", "idrog", "idróg", "h2", "methan", "méthan", "metan",
+		"gas", "gaz", "lng", "cng", "lpg", "diesel", "petrol", "benzin", "hvo", "oil", "kerosene", "jet", "ammonia", "amoniak", "ammoniak", "ammoniac", "amoníaco", "ethanol", "etanol", "éthanol", "biodiesel"}
 )
 
 // firstWord is where in name the first of words starts, -1 if none.
 func firstWord(name string, words []string) int {
 	padded := " " + strings.Map(func(r rune) rune {
+		if r == '₂' {
+			return '2' // H₂
+		}
 		if unicode.IsLetter(r) || unicode.IsDigit(r) {
 			return r
 		}

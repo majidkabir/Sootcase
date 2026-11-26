@@ -127,6 +127,10 @@ func unit(u string) (string, float64, bool) {
 		return "kg", 1000, true
 	case "kwh", "kwh (net cv)", "kwh (gross cv)":
 		return "kWh", 1, true
+	case "mwh":
+		return "kWh", 1000, true
+	case "gwh":
+		return "kWh", 1e6, true
 	case "mj":
 		return "MJ", 1, true
 	case "gj":
@@ -204,6 +208,9 @@ func desnzFuel(carrierType string) string {
 // the amount of fuel (in the factor's unit) used per unit of activity.
 func carrierFromFuel(f calc.FuelFactor, perActivity float64) (EnergyCarrier, string) {
 	c := carrier(f.Fuel)
+	if c == Electric && !calc.ElectricFuel(f) {
+		c = "" // burnt in the vehicle, or not per energy: not what the GHG scopes call electricity
+	}
 	if c == "" && calc.ElectricFuel(f) {
 		c = Electric // a supplier's electricity factor (a green tariff), as the GHG scopes read it
 	}
