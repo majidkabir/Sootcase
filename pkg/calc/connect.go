@@ -271,7 +271,7 @@ func (c Calculator) moveEnds(ctx context.Context, legs []Leg, add bool) (fixed [
 			case InlandWaterway:
 				at = "inland port"
 			}
-			return nil, nil, nil, nil, fmt.Errorf("%w: leg %s: both ends are nearest the same %s (%s), so no %s part is left; give this part by road",
+			return nil, nil, nil, nil, fmt.Errorf("%w: leg %s: it would start and end at the same %s (%s), so no %s part is left; give this part by road",
 				ErrNoDistance, legID(legs[i], i), at, place(l.From), network(l.Mode))
 		}
 		warnings = append(warnings, offNetworkWarnings(legs[i], i, offFrom, offTo, from[i] != nil, to[i] != nil)...)
@@ -349,8 +349,18 @@ func (c Calculator) join(legs, fixed []Leg, from, to []*moved, add bool) ([]plan
 		} else {
 			prev, prevMoved = fixed[i-1].To, to[i-1]
 		}
-		if !isZero(prev) && !isZero(l.From) {
-			if d := gcKm(prev, l.From); d > GapKm {
+		// A neighbour without places (a given distance only) still gets the
+		// road to or from a moved end: from where the leg was to start, or
+		// back to where the leg before was to end.
+		start := l.From
+		if isZero(start) && prevMoved != nil {
+			start = legs[i-1].To
+		}
+		if isZero(prev) && from[i] != nil {
+			prev = legs[i].From
+		}
+		if !isZero(prev) && !isZero(start) {
+			if d := gcKm(prev, start); d > GapKm {
 				var why []string
 				if prevMoved != nil {
 					why = append(why, fmt.Sprintf("leg %s ends at %s instead of %s, %s",
@@ -373,7 +383,7 @@ func (c Calculator) join(legs, fixed []Leg, from, to []*moved, add bool) ([]plan
 					}
 				}
 				if add {
-					road(prev, l.From, kind, fmt.Sprintf("Added road from %s to %s: %s.", place(prev), place(l.From), strings.Join(why, "; ")), cargo)
+					road(prev, start, kind, fmt.Sprintf("Added road from %s to %s: %s.", place(prev), place(start), strings.Join(why, "; ")), cargo)
 				} else {
 					warnings = append(warnings, Warning{WarnGapNotCounted, why[0] + "; that distance isn't counted (adding road legs is off)"})
 				}
@@ -584,7 +594,7 @@ func (c Calculator) accessPoint(ctx context.Context, m Mode, p, other Location, 
 		case Temporary(err):
 			return Location{}, false, err
 		case err == nil && r.Km <= 0:
-			continue // no leg left between the candidate and the other end
+			mainKm = 0 // the other end is the candidate itself: no leg left, which moveEnds refuses
 		case err == nil:
 			mainKm = r.Km
 		case errors.As(err, &off) && ((isFrom && off.FromOff()) || (!isFrom && off.ToOff())):

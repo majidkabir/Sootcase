@@ -347,3 +347,37 @@ func TestRoadLegs_AtTerminals(t *testing.T) {
 		t.Errorf("legs: %+v", r.Legs)
 	}
 }
+
+// A neighbour leg with a given distance and no places still gets the road
+// to or from a moved end.
+func TestJoin_NeighbourWithoutPlaces(t *testing.T) {
+	c := toyCalc()
+	for name, legs := range map[string][]Leg{
+		"before": {{ID: "pre", Mode: Road, VehicleType: "hgv", DistanceKm: 50}, {ID: "sea", Mode: Sea, VehicleType: "container", From: kassel, To: westEnd}},
+		"after":  {{ID: "sea", Mode: Sea, VehicleType: "container", From: westEnd, To: kassel}, {ID: "post", Mode: Road, VehicleType: "hgv", DistanceKm: 50}},
+	} {
+		r, err := c.Calculate(context.Background(), Shipment{ID: "s", WeightKg: 1000, Legs: legs})
+		if err != nil {
+			t.Fatal(err)
+		}
+		added := 0
+		for _, l := range r.Legs {
+			if l.Added == AddedAccess {
+				added++
+			}
+		}
+		if added != 1 || len(r.Legs) != 3 {
+			t.Errorf("%s: %d legs, %d access roads", name, len(r.Legs), added)
+		}
+	}
+}
+
+// The other end being the nearest terminal itself leaves no rail part:
+// refused, not routed through a farther terminal.
+func TestAccess_OtherEndIsTheTerminal(t *testing.T) {
+	c := toyCalc()
+	_, err := c.Calculate(context.Background(), Shipment{ID: "s", WeightKg: 1000, Legs: []Leg{{ID: "r", Mode: Rail, VehicleType: "train", From: village, To: terminal}}})
+	if !errors.Is(err, ErrNoDistance) || !strings.Contains(err.Error(), "same rail terminal") {
+		t.Errorf("village to the terminal: %v", err)
+	}
+}

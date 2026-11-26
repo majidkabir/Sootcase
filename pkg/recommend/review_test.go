@@ -219,7 +219,7 @@ func TestSeaLegEndsAtOnePort(t *testing.T) {
 	c := calc.Calculator{Factors: ds, Distances: seaNet{pc}, Places: pc}
 	basel, antwerp := calc.Location{Lat: 47.5596, Lon: 7.5886}, calc.Location{Lat: 51.2194, Lon: 4.4025}
 	_, err = c.Calculate(context.Background(), calc.Shipment{ID: "s", WeightKg: 10000, Legs: []calc.Leg{{Mode: calc.Sea, VehicleType: "container_ship", From: basel, To: antwerp}}})
-	if !errors.Is(err, calc.ErrNoDistance) || !strings.Contains(err.Error(), "same port") {
+	if !errors.Is(err, calc.ErrNoDistance) || !strings.Contains(err.Error(), "the same port") {
 		t.Errorf("sea leg Basel to Antwerp: %v", err)
 	}
 	leg := road("r", basel, antwerp, 0)
