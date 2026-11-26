@@ -483,3 +483,36 @@ func TestVehicleChanges(t *testing.T) {
 		t.Errorf("US: %+v %v", o, res.Shipments[0].Notes)
 	}
 }
+
+// A vehicle change keeps only the legs it lowers: GLEC's Chinese electric
+// truck is higher than the diesel artic on that leg, so that leg stays.
+func TestVehicleChange_OnlyLowerLegs(t *testing.T) {
+	c := setup(t)
+	ctx := context.Background()
+	suzhou, shanghai := calc.Location{Lat: 31.30, Lon: 120.59}, calc.Location{Lat: 31.23, Lon: 121.47}
+	cn := road("cn", suzhou, shanghai, 120)
+	cn.VehicleType = "hgv_artic"
+	de := road("de", hamburg, munich, 780)
+	de.VehicleType = "hgv_artic"
+	no := false
+	s := calc.Shipment{ID: "s", WeightKg: 20000, AddRoadLegs: &no, Legs: []calc.Leg{cn, de}}
+	res, err := Run(ctx, c, []calc.Shipment{s}, Settings{Kinds: []string{ElectricTruck}}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o := option(res.Shipments[0], ElectricTruck)
+	if o == nil {
+		t.Fatalf("no option: %v", res.Shipments[0].Notes)
+	}
+	if o.Legs[0].VehicleType != "hgv_artic" || o.Legs[1].VehicleType != "truck_electric" {
+		t.Errorf("legs %s %s, want the Chinese leg kept", o.Legs[0].VehicleType, o.Legs[1].VehicleType)
+	}
+	base, _ := c.Calculate(ctx, s)
+	want := s
+	want.Legs = []calc.Leg{cn, de}
+	want.Legs[1].VehicleType = "truck_electric"
+	r, _ := c.Calculate(ctx, want)
+	if !near(o.SavedKg, base.WTWKg-r.WTWKg) {
+		t.Errorf("saved %v, want %v", o.SavedKg, base.WTWKg-r.WTWKg)
+	}
+}

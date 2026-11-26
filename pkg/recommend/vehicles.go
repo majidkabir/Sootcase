@@ -116,6 +116,23 @@ func (a *analyser) vehicles(kind string, pick func(calc.Leg, calc.LegResult) str
 			s, r, err = calcWith(cands)
 		}
 	}
+	if err == nil {
+		// Only legs the new vehicle makes lower: one that gets higher
+		// (another region's value, a smaller vehicle) stays as it is.
+		var lower []cand
+		for _, c := range cands {
+			for _, l := range r.Legs {
+				if l.LegID == a.s.Legs[c.j].ID && l.WTWKg < a.own[l.LegID].WTWKg {
+					lower = append(lower, c)
+					break
+				}
+			}
+		}
+		if len(lower) > 0 && len(lower) < len(cands) {
+			cands = lower
+			s, r, err = calcWith(cands)
+		}
+	}
 	if err != nil {
 		a.note("%s: not possible: %v", kindName(kind), shortErr(err))
 		return

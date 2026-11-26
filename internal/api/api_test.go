@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -142,6 +143,17 @@ func TestReport(t *testing.T) {
 	if r.StatusCode != http.StatusOK || !strings.HasPrefix(r.Header.Get("Content-Type"), "text/markdown") ||
 		!strings.Contains(md.String(), "**375.0**") {
 		t.Errorf("markdown %d %q:\n%s", r.StatusCode, r.Header.Get("Content-Type"), md.String())
+	}
+
+	// Results each fine, totals beyond float64: refused, not a 500.
+	var big []string
+	for i := 0; i < 100; i++ {
+		big = append(big, `{"id":"b`+strconv.Itoa(i)+`","weight_kg":1e305,"legs":[{"mode":"road","vehicle_type":"truck_40t","distance_km":500}]}`)
+	}
+	for _, f := range []string{"", "?format=md"} {
+		if resp, _ := post(t, srv.URL+"/v1/report"+f, `{"shipments":[`+strings.Join(big, ",")+`]}`); resp.StatusCode != http.StatusUnprocessableEntity {
+			t.Errorf("overflowing totals %q: status %d", f, resp.StatusCode)
+		}
 	}
 
 	for name, bad := range map[string]string{
