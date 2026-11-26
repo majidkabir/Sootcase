@@ -264,3 +264,29 @@ func TestElectricFuel_OtherFuels(t *testing.T) {
 		}
 	}
 }
+
+// Round 27: a fuel burnt in the vehicle is never electricity, the first word
+// decides, words count anywhere, and energy units without a word do too.
+func TestElectricFuel_Words(t *testing.T) {
+	for _, c := range []struct {
+		f    FuelFactor
+		want bool
+	}{
+		{FuelFactor{Fuel: "Diesel (Stromaggregat)", Unit: "l", TTW: 2.6, WTT: 0.6}, false},
+		{FuelFactor{Fuel: "Electric hybrid diesel", Unit: "l", TTW: 2.6, WTT: 0.6}, false},
+		{FuelFactor{Fuel: "Grüner Wasserstoff aus Ökostrom", Unit: "kWh", WTT: 0.05}, false},
+		{FuelFactor{Fuel: "E-Methan aus Ökostrom", Unit: "kWh", WTT: 0.05}, false},
+		{FuelFactor{Fuel: "Renewable electricity", Unit: "MWh", WTT: 20}, true},
+		{FuelFactor{Fuel: "Grøn strøm", Unit: "MWh", WTT: 20}, true},
+		{FuelFactor{Fuel: "Grøn el", Unit: "kWh", WTT: 0.02}, true},
+		{FuelFactor{Fuel: "Energia elektryczna", Unit: "GJ", WTT: 5}, true},
+		{FuelFactor{Fuel: "Green electricity (biogas CHP)", Unit: "kWh", WTT: 0.05}, true},
+		{FuelFactor{Fuel: "Green tariff", Unit: "kWh", WTT: 0.02}, true},
+		{FuelFactor{Fuel: "Green tariff", Unit: "l", WTT: 0.02}, false},
+		{FuelFactor{Fuel: "Diesel", Unit: "l", WTT: 0.6}, false},
+	} {
+		if got := ElectricFuel(c.f); got != c.want {
+			t.Errorf("%q %s TTW %g: %v, want %v", c.f.Fuel, c.f.Unit, c.f.TTW, got, c.want)
+		}
+	}
+}

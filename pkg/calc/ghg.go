@@ -1,6 +1,9 @@
 package calc
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+)
 
 // GHGScopes places a result's emissions in the GHG Protocol's scopes, from
 // two points of view (GHG Protocol Corporate Value Chain (Scope 3)
@@ -46,28 +49,57 @@ func electricLeg(l LegResult) bool {
 	return false
 }
 
-// ElectricFuel says whether a fuel factor is for electricity: a dataset's
-// "electricity/<country>" grid factor, or a supplier's factor named
-// electricity (in any case, in the site's languages: electricity, Strom,
-// el, prąd, électricité, ...), or one per kWh that burns nothing (TTW 0)
-// and doesn't name another fuel (hydrogen, gas, methane, ...), as a green
-// tariff's is.
+// ElectricFuel says whether a fuel factor is for electricity: nothing is
+// burnt in the vehicle (TTW 0), and its name says electricity
+// before it names another fuel (a dataset's "electricity/<country>";
+// "Ökostrom", "Grøn el", "Renewable electricity", but not "Wasserstoff aus
+// Ökostrom": hydrogen), or, naming neither, it is per kWh, MWh, GJ or MJ
+// (a green tariff's).
 func ElectricFuel(f FuelFactor) bool {
-	name := strings.ToLower(strings.TrimSpace(f.Fuel))
-	for _, w := range []string{"electric", "elektri", "électri", "eléctri", "elettri", "strom", "prąd", "stroom"} {
-		if strings.HasPrefix(name, w) || strings.Contains(name, w) && w == "strom" {
-			return true
-		}
-	}
-	if !strings.EqualFold(f.Unit, "kWh") || f.TTW != 0 || f.WTT <= 0 {
+	if f.TTW != 0 || !(f.WTT >= 0) {
 		return false
 	}
-	for _, w := range []string{"hydrog", "h2", "wasserstoff", "brint", "wodór", "waterstof", "idrog", "idróg", "gas", "metan", "méthane", "methane", "lng", "cng", "diesel", "hvo", "fuel", "oil"} {
-		if strings.Contains(name, w) {
-			return false
+	name := strings.ToLower(strings.TrimSpace(f.Fuel))
+	if name == "electricity" || strings.HasPrefix(name, "electricity/") {
+		return true
+	}
+	el, other := firstWord(name, electricWords), firstWord(name, otherFuelWords)
+	switch {
+	case el >= 0 && (other < 0 || el < other):
+		return true
+	case other >= 0:
+		return false
+	}
+	switch strings.ToLower(f.Unit) {
+	case "kwh", "mwh", "gwh", "gj", "mj":
+		return true
+	}
+	return false
+}
+
+// Words naming electricity, and other fuels, in the site's languages
+// ("el" only as a word of its own).
+var (
+	electricWords  = []string{"electric", "elektri", "elektry", "électri", "eléctri", "elettri", "strom", "strøm", "prąd", "stroom", " el "}
+	otherFuelWords = []string{"hydrog", "wasserstoff", "brint", "wodór", "waterstof", "idrog", "idróg", "h2", "methan", "méthan", "metan",
+		"gas", "lng", "cng", "lpg", "diesel", "petrol", "benzin", "hvo", "oil", "kerosene", "jet", "ammonia", "ethanol", "biodiesel"}
+)
+
+// firstWord is where in name the first of words starts, -1 if none.
+func firstWord(name string, words []string) int {
+	padded := " " + strings.Map(func(r rune) rune {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			return r
+		}
+		return ' '
+	}, name) + " "
+	first := -1
+	for _, w := range words {
+		if i := strings.Index(padded, w); i >= 0 && (first < 0 || i < first) {
+			first = i
 		}
 	}
-	return true
+	return first
 }
 
 // electricFactor says whether a factor id is for vehicles that run on
