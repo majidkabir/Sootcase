@@ -54,7 +54,7 @@ func WriteMarkdown(w io.Writer, r Report) error {
 	}
 	p("For the operator of the vehicles:\n\n| | kg CO2e |\n|---|---:|\n")
 	p("| Scope 1: fuel burnt in the vehicles | %s |\n", num(g.OperatorScope1Kg, 1))
-	p("| Scope 2: electricity used by the vehicles (location-based) | %s |\n", num(g.OperatorScope2Kg, 1))
+	p("| Scope 2: electricity used by the vehicles (location-based for grid factors, market-based for a supplier's own) | %s |\n", num(g.OperatorScope2Kg, 1))
 	p("| Scope 3, category 3: producing and delivering the fuel | %s |\n", num(g.OperatorScope3Cat3Kg, 1))
 	p("| Hub operations (not split by scope) | %s |\n\n", num(g.HubsKg, 1))
 	p("GHG Protocol Corporate Value Chain (Scope 3) Standard and its technical guidance, chapters 3, 4 and 9. " +

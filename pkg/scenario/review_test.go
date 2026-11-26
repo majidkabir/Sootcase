@@ -129,3 +129,19 @@ func TestElectrify_AlreadyElectric(t *testing.T) {
 		t.Errorf("diff %v notes %v affected %d", sr.DiffKg, sr.Notes, res.Changes[0].LegsAffected)
 	}
 }
+
+// electrify leaves an own intensity that burns no fuel (TTW 0) as it is.
+func TestElectrify_OwnZeroTTW(t *testing.T) {
+	c, _ := setup(t)
+	l := road("o", hamburg, munich, 780)
+	w, z := 25.0, 0.0
+	l.OwnFactor = &calc.OwnFactor{WTW: w, TTW: &z, Source: "carrier"}
+	s := calc.Shipment{ID: "o", WeightKg: 1000, Legs: []calc.Leg{l}}
+	res, err := Run(context.Background(), c, []calc.Shipment{s}, Plan{Changes: []Change{{Type: Electrify, Share: ptr(1), KWhPerTkm: 0.08, Country: "POL", Source: "x"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sr := res.Shipments[0]; sr.DiffKg != 0 || !strings.Contains(strings.Join(sr.Notes, "|"), "TTW 0") {
+		t.Errorf("diff %v notes %v", sr.DiffKg, sr.Notes)
+	}
+}

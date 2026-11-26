@@ -152,6 +152,7 @@ function fillFuelUnits(node, cur) {
   // A supplier's own fuel has no default value: it goes with the supplier's factor.
   const from = f("fuel_factor_from");
   if (own) from.value = "supplier";
+  else if (from.disabled) from.value = "default"; // leaving a supplier's own fuel: its factor doesn't go with a listed one
   from.disabled = own;
   from.dispatchEvent(new Event("change"));
 }
@@ -212,9 +213,10 @@ function methodOf(v) {
     has("load_tonnes", "load_factor", "empty_trip_factor", "repositioning_km") ? "load" : "default";
 }
 
+let legSeq = 0; // element ids stay unique when legs are removed and added
 function addLeg(values = {}) {
   const node = $("#leg-t").content.firstElementChild.cloneNode(true);
-  const n = legsEl.children.length + 1;
+  const n = ++legSeq;
   values = { method: methodOf(values), distance_from: values.distance_km ? "given" : "route",
     load_as: values.load_factor ? "factor" : "tonnes", fuel_factor_from: values.fuel_wtw || values.fuel_source ? "supplier" : "default", ...values };
   node.querySelectorAll("input, select").forEach(el => {
@@ -316,6 +318,8 @@ function placeSearch(box, leg) {
     lat.value = p.lat; lon.value = p.lon;
     close();
   };
+  // Coordinates typed by hand are no longer the place picked: its name goes.
+  [lat, lon].forEach(el => el.addEventListener("input", () => { input.value = ""; }));
   async function search() {
     const q = input.value.trim();
     if (q.length < 2) { close(); return; }
@@ -556,7 +560,7 @@ function ghgHTML(g, cat) {
     <div class="scroll"><table class="report-table"><tbody>
       <tr><td><strong>Company buying the transport</strong>: ${s3}</td><td class="num"><strong>${kg(g.scope3_shipper_kg)}</strong></td></tr>
       <tr><td><strong>Operator of the vehicles</strong>: scope 1, fuel burnt in the vehicles</td><td class="num">${kg(g.operator_scope1_kg)}</td></tr>
-      <tr><td>Scope 2, electricity the vehicles use (location-based)</td><td class="num">${kg(g.operator_scope2_kg)}</td></tr>
+      <tr><td>Scope 2, electricity the vehicles use (location-based for grid factors, market-based for a supplier's own)</td><td class="num">${kg(g.operator_scope2_kg)}</td></tr>
       <tr><td>Scope 3, category 3, producing and delivering the fuel</td><td class="num">${kg(g.operator_scope3_cat3_kg)}</td></tr>
       ${g.hubs_kg ? `<tr><td>Hub operations (not split by scope)</td><td class="num">${kg(g.hubs_kg)}</td></tr>` : ""}
     </tbody></table></div>

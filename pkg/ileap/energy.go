@@ -204,6 +204,9 @@ func desnzFuel(carrierType string) string {
 // the amount of fuel (in the factor's unit) used per unit of activity.
 func carrierFromFuel(f calc.FuelFactor, perActivity float64) (EnergyCarrier, string) {
 	c := carrier(f.Fuel)
+	if c == "" && calc.ElectricFuel(f) {
+		c = Electric // a supplier's electricity factor (a green tariff), as the GHG scopes read it
+	}
 	if c == "" {
 		return EnergyCarrier{}, "iLEAP has no energy carrier type for fuel " + f.Fuel
 	}
