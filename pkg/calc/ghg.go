@@ -27,18 +27,34 @@ type GHGScopes struct {
 	HubsKg               float64 `json:"hubs_kg,omitempty"`
 }
 
-// electricLeg says whether a leg (or the part of it left after its parts)
-// runs on electricity.
+// ElectricLeg says whether a leg (or the part of it left after its parts)
+// runs on electricity: an energy leg, metered electricity, or a dataset's
+// electric vehicle row.
+func ElectricLeg(l LegResult) bool { return electricLeg(l) }
+
+// electricLeg is ElectricLeg.
 func electricLeg(l LegResult) bool {
 	switch {
 	case l.Method == MethodEnergy:
 		return true
-	case l.FuelFactor != nil && strings.HasPrefix(l.FuelFactor.Fuel, "electricity"):
+	case l.FuelFactor != nil && ElectricFuel(*l.FuelFactor):
 		return true
 	case l.Factor != nil && (l.Factor.DataType == "" || l.Factor.DataType == DataDefault) && electricFactor(l.Factor.VehicleType):
 		return true // a dataset's electric row; an operator's TOC (any id) says its electricity share itself
 	}
 	return false
+}
+
+// ElectricFuel says whether a fuel factor is for electricity: a dataset's
+// "electricity/<country>" grid factor, or a supplier's factor named
+// electricity in any case, or one per kWh that burns nothing (TTW 0) and
+// isn't hydrogen, as a green tariff's is.
+func ElectricFuel(f FuelFactor) bool {
+	name := strings.ToLower(strings.TrimSpace(f.Fuel))
+	if strings.HasPrefix(name, "electric") {
+		return true
+	}
+	return strings.EqualFold(f.Unit, "kWh") && f.TTW == 0 && f.WTT > 0 && !strings.Contains(name, "hydrogen")
 }
 
 // electricFactor says whether a factor id is for vehicles that run on

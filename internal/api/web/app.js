@@ -83,6 +83,11 @@ function fuelIndex(d) {
     else if (p.length === 3) { group += ": " + pretty(p[0]).toLowerCase(); name = pretty(p[1]); }
     add(group, p.length > 1 ? p.slice(0, -1).join("/") : f.fuel, name, f.fuel, f.unit);
   }
+  // Metered electricity: a country's grid factor per kWh (the fuel "electricity/<country>").
+  for (const g of d.grids || []) {
+    const name = (g.source || "").includes(": ") ? g.source.split(": ").pop() : g.country;
+    add("Electricity from a country's grid", "electricity/" + g.country, name, "electricity/" + g.country, "kWh");
+  }
   // The short names first, then GLEC's fuels (the default values), then the rest.
   const rank = label => label === "Common fuels" ? 0 : label.startsWith("GLEC") ? 1 : 2;
   return { groups: [...groups].map(([label, fuels]) => ({ label, fuels })).sort((a, b) => rank(a.label) - rank(b.label)), units };

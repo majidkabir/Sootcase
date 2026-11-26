@@ -232,3 +232,22 @@ func TestElectricLeg_TOCId(t *testing.T) {
 		t.Error("GLEC electric van row: not electric")
 	}
 }
+
+// Metered electricity is scope 2 however a supplier's factor names it.
+func TestElectricFuel(t *testing.T) {
+	for _, c := range []struct {
+		f    FuelFactor
+		want bool
+	}{
+		{FuelFactor{Fuel: "electricity/DEU", Unit: "kWh", WTT: 0.3}, true},
+		{FuelFactor{Fuel: "Electricity", Unit: "kWh", WTT: 0.1}, true},
+		{FuelFactor{Fuel: "Ökostrom (green tariff)", Unit: "kWh", WTT: 0.02}, true},
+		{FuelFactor{Fuel: "Hydrogen", Unit: "kWh", WTT: 0.1}, false},
+		{FuelFactor{Fuel: "natural gas", Unit: "kWh", TTW: 0.18, WTT: 0.03}, false},
+		{FuelFactor{Fuel: "diesel", Unit: "l", TTW: 2.6, WTT: 0.6}, false},
+	} {
+		if got := ElectricFuel(c.f); got != c.want {
+			t.Errorf("%+v: %v", c.f, got)
+		}
+	}
+}
