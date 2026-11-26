@@ -490,3 +490,29 @@ func TestWriteJSON_Overflow(t *testing.T) {
 		t.Errorf("%d %s", rec.Code, rec.Body.String())
 	}
 }
+
+// Fields a leg's way of calculating doesn't use are refused, not ignored.
+func TestCalculate_UnusedFieldsRefused(t *testing.T) {
+	srv := newTestServer(t)
+	own := `"own_factor":{"wtw_g_per_tkm":100,"ttw_g_per_tkm":80,"source":"carrier"}`
+	for name, leg := range map[string]string{
+		"own + empty_trip_factor":    own + `,"empty_trip_factor":0.4`,
+		"own + country":              own + `,"country":"FRA"`,
+		"energy + empty_trip_factor": `"energy_kwh_per_tkm":0.05,"country":"DEU","empty_trip_factor":0.4`,
+		"teu_net_tonnes + weight":    `"x":1`,
+	} {
+		body := `{"id":"s","weight_kg":1000,"legs":[{"mode":"road","vehicle_type":"truck_40t","distance_km":500,` + leg + `}]}`
+		if name == "teu_net_tonnes + weight" {
+			body = `{"id":"s","weight_kg":1000,"teu_net_tonnes":7,"legs":[{"mode":"road","vehicle_type":"truck_40t","distance_km":500}]}`
+		}
+		resp, out := post(t, srv.URL+"/v1/calculate", body)
+		if resp.StatusCode < 400 || resp.StatusCode >= 500 || !strings.Contains(fmt.Sprint(out["error"]), map[string]string{
+			"own + empty_trip_factor": "empty_trip_factor", "own + country": "country", "energy + empty_trip_factor": "empty_trip_factor",
+			"teu_net_tonnes + weight": "teu"}[name]) {
+			t.Errorf("%s: status %d %v", name, resp.StatusCode, out)
+		}
+		if name == "teu_net_tonnes + weight" && !strings.Contains(fmt.Sprint(out["error"]), "go with teu") {
+			t.Errorf("teu message: %v", out["error"])
+		}
+	}
+}

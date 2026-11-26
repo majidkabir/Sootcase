@@ -164,16 +164,29 @@ func (a *analyser) vehicles(kind string, pick func(calc.Leg, calc.LegResult) str
 		// (another region's value, a smaller vehicle) stays as it is, and
 		// so does a temperature-controlled one without such a new value.
 		var lower []cand
+		mismatch, same := "", 0 // a leg left out because the new value is for another cargo category; legs compared
 		for _, c := range cands {
 			for _, l := range r.Legs {
-				if l.LegID == a.s.Legs[c.j].ID && l.WTWKg < a.own[l.LegID].WTWKg && cargoOf(l.Factor) == cargoOf(a.own[l.LegID].Factor) {
-					lower = append(lower, c)
-					break
+				if l.LegID != a.s.Legs[c.j].ID {
+					continue
 				}
+				if was, now := cargoOf(a.own[l.LegID].Factor), cargoOf(l.Factor); was != now {
+					if mismatch == "" {
+						mismatch = fmt.Sprintf("%s: GLEC's value for the new vehicle on leg %s is for %s, not for %s as now", kindName(kind), l.LegID, cargoName(now), cargoName(was))
+					}
+				} else if same++; l.WTWKg < a.own[l.LegID].WTWKg {
+					lower = append(lower, c)
+				}
+				break
 			}
 		}
+		if mismatch != "" {
+			a.note("%s", mismatch)
+		}
 		if len(lower) == 0 {
-			a.note("%s: possible, but not lower than now", kindName(kind))
+			if same > 0 {
+				a.note("%s: possible, but not lower than now", kindName(kind))
+			}
 			return
 		}
 		if len(lower) < len(cands) {
@@ -215,27 +228,16 @@ func (a *analyser) vehicles(kind string, pick func(calc.Leg, calc.LegResult) str
 
 const cargoReefer = "temperature_controlled"
 
-// cargoOf is the GLEC cargo category a road value is for: temperature
-// controlled, light, heavy or container ("" for average/mixed).
-func cargoOf(f *calc.Factor) string {
-	switch {
-	case reefer(f):
-		return cargoReefer
-	case f == nil:
-		return ""
+// cargoName names a cargo category in a note.
+func cargoName(k string) string {
+	if k == "" {
+		return "average/mixed cargo"
 	}
-	for _, seg := range strings.Split(f.VehicleType, "/") { // a whole segment: India's "heavy_cv_1" is a vehicle class
-		if seg == "light" || seg == "heavy" || seg == "container" {
-			return seg
-		}
-	}
-	return ""
+	return strings.ReplaceAll(k, "_", "-") + " cargo"
 }
 
-// reefer is whether a value is GLEC's for temperature-controlled freight.
-func reefer(f *calc.Factor) bool {
-	return f != nil && (strings.Contains(f.VehicleType, "temperature_controlled") || strings.HasSuffix(f.VehicleType, "/refrigerated"))
-}
+// cargoOf is the cargo category of a value (calc.FactorCargo).
+func cargoOf(f *calc.Factor) string { return calc.FactorCargo(f) }
 
 // electricSizes are GLEC v3.3's electric truck values by size: Europe
 // (Tables 10–11), China (Table 12), India (Table 13a).

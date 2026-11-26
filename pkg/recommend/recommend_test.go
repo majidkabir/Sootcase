@@ -596,3 +596,38 @@ func TestVehicleChange_Datasets(t *testing.T) {
 		}
 	}
 }
+
+// A reefer truck given by its vehicle type: the rail alternative, its
+// terminals and the larger truck keep temperature control, as with
+// cargo_type; a cargo category the new vehicle has no value for is said.
+func TestReeferByVehicleType(t *testing.T) {
+	c := setup(t)
+	ctx := context.Background()
+	mk := func(vt, cargo string) calc.Shipment {
+		leg := road("r", hamburg, munich, 0)
+		leg.VehicleType = vt
+		return calc.Shipment{ID: "s", WeightKg: 10000, CargoType: cargo, Legs: []calc.Leg{leg}}
+	}
+	get := func(s calc.Shipment, kind string) *Option {
+		res, err := Run(ctx, c, []calc.Shipment{s}, Settings{Kinds: []string{kind}}, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return option(res.Shipments[0], kind)
+	}
+	byType, byCargo := get(mk("hgv_reefer", ""), Rail), get(mk("hgv", "temperature_controlled"), Rail)
+	if byType == nil || byCargo == nil {
+		t.Fatalf("rail options %v %v", byType, byCargo)
+	}
+	if !near(byType.Route.WTWKg, byCargo.Route.WTWKg) || len(byType.Route.Terminals) == 0 ||
+		!strings.Contains(byType.Route.Terminals[0].HubType, "temperature_controlled") {
+		t.Errorf("by type %+v\nby cargo %+v", byType.Route, byCargo.Route)
+	}
+	if o := get(mk("hgv_reefer", ""), LargerTruck); o == nil || o.Legs[0].CargoType != "temperature_controlled" {
+		t.Errorf("larger reefer truck: %+v", o)
+	}
+	res, _ := Run(ctx, c, []calc.Shipment{mk("hgv", "container")}, Settings{Kinds: []string{ElectricTruck}}, 1)
+	if n := strings.Join(res.Shipments[0].Notes, "|"); !strings.Contains(n, "is for average/mixed cargo, not for container cargo") || strings.Contains(n, "not lower") {
+		t.Errorf("container note: %s", n)
+	}
+}

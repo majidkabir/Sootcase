@@ -416,6 +416,8 @@ func (c Calculator) weight(s Shipment) (float64, string, string, error) {
 		return s.WeightKg, "weight", "", nil
 	}
 	switch {
+	case s.WeightKg > 0 && s.TEU == 0:
+		return 0, "", "", fmt.Errorf("%w: teu_net_tonnes and container_load go with teu, not with weight_kg", ErrInvalidTEU)
 	case s.WeightKg > 0:
 		return 0, "", "", fmt.Errorf("%w: give weight_kg or teu, not both", ErrInvalidTEU)
 	case s.TEU <= 0:
@@ -589,11 +591,16 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 	if err := oneMethod(leg); err != nil { // after repositioning's load: own_factor with it is two ways
 		return LegResult{}, err
 	}
-	if leg.OwnFactor != nil {
-		return c.ownLeg(lr, leg, tonnes, dist, dtype)
-	}
+	// Fields only one way of calculating uses, refused with any other
+	// (they would be ignored without a word).
 	if leg.Country != "" && leg.EnergyKWhPerTkm == 0 {
 		return LegResult{}, fmt.Errorf("%w: country is only used with energy_kwh_per_tkm", ErrInvalidEnergy)
+	}
+	if leg.EmptyTripFactor != 0 && leg.LoadFactor == 0 && leg.LoadTonnes == 0 {
+		return LegResult{}, fmt.Errorf("%w: empty_trip_factor needs load_factor or load_tonnes", ErrInvalidLoad)
+	}
+	if leg.OwnFactor != nil {
+		return c.ownLeg(lr, leg, tonnes, dist, dtype)
 	}
 	if leg.EnergyKWhPerTkm != 0 || leg.Fuel != nil {
 		// Energy per tonne-km and the shipment's share of measured fuel
@@ -605,9 +612,6 @@ func (c Calculator) main(tonnes, dist float64, dtype string, leg Leg) (LegResult
 	}
 	if leg.EnergyKWhPerTkm != 0 {
 		return c.energyLeg(lr, leg)
-	}
-	if leg.EmptyTripFactor != 0 && leg.LoadFactor == 0 && leg.LoadTonnes == 0 {
-		return LegResult{}, fmt.Errorf("%w: empty_trip_factor needs load_factor or load_tonnes", ErrInvalidLoad)
 	}
 	if leg.Fuel != nil {
 		return c.fuelLeg(lr, *leg.Fuel, c.where(leg.From), c.where(leg.To))

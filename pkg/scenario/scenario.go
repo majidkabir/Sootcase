@@ -751,7 +751,8 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 			if cc.RoadVehicle == "" {
 				cc.RoadVehicle = l.VehicleType
 			}
-			rs.Legs[j] = calc.Leg{ID: l.ID, Mode: calc.Rail, VehicleType: ch.RailVehicle, CargoType: l.CargoType, From: l.From, To: l.To, AtTerminals: true}
+			rs.Legs[j] = calc.Leg{ID: l.ID, Mode: calc.Rail, VehicleType: ch.RailVehicle, CargoType: calc.CarriedCargo(l, s.CargoType, byID[l.ID].Factor),
+				From: l.From, To: l.To, AtTerminals: true}
 			ids[l.ID] = true
 		}
 		r, err := cc.CalculateRetrying(ctx, rs)
@@ -790,8 +791,19 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 				terminalNote = fmt.Sprintf("terminal handlings at the rail terminals not counted: %v", err)
 			} else {
 				rs.Hubs = append([]calc.HubStop(nil), s.Hubs...)
+				hub := calc.IntermodalTerminal
+				if cp, ok := cc.Factors.(calc.CargoProvider); ok && (s.CargoType == "" || s.CargoType == "average") {
+					for _, l := range r.Legs { // the rail legs' cargo, carried from a vehicle type for temperature-controlled cargo
+						if ids[l.LegID] && calc.FactorCargo(l.Factor) == "temperature_controlled" {
+							if ht, _, err := cp.HubCargo(hub, "temperature_controlled"); err == nil {
+								hub = ht
+							}
+							break
+						}
+					}
+				}
 				for k := range extra {
-					rs.Hubs = append(rs.Hubs, calc.HubStop{ID: fmt.Sprintf("added-terminal-%d", k+1), HubType: calc.IntermodalTerminal, Containers: n})
+					rs.Hubs = append(rs.Hubs, calc.HubStop{ID: fmt.Sprintf("added-terminal-%d", k+1), HubType: hub, Containers: n})
 				}
 			}
 		}

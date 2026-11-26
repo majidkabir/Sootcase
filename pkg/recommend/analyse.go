@@ -96,9 +96,17 @@ func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result, main map[str
 	}
 	var hs []calc.HubResult
 	kg := 0.0
+	cargo := a.s.CargoType
+	if cargo == "" || cargo == "average" {
+		for _, l := range r.Legs { // the new legs' cargo, carried from a vehicle type for temperature-controlled cargo
+			if main[l.LegID] && calc.FactorCargo(l.Factor) == cargoReefer {
+				cargo = cargoReefer
+			}
+		}
+	}
 	for k := range extra {
 		h, err := cc.Hub(calc.HubStop{ID: fmt.Sprintf("added-terminal-%d", k+1), HubType: IntermodalTerminal, Containers: a.containers},
-			a.s.CargoType, r.WeightKg/1000)
+			cargo, r.WeightKg/1000)
 		if err != nil {
 			return nil, "", err
 		}
@@ -166,7 +174,7 @@ func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settin
 	}
 	if set.has(LargerTruck) {
 		a.vehicles(LargerTruck, func(l calc.Leg, r calc.LegResult) string {
-			if r.Factor != nil && strings.Contains(r.Factor.VehicleType, "/rigid_") && !reefer(r.Factor) {
+			if r.Factor != nil && strings.Contains(r.Factor.VehicleType, "/rigid_") { // a temperature-controlled one keeps its uplift (vehicles)
 				return vehArtic
 			}
 			return ""

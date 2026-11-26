@@ -90,3 +90,41 @@ func (c Calculator) Containers(s Shipment, weightKg float64) (float64, string, e
 	}
 	return weightKg / 1000 / perTEU, fmt.Sprintf("TEU = tonnes ÷ %g, GLEC %s", perTEU, profile), nil
 }
+
+// FactorCargo is the GLEC cargo category a default value is for, from its
+// id: "temperature_controlled", "light", "heavy" or "container" (a whole
+// id segment: India's "heavy_cv_1" is a vehicle class); "" for an
+// average/mixed load or no value.
+func FactorCargo(f *Factor) string {
+	if f == nil {
+		return ""
+	}
+	vt := f.VehicleType
+	if strings.Contains(vt, "temperature_controlled") || strings.HasSuffix(vt, "/refrigerated") || strings.HasSuffix(vt, "/reefer") {
+		return "temperature_controlled"
+	}
+	for _, seg := range strings.Split(vt, "/") {
+		if seg == "light" || seg == "heavy" || seg == "container" {
+			return seg
+		}
+	}
+	return ""
+}
+
+// CarriedCargo is the cargo type a new leg replacing l (whose own value is
+// f) takes: l's own, else the shipment's, else, for a value given for
+// temperature-controlled or container cargo by its vehicle type, that
+// category, so the new vehicle's value is for the same cargo ("" for
+// none; "average" counts as none).
+func CarriedCargo(l Leg, shipmentCargo string, f *Factor) string {
+	if l.CargoType != "" && l.CargoType != "average" {
+		return l.CargoType
+	}
+	if shipmentCargo != "" && shipmentCargo != "average" {
+		return "" // the shipment's applies to the new leg too
+	}
+	if k := FactorCargo(f); k == "temperature_controlled" || k == "container" {
+		return k
+	}
+	return ""
+}

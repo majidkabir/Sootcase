@@ -40,7 +40,8 @@ func (a *analyser) roadShift(kind string, m calc.Mode, vehicle string) {
 			}
 			from, _ := a.loc(l, true)
 			to, _ := a.loc(l, false)
-			s.Legs[j] = calc.Leg{ID: l.ID, Mode: m, VehicleType: vehicle, CargoType: l.CargoType, From: from, To: to, AtTerminals: true}
+			s.Legs[j] = calc.Leg{ID: l.ID, Mode: m, VehicleType: vehicle, CargoType: calc.CarriedCargo(l, a.s.CargoType, a.own[l.ID].Factor),
+				From: from, To: to, AtTerminals: true}
 			main[l.ID] = true
 		}
 		return s, cc, main
@@ -104,7 +105,8 @@ func (a *analyser) airShift(kind string, m calc.Mode, vehicle string) {
 				}
 			}
 		}
-		out = append(out, calc.Leg{ID: l.ID, Mode: m, VehicleType: vehicle, CargoType: l.CargoType, From: from, To: to, AtTerminals: true})
+		out = append(out, calc.Leg{ID: l.ID, Mode: m, VehicleType: vehicle, CargoType: calc.CarriedCargo(l, a.s.CargoType, a.own[l.ID].Factor),
+			From: from, To: to, AtTerminals: true})
 		main[l.ID] = true
 		j = end
 	}
