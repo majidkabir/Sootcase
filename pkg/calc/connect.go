@@ -307,14 +307,24 @@ func (c Calculator) join(legs, fixed []Leg, from, to []*moved, add bool) ([]plan
 		ids[l.ID] = true
 	}
 	n := 0
-	road := func(a, b Location, kind, note string) {
+	// An added road leg carries the cargo type of the leg it reaches (a
+	// leg-level one; the shipment's applies anyway), where road has GLEC
+	// categories for it.
+	roadCargo := func(k string) string {
+		switch k {
+		case "temperature_controlled", "container", "light", "heavy":
+			return k
+		}
+		return ""
+	}
+	road := func(a, b Location, kind, note, cargo string) {
 		n++
 		id := fmt.Sprintf("added-%d", n)
 		for ids[id] {
 			id += "x"
 		}
 		ids[id] = true
-		out = append(out, planned{Leg: Leg{ID: id, Mode: Road, VehicleType: vehicle, From: a, To: b},
+		out = append(out, planned{Leg: Leg{ID: id, Mode: Road, VehicleType: vehicle, CargoType: roadCargo(cargo), From: a, To: b},
 			added: kind, note: note})
 	}
 
@@ -343,8 +353,15 @@ func (c Calculator) join(legs, fixed []Leg, from, to []*moved, add bool) ([]plan
 					kind = AddedGap
 					why = append(why, fmt.Sprintf("leg %s ends %.0f km from where leg %s starts", legID(legs[i-1], i-1), d, legID(legs[i], i)))
 				}
+				cargo := legs[i].CargoType // the leg whose start moved, else the one before if both say the same
+				if i > 0 && from[i] == nil && (prevMoved != nil || legs[i-1].CargoType != legs[i].CargoType) {
+					cargo = legs[i-1].CargoType
+					if prevMoved == nil {
+						cargo = ""
+					}
+				}
 				if add {
-					road(prev, l.From, kind, fmt.Sprintf("Added road from %s to %s: %s.", place(prev), place(l.From), strings.Join(why, "; ")))
+					road(prev, l.From, kind, fmt.Sprintf("Added road from %s to %s: %s.", place(prev), place(l.From), strings.Join(why, "; ")), cargo)
 				} else {
 					warnings = append(warnings, Warning{WarnGapNotCounted, why[0] + "; that distance isn't counted (adding road legs is off)"})
 				}
@@ -367,7 +384,8 @@ func (c Calculator) join(legs, fixed []Leg, from, to []*moved, add bool) ([]plan
 	}
 	if last := len(fixed) - 1; last >= 0 && to[last] != nil {
 		road(fixed[last].To, legs[last].To, AddedAccess, fmt.Sprintf("Added road from %s to %s: leg %s ends at %s instead of %s, %s.",
-			place(fixed[last].To), place(legs[last].To), legID(legs[last], last), place(fixed[last].To), place(legs[last].To), to[last].why(legs[last].Mode)))
+			place(fixed[last].To), place(legs[last].To), legID(legs[last], last), place(fixed[last].To), place(legs[last].To), to[last].why(legs[last].Mode)),
+			legs[last].CargoType)
 	}
 	return out, warnings
 }

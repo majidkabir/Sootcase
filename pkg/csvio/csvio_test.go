@@ -338,3 +338,16 @@ func TestRead_HalfFilledMethods(t *testing.T) {
 		t.Errorf("read as %+v / %+v / %+v", a.Fuel, b.Fuel, c.OwnFactor)
 	}
 }
+
+// leg_cargo_type is a leg's own cargo type, next to the shipment's.
+func TestLegCargoType(t *testing.T) {
+	in := "shipment_id,weight_kg,cargo_type,leg_id,mode,vehicle_type,distance_km,leg_cargo_type\n" +
+		"s,1000,,a,road,hgv,100,temperature_controlled\ns,1000,,b,road,van,10,\n"
+	items, err := Read(strings.NewReader(in))
+	if err != nil || len(items) != 1 || items[0].Err != nil {
+		t.Fatalf("%+v %v", items, err)
+	}
+	if l := items[0].Shipment.Legs; l[0].CargoType != "temperature_controlled" || l[1].CargoType != "" || items[0].Shipment.CargoType != "" {
+		t.Errorf("%+v", items[0].Shipment)
+	}
+}

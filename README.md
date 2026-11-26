@@ -355,6 +355,7 @@ Not taken into account (also in every result): transit times and costs; whether 
 | `shipment_id` | required |
 | `weight_kg`, or `teu` with `teu_net_tonnes` / `container_load` | cargo; can be on the first row only |
 | `cargo_type` | optional: GLEC cargo or load category (see above) |
+| `leg_cargo_type` | optional: a leg's own cargo type, overriding the shipment's for that leg |
 | `leg_id`, `mode`, `vehicle_type`, `distance_km`, `distance_type` | leg |
 | `from_lat`, `from_lon`, `to_lat`, `to_lon` | leg, when `distance_km` is empty |
 | `from_code`, `to_code` | leg, instead of coordinates: a UN/LOCODE (`NLRTM`) or IATA airport code (`CPH`); an airport's UN/LOCODE (`CNSHA`, Shanghai Hongqiao) works too |

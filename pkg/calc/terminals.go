@@ -100,7 +100,8 @@ func FactorCargo(f *Factor) string {
 		return ""
 	}
 	vt := f.VehicleType
-	if strings.Contains(vt, "temperature_controlled") || strings.HasSuffix(vt, "/refrigerated") || strings.HasSuffix(vt, "/reefer") {
+	if strings.Contains(vt, "temperature_controlled") || strings.HasSuffix(vt, "/refrigerated") || strings.HasSuffix(vt, "/reefer") ||
+		strings.HasPrefix(vt, "hgv_refrigerated") { // DESNZ's refrigerated HGVs ("hgv_non_refrigerated_..." aren't)
 		return "temperature_controlled"
 	}
 	for _, seg := range strings.Split(vt, "/") {
