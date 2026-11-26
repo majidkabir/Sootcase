@@ -116,6 +116,9 @@ func Shipment(s calc.Shipment, r calc.Result, f calc.FactorProvider) Sheet {
 			st.Formula = fmt.Sprintf("WTW = %s containers × %s g/container ÷ 1,000 = %s kg", n(h.Containers, 2),
 				n(div(h.WTWKg*1000, h.Containers), 1), n(h.WTWKg, 3))
 		}
+		if h.Note != "" {
+			st.Text = h.Note + " " + st.Text
+		}
 		if h.TTWKg != nil && h.WTTKg != nil { // the operator's own value splits it
 			st.Text = strings.Replace(st.Text, "well-to-wheel only", "split into tank-to-wheel and well-to-tank", 1)
 			st.Formula += fmt.Sprintf("; TTW %s kg + WTT %s kg", n(*h.TTWKg, 3), n(*h.WTTKg, 3))
@@ -284,8 +287,8 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 		}
 		grid := div(fac.WTT, l.EnergyKWhPerTkm)
 		s := Step{Group: group, Title: "Electricity",
-			Text: fmt.Sprintf("Electric vehicle: nothing is emitted at the vehicle (TTW = 0); generating the electricity is the energy provision (WTT). "+
-				"Electricity per tonne-km as given, times the grid intensity of %s: %s.", l.Country, fac.Source),
+			Text: strings.TrimSpace(l.FactorNote + " " + fmt.Sprintf("Electric vehicle: nothing is emitted at the vehicle (TTW = 0); generating the electricity is the energy provision (WTT). "+
+				"Electricity per tonne-km as given, times the grid intensity of %s: %s.", l.Country, fac.Source)),
 			Formula: fmt.Sprintf("intensity = %s kWh/tkm × %s g/kWh = %s g CO₂e/tkm", n(l.EnergyKWhPerTkm, 4), n(grid, 1), n(fac.WTT, 3)),
 			Basis:   []string{bModel, bElec, bDataCats}}
 		emissions.Formula = fmt.Sprintf("WTT = %s tkm × %s g/tkm ÷ 1,000 = %s kg\nTTW = 0, WTW = %s kg", n(tkm, 1), n(fac.WTT, 3), n(wttKg, 3), n(wtwKg, 3))
@@ -301,6 +304,7 @@ func intensitySteps(group string, l calc.LegResult, in calc.Leg, t, km, tkm, ttw
 				"%s t payload%s, %s empty km per loaded km%s. Source: %s.",
 				n(l.LoadFactor, 4), n(l.PayloadT, 2), loadTonnesText(l), n(l.EmptyTripFactor, 3), repositioningText(l, km), fac.Source),
 			Basis: []string{bModel, bLoad, bDataCats}}
+		s.Text = strings.TrimSpace(l.FactorNote + " " + s.Text)
 		if lmp, ok := f.(calc.LoadModelProvider); ok && f != nil {
 			if m, err := lmp.LoadModel(l.Mode, l.VehicleType); err == nil {
 				et, ew := m.At(l.LoadFactor)

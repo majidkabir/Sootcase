@@ -345,3 +345,16 @@ func TestBuild_ElectricityScope2(t *testing.T) {
 		t.Errorf("operator scope 2 %v kg, want %v (scopes %+v)", g.OperatorScope2Kg, want, g)
 	}
 }
+
+// A container HOC without emissions can't make a value per container: refused
+// when the layer is built, not when it is loaded.
+func TestBuild_ZeroContainerHOC(t *testing.T) {
+	ds, err := factors.Open("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ops := Operations{Name: "x", Period: "2025", HOCs: []HOC{{ID: "t1", Containers: 100, Energy: []EnergyUse{{Fuel: "diesel", Amount: 0}}}}}
+	if _, err := Build(ops, ds); err == nil || !strings.Contains(err.Error(), "no emissions") {
+		t.Errorf("zero container HOC: %v", err)
+	}
+}

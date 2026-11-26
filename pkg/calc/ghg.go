@@ -35,8 +35,8 @@ func electricLeg(l LegResult) bool {
 		return true
 	case l.FuelFactor != nil && strings.HasPrefix(l.FuelFactor.Fuel, "electricity"):
 		return true
-	case l.Factor != nil && electricFactor(l.Factor.VehicleType):
-		return true
+	case l.Factor != nil && (l.Factor.DataType == "" || l.Factor.DataType == DataDefault) && electricFactor(l.Factor.VehicleType):
+		return true // a dataset's electric row; an operator's TOC (any id) says its electricity share itself
 	}
 	return false
 }
