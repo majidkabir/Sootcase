@@ -631,6 +631,10 @@ func (s *Server) report(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rep := b.Report()
+	if _, err := json.Marshal(rep); err != nil { // a total beyond float64 (each result is checked, their sum isn't)
+		writeError(w, http.StatusUnprocessableEntity, errors.New("the report's totals are too large to calculate: check the shipments' weights and distances"))
+		return
+	}
 	if q.Get("format") != "md" && (withResults || flags["markdown"]) {
 		resp := ReportResponse{Report: rep}
 		if flags["markdown"] {
