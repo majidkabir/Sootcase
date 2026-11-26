@@ -94,21 +94,29 @@ func (a *analyser) vehicles(kind string, pick func(calc.Leg, calc.LegResult) str
 		cargo string // temperature_controlled for a leg whose own value is
 	}
 	var cands []cand
+	other := 0
 	for j, l := range a.s.Legs {
 		r, ok := a.own[l.ID]
 		if l.Mode != calc.Road || !ok || r.Method != calc.MethodIntensity || r.DataType != calc.DataDefault || r.Factor == nil ||
 			l.Fuel != nil || l.OwnFactor != nil || l.EnergyKWhPerTkm != 0 || l.LoadFactor != 0 || l.LoadTonnes != 0 {
 			continue
 		}
+		if !strings.HasPrefix(r.Factor.VehicleType, "glec/") {
+			other++ // another dataset's value (DESNZ): not compared with GLEC's vehicles
+			continue
+		}
 		if vt := pick(l, r); vt != "" {
 			c := cand{j: j, vt: vt}
-			if reefer(r.Factor) && l.CargoType == "" && a.s.CargoType == "" {
-				c.cargo = cargoReefer // given as a temperature-controlled vehicle type: the new one is too
+			if k := cargoOf(r.Factor); k != "" && (l.CargoType == "" || l.CargoType == "average") && (a.s.CargoType == "" || a.s.CargoType == "average") {
+				c.cargo = k // given as a vehicle type for that cargo (temperature-controlled, light, ...): the new one is too
 			}
 			cands = append(cands, c)
 		}
 	}
 	if len(cands) == 0 {
+		if other > 0 {
+			a.note("%s: only road legs on GLEC default values are changed", kindName(kind))
+		}
 		return
 	}
 	calcWith := func(cs []cand) (calc.Shipment, calc.Result, error) {
@@ -158,7 +166,7 @@ func (a *analyser) vehicles(kind string, pick func(calc.Leg, calc.LegResult) str
 		var lower []cand
 		for _, c := range cands {
 			for _, l := range r.Legs {
-				if l.LegID == a.s.Legs[c.j].ID && l.WTWKg < a.own[l.LegID].WTWKg && reefer(l.Factor) == reefer(a.own[l.LegID].Factor) {
+				if l.LegID == a.s.Legs[c.j].ID && l.WTWKg < a.own[l.LegID].WTWKg && cargoOf(l.Factor) == cargoOf(a.own[l.LegID].Factor) {
 					lower = append(lower, c)
 					break
 				}
@@ -206,6 +214,23 @@ func (a *analyser) vehicles(kind string, pick func(calc.Leg, calc.LegResult) str
 }
 
 const cargoReefer = "temperature_controlled"
+
+// cargoOf is the GLEC cargo category a road value is for: temperature
+// controlled, light, heavy or container ("" for average/mixed).
+func cargoOf(f *calc.Factor) string {
+	switch {
+	case reefer(f):
+		return cargoReefer
+	case f == nil:
+		return ""
+	}
+	for _, seg := range strings.Split(f.VehicleType, "/") { // a whole segment: India's "heavy_cv_1" is a vehicle class
+		if seg == "light" || seg == "heavy" || seg == "container" {
+			return seg
+		}
+	}
+	return ""
+}
 
 // reefer is whether a value is GLEC's for temperature-controlled freight.
 func reefer(f *calc.Factor) bool {

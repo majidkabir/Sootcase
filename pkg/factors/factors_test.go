@@ -1019,3 +1019,19 @@ func TestRailNotElectrified_GLEC33(t *testing.T) {
 		}
 	}
 }
+
+// A vehicle GLEC gives for some regions only: the refusal's advice fits it.
+func TestOnlyRegionsAdvice(t *testing.T) {
+	ds, err := Open(Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := calc.Calculator{Factors: ds, Places: places.Codes{}}
+	for vt, want := range map[string]string{"truck_bio_lng": "choose another vehicle type", "truck_electric": "energy_kwh_per_tkm"} {
+		_, err := c.Calculate(context.Background(), calc.Shipment{WeightKg: 1000, Legs: []calc.Leg{{Mode: calc.Road, VehicleType: vt,
+			From: calc.Location{Code: "USCHI"}, To: calc.Location{Code: "USNYC"}, DistanceKm: 1000, DistanceType: calc.DistSFD}}})
+		if err == nil || !strings.Contains(err.Error(), want) {
+			t.Errorf("%s: %v", vt, err)
+		}
+	}
+}

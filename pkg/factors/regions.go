@@ -209,8 +209,12 @@ func (d *Dataset) LegFactorAt(m calc.Mode, vt string, km float64, from, to calc.
 		} else if ra == "" && ra == rb {
 			where = "outside them"
 		}
-		return calc.Factor{}, "", fmt.Errorf("%w: %q has GLEC values for %s only, and this leg is %s; give energy_kwh_per_tkm with the "+
-			"country instead", calc.ErrInvalidInput, p.alias, strings.Join(in, ", "), where)
+		instead := "choose another vehicle type"
+		if strings.Contains(p.alias, "electric") {
+			instead = "give energy_kwh_per_tkm with the country instead"
+		}
+		return calc.Factor{}, "", fmt.Errorf("%w: %q has GLEC values for %s only, and this leg is %s; %s",
+			calc.ErrInvalidInput, p.alias, strings.Join(in, ", "), where, instead)
 	}
 	f, note, err := d.LegFactorFor(m, vt, km)
 	if err != nil {

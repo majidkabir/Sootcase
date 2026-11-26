@@ -5340,7 +5340,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/van_3_5t",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 461.0304,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/van_3_5t with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/van_3_5t (Table 10: van < 3.5 t (combined load factor and empty running 31%), 1.2 kWh/t-km) with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5349,7 +5349,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_7_5t/light",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 231.9852,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5t/light (Table 11: rigid truck < 7.5 t GVW, light load (30%, empty 9%), 0.62 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5358,7 +5358,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_7_5t",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 127.2177,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5t (Table 11: rigid truck < 7.5 t GVW, average/mixed load (60%, empty 17%), 0.34 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5367,7 +5367,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t/light",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 217.0184,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5_12t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5_12t/light (Table 11: rigid truck 7.5-12 t GVW, light load, 0.58 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5376,7 +5376,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 115.9926,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5_12t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5_12t (Table 11: rigid truck 7.5-12 t GVW, average/mixed load, 0.31 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5385,7 +5385,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_14_20t/light",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 134.7011,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_14_20t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_14_20t/light (Table 11: rigid truck 14-20 t GVW, light load, 0.36 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5394,7 +5394,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_14_20t",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 71.0922,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_14_20t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_14_20t (Table 11: rigid truck 14-20 t GVW, average/mixed load, 0.19 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5403,7 +5403,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_20_26t/light",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 119.7343,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_20_26t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_20_26t/light (Table 11: rigid truck 20-26 t GVW, light load, 0.32 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5412,7 +5412,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_20_26t",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 63.6088,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_20_26t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_20_26t (Table 11: rigid truck 20-26 t GVW, average/mixed load, 0.17 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5421,7 +5421,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_28_32t/light",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 115.9926,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_28_32t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_28_32t/light (Table 11: rigid truck 28-32 t GVW, light load, 0.31 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5430,7 +5430,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_28_32t",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 63.6088,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_28_32t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_28_32t (Table 11: rigid truck 28-32 t GVW, average/mixed load, 0.17 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5439,7 +5439,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_28_34t/light",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 97.2841,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_28_34t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_28_34t/light (Table 11: artic truck 28-34 t GVW, light load, 0.26 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5448,7 +5448,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_28_34t",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 52.3837,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_28_34t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_28_34t (Table 11: artic truck 28-34 t GVW, average/mixed load, 0.14 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5457,7 +5457,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_34_40t/light",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 86.059,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_34_40t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_34_40t/light (Table 11: artic truck 34-40 t GVW, light load, 0.23 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5466,7 +5466,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_34_40t",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 44.9004,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_34_40t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_34_40t (Table 11: artic truck 34-40 t GVW, average/mixed load, 0.12 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5475,7 +5475,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_40_50t/light",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 74.8339,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_40_50t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_40_50t/light (Table 11: artic truck 40-50 t GVW, light load, 0.2 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },
@@ -5484,7 +5484,7 @@
    "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_40_50t",
    "ttw_g_per_tkm": 0,
    "wtt_g_per_tkm": 37.417,
-   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_40_50t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_40_50t (Table 11: artic truck 40-50 t GVW, average/mixed load, 0.1 kWh/t-km) with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa) × 334.08 g CO2e/kWh, GLEC's European average electricity; all of it is energy provision (WTT)",
    "year": 2026,
    "distance_basis": "sfd"
   },

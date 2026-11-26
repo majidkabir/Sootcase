@@ -563,3 +563,36 @@ func TestVehicleChange_Reefer(t *testing.T) {
 		}
 	}
 }
+
+// Vehicle options compare GLEC values only, keep a cargo category given by
+// the vehicle type (light), and read cargo_type "average" as none.
+func TestVehicleChange_Datasets(t *testing.T) {
+	c := setup(t)
+	ctx := context.Background()
+	run := func(vt, cargo string, kinds ...string) ShipmentResult {
+		leg := road("r", hamburg, munich, 776)
+		leg.VehicleType = vt
+		res, err := Run(ctx, c, []calc.Shipment{{ID: "s", WeightKg: 1000, CargoType: cargo, Legs: []calc.Leg{leg}}}, Settings{Kinds: kinds}, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return res.Shipments[0]
+	}
+	// A DESNZ van: no GLEC vehicle swapped in, a note says why.
+	if sr := run("vans/average_up_to_3_5_tonnes/diesel", "", ElectricTruck, BioLNGTruck, LargerTruck); len(sr.Options) != 0 ||
+		!strings.Contains(strings.Join(sr.Notes, "|"), "only road legs on GLEC default values") {
+		t.Errorf("DESNZ van: %+v %v", sr.Options, sr.Notes)
+	}
+	// A light-load artic: the electric one at light load too.
+	if o := option(run("glec/road/eu_sa/artic_40_44t/light/diesel", "", ElectricTruck), ElectricTruck); o == nil ||
+		o.Legs[0].CargoType != "light" || !strings.Contains(o.Summary, "artic_40_50t/light") {
+		t.Errorf("light: %+v", o)
+	}
+	// cargo_type average on a reefer: still the reefer electric and bio-LNG values.
+	sr := run("hgv_reefer", "average", ElectricTruck, BioLNGTruck)
+	for _, k := range []string{ElectricTruck, BioLNGTruck} {
+		if o := option(sr, k); o == nil || o.Legs[0].CargoType != "temperature_controlled" {
+			t.Errorf("average + reefer %s: %+v %v", k, o, sr.Notes)
+		}
+	}
+}

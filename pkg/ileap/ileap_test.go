@@ -626,3 +626,22 @@ func TestDefaultConsumption(t *testing.T) {
 		t.Errorf("energy use %s l/tkm, GLEC 0.029", ec[0].EnergyConsumption)
 	}
 }
+
+// GLEC's European electric trucks, also temperature-controlled: an
+// Electric carrier with GLEC's European electricity, no gap.
+func TestEuropeanElectricReefer(t *testing.T) {
+	ds, err := factors.Open(factors.Default)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, vt := range []string{"glec/road/europe/electric/artic_34_40t", "glec/road/europe/temperature_controlled/electric/artic_34_40t"} {
+		r := calculate(t, ds, calc.Shipment{ID: "e", WeightKg: 10000, Legs: []calc.Leg{
+			{ID: "l1", Mode: calc.Road, VehicleType: vt, From: cph, To: ham, DistanceKm: 300, DistanceType: calc.DistSFD}}})
+		ex := FromResults([]calc.Result{r}, opts(ds))
+		for _, g := range ex.Gaps {
+			if strings.Contains(g.Field, "energyCarriers") {
+				t.Errorf("%s: gap %+v", vt, g)
+			}
+		}
+	}
+}
