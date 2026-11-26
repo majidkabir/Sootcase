@@ -168,13 +168,19 @@ func TestJoinSections(t *testing.T) {
 		{Country: "", Ferry: true, FromKm: 50, ToKm: 60.12345}}
 	at := 30.0
 	got := joinSections(a, b, at)
-	r := calc.Route{Km: at + b[1].ToKm, CountrySections: got, CountryKm: map[string]float64{"DK": 10, "DE": 70}}
+	r := calc.Route{Km: math.Round((at+b[1].ToKm)*1e4) / 1e4, CountrySections: got, CountryKm: map[string]float64{"DK": 10, "DE": 70}}
 	checkSections(t, r)
 	if countries(r) != "DK DE ferry" || len(got[1].Regions) != 2 || got[1].Regions[0].ToKm != 50 {
 		t.Errorf("joined %+v", got)
 	}
 	if a[1].ToKm != 30 || len(a[1].Regions) != 1 || a[1].Regions[0].ToKm != 30 {
 		t.Errorf("a changed: %+v", a)
+	}
+	// The last section ends at the route's km exactly, without float noise.
+	a2 := []calc.CountrySection{{Country: "DE", FromKm: 0, ToKm: 987.6543}}
+	b2 := []calc.CountrySection{{Country: "AT", FromKm: 0, ToKm: 500.4321}}
+	if j := joinSections(a2, b2, 987.6543); j[1].ToKm != 1488.0864 {
+		t.Errorf("last to_km %v, want 1488.0864", j[1].ToKm)
 	}
 	if joinSections(a, nil, 30) != nil {
 		t.Error("a half without sections: want none")
