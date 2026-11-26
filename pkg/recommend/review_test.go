@@ -3,6 +3,7 @@ package recommend
 import (
 	"context"
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
@@ -131,5 +132,48 @@ func TestTEUNumbers(t *testing.T) {
 	if a.WeightKg != 10000 || !(a.Now.Totals.WTWKg > 0) || math.Abs(a.Now.Totals.WTWKg-b.Now.Totals.WTWKg) > 1e-6 ||
 		len(a.Options) != len(b.Options) || len(a.Options) == 0 || math.Abs(a.Options[0].SavedKg-b.Options[0].SavedKg) > 1e-6 {
 		t.Errorf("TEU: weight %v, now %v, options %d; by weight: now %v, options %d", a.WeightKg, a.Now.Totals.WTWKg, len(a.Options), b.Now.Totals.WTWKg, len(b.Options))
+	}
+}
+
+// A shipment whose own weight can't be calculated never passes its error
+// to a lighter one with the same legs, nor gets a scaled result that
+// overflows: either order, the light one is fine and the heavy one refused.
+func TestGroup_HugeWeight(t *testing.T) {
+	c := setup(t)
+	leg := road("r", hamburg, munich, 1000000)
+	leg.VehicleType = "hgv_rigid"
+	light := calc.Shipment{ID: "a", WeightKg: 1, Legs: []calc.Leg{leg}}
+	heavy := calc.Shipment{ID: "b", WeightKg: 1.7e308, Legs: []calc.Leg{leg}}
+	for _, order := range [][]calc.Shipment{{light, heavy}, {heavy, light}} {
+		res, err := Run(context.Background(), c, order, Settings{Kinds: []string{LargerTruck}}, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, sr := range res.Shipments {
+			if (sr.ShipmentID == "a") != (sr.Error == "") || !finite(sr) {
+				t.Errorf("order %s first: %s error %q, finite %v", order[0].ID, sr.ShipmentID, sr.Error, finite(sr))
+			}
+		}
+	}
+}
+
+// Shipments heavier than the fuller-loads load aren't grouped: each note
+// names its own weight.
+func TestOverLoad_OwnNote(t *testing.T) {
+	c := setup(t)
+	leg := road("r", hamburg, munich, 780)
+	leg.VehicleType = "hgv_artic_33t"
+	lt := 20.0
+	res, err := Run(context.Background(), c, []calc.Shipment{{ID: "a", WeightKg: 25000, Legs: []calc.Leg{leg}}, {ID: "b", WeightKg: 30000, Legs: []calc.Leg{leg}}},
+		Settings{Kinds: []string{Load}, LoadTonnes: &lt}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, sr := range res.Shipments {
+		notes := strings.Join(sr.Notes, "|")
+		own := map[string]string{"a": "25 t", "b": "30 t"}[sr.ShipmentID]
+		if !strings.Contains(notes, own) || strings.Contains(notes, "no road leg on a fleet-average factor") {
+			t.Errorf("%s: %s", sr.ShipmentID, notes)
+		}
 	}
 }

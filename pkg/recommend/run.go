@@ -69,7 +69,7 @@ func Run(ctx context.Context, c calc.Calculator, shipments []calc.Shipment, set 
 	for i, s := range shipments {
 		key, ok := groupKey(s)
 		if set.has(Load) && set.LoadTonnes != nil && s.WeightKg/1000 > *set.LoadTonnes {
-			key += "|over load" // fuller loads aren't possible for these
+			ok = false // fuller loads aren't possible for these, and the note names the shipment's own weight
 		}
 		if set.has(Load) && set.LoadFactor != nil {
 			ok = false // whether the load factor holds the shipment depends on its weight and the vehicle
@@ -102,7 +102,14 @@ func Run(ctx context.Context, c calc.Calculator, shipments []calc.Shipment, set 
 						out[i] = first // its own result, with its calculated weight (a TEU shipment's input weight is 0)
 						continue
 					}
-					out[i] = rescale(first, shipments[i])
+					// The first one's error may be its own (a weight too large
+					// to calculate), and a scaled result can overflow: then
+					// the shipment is analysed on its own.
+					if r := rescale(first, shipments[i]); first.Error == "" && finite(r) {
+						out[i] = r
+					} else {
+						out[i] = analyse(ctx, c, shipments[i], set)
+					}
 				}
 			}
 		}()
@@ -154,6 +161,13 @@ func groupKey(s calc.Shipment) (string, bool) {
 		return "", false
 	}
 	return string(b), true
+}
+
+// finite is whether every number of a result can be written (no
+// infinity or NaN).
+func finite(r ShipmentResult) bool {
+	_, err := json.Marshal(r)
+	return err == nil
 }
 
 // rescale turns a group's first result into another member's.

@@ -480,3 +480,13 @@ func TestRefusedParameters(t *testing.T) {
 		t.Errorf("format=json: HTTP %d %v", resp.StatusCode, out)
 	}
 }
+
+// A response with a number beyond float64 (a sum of many results) is a
+// 422 the caller can act on, not a 500.
+func TestWriteJSON_Overflow(t *testing.T) {
+	rec := httptest.NewRecorder()
+	writeJSON(rec, http.StatusOK, map[string]float64{"wtw_kg": math.Inf(1)})
+	if rec.Code != http.StatusUnprocessableEntity || !strings.Contains(rec.Body.String(), "too large") {
+		t.Errorf("%d %s", rec.Code, rec.Body.String())
+	}
+}
