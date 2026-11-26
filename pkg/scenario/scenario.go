@@ -674,6 +674,10 @@ func legChanges(l calc.LegResult, changes []Change, fx resolved, touched []bool)
 		p := left * *ch.Share
 		switch ch.Type {
 		case Electrify:
+			if calc.ElectricLeg(l) && l.Factor != nil {
+				notes = append(notes, fmt.Sprintf("electrify not applied to leg %s: it is electric already (%s)", l.LegID, l.Factor.VehicleType))
+				continue
+			}
 			newWTT := tkm * ch.KWhPerTkm * fx.grids[i] / 1000
 			d.Add(Totals{TTWKg: -ttw, WTTKg: newWTT - wtt, WTWKg: newWTT - ttw - wtt}, p)
 		case FuelSwitch:

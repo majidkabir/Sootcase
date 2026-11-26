@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
@@ -110,5 +111,21 @@ func TestRoadToRail_ReeferByVehicleType(t *testing.T) {
 	}
 	if byType, byCargo := run("hgv_reefer", ""), run("hgv", "temperature_controlled"); math.Abs(byType-byCargo) > 1e-6 {
 		t.Errorf("change by vehicle type %v kg, by cargo type %v kg", byType, byCargo)
+	}
+}
+
+// electrify leaves a leg that is electric already as it is, with a note.
+func TestElectrify_AlreadyElectric(t *testing.T) {
+	c, _ := setup(t)
+	l := road("e", hamburg, munich, 780)
+	l.VehicleType = "van_electric"
+	s := calc.Shipment{ID: "e", WeightKg: 1000, Legs: []calc.Leg{l}}
+	res, err := Run(context.Background(), c, []calc.Shipment{s}, Plan{Changes: []Change{{Type: Electrify, Share: ptr(1), KWhPerTkm: 0.06, Country: "DEU", Source: "x"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sr := res.Shipments[0]
+	if sr.DiffKg != 0 || !strings.Contains(strings.Join(sr.Notes, "|"), "electric already") || res.Changes[0].LegsAffected != 0 {
+		t.Errorf("diff %v notes %v affected %d", sr.DiffKg, sr.Notes, res.Changes[0].LegsAffected)
 	}
 }
