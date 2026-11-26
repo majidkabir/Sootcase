@@ -348,7 +348,7 @@ Not taken into account (also in every result): transit times and costs; whether 
 
 **JSON** — see [`examples/cph-rotterdam.json`](examples/cph-rotterdam.json) and the [OpenAPI spec](internal/api/openapi.yaml).
 
-**CSV** — one row per leg or hub stop, grouped by `shipment_id`. Separated by commas, or by semicolons or tabs when the header row has those and no comma; a semicolon file may use decimal commas (`12,5`), as spreadsheets save CSV in many countries. Columns (any order):
+**CSV** — one row per leg or hub stop, grouped by `shipment_id`. Separated by commas, or by semicolons or tabs when the header row has those and no comma; a semicolon file may use decimal commas (`12,5`), as spreadsheets save CSV in many countries; a dot between groups of three digits (`12.000`) is refused there, as it could be a thousands separator. Columns (any order):
 
 | Column | Use |
 |---|---|
@@ -365,7 +365,7 @@ Not taken into account (also in every result): transit times and costs; whether 
 | `energy_kwh_per_tkm`, `country` | leg, energy method |
 | `own_wtw_g_per_tkm`, `own_ttw_g_per_tkm`, `own_factor_source`, `own_distance_basis` | leg, the carrier's or your own intensity (primary data) |
 | `fuel_unit`, `fuel_wtw_kg_per_unit`, `fuel_ttw_kg_per_unit`, `fuel_factor_source`, `fuel_biogenic_co2_kg_per_unit` | leg with `fuel`, the supplier's emission factor |
-| `hub_id`, `hub_type`, `hub_containers` | hub stop (row is a hub when `hub_type` is set); containers for per-container hub types only |
+| `hub_id`, `hub_type`, `hub_containers` | hub stop (row is a hub when `hub_type` is set; a hub row with leg cells filled is refused); containers for per-container hub types only |
 
 A bad row fails only its shipment; the rest still calculate. Only failures caused by the data are final: when a shipment fails because a routing service didn't answer (unreachable, timed out, overloaded or restarting), it is tried again after 1 s and 3 s. If it still fails, it is marked `retryable` (batch results, reports' `retryable_failed`, HTTP 503 with `Retry-After` for a single shipment), so you know to send it again rather than fix it.
 

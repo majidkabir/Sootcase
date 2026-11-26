@@ -60,7 +60,7 @@ func (r *Reader) Next() (csvio.Item, error) {
 		if err := dec.Decode(&it.Shipment); err != nil {
 			it.Shipment = calc.Shipment{ID: peekID(raw)}
 			it.Err = fmt.Errorf("line %d: invalid shipment JSON: %w", r.line, err)
-		} else if dec.More() {
+		} else if _, err := dec.Token(); !errors.Is(err, io.EOF) {
 			it.Err = fmt.Errorf("line %d: more than one JSON value on the line", r.line)
 		}
 		return it, nil

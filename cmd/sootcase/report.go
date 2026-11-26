@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/majidkabir/sootcase/pkg/batch"
 	"github.com/majidkabir/sootcase/pkg/calc"
@@ -48,10 +47,8 @@ func runReport(args []string) error {
 	if *format != "md" && *format != "json" {
 		return fmt.Errorf("report: -format must be md or json")
 	}
-	for _, d := range []string{m.PeriodFrom, m.PeriodTo} {
-		if _, err := time.Parse(time.DateOnly, d); d != "" && err != nil {
-			return fmt.Errorf("report: dates must be YYYY-MM-DD, got %q", d)
-		}
+	if err := report.CheckPeriod(m.PeriodFrom, m.PeriodTo); err != nil {
+		return fmt.Errorf("report: %w", err)
 	}
 	calculator, _, err := c.calculator()
 	if err != nil {

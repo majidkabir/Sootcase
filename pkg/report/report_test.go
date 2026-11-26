@@ -265,7 +265,7 @@ func TestAddedRoadLegsAndWarnings(t *testing.T) {
 	}
 	notes := strings.Join(r.Notes, "\n")
 	if !strings.Contains(notes, "Road legs added by the calculator: 1 (120 km) on 1 shipment,") ||
-		!strings.Contains(notes, "2 shipments have warnings that may make the results too low: 2 × a sea leg starts or ends inland") {
+		!strings.Contains(notes, "2 shipments have warnings (some may make the results too low): 2 × a sea leg starts or ends inland") {
 		t.Errorf("notes:\n%s", notes)
 	}
 }
@@ -300,4 +300,14 @@ func TestHubPerContainer(t *testing.T) {
 	}
 	near(t, "per container", r.Hubs[0].IntensityGContainer, 18200)
 	near(t, "per tonne", r.Hubs[0].IntensityGT, 1820)
+}
+
+// Round 29: a report period ending before it starts is refused.
+func TestReport_ReversedPeriod(t *testing.T) {
+	if err := CheckPeriod("2026-12-31", "2026-01-01"); err == nil {
+		t.Error("reversed period accepted")
+	}
+	if err := CheckPeriod("2026-01-01", "2026-12-31"); err != nil {
+		t.Error(err)
+	}
 }

@@ -351,3 +351,29 @@ func TestLegCargoType(t *testing.T) {
 		t.Errorf("%+v", items[0].Shipment)
 	}
 }
+
+// Round 29: a hub row with leg cells, hub cells on a leg row, and 12.000
+// in a file separated by semicolons are refused, not silently read.
+func TestRead_HubRowsAndThousands(t *testing.T) {
+	for name, in := range map[string]string{
+		"leg cells on a hub row": "shipment_id,weight_kg,mode,distance_km,hub_type\nA,1000,road,500,warehouse\n",
+		"hub cells on a leg row": "shipment_id,weight_kg,mode,distance_km,hub_containers\nA,1000,road,500,2\n",
+		"thousands dot":          "shipment_id;weight_kg;mode;distance_km\nA;12.000;road;1250\n",
+		"thousands dot km":       "shipment_id;weight_kg;mode;distance_km\nA;12000;road;1.250\n",
+	} {
+		items, err := Read(strings.NewReader(in))
+		if err == nil && (len(items) == 0 || items[0].Err == nil) {
+			t.Errorf("%s: read without an error: %+v", name, items)
+		}
+	}
+	items, err := Read(strings.NewReader("shipment_id;weight_kg;mode;distance_km;hub_type\nA;12,5;road;1250,5;\nA;;;;warehouse\nB;12.5;road;7.25;\n"))
+	if err != nil || len(items) != 2 || items[0].Err != nil || items[1].Err != nil {
+		t.Fatalf("%v %+v", err, items)
+	}
+	if s := items[0].Shipment; s.WeightKg != 12.5 || s.Legs[0].DistanceKm != 1250.5 || len(s.Hubs) != 1 {
+		t.Errorf("A = %+v", s)
+	}
+	if s := items[1].Shipment; s.WeightKg != 12.5 || s.Legs[0].DistanceKm != 7.25 {
+		t.Errorf("B = %+v", s)
+	}
+}

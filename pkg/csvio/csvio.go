@@ -36,6 +36,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"io"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -278,6 +279,11 @@ func addRow(s *calc.Shipment, row rowReader) error {
 	}
 
 	if ht := row.str("hub_type"); ht != "" {
+		for _, c := range legColumns {
+			if row.str(c) != "" {
+				return fmt.Errorf("a hub row (hub_type %q) has %s filled: put the leg on a row of its own", ht, c)
+			}
+		}
 		n, err := row.float("hub_containers")
 		if err != nil {
 			return err
@@ -291,6 +297,11 @@ func addRow(s *calc.Shipment, row rowReader) error {
 		Mode:         calc.Mode(strings.ToLower(row.str("mode"))),
 		VehicleType:  row.str("vehicle_type"),
 		DistanceType: strings.ToLower(row.str("distance_type")),
+	}
+	for _, c := range []string{"hub_id", "hub_containers"} {
+		if row.str(c) != "" {
+			return fmt.Errorf("%s is filled but hub_type isn't: a hub needs its hub_type", c)
+		}
 	}
 	if leg.Mode == "" {
 		return errors.New("leg row without mode")
@@ -366,11 +377,25 @@ func (r rowReader) str(name string) string {
 	return strings.TrimSpace(r.rec[i])
 }
 
+// legColumns are the columns only a leg row reads.
+var legColumns = []string{"leg_id", "mode", "vehicle_type", "distance_type", "distance_km", "from_code", "from_lat", "from_lon",
+	"to_code", "to_lat", "to_lon", "country", "empty_trip_factor", "energy_kwh_per_tkm", "fuel", "fuel_amount", "fuel_unit",
+	"fuel_wtw_kg_per_unit", "fuel_ttw_kg_per_unit", "fuel_factor_source", "leg_cargo_type", "load_factor", "load_tonnes",
+	"own_distance_basis", "own_factor_source", "own_ttw_g_per_tkm", "own_wtw_g_per_tkm", "repositioning_km", "vehicle_tonne_km"}
+
+// thousands is a number with dots between groups of three digits: in a
+// file separated by semicolons it may be 12.000 = 12,000 as a spreadsheet
+// shows it, or 12.000 = 12 with a decimal point.
+var thousands = regexp.MustCompile(`^[-+]?\d{1,3}(\.\d{3})+$`)
+
 // float returns 0 for an empty or missing cell.
 func (r rowReader) float(name string) (float64, error) {
 	s := r.str(name)
 	if s == "" {
 		return 0, nil
+	}
+	if r.decimalComma && thousands.MatchString(s) {
+		return 0, fmt.Errorf("%s: %q could be thousands or a decimal point: write it without the dot (12000) or with a decimal comma (12,5)", name, s)
 	}
 	v, err := strconv.ParseFloat(s, 64)
 	if err != nil && r.decimalComma && strings.Count(s, ",") == 1 && !strings.Contains(s, ".") {
