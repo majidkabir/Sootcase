@@ -86,7 +86,7 @@ func (a *analyser) setContainers() {
 
 // addTerminals adds to r the terminal handlings it has beyond now, and
 // says so in a few words ("" if none).
-func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result, main map[string]bool) ([]calc.HubResult, string, error) {
+func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result, main map[string]bool, cargo string) ([]calc.HubResult, string, error) {
 	extra := terminals(*r, main) - a.nowTerminals
 	if extra <= 0 {
 		return nil, "", nil
@@ -96,14 +96,6 @@ func (a *analyser) addTerminals(cc calc.Calculator, r *calc.Result, main map[str
 	}
 	var hs []calc.HubResult
 	kg := 0.0
-	cargo := a.s.CargoType
-	if cargo == "" || cargo == "average" {
-		for _, l := range r.Legs { // the new legs' cargo, carried from a vehicle type for temperature-controlled cargo
-			if main[l.LegID] && calc.FactorCargo(l.Factor) == cargoReefer {
-				cargo = cargoReefer
-			}
-		}
-	}
 	for k := range extra {
 		h, err := cc.Hub(calc.HubStop{ID: fmt.Sprintf("added-terminal-%d", k+1), HubType: IntermodalTerminal, Containers: a.containers},
 			cargo, r.WeightKg/1000)
@@ -348,7 +340,17 @@ func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.
 	if kind == OtherPort {
 		edges = nil
 	}
-	hubs, hubText, err := a.addTerminals(cc, &r, edges)
+	// The terminals handle the new legs' cargo: the shipment's, or one a
+	// new leg carries (calc.CarriedCargo), whatever value the new vehicle has.
+	cargo := s.CargoType
+	if cargo == "" || cargo == "average" {
+		for _, l := range s.Legs {
+			if main[l.ID] && l.CargoType == cargoReefer {
+				cargo = cargoReefer
+			}
+		}
+	}
+	hubs, hubText, err := a.addTerminals(cc, &r, edges, cargo)
 	if err != nil {
 		a.note("%s: not possible: %v", kindName(kind), shortErr(err))
 		return false

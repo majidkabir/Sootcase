@@ -793,8 +793,8 @@ func toRail(ctx context.Context, c calc.Calculator, s calc.Shipment, ch Change) 
 				rs.Hubs = append([]calc.HubStop(nil), s.Hubs...)
 				hub := calc.IntermodalTerminal
 				if cp, ok := cc.Factors.(calc.CargoProvider); ok && (s.CargoType == "" || s.CargoType == "average") {
-					for _, l := range r.Legs { // the rail legs' cargo, carried from a vehicle type for temperature-controlled cargo
-						if ids[l.LegID] && calc.FactorCargo(l.Factor) == "temperature_controlled" {
+					for _, l := range rs.Legs { // the rail legs' cargo (calc.CarriedCargo), whatever value the train has
+						if ids[l.ID] && l.CargoType == "temperature_controlled" {
 							if ht, _, err := cp.HubCargo(hub, "temperature_controlled"); err == nil {
 								hub = ht
 							}

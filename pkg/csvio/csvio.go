@@ -11,6 +11,7 @@
 //	shipment_id                                     required (rows of empty cells are skipped)
 //	weight_kg, or teu with teu_net_tonnes or container_load   cargo
 //	cargo_type                                      shipment, e.g. container, temperature_controlled (optional)
+//	leg_cargo_type                                  leg, overrides the shipment's for that leg (optional)
 //	leg_id, mode, vehicle_type, distance_km         leg
 //	distance_type                                   leg: sfd, gcd or actual (optional)
 //	from_lat, from_lon, to_lat, to_lon              leg, used when distance_km is empty
@@ -317,6 +318,7 @@ func addRow(s *calc.Shipment, row rowReader) error {
 	leg.RepositioningKm = get("repositioning_km")
 	leg.EnergyKWhPerTkm = get("energy_kwh_per_tkm")
 	leg.Country = row.str("country")
+	leg.CargoType = row.str("leg_cargo_type")
 	// A way of calculating is on when any of its cells is filled, so a
 	// half-filled one is refused (as in JSON), not silently left out.
 	ownFuel := row.any("fuel_factor_source", "fuel_wtw_kg_per_unit", "fuel_ttw_kg_per_unit", "fuel_biogenic_co2_kg_per_unit", "fuel_unit")

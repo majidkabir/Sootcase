@@ -631,3 +631,39 @@ func TestReeferByVehicleType(t *testing.T) {
 		t.Errorf("container note: %s", n)
 	}
 }
+
+// The carried temperature-controlled category also comes from a DESNZ
+// refrigerated HGV (a reefer truck with a load), and the terminals are
+// temperature-controlled even where the new vehicle has no reefer value.
+func TestReeferCarried_DESNZAndTerminals(t *testing.T) {
+	c := setup(t)
+	ctx := context.Background()
+	run := func(s calc.Shipment, kind string) *Option {
+		res, err := Run(ctx, c, []calc.Shipment{s}, Settings{Kinds: []string{kind}}, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return option(res.Shipments[0], kind)
+	}
+	leg := road("r", hamburg, munich, 0)
+	leg.VehicleType, leg.LoadTonnes = "hgv_reefer", 20
+	o := run(calc.Shipment{ID: "s", WeightKg: 10000, Legs: []calc.Leg{leg}}, Rail)
+	if o == nil || len(o.Route.Terminals) == 0 || !strings.Contains(o.Route.Terminals[0].HubType, "temperature_controlled") {
+		t.Fatalf("DESNZ reefer with a load: %+v", o)
+	}
+	for _, l := range o.Legs {
+		if l.Mode == calc.Rail && l.CargoType != "temperature_controlled" {
+			t.Errorf("rail leg %+v", l)
+		}
+	}
+	// A barge has no GLEC reefer value: its terminals are still temperature-controlled.
+	leg = road("r", hamburg, munich, 0)
+	leg.VehicleType = "hgv_reefer"
+	if o := run(calc.Shipment{ID: "s", WeightKg: 10000, Legs: []calc.Leg{leg}}, Waterway); o != nil {
+		for _, h := range o.Route.Terminals {
+			if !strings.Contains(h.HubType, "temperature_controlled") {
+				t.Errorf("waterway terminal %+v", h)
+			}
+		}
+	}
+}
