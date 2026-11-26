@@ -710,7 +710,11 @@ func writeError(w http.ResponseWriter, status int, err error) {
 // instead of a truncated 200.
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	b, err := json.Marshal(v)
-	if err != nil {
+	var uv *json.UnsupportedValueError
+	if errors.As(err, &uv) { // a total beyond float64: each result is checked, sums of many aren't
+		status = http.StatusUnprocessableEntity
+		b, _ = json.Marshal(errorBody{Error: "the totals are too large to calculate: check the shipments' weights and distances"})
+	} else if err != nil {
 		status = http.StatusInternalServerError
 		b, _ = json.Marshal(errorBody{Error: "could not encode response: " + err.Error()})
 	}

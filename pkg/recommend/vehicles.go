@@ -12,7 +12,7 @@ import (
 func (a *analyser) loads() {
 	s := a.s
 	s.Legs = append([]calc.Leg(nil), a.s.Legs...)
-	n := 0
+	n, unfit := 0, 0
 	for j := range s.Legs {
 		l := &s.Legs[j]
 		if l.Mode != calc.Road || l.Fuel != nil || l.EnergyKWhPerTkm != 0 || l.OwnFactor != nil {
@@ -26,6 +26,7 @@ func (a *analyser) loads() {
 		if why := calc.LoadFits(a.c.Factors, *l, val(a.set.LoadTonnes, 0), val(a.set.LoadFactor, 0), a.base.WeightKg/1000); why != "" { // the calculated weight (TEU given: 10 t each)
 			l.VehicleType = vt
 			a.note("Fuller loads: leg %s left as it is: %s", l.ID, why)
+			unfit++
 			continue
 		}
 		l.LoadTonnes, l.LoadFactor = val(a.set.LoadTonnes, 0), val(a.set.LoadFactor, 0)
@@ -33,7 +34,9 @@ func (a *analyser) loads() {
 		n++
 	}
 	if n == 0 {
-		a.note("Fuller loads: no road leg on a fleet-average factor")
+		if unfit == 0 { // else each leg's note says why
+			a.note("Fuller loads: no road leg on a fleet-average factor")
+		}
 		return
 	}
 	load := ""
