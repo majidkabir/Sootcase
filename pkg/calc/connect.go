@@ -312,7 +312,7 @@ func (c Calculator) join(legs, fixed []Leg, from, to []*moved, add bool) ([]plan
 	// categories for it.
 	roadCargo := func(k string) string {
 		switch k {
-		case "temperature_controlled", "container", "light", "heavy":
+		case "temperature_controlled", "container", "light", "heavy", "average": // a leg's own average: not the shipment's either
 			return k
 		}
 		return ""

@@ -237,6 +237,9 @@ type HubFactor struct {
 // LegResult is the outcome for one leg.
 type LegResult struct {
 	LegID string `json:"leg_id"`
+	// CargoType is the cargo type the leg was calculated for: its own,
+	// the shipment's, or (an added road leg) the leg it reaches.
+	CargoType string `json:"cargo_type,omitempty"`
 	// Added says why the calculator added this road leg (AddedGap or
 	// AddedAccess); empty for the shipment's own legs. Note explains an
 	// added leg, or a leg whose end was moved to a port or terminal. From

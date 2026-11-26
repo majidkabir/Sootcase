@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.21.3
+  version: 0.21.4
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -665,6 +665,7 @@ components:
       type: object
       properties:
         leg_id: { type: string, description: "The leg's id, or added-N for an added road leg" }
+        cargo_type: { type: string, description: "The cargo type the leg was calculated for: its own, the shipment's, or (an added road leg) the leg it reaches" }
         biogenic_co2_kg: { type: number, description: "Biogenic CO2, reported separately and not included in the totals (GLEC v3.3 p. 64)" }
         added:
           type: string
