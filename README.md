@@ -128,6 +128,7 @@ A dataset of your own may define `distance_adjustments` (`gcd × multiplier + ad
 | Mode | From → to | DAF |
 |---|---|---|
 | air | actual flown → great-circle | actual − 95 km (GLEC: GCD / (GCD + 95 km)) |
+| air | great-circle → actual flown | GCD + 95 km (an own intensity per km flown, GLEC Section 1 Chapter 4) |
 | road | shortest feasible → actual | × 1.05 (GLEC Section 1 Chapter 4: a DAF must be applied when the intensity is based on actual distance; 5% as in GLEC's own road default values) |
 | road | actual → shortest feasible | ÷ 1.05, for GLEC's road values, which include the 5% and so are per shortest feasible distance |
 | sea | shortest feasible → actual | × 1.15 (Clean Cargo, cited by GLEC) |

@@ -1006,7 +1006,8 @@ $("#rexample").addEventListener("click", () => {
 });
 
 // ---- Scenarios ----
-const shareOf = id => Math.min(100, Math.max(0, Number($(id).value) || 0)) / 100;
+// An empty share is left out, so the server's default share applies.
+const shareOf = id => $(id).value.trim() === "" ? undefined : Math.min(100, Math.max(0, Number($(id).value) || 0)) / 100;
 
 function scenarioPlan() {
   const changes = [];
