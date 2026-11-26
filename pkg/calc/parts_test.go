@@ -219,3 +219,16 @@ func TestCalculate_RailNotElectrifiedIsDiesel(t *testing.T) {
 		}
 	}
 }
+
+// An operator's TOC is never read as electric by its id: its own
+// electricity share says that.
+func TestElectricLeg_TOCId(t *testing.T) {
+	toc := LegResult{Method: MethodIntensity, Factor: &Factor{VehicleType: "fleet/electric", DataType: DataPrimary, TTW: 80, WTT: 20, ElectricityG: 5}}
+	if electricLeg(toc) || electricityShare(toc) != 0.05 {
+		t.Errorf("TOC fleet/electric: electric %v share %v", electricLeg(toc), electricityShare(toc))
+	}
+	row := LegResult{Method: MethodIntensity, Factor: &Factor{VehicleType: "glec/road/europe/electric/van_3_5t", DataType: DataDefault, WTT: 100}}
+	if !electricLeg(row) {
+		t.Error("GLEC electric van row: not electric")
+	}
+}

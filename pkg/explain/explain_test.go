@@ -220,3 +220,23 @@ func TestSheet_ModelledOwn(t *testing.T) {
 	}
 	t.Error("no emission intensity step")
 }
+
+// The sheet says a hub's note and a load or energy leg's factor note.
+func TestSheet_Notes(t *testing.T) {
+	ds, err := factors.Open("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := calc.Factor{Mode: calc.Road, VehicleType: "x", TTW: 80, WTT: 20, Source: "src"}
+	r := calc.Result{ShipmentID: "n", WeightKg: 1000,
+		Legs: []calc.LegResult{{LegID: "l", Mode: calc.Road, Method: calc.MethodLoadModel, Factor: &f, FactorNote: "LEG NOTE", DistanceKm: 100, TonneKm: 100, TTWKg: 8, WTTKg: 2, WTWKg: 10}},
+		Hubs: []calc.HubResult{{HubID: "h", HubType: "warehouse", Note: "HUB NOTE", WTWKg: 35.5, DataType: calc.DataDefault, Source: "s"}}}
+	s := calc.Shipment{ID: "n", WeightKg: 1000, Legs: []calc.Leg{{ID: "l", Mode: calc.Road, VehicleType: "x", DistanceKm: 100, LoadTonnes: 10}}}
+	text := ""
+	for _, st := range Shipment(s, r, ds).Steps {
+		text += st.Text + "|"
+	}
+	if !strings.Contains(text, "LEG NOTE") || !strings.Contains(text, "HUB NOTE") {
+		t.Errorf("notes missing: %s", text)
+	}
+}

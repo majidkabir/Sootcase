@@ -279,6 +279,9 @@ func Build(ops Operations, fuels calc.FactorProvider) (factors.Dataset, error) {
 			return factors.Dataset{}, fmt.Errorf("hoc %q: %w", h.ID, err)
 		}
 		hf := calc.HubFactor{HubType: h.ID, Year: ops.Year, DataType: dataType(h.DataType)}
+		if h.Containers > 0 && ttw+wtt <= 0 { // a per-container value of 0 can't be told from a per-tonne one
+			return factors.Dataset{}, fmt.Errorf("hoc %q: its energy use and refrigerant losses add up to no emissions to spread over containers", h.ID)
+		}
 		if h.Containers > 0 {
 			ttwC, wttC := ttw*1000/h.Containers, wtt*1000/h.Containers
 			hf.WTWPerContainerG, hf.TTWPerContainerG, hf.WTTPerContainerG = ttwC+wttC, &ttwC, &wttC
