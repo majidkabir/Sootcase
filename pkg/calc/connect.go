@@ -258,11 +258,23 @@ func (c Calculator) moveEnds(ctx context.Context, legs []Leg, add bool) (fixed [
 				l.To = p
 			}
 		}
-		warnings = append(warnings, offNetworkWarnings(legs[i], i, offFrom, offTo, from[i] != nil, to[i] != nil)...)
 		if (from[i] != nil || to[i] != nil) && gcKm(l.From, l.To) <= GapKm {
-			// The ends met at one port: no sea, rail or waterway left.
-			fixed[i], from[i], to[i] = legs[i], nil, nil
+			// Both ends are nearest the same port, terminal or airport: no
+			// part is left for this mode, and the leg as given would count
+			// land as sea (or rail, waterway, air) distance.
+			at := "port"
+			switch l.Mode {
+			case Rail:
+				at = "rail terminal"
+			case Air:
+				at = "airport"
+			case InlandWaterway:
+				at = "inland port"
+			}
+			return nil, nil, nil, nil, fmt.Errorf("%w: leg %s: both ends are nearest the same %s (%s), so no %s part is left; give this part by road",
+				ErrNoDistance, legID(legs[i], i), at, place(l.From), network(l.Mode))
 		}
+		warnings = append(warnings, offNetworkWarnings(legs[i], i, offFrom, offTo, from[i] != nil, to[i] != nil)...)
 	}
 	return fixed, from, to, warnings, nil
 }

@@ -255,7 +255,7 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 		finish(&lr)
 		for i := range lr.Alternatives { // each with the fields of a leg result
 			a := &lr.Alternatives[i]
-			a.From, a.To = lr.From, lr.To
+			a.From, a.To, a.CargoType = lr.From, lr.To, lr.CargoType
 			finish(a)
 		}
 		res.Legs = append(res.Legs, lr)

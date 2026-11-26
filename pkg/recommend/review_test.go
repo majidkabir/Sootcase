@@ -2,11 +2,15 @@ package recommend
 
 import (
 	"context"
+	"errors"
 	"math"
 	"strings"
 	"testing"
 
 	"github.com/majidkabir/sootcase/pkg/calc"
+	"github.com/majidkabir/sootcase/pkg/distance"
+	"github.com/majidkabir/sootcase/pkg/factors"
+	"github.com/majidkabir/sootcase/pkg/places"
 )
 
 // Shipments with the same leg and load_tonnes are grouped only when they
@@ -175,5 +179,56 @@ func TestOverLoad_OwnNote(t *testing.T) {
 		if !strings.Contains(notes, own) || strings.Contains(notes, "no road leg on a fleet-average factor") {
 			t.Errorf("%s: %s", sr.ShipmentID, notes)
 		}
+	}
+}
+
+// seaNet is a router whose sea network only reaches places near a sea
+// port (as SeaRoute snaps), for the real place list.
+type seaNet struct{ pc *places.Index }
+
+func (n seaNet) Distance(_ context.Context, m calc.Mode, a, b calc.Location) (float64, error) {
+	if m == calc.Air {
+		return distance.Haversine(a, b), nil
+	}
+	return 1.2*distance.Haversine(a, b) + 1, nil
+}
+func (seaNet) DistanceType(m calc.Mode) string {
+	if m == calc.Air {
+		return calc.DistGCD
+	}
+	return calc.DistSFD
+}
+func (n seaNet) SnapKm(m calc.Mode, p calc.Location, maxKm float64) (float64, bool) {
+	if m != calc.Sea {
+		return 0, true
+	}
+	if near := n.pc.Near(p, []string{calc.KindSeaPort}, 300, 1); len(near) > 0 {
+		return distance.Haversine(p, near[0]), true
+	}
+	return 300, true
+}
+
+// A sea leg whose ends are both nearest one port has no sea part: it is
+// refused, not counted as sea across land, and no option builds one.
+func TestSeaLegEndsAtOnePort(t *testing.T) {
+	pc, err := places.Default()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ds, _ := factors.Open("")
+	c := calc.Calculator{Factors: ds, Distances: seaNet{pc}, Places: pc}
+	basel, antwerp := calc.Location{Lat: 47.5596, Lon: 7.5886}, calc.Location{Lat: 51.2194, Lon: 4.4025}
+	_, err = c.Calculate(context.Background(), calc.Shipment{ID: "s", WeightKg: 10000, Legs: []calc.Leg{{Mode: calc.Sea, VehicleType: "container_ship", From: basel, To: antwerp}}})
+	if !errors.Is(err, calc.ErrNoDistance) || !strings.Contains(err.Error(), "same port") {
+		t.Errorf("sea leg Basel to Antwerp: %v", err)
+	}
+	leg := road("r", basel, antwerp, 0)
+	leg.VehicleType = "hgv"
+	res, err := Run(context.Background(), c, []calc.Shipment{{ID: "s", WeightKg: 12000, Legs: []calc.Leg{leg}}}, Settings{Kinds: []string{ShortSea}}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if o := option(res.Shipments[0], ShortSea); o != nil {
+		t.Errorf("short sea from Basel: %s", o.Summary)
 	}
 }
