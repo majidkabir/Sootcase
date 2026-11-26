@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.20.5
+  version: 0.21.0
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -53,6 +53,7 @@ paths:
                   places:
                     type: array
                     items: { $ref: "#/components/schemas/Place" }
+        "400": { $ref: "#/components/responses/Error" }
   /v1/calculate:
     post:
       summary: Calculate emissions for one shipment
@@ -154,6 +155,7 @@ paths:
                         retryable: { type: boolean, description: "The failure isn't the input's fault (a routing service didn't answer, also when tried again): send it again" }
         "400": { $ref: "#/components/responses/Error" }
         "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Busy" }
         "504": { $ref: "#/components/responses/Error" }
@@ -188,6 +190,7 @@ paths:
           description: Also return the report as Markdown (markdown), alongside the JSON
       requestBody:
         required: true
+        description: JSON, or a shipments CSV (text/csv) with the report details (title, organisation, period_from, period_to, reference, declare_iso, scope3_category) as query parameters.
         content:
           application/json:
             schema:
@@ -209,6 +212,8 @@ paths:
                 shipments:
                   type: array
                   items: { $ref: "#/components/schemas/Shipment" }
+          text/csv:
+            schema: { type: string }
       responses:
         "200":
           description: Report
@@ -219,6 +224,7 @@ paths:
               schema: { type: string }
         "400": { $ref: "#/components/responses/Error" }
         "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Busy" }
         "504": { $ref: "#/components/responses/Error" }
@@ -267,6 +273,7 @@ paths:
               schema: { $ref: "#/components/schemas/ILEAPResponse" }
         "400": { $ref: "#/components/responses/Error" }
         "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Busy" }
   /v1/ileap/operations:
     post:
@@ -344,6 +351,7 @@ paths:
               schema: { $ref: "#/components/schemas/ScenarioResult" }
         "400": { $ref: "#/components/responses/Error" }
         "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Busy" }
         "504": { $ref: "#/components/responses/Error" }
   /v1/recommend:
@@ -366,6 +374,10 @@ paths:
           in: query
           schema: { type: string }
           description: With a text/csv body, the settings as JSON (optional).
+        - name: add_road_legs
+          in: query
+          schema: { type: boolean, default: true }
+          description: false adds no road legs for shipments that don't set add_road_legs themselves.
       requestBody:
         required: true
         content:
@@ -388,6 +400,7 @@ paths:
               schema: { $ref: "#/components/schemas/RecommendResult" }
         "400": { $ref: "#/components/responses/Error" }
         "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Busy" }
         "504": { $ref: "#/components/responses/Error" }
 components:
