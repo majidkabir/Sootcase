@@ -957,8 +957,8 @@ function renderReport(r) {
 function resultsCSV(results) {
   const cols = ["shipment_id", "weight_kg", "shipment_wtw_kg", "row", "leg_id", "added", "mode", "vehicle_type", "factor",
     "from", "from_lat", "from_lon", "to", "to_lat", "to_lon", "distance_km", "distance_method", "distance_type", "daf",
-    "tonne_km", "method", "data_type", "ttw_kg", "wtt_kg", "wtw_kg", "intensity_g_per_tkm", "factor_source", "parts",
-    "note", "warnings", "error", "retryable", "basis", "certification"];
+    "tonne_km", "method", "data_type", "ttw_kg", "wtt_kg", "wtw_kg", "biogenic_co2_kg", "intensity_g_per_tkm", "factor_source", "parts",
+    "note", "factor_note", "warnings", "error", "retryable", "basis", "certification"];
   const cell = v => {
     if (v === undefined || v === null) return "";
     if (typeof v === "number") return Number.isFinite(v) ? String(Math.round(v * 1e4) / 1e4) : "";
@@ -980,10 +980,10 @@ function resultsCSV(results) {
         from: l.from && (l.from.name || l.from.code), from_lat: l.from && l.from.lat, from_lon: l.from && l.from.lon,
         to: l.to && (l.to.name || l.to.code), to_lat: l.to && l.to.lat, to_lon: l.to && l.to.lon,
         distance_km: l.distance_km, distance_method: l.distance_method, distance_type: l.distance_type, daf: l.daf,
-        tonne_km: l.tonne_km, method: l.method, data_type: l.data_type, ttw_kg: l.ttw_kg, wtt_kg: l.wtt_kg, wtw_kg: l.wtw_kg,
+        tonne_km: l.tonne_km, method: l.method, data_type: l.data_type, ttw_kg: l.ttw_kg, wtt_kg: l.wtt_kg, wtw_kg: l.wtw_kg, biogenic_co2_kg: l.biogenic_co2_kg,
         intensity_g_per_tkm: l.intensity_g_per_tkm, factor_source: f.source,
         parts: (l.parts || []).map(p => `${p.kind} ${Math.round(p.distance_km * 10) / 10} km ${Math.round(p.wtw_kg * 100) / 100} kg`).join("; "),
-        note: l.note });
+        note: l.note, factor_note: l.factor_note });
     }
     for (const h of res.hubs || [])
       row({ ...base, row: "hub", leg_id: h.hub_id, vehicle_type: h.hub_type, wtw_kg: h.wtw_kg, data_type: h.data_type, factor_source: h.source });
@@ -1010,8 +1010,10 @@ const shareOf = id => Math.min(100, Math.max(0, Number($(id).value) || 0)) / 100
 
 function scenarioPlan() {
   const changes = [];
-  if ($("#s-rail").checked) changes.push({ type: "road_to_rail", min_road_km: Number($("#s-rail-km").value),
-    share: shareOf("#s-rail-share"), min_rail_km: Number($("#s-rail-min").value) });
+  // An empty number field is left out, so the server's default applies (not 0).
+  const numOf = id => $(id).value.trim() === "" ? undefined : Number($(id).value);
+  if ($("#s-rail").checked) changes.push({ type: "road_to_rail", min_road_km: numOf("#s-rail-km"),
+    share: shareOf("#s-rail-share"), min_rail_km: numOf("#s-rail-min") });
   if ($("#s-el").checked) {
     const c = { type: "electrify", kwh_per_tkm: Number($("#s-el-kwh").value), country: $("#s-el-country").value,
       share: shareOf("#s-el-share"), source: $("#s-el-src").value.trim() };
@@ -1020,7 +1022,7 @@ function scenarioPlan() {
   }
   if ($("#s-fuel").checked) {
     const c = { type: "fuel_switch", fuel: $("#s-fuel-name").value, share: shareOf("#s-fuel-share"),
-      energy_ratio: Number($("#s-fuel-ratio").value) || 1 };
+      energy_ratio: numOf("#s-fuel-ratio") };
     const src = $("#s-fuel-src").value.trim(); if (src) c.source = src;
     const vt = $("#s-fuel-vt").picked; if (vt.length) c.vehicle_types = vt;
     changes.push(c);
