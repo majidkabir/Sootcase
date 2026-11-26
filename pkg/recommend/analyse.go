@@ -166,30 +166,30 @@ func analyse(ctx context.Context, c calc.Calculator, s calc.Shipment, set Settin
 	}
 	if set.has(LargerTruck) {
 		a.vehicles(LargerTruck, func(l calc.Leg, r calc.LegResult) string {
-			if r.Factor != nil && strings.Contains(r.Factor.VehicleType, "/rigid_") && !strings.Contains(r.Factor.VehicleType, "temperature_controlled") {
+			if r.Factor != nil && strings.Contains(r.Factor.VehicleType, "/rigid_") && !reefer(r.Factor) {
 				return vehArtic
 			}
 			return ""
-		})
+		}, nil)
 	}
 	if set.has(ElectricTruck) {
+		// The region's electric value (the alias), then the one of the
+		// leg's own vehicle's size (GLEC gives them by GVW).
 		a.vehicles(ElectricTruck, func(l calc.Leg, r calc.LegResult) string {
-			switch vt := r.Factor.VehicleType; {
-			case strings.Contains(vt, "electric"):
+			if strings.Contains(r.Factor.VehicleType, "electric") {
 				return ""
-			case strings.Contains(vt, "/van"):
-				return vehElectricVan
 			}
 			return vehElectric
-		})
+		}, a.electricSize)
 	}
 	if set.has(BioLNGTruck) {
 		a.vehicles(BioLNGTruck, func(l calc.Leg, r calc.LegResult) string {
-			if vt := r.Factor.VehicleType; strings.Contains(vt, "/van") || strings.Contains(vt, "electric") || strings.Contains(vt, "bio_lng") {
-				return ""
+			if _, hi, ok := gvw(r.Factor.Source); strings.Contains(r.Factor.VehicleType, "electric") || strings.Contains(r.Factor.VehicleType, "bio_lng") ||
+				(ok && hi <= 3.5) || strings.Contains(r.Factor.VehicleType, "/van") {
+				return "" // GLEC's bio-LNG value is an artic 34-40 t: not for vans
 			}
 			return vehBioLNG
-		})
+		}, nil)
 	}
 	if a.temporary != nil {
 		return ShipmentResult{ShipmentID: s.ID, WeightKg: sr.WeightKg, CargoType: s.CargoType, Error: a.temporary.Error(), Retryable: true}

@@ -451,7 +451,8 @@ func TestVehicleChanges(t *testing.T) {
 	sr := res.Shipments[0]
 	base, _ := c.Calculate(ctx, s)
 	for _, k := range []struct{ kind, alias, area string }{
-		{LargerTruck, "hgv_artic", "energy_efficiency"}, {ElectricTruck, "truck_electric", "carbon_content"}, {BioLNGTruck, "truck_bio_lng", "carbon_content"}} {
+		// The electric truck of the leg's own size: GLEC's European rigid 28-32 t for the rigid 26-32 t.
+		{LargerTruck, "hgv_artic", "energy_efficiency"}, {ElectricTruck, "glec/road/europe/electric/rigid_28_32t", "carbon_content"}, {BioLNGTruck, "truck_bio_lng", "carbon_content"}} {
 		o := option(sr, k.kind)
 		if o == nil {
 			t.Errorf("%s: no option (%v)", k.kind, sr.Notes)
@@ -504,15 +505,61 @@ func TestVehicleChange_OnlyLowerLegs(t *testing.T) {
 	if o == nil {
 		t.Fatalf("no option: %v", res.Shipments[0].Notes)
 	}
-	if o.Legs[0].VehicleType != "hgv_artic" || o.Legs[1].VehicleType != "truck_electric" {
+	if o.Legs[0].VehicleType != "hgv_artic" || o.Legs[1].VehicleType != "glec/road/europe/electric/artic_34_40t" {
 		t.Errorf("legs %s %s, want the Chinese leg kept", o.Legs[0].VehicleType, o.Legs[1].VehicleType)
 	}
 	base, _ := c.Calculate(ctx, s)
 	want := s
 	want.Legs = []calc.Leg{cn, de}
-	want.Legs[1].VehicleType = "truck_electric"
+	want.Legs[1].VehicleType = "glec/road/europe/electric/artic_34_40t"
 	r, _ := c.Calculate(ctx, want)
 	if !near(o.SavedKg, base.WTWKg-r.WTWKg) {
 		t.Errorf("saved %v, want %v", o.SavedKg, base.WTWKg-r.WTWKg)
+	}
+}
+
+// The electric truck of the leg's own size, in the region the alias chose.
+func TestElectricSize(t *testing.T) {
+	a := &analyser{c: setup(t)}
+	for _, c := range []struct{ own, got, want string }{
+		{"glec/road/in/small_cv/cng", "glec/road/in/artic_55t/electricity", "glec/road/in/rigid_3_5t/electricity"},
+		{"glec/road/in/heavy_cv_1/diesel", "glec/road/in/artic_55t/electricity", "glec/road/in/rigid_18_5t/electricity"},
+		{"glec/road/cn/dump_3_5_4_5t/diesel", "glec/road/cn/truck_12t/electricity", "glec/road/cn/truck_4_5t/electricity"},
+		{"glec/road/cn/artic_35_40t/diesel", "glec/road/cn/truck_12t/electricity", "glec/road/cn/truck_12t/electricity"},
+		{"glec/road/eu_sa/van_3_5t/diesel", "glec/road/europe/electric/artic_34_40t", "glec/road/europe/electric/van_3_5t"},
+		{"glec/road/eu_sa/rigid_3_5_7_5t/diesel", "glec/road/europe/electric/artic_34_40t", "glec/road/europe/electric/rigid_7_5t"},
+		{"glec/road/eu_sa/temperature_controlled/rigid_12_20t/diesel", "glec/road/europe/temperature_controlled/electric/artic_34_40t", "glec/road/europe/electric/rigid_14_20t"},
+		{"glec/road/eu_sa/artic_34_40t/diesel", "glec/road/europe/electric/artic_34_40t", "glec/road/europe/electric/artic_34_40t"},
+		{"glec/road/eu_sa/artic_60t/diesel", "glec/road/europe/electric/artic_34_40t", "glec/road/europe/electric/artic_40_50t"},
+	} {
+		if got := a.electricSize(&calc.Factor{VehicleType: c.own}, &calc.Factor{VehicleType: c.got}); got != c.want {
+			t.Errorf("%s: %s, want %s", c.own, got, c.want)
+		}
+	}
+}
+
+// A temperature-controlled leg keeps GLEC's uplift on the new vehicle.
+func TestVehicleChange_Reefer(t *testing.T) {
+	c := setup(t)
+	ctx := context.Background()
+	leg := road("r", hamburg, munich, 776)
+	leg.VehicleType = "hgv_reefer"
+	s := calc.Shipment{ID: "s", WeightKg: 10000, Legs: []calc.Leg{leg}}
+	res, err := Run(ctx, c, []calc.Shipment{s}, Settings{Kinds: []string{ElectricTruck, BioLNGTruck}}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	base, _ := c.Calculate(ctx, s)
+	for _, k := range []string{ElectricTruck, BioLNGTruck} {
+		o := option(res.Shipments[0], k)
+		if o == nil {
+			t.Errorf("%s: no option %v", k, res.Shipments[0].Notes)
+			continue
+		}
+		r, err := c.Calculate(ctx, calc.Shipment{ID: "s", WeightKg: 10000, Legs: o.Legs})
+		if err != nil || o.Legs[0].CargoType != "temperature_controlled" || !strings.Contains(r.Legs[0].Factor.VehicleType, "temperature_controlled") ||
+			!near(o.SavedKg, base.WTWKg-r.WTWKg) {
+			t.Errorf("%s: leg %+v factor %s saved %v (%v)", k, o.Legs[0], r.Legs[0].Factor.VehicleType, o.SavedKg, err)
+		}
 	}
 }

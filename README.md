@@ -75,9 +75,9 @@ res, err := c.Calculate(ctx, calc.Shipment{
 
 ## Calculation
 
-Four methods per leg:
+Five methods per leg:
 
-**Intensity (modelled data)** — the default:
+**Intensity (default values)** — the default:
 ```
 tonne-km = weight_t × distance_km
 TTW kg   = tonne-km × TTW g/tkm / 1000
@@ -327,10 +327,10 @@ iLEAP makes some properties mandatory that a calculation on default values can't
 | `other_port` | The large sea ports within `port_radius_km` of each port used now, with the leg on the land side going there |
 | `fuller_loads` | The shipment's road vehicles at `load_tonnes` or `load_factor` (and `empty_trip_factor`, `load_vehicle`); only when you give a load |
 | `larger_truck` | Same route, rigid trucks as articulated 34–40 t (GLEC default value) |
-| `electric_truck` | Same route, electric truck or van (GLEC v3.3 Tables 10–11; Europe, China, India) |
+| `electric_truck` | Same route, the electric truck or van of the leg's own vehicle's size class (GLEC v3.3 Tables 10–11 Europe, 12 China, 13a India) |
 | `bio_lng_truck` | Same route, bio-LNG articulated truck 34–40 t (GLEC v3.3 Table 8; Europe, South America, Asia, Africa) |
 
-The three vehicle kinds change only road legs on a default value, and only those the new vehicle makes lower; the others stay as they are.
+The three vehicle kinds change only road legs on a default value, and only those the new vehicle makes lower; the others stay as they are. A temperature-controlled leg keeps GLEC's uplift (p. 106) on the new vehicle, or stays as it is.
 
 Kinds are grouped by the GLEC Framework's five reduction areas (v3.3, Section 2 Chapter 2, Figure 2, p. 67; results' `areas` and each option's `area`): optimize freight transport modes (the route changes), increase asset utilization (fuller loads), improve fleet energy efficiency (larger truck), reduce carbon content of energy (electric and bio-LNG trucks). The fifth, reduce freight transport demand, needs business data and has no kind.
 

@@ -308,7 +308,7 @@ def variant(base, cargo, target):
 
 for b in [l for l in legs if l["mode"] == "road" and l["vehicle_type"].split("/")[2] in ("eu_sa", "asia_africa", "cn", "in")]:
     region, rest = b["vehicle_type"].split("/")[2], "/".join(b["vehicle_type"].split("/")[3:])
-    van = rest.startswith("van_3_5t") or rest.startswith("small_cv") or rest.startswith("rigid_3_5t/")
+    van = rest.startswith(("van_3_5t", "small_cv", "rigid_3_5t/", "electric/van_3_5t"))
     up = 1.15 if van else 1.12
     vid = f"glec/road/{region}/temperature_controlled/{rest}"
     leg("road", vid, b["wtt_g_per_tkm"] * up, b["ttw_g_per_tkm"] * up,
@@ -855,6 +855,14 @@ for vid, label, kwh in EV:
         f"losses and the +5% distance conversion) × 334.08 g CO2e/kWh, GLEC's European average electricity (Module 1 p. 77: "
         f"92.8 g CO2e/MJ WTW, EU 27, medium voltage, including infrastructure); all of it is energy provision (WTT). The charging "
         f"country's own mix is more exact: give energy_kwh_per_tkm with country", "sfd")
+# GLEC's temperature-controlled uplift (p. 106) is for the regional values of Europe too: the electric ones as well.
+for vid, label, kwh in EV:
+    up = 1.15 if vid.startswith("van_") else 1.12
+    leg("road", "glec/road/europe/temperature_controlled/electric/" + vid, kwh * EU_ELEC * up, 0,
+        f"{GLEC}, Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/{vid} with GLEC's "
+        f"+{round((up - 1) * 100)}% uplift for temperature-controlled {'vans' if up == 1.15 else 'vehicles over 3.5 t GVW'} "
+        f"(p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)", "sfd")
+    variant("glec/road/europe/electric/" + vid, "temperature_controlled", "glec/road/europe/temperature_controlled/electric/" + vid)
 
 # ---------------------------------------------------------------- temperature-controlled rail (p. 99): +12%
 RAIL_REEFER = [("glec/rail/eu/average_traction_unknown", "glec/rail/eu/temperature_controlled/average_traction_unknown"),

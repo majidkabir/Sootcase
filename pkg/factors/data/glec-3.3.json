@@ -5336,6 +5336,159 @@
    "distance_basis": "sfd"
   },
   {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/van_3_5t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 461.0304,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/van_3_5t with GLEC's +15% uplift for temperature-controlled vans (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_7_5t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 231.9852,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_7_5t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 127.2177,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 217.0184,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5_12t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 115.9926,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_7_5_12t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_14_20t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 134.7011,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_14_20t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_14_20t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 71.0922,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_14_20t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_20_26t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 119.7343,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_20_26t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_20_26t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 63.6088,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_20_26t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_28_32t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 115.9926,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_28_32t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/rigid_28_32t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 63.6088,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/rigid_28_32t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_28_34t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 97.2841,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_28_34t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_28_34t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 52.3837,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_28_34t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_34_40t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 86.059,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_34_40t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_34_40t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 44.9004,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_34_40t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_40_50t/light",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 74.8339,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_40_50t/light with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
+   "mode": "road",
+   "vehicle_type": "glec/road/europe/temperature_controlled/electric/artic_40_50t",
+   "ttw_g_per_tkm": 0,
+   "wtt_g_per_tkm": 37.417,
+   "source": "GLEC Framework v3.3 (Smart Freight Centre, 2026), Section 3 Module 2, road, temperature-controlled: glec/road/europe/electric/artic_40_50t with GLEC's +12% uplift for temperature-controlled vehicles over 3.5 t GVW (p. 106; given for Europe, South America, Asia and Africa); all of it is energy provision (WTT)",
+   "year": 2026,
+   "distance_basis": "sfd"
+  },
+  {
    "mode": "rail",
    "vehicle_type": "glec/rail/eu/temperature_controlled/average_traction_unknown",
    "ttw_g_per_tkm": 10.065,
@@ -9542,28 +9695,63 @@
    "temperature_controlled": "glec/sea/container/other/reefer"
   },
   "glec/road/europe/electric/rigid_7_5t": {
-   "light": "glec/road/europe/electric/rigid_7_5t/light"
+   "light": "glec/road/europe/electric/rigid_7_5t/light",
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_7_5t"
   },
   "glec/road/europe/electric/rigid_7_5_12t": {
-   "light": "glec/road/europe/electric/rigid_7_5_12t/light"
+   "light": "glec/road/europe/electric/rigid_7_5_12t/light",
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t"
   },
   "glec/road/europe/electric/rigid_14_20t": {
-   "light": "glec/road/europe/electric/rigid_14_20t/light"
+   "light": "glec/road/europe/electric/rigid_14_20t/light",
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_14_20t"
   },
   "glec/road/europe/electric/rigid_20_26t": {
-   "light": "glec/road/europe/electric/rigid_20_26t/light"
+   "light": "glec/road/europe/electric/rigid_20_26t/light",
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_20_26t"
   },
   "glec/road/europe/electric/rigid_28_32t": {
-   "light": "glec/road/europe/electric/rigid_28_32t/light"
+   "light": "glec/road/europe/electric/rigid_28_32t/light",
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_28_32t"
   },
   "glec/road/europe/electric/artic_28_34t": {
-   "light": "glec/road/europe/electric/artic_28_34t/light"
+   "light": "glec/road/europe/electric/artic_28_34t/light",
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_28_34t"
   },
   "glec/road/europe/electric/artic_34_40t": {
-   "light": "glec/road/europe/electric/artic_34_40t/light"
+   "light": "glec/road/europe/electric/artic_34_40t/light",
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_34_40t"
   },
   "glec/road/europe/electric/artic_40_50t": {
-   "light": "glec/road/europe/electric/artic_40_50t/light"
+   "light": "glec/road/europe/electric/artic_40_50t/light",
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_40_50t"
+  },
+  "glec/road/europe/electric/van_3_5t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/van_3_5t"
+  },
+  "glec/road/europe/electric/rigid_7_5t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_7_5t/light"
+  },
+  "glec/road/europe/electric/rigid_7_5_12t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t/light"
+  },
+  "glec/road/europe/electric/rigid_14_20t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_14_20t/light"
+  },
+  "glec/road/europe/electric/rigid_20_26t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_20_26t/light"
+  },
+  "glec/road/europe/electric/rigid_28_32t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_28_32t/light"
+  },
+  "glec/road/europe/electric/artic_28_34t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_28_34t/light"
+  },
+  "glec/road/europe/electric/artic_34_40t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_34_40t/light"
+  },
+  "glec/road/europe/electric/artic_40_50t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_40_50t/light"
   },
   "glec/rail/eu/average_traction_unknown": {
    "temperature_controlled": "glec/rail/eu/temperature_controlled/average_traction_unknown"
@@ -10191,6 +10379,57 @@
   },
   "glec/sea/container/other/reefer": {
    "temperature_controlled": "glec/sea/container/other/reefer"
+  },
+  "glec/road/europe/temperature_controlled/electric/van_3_5t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/van_3_5t"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_7_5t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_7_5t/light"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_7_5t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_7_5t"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t/light"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_7_5_12t"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_14_20t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_14_20t/light"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_14_20t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_14_20t"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_20_26t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_20_26t/light"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_20_26t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_20_26t"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_28_32t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_28_32t/light"
+  },
+  "glec/road/europe/temperature_controlled/electric/rigid_28_32t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/rigid_28_32t"
+  },
+  "glec/road/europe/temperature_controlled/electric/artic_28_34t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_28_34t/light"
+  },
+  "glec/road/europe/temperature_controlled/electric/artic_28_34t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_28_34t"
+  },
+  "glec/road/europe/temperature_controlled/electric/artic_34_40t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_34_40t/light"
+  },
+  "glec/road/europe/temperature_controlled/electric/artic_34_40t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_34_40t"
+  },
+  "glec/road/europe/temperature_controlled/electric/artic_40_50t/light": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_40_50t/light"
+  },
+  "glec/road/europe/temperature_controlled/electric/artic_40_50t": {
+   "temperature_controlled": "glec/road/europe/temperature_controlled/electric/artic_40_50t"
   },
   "glec/rail/eu/temperature_controlled/average_traction_unknown": {
    "temperature_controlled": "glec/rail/eu/temperature_controlled/average_traction_unknown"
