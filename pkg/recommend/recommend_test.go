@@ -667,3 +667,43 @@ func TestReeferCarried_DESNZAndTerminals(t *testing.T) {
 		}
 	}
 }
+
+// An option's legs recalculate to the option (added road legs keep the
+// cargo they were calculated for), and a leg's own "average" cargo stays
+// ambient in the alternative though the shipment is temperature-controlled.
+func TestOptionLegsRecalculate_Cargo(t *testing.T) {
+	c := setup(t)
+	ctx := context.Background()
+	for _, tc := range []struct{ ship, leg string }{{"", "temperature_controlled"}, {"", "container"}, {"temperature_controlled", "average"}} {
+		l := road("r", hamburg, munich, 0)
+		l.CargoType = tc.leg
+		s := calc.Shipment{ID: "s", WeightKg: 12000, CargoType: tc.ship, Legs: []calc.Leg{l}}
+		res, err := Run(ctx, c, []calc.Shipment{s}, Settings{Kinds: []string{Rail}}, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		o := option(res.Shipments[0], Rail)
+		if o == nil {
+			t.Fatalf("%+v: no option %v", tc, res.Shipments[0].Notes)
+		}
+		r, err := c.Calculate(ctx, calc.Shipment{ID: "s", WeightKg: 12000, CargoType: tc.ship, Legs: o.Legs, AddRoadLegs: ptr(false)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		hub := 0.0
+		for _, h := range o.Route.Terminals {
+			hub += h.WTWKg
+			if tc.leg == "average" && strings.Contains(h.HubType, "temperature_controlled") {
+				t.Errorf("average leg: reefer terminal %s", h.HubType)
+			}
+		}
+		if !near(r.WTWKg+hub, o.Route.WTWKg) {
+			t.Errorf("%+v: legs %v + terminals %v, option %v", tc, r.WTWKg, hub, o.Route.WTWKg)
+		}
+		for _, lr := range r.Legs {
+			if tc.leg == "average" && strings.Contains(lr.Factor.VehicleType, "temperature_controlled") {
+				t.Errorf("average leg: %s on %s", lr.LegID, lr.Factor.VehicleType)
+			}
+		}
+	}
+}

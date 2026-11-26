@@ -59,7 +59,7 @@ func explicit(in []calc.Leg, r calc.Result) []calc.Leg {
 	for _, lr := range r.Legs {
 		l, ok := byID[lr.LegID]
 		if !ok || lr.Added != "" {
-			l = calc.Leg{ID: lr.LegID, Mode: lr.Mode, VehicleType: lr.VehicleType}
+			l = calc.Leg{ID: lr.LegID, Mode: lr.Mode, VehicleType: lr.VehicleType, CargoType: lr.CargoType}
 		}
 		if lr.From != nil {
 			l.From = *lr.From
@@ -342,12 +342,17 @@ func (a *analyser) try(kind string, s calc.Shipment, cc calc.Calculator, m calc.
 	}
 	// The terminals handle the new legs' cargo: the shipment's, or one a
 	// new leg carries (calc.CarriedCargo), whatever value the new vehicle has.
-	cargo := s.CargoType
-	if cargo == "" || cargo == "average" {
-		for _, l := range s.Legs {
-			if main[l.ID] && l.CargoType == cargoReefer {
-				cargo = cargoReefer
-			}
+	cargo := ""
+	for _, l := range s.Legs {
+		if !main[l.ID] {
+			continue
+		}
+		k := l.CargoType
+		if k == "" {
+			k = s.CargoType // the shipment's applies to the leg
+		}
+		if k == cargoReefer {
+			cargo = cargoReefer
 		}
 	}
 	hubs, hubText, err := a.addTerminals(cc, &r, edges, cargo)

@@ -116,10 +116,10 @@ func FactorCargo(f *Factor) string {
 // f) takes: l's own, else the shipment's, else, for a value given for
 // temperature-controlled or container cargo by its vehicle type, that
 // category, so the new vehicle's value is for the same cargo ("" for
-// none; "average" counts as none).
+// none). A leg's own "average" stays: the shipment's doesn't apply to it.
 func CarriedCargo(l Leg, shipmentCargo string, f *Factor) string {
-	if l.CargoType != "" && l.CargoType != "average" {
-		return l.CargoType
+	if l.CargoType != "" {
+		return l.CargoType // "average" too: the shipment's doesn't apply to the leg
 	}
 	if shipmentCargo != "" && shipmentCargo != "average" {
 		return "" // the shipment's applies to the new leg too

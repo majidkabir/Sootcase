@@ -240,6 +240,7 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 			return Result{}, fmt.Errorf("leg %q: %w", p.ID, err)
 		}
 		lr.Added, lr.Note = p.added, strings.TrimSpace(p.note+" "+lr.Note)
+		lr.CargoType = p.Leg.CargoType // as calculated: the leg's own, the shipment's, or an added leg's
 		for _, w := range lr.warnings {
 			name := p.ID
 			if name == "" {
