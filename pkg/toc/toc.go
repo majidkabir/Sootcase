@@ -303,34 +303,22 @@ func Totals(uses []EnergyUse, refs []RefrigerantUse, fuels calc.FactorProvider) 
 	return
 }
 
-// electricityKg is the kg CO2e of the electricity among uses (fuels named
-// "electricity/<ISO3>" or with an "electricity" part, as calc reads
-// them): all well-to-tank, the vehicles' purchased electricity.
+// electricityKg is the kg CO2e of the electricity among uses (fuels
+// calc.ElectricFuel calls electricity, as measured-fuel legs read them):
+// all well-to-tank, the vehicles' purchased electricity.
 func electricityKg(uses []EnergyUse, fuels calc.FactorProvider) (float64, error) {
 	kg := 0.0
 	for _, u := range uses {
-		if !electricityFuel(u.Fuel) {
-			continue
-		}
 		f, err := fuels.FuelFactor(u.Fuel)
 		if err != nil {
 			return 0, err
 		}
+		if !calc.ElectricFuel(f) { // as measured fuel legs read it
+			continue
+		}
 		kg += u.Amount * f.WTT
 	}
 	return kg, nil
-}
-
-func electricityFuel(id string) bool {
-	if strings.HasPrefix(id, "electricity") {
-		return true
-	}
-	for _, part := range strings.Split(id, "/") {
-		if part == "electricity" {
-			return true
-		}
-	}
-	return false
 }
 
 // sum returns TTW and WTT kg CO2e for a list of energy uses and
