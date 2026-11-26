@@ -251,3 +251,16 @@ func TestElectricFuel(t *testing.T) {
 		}
 	}
 }
+
+func TestElectricFuel_OtherFuels(t *testing.T) {
+	for _, name := range []string{"H2 (green)", "Wasserstoff", "Biomethane", "LNG"} {
+		if ElectricFuel(FuelFactor{Fuel: name, Unit: "kWh", WTT: 0.05}) {
+			t.Errorf("%s counted as electricity", name)
+		}
+	}
+	for _, name := range []string{"Grøn strøm", "Ökostrom", "Elektriciteit", "prąd z OZE"} {
+		if !ElectricFuel(FuelFactor{Fuel: name, Unit: "kWh", WTT: 0.05}) {
+			t.Errorf("%s not counted as electricity", name)
+		}
+	}
+}

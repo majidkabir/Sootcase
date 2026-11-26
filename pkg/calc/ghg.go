@@ -12,8 +12,9 @@ import "strings"
 //     transport the company pays for, inbound or outbound) or category 9
 //     (downstream: sold products moved by transport it doesn't pay for);
 //   - the operator running the vehicles: fuel burnt in them is scope 1,
-//     electricity they use is scope 2 (location-based; it includes the
-//     upstream share the grid or vehicle factor contains, which isn't split
+//     electricity they use is scope 2 (location-based with a grid or
+//     vehicle factor, market-based with a supplier's own factor; it
+//     includes the upstream share the factor contains, which isn't split
 //     off), and producing and delivering the fuel is scope 3 category 3
 //     (fuel- and energy-related activities).
 //
@@ -47,14 +48,26 @@ func electricLeg(l LegResult) bool {
 
 // ElectricFuel says whether a fuel factor is for electricity: a dataset's
 // "electricity/<country>" grid factor, or a supplier's factor named
-// electricity in any case, or one per kWh that burns nothing (TTW 0) and
-// isn't hydrogen, as a green tariff's is.
+// electricity (in any case, in the site's languages: electricity, Strom,
+// el, prąd, électricité, ...), or one per kWh that burns nothing (TTW 0)
+// and doesn't name another fuel (hydrogen, gas, methane, ...), as a green
+// tariff's is.
 func ElectricFuel(f FuelFactor) bool {
 	name := strings.ToLower(strings.TrimSpace(f.Fuel))
-	if strings.HasPrefix(name, "electric") {
-		return true
+	for _, w := range []string{"electric", "elektri", "électri", "eléctri", "elettri", "strom", "prąd", "stroom"} {
+		if strings.HasPrefix(name, w) || strings.Contains(name, w) && w == "strom" {
+			return true
+		}
 	}
-	return strings.EqualFold(f.Unit, "kWh") && f.TTW == 0 && f.WTT > 0 && !strings.Contains(name, "hydrogen")
+	if !strings.EqualFold(f.Unit, "kWh") || f.TTW != 0 || f.WTT <= 0 {
+		return false
+	}
+	for _, w := range []string{"hydrog", "h2", "wasserstoff", "brint", "wodór", "waterstof", "idrog", "idróg", "gas", "metan", "méthane", "methane", "lng", "cng", "diesel", "hvo", "fuel", "oil"} {
+		if strings.Contains(name, w) {
+			return false
+		}
+	}
+	return true
 }
 
 // electricFactor says whether a factor id is for vehicles that run on
