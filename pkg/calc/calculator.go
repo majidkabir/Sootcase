@@ -290,6 +290,7 @@ func (c Calculator) Calculate(ctx context.Context, s Shipment) (Result, error) {
 	}
 	res.PrimaryDataShare = primaryShare(res)
 	res.GHGProtocol = ghgScopes(res)
+	c.airPollutantsOf(&res)
 	if err := checkResult(res); err != nil {
 		return Result{}, err
 	}

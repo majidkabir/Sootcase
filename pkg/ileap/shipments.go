@@ -560,25 +560,6 @@ func share(ttw, wtw float64) float64 {
 	return ttw / wtw
 }
 
-// factorCarrier is vehicleCarrier, plus what a GLEC value's own text
-// says: GLEC's inland waterway rows (Table 2) and its US rail average are
-// for diesel.
-func factorCarrier(f calc.Factor) string {
-	if c := vehicleCarrier(f.VehicleType, f.Mode); c != "" {
-		return c
-	}
-	src, _, _ := strings.Cut(strings.ToLower(f.Source), "; wtw ") // without the note on GLEC's printed WTW
-	switch {
-	case !strings.HasPrefix(f.Source, "GLEC Framework") || strings.Contains(src, "electric"):
-		return ""
-	case f.Mode == calc.InlandWaterway && strings.HasPrefix(f.VehicleType, "glec/iww/") && strings.HasSuffix(src, ", diesel"):
-		return Diesel
-	case f.Mode == calc.Rail && strings.HasPrefix(f.VehicleType, "glec/rail/na/") && strings.Contains(src, "(diesel)"):
-		return Diesel
-	}
-	return ""
-}
-
 // hubHOC returns the id of the HOC a hub stop was calculated with,
 // adding it to the export.
 func (b *builder) hubHOC(r calc.Result, h calc.HubResult) (string, []SourceRef) {

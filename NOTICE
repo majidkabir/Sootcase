@@ -28,6 +28,13 @@ GWPs to IPCC AR6); they are included as GLEC publishes them.
 Country continents for the GLEC regions (tools/glec/countries.csv) are from OurAirports,
 public domain.
 
+Air pollutant emission factors (pkg/calc/airpol.go) are from GLEC Framework v3.3 Section 3
+Module 6, from Smart Freight Centre and Stockholm Environment Institute, Air Pollutant
+Emissions Methodology for the Logistics Sector (Amsterdam, October 2025), which may be
+reproduced for educational or non-profit purposes with acknowledgement of the source, and
+from the EMEP/EEA air pollutant emission inventory guidebook 2023 (European Environment
+Agency; EEA materials are published under the CC BY licence; source: EEA).
+
 This product includes electricity carbon intensity data
 (pkg/factors/data/grid/ember-owid.json) from Ember, Yearly Electricity Data,
 processed by Our World in Data (https://github.com/owid/energy-data).

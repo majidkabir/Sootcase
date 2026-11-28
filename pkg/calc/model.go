@@ -341,6 +341,9 @@ type LegResult struct {
 	Summary      *RouteSummary `json:"summary,omitempty"`
 	DurationH    float64       `json:"duration_h,omitempty"`
 	Alternatives []LegResult   `json:"alternatives,omitempty"`
+	// AirPollutants are the leg's exhaust air pollutants (GLEC v3.3 Module
+	// 6, Tier 1), from the fuel it burnt.
+	AirPollutants *LegAirPollutants `json:"air_pollutants,omitempty"`
 	// Restrictions is what a road leg with a vehicle was routed for (see
 	// Leg.Vehicle); left out when the leg has none or wasn't routed.
 	Restrictions *Restrictions `json:"restrictions,omitempty"`
@@ -398,6 +401,9 @@ type Result struct {
 	BiogenicCO2Kg float64 `json:"biogenic_co2_kg,omitempty"`
 	// GHGProtocol places the emissions in GHG Protocol scopes (see GHGScopes).
 	GHGProtocol GHGScopes `json:"ghg_protocol"`
+	// AirPollutants are the shipment's exhaust air pollutants, summed over
+	// its legs (hubs are outside GLEC Module 6).
+	AirPollutants *AirPollutantTotals `json:"air_pollutants,omitempty"`
 	// PrimaryDataShare is the share of WTW emissions computed from primary
 	// data (0..1).
 	PrimaryDataShare float64 `json:"primary_data_share"`

@@ -8,111 +8,30 @@ import (
 
 // iLEAP energy carrier types (6.7.7) and feedstocks (6.7.8).
 const (
-	Diesel   = "Diesel"
-	HVO      = "HVO"
-	Petrol   = "Petrol"
-	CNG      = "CNG"
-	LNG      = "LNG"
-	LPG      = "LPG"
-	HFO      = "HFO"
-	MGO      = "MGO"
-	Aviation = "Aviation fuel"
-	Hydrogen = "Hydrogen"
-	Methanol = "Methanol"
-	Electric = "Electric"
+	Diesel   = calc.CarrierDiesel
+	HVO      = calc.CarrierHVO
+	Petrol   = calc.CarrierPetrol
+	CNG      = calc.CarrierCNG
+	LNG      = calc.CarrierLNG
+	LPG      = calc.CarrierLPG
+	HFO      = calc.CarrierHFO
+	MGO      = calc.CarrierMGO
+	Aviation = calc.CarrierAviation
+	Hydrogen = calc.CarrierHydrogen
+	Methanol = calc.CarrierMethanol
+	Electric = calc.CarrierElectric
 
 	FeedstockGrid = "Grid"
 )
 
-// vehicleCarrier names the iLEAP energy carrier of a vehicle factor id,
-// "" when the id doesn't say (GLEC rail "traction unknown", container
-// ships by trade lane, inland vessels, SmartWay rows, ...). Only what the
-// id states is used: GLEC road rows end in their fuel, GLEC rail rows
-// name diesel or electric traction, GLEC ship rows name their fuel, and
-// air freight factors are for jet fuel.
-func vehicleCarrier(id string, mode calc.Mode) string {
-	s := strings.ToLower(id)
-	switch mode {
-	case calc.Road:
-		return carrier(s)
-	case calc.Rail:
-		switch {
-		case !strings.HasPrefix(s, "glec/rail/"):
-			return ""
-		case strings.Contains(s, "/diesel/"):
-			return Diesel
-		case strings.Contains(s, "/electric/"):
-			return Electric
-		}
-	case calc.Sea:
-		if strings.HasPrefix(s, "glec/sea/") {
-			switch s[strings.LastIndex(s, "/")+1:] {
-			case "hfo", "vlsfo":
-				return HFO
-			case "mdo":
-				return MGO
-			}
-		}
-	case calc.Air:
-		if strings.HasPrefix(s, "glec/air/") || strings.HasPrefix(s, "freight_flights/") {
-			return Aviation
-		}
-	}
-	return ""
+// The carrier and fuel rules live in calc (the air pollutants use them too).
+func vehicleCarrier(id string, mode calc.Mode) string { return calc.VehicleCarrier(id, mode) }
+func carrier(id string) string                        { return calc.FuelCarrier(id) }
+func glecFuel(c, vehicleID string, mode calc.Mode) string {
+	return calc.GLECFuelFor(c, vehicleID, mode)
 }
-
-// carrier names the iLEAP energy carrier of a fuel id (or a GLEC/DESNZ
-// road vehicle id, which ends in its fuel), "" when the id doesn't say
-// which one it is, names one iLEAP has no value for (FAME biodiesel,
-// ethanol, natural gas for heating, ...), or several (dual fuel, plug-in
-// hybrid). Only what the id states is used.
-func carrier(id string) string {
-	s := strings.ToLower(id)
-	has := func(words ...string) bool {
-		for _, w := range words {
-			if strings.Contains(s, w) {
-				return true
-			}
-		}
-		return false
-	}
-	switch {
-	case has("hybrid", "cng_diesel", "lng_diesel", "dual", "unknown"):
-		return ""
-	case strings.HasPrefix(s, "electricity"), has("battery_electric", "/electric", "/electricity"):
-		return Electric
-	case has("hydrogen"):
-		return Hydrogen
-	case has("methanol"):
-		return Methanol
-	case has("biodiesel", "ethanol", "biogas", "natural_gas", "ammonia", "biomass", "coal", "wood", "lubricant", "naphtha", "burning_oil", "waste_oil", "refinery", "coke"):
-		return ""
-	case has("bio_lng", "bio_cng", "biomethane"):
-		// iLEAP's LNG and CNG are natural gas; it has no type for biomethane.
-		return ""
-	case has("diesel_hvo"): // diesel blended with some HVO is still diesel
-		return Diesel
-	case has("hvo"):
-		return HVO
-	case has("lng", "biomethane_liquified"):
-		return LNG
-	case has("cng", "biomethane_compressed"):
-		return CNG
-	case has("lpg", "propane", "butane"):
-		return LPG
-	case has("jet_kerosene", "aviation_turbine", "aviation_spirit", "avtur"):
-		return Aviation
-	case has("mdo", "mgo", "marine_gas_oil"):
-		return MGO
-	case has("hfo", "vlsfo", "marine_fuel_oil", "residual_oil", "/fuel_oil/"):
-		return HFO
-	case has("diesel"):
-		return Diesel
-	case has("petrol", "gasoline"):
-		return Petrol
-	}
-	return ""
-}
+func desnzFuel(c string) string          { return calc.DESNZFuelFor(c) }
+func factorCarrier(f calc.Factor) string { return calc.FactorCarrier(f) }
 
 // unit converts a fuel factor unit to an iLEAP energy consumption unit:
 // the iLEAP unit, and what to multiply an amount in the factor's unit by
@@ -137,70 +56,6 @@ func unit(u string) (string, float64, bool) {
 		return "MJ", 1000, true
 	}
 	return "", 0, false
-}
-
-// glecFuel is the GLEC v3.3 Module 1 fuel factor for a carrier in a
-// GLEC road region (from the vehicle id) or for ships and aircraft, ""
-// when GLEC has none that fits.
-func glecFuel(carrierType, vehicleID string, mode calc.Mode) string {
-	switch mode {
-	case calc.Sea:
-		// GLEC's Tables 14-17 name the fuel HFO, VLSFO or MDO; their WTT/TTW
-		// splits are those of Module 1's HFO (HSHFO), HFO (VLSFO) and MDO/MGO
-		// (VLSFO) rows (Module 1's "HFO Default" has the VLSFO numbers), so
-		// those are the factors behind them (checked in TestCarrierSplits).
-		if strings.HasPrefix(vehicleID, "glec/sea/") {
-			switch vehicleID[strings.LastIndex(vehicleID, "/")+1:] {
-			case "hfo":
-				return "glec/fuel/marine/hfo_hshfo/kg"
-			case "vlsfo":
-				return "glec/fuel/marine/hfo_vlsfo/kg"
-			case "mdo":
-				return "glec/fuel/marine/mdo_mgo_vlsfo/kg"
-			}
-		}
-		return ""
-	case calc.Air:
-		if carrierType == Aviation {
-			return "glec/fuel/air/jet_kerosene/kg"
-		}
-		return ""
-	case calc.InlandWaterway:
-		// GLEC's inland waterway values are mainly European data (Table 2).
-		if carrierType == Diesel && strings.HasPrefix(vehicleID, "glec/iww/") {
-			return "glec/fuel/eu/diesel/l"
-		}
-		return ""
-	}
-	region := ""
-	for _, r := range []string{"eu_sa", "na", "cn", "in"} {
-		if strings.Contains(vehicleID, "/"+r+"/") || strings.HasPrefix(vehicleID, "glec/rail/eu/") && r == "eu_sa" {
-			region = strings.TrimSuffix(r, "_sa")
-			break
-		}
-	}
-	if region == "" || !strings.HasPrefix(vehicleID, "glec/") {
-		return ""
-	}
-	name := map[string]string{Diesel: "diesel/l", Petrol: "gasoline/l", CNG: "cng/kg", LNG: "lng/kg", LPG: "lpg/kg", HVO: "hvo/l"}[carrierType]
-	if name == "" {
-		return ""
-	}
-	if region == "in" && carrierType == Petrol {
-		name = "petrol/l"
-	}
-	return "glec/fuel/" + region + "/" + name
-}
-
-// desnzFuel is the UK DESNZ fuel factor behind a DESNZ freight factor's
-// fuel, "" when there is none.
-func desnzFuel(carrierType string) string {
-	return map[string]string{
-		Diesel: "liquid_fuels/diesel_average_biofuel_blend/litres",
-		Petrol: "liquid_fuels/petrol_average_biofuel_blend/litres",
-		CNG:    "gaseous_fuels/cng/tonnes",
-		LPG:    "gaseous_fuels/lpg/litres",
-	}[carrierType]
 }
 
 // carrierFromFuel makes an EnergyCarrier from a fuel factor, with the
