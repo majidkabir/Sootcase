@@ -538,6 +538,7 @@ function render(req, r) {
         <th class="num">Vehicle</th><th class="num">Supply</th><th class="num">Total</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
     ${ghgHTML(r.ghg_protocol)}
+    ${airHTML(r.air_pollutants)}
     ${basisHTML(r)}
     ${sheetHTML(r.explanation)}
     <details class="json"><summary>Show request and response JSON</summary>
@@ -565,6 +566,23 @@ function ghgHTML(g, cat) {
       ${g.hubs_kg ? `<tr><td>Hub operations (not split by scope)</td><td class="num">${kg(g.hubs_kg)}</td></tr>` : ""}
     </tbody></table></div>
     <p class="id">GHG Protocol Corporate Value Chain (Scope 3) Standard and technical guidance, chapters 3, 4 and 9. Electricity includes the upstream share its factor contains.</p>`;
+}
+
+// ---- Air pollutants (GLEC Framework v3.3 Module 6) ----
+const polKg = v => v < 1 ? fmt(v * 1000, 1) + " g" : fmt(v, 2) + " kg";
+function airHTML(a) {
+  if (!a) return "";
+  const partial = new Set(a.partial || []);
+  const rows = [["nox_kg", "Nitrogen oxides (NOx)"], ["so2_kg", "Sulphur dioxide (SO₂)"], ["pm10_kg", "Particulate matter (PM10)"],
+    ["pm2_5_kg", "Fine particulate matter (PM2.5)"], ["bc_kg", "Black carbon"], ["co_kg", "Carbon monoxide (CO)"]].map(([k, name]) => {
+    const v = a[k] == null ? "No factor" : partial.has(k) ? polKg(a[k]) + " (some legs not counted)" : polKg(a[k]);
+    return `<tr><td>${name}</td><td class="num">${v}</td></tr>`;
+  }).join("");
+  const nk = (a.not_known || []).map(x => `<li>${esc(x)}</li>`).join("");
+  return `<h3 class="sub">Air pollutants (exhaust)</h3>
+    <div class="scroll"><table class="report-table"><tbody>${rows}</tbody></table></div>
+    <p class="id">GLEC Framework v3.3 Module 6, Tier 1: fuel burnt in the vehicle × an emission factor per kg of fuel. Exhaust only: electric vehicles count as 0, and fuel production, tyres and brakes aren't included.</p>
+    ${nk ? `<p class="id">Not counted:</p><ul class="notes">${nk}</ul>` : ""}`;
 }
 
 // ---- Calculation sheet: every step with its numbers and its GLEC / ISO 14083 basis ----
@@ -931,6 +949,7 @@ function renderReport(r) {
     ${models ? `<p class="id">Models:</p><ul class="notes">${models}</ul>` : ""}
     ${dafs ? `<h3 class="sub">Distance adjustment factors</h3><ul class="notes">${dafs}</ul>` : ""}
     ${ghgHTML(r.ghg_protocol, r.ghg_protocol && r.ghg_protocol.scope3_category)}
+    ${airHTML(r.air_pollutants)}
     ${(c.warnings || []).length ? `<h3 class="sub">Warnings</h3>
       <div class="scroll"><table class="report-table long-names"><thead><tr><th>Warning</th><th class="num">Shipments</th></tr></thead>
       <tbody>${c.warnings.map(x => `<tr><td>${esc(x.reason)}</td><td class="num">${x.shipments}</td></tr>`).join("")}</tbody></table></div>` : ""}

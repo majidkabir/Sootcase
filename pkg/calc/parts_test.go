@@ -315,3 +315,34 @@ func TestElectricFuel_UnitsAndSpellings(t *testing.T) {
 		}
 	}
 }
+
+// Air pollutants of a road leg with a ferry crossing: the road part from
+// its diesel (78 g TTW per tkm ÷ 3.22 kg per kg diesel), the ferry part
+// not known (its value names no fuel), so every pollutant is partial.
+func TestAirPollutants_FerryPart(t *testing.T) {
+	f := withGrid{fakeFactors{
+		legs: map[string]Factor{
+			"road/glec/road/eu_sa/artic_34_40t/diesel": {Mode: Road, VehicleType: "glec/road/eu_sa/artic_34_40t/diesel", TTW: 78, WTT: 23, Source: "GLEC Framework v3.3"},
+			"sea/ropax": {Mode: Sea, VehicleType: "ropax", TTW: 300, WTT: 70, Source: "ferry src"},
+		},
+		fuels: map[string]FuelFactor{
+			"glec/fuel/eu/diesel/l":  {Fuel: "glec/fuel/eu/diesel/l", Unit: "l", TTW: 2.6726, WTT: 0.8051},
+			"glec/fuel/eu/diesel/kg": {Fuel: "glec/fuel/eu/diesel/kg", Unit: "kg", TTW: 3.22, WTT: 0.97},
+		},
+	}}
+	c := Calculator{Factors: f, Distances: fakeRouter{Km: 100, Parts: map[string]float64{PartFerry: 20}}}
+	r, err := c.Calculate(context.Background(), Shipment{WeightKg: 10_000,
+		Legs: []Leg{{Mode: Road, VehicleType: "glec/road/eu_sa/artic_34_40t/diesel", From: cph, To: aar}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := r.Legs[0].AirPollutants
+	fuel := 800 * 78.0 / 1000 / 3.22
+	if a == nil || a.NOxKg == nil || !approx(*a.NOxKg, fuel*0.02595) || !approx(a.FuelKg, fuel) ||
+		!strings.Contains(a.NotKnown, "the ferry crossing: the emission factor ropax doesn't say which fuel") {
+		t.Fatalf("leg air pollutants %+v", a)
+	}
+	if tot := r.AirPollutants; len(tot.Partial) != 6 || len(tot.NotKnown) != 1 || !approx(*tot.NOxKg, fuel*0.02595) {
+		t.Errorf("totals %+v", tot)
+	}
+}

@@ -87,9 +87,9 @@ func TestWriter(t *testing.T) {
 	}
 	basis := `"EN ISO 14083:2023, GLEC Framework v3.3, Sootcase dev",Not certified under Regulation (EU) 2026/1030 (applies from 2 December 2030)`
 	want := "shipment_id,weight_kg,tonne_km,ttw_kg,wtt_kg,wtw_kg,intensity_g_per_tkm,primary_data_share,dataset,error,added_road_legs,warnings," +
-		"operator_scope1_kg,operator_scope2_kg,operator_scope3_cat3_kg,hubs_kg,basis,certification,biogenic_co2_kg\n" +
-		"S1,10000.0000,5000.0000,300.0000,75.0000,375.0000,75.0000,0.5000,d,,1,w1 | w2,300.0000,0.0000,75.0000,0.0000," + basis + ",240.2400\n" +
-		"S2,,,,,,,,,boom,,,,,,," + basis + ",\n"
+		"operator_scope1_kg,operator_scope2_kg,operator_scope3_cat3_kg,hubs_kg,basis,certification,biogenic_co2_kg,nox_kg,so2_kg,pm10_kg,pm2_5_kg,bc_kg,co_kg\n" +
+		"S1,10000.0000,5000.0000,300.0000,75.0000,375.0000,75.0000,0.5000,d,,1,w1 | w2,300.0000,0.0000,75.0000,0.0000," + basis + ",240.2400,,,,,,\n" +
+		"S2,,,,,,,,,boom,,,,,,," + basis + ",,,,,,,\n"
 	if buf.String() != want {
 		t.Errorf("got\n%s\nwant\n%s", buf.String(), want)
 	}

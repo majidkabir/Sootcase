@@ -89,7 +89,10 @@ type Report struct {
 	Data     Data     `json:"data_quality"`
 	DAFs     []DAF    `json:"distance_adjustments,omitempty"`
 	GHG      GHG      `json:"ghg_protocol"`
-	Notes    []string `json:"notes,omitempty"`
+	// AirPollutants are the shipments' exhaust air pollutants (GLEC v3.3
+	// Module 6), each summed over the legs that have it.
+	AirPollutants calc.AirPollutantTotals `json:"air_pollutants"`
+	Notes         []string                `json:"notes,omitempty"`
 }
 
 // Period covered by the report.
@@ -300,6 +303,8 @@ type Builder struct {
 	cov       Coverage
 	tot       Total
 	ghg       calc.GHGScopes
+	air       calc.AirPollutantTotals
+	airPart   map[string]bool
 	modes     map[calc.Mode]*Mode
 	modeDist  map[calc.Mode]map[string]float64
 	dist      map[string]float64
@@ -370,6 +375,20 @@ func (b *Builder) Add(id string, r calc.Result, err error) {
 	b.ghg.OperatorScope2Kg += g.OperatorScope2Kg
 	b.ghg.OperatorScope3Cat3Kg += g.OperatorScope3Cat3Kg
 	b.ghg.HubsKg += g.HubsKg
+	if a := r.AirPollutants; a != nil {
+		b.air.Add(a.AirPollutants)
+		if b.airPart == nil {
+			b.airPart = map[string]bool{}
+		}
+		for _, p := range a.Partial {
+			b.airPart[p] = true
+		}
+		for _, n := range a.NotKnown {
+			if len(b.air.NotKnown) < MaxListed {
+				b.air.NotKnown = append(b.air.NotKnown, id+", "+n)
+			}
+		}
+	}
 	added := false
 	for _, l := range r.Legs {
 		if l.Added != "" {
@@ -579,6 +598,7 @@ func (b *Builder) Report() Report {
 		Coverage:      b.cov,
 		Total:         b.tot,
 		GHG:           GHG{Scope3Category: b.meta.Scope3Category, GHGScopes: b.ghg},
+		AirPollutants: b.airTotals(),
 	}
 	if r.Title == "" {
 		r.Title = "Freight GHG emissions report"
@@ -792,4 +812,13 @@ func CheckPeriod(from, to string) error {
 		return fmt.Errorf("period ends (%s) before it starts (%s)", to, from)
 	}
 	return nil
+}
+
+// airTotals are the report's air pollutants: the sums, the method, and the
+// pollutants some leg has no figure for.
+func (b *Builder) airTotals() calc.AirPollutantTotals {
+	t := b.air
+	t.Method = calc.AirPollutantsMethod
+	t.Partial = calc.PollutantsIn(b.airPart)
+	return t
 }

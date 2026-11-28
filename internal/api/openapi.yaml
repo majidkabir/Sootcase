@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Sootcase API
-  version: 0.21.14
+  version: 0.22.0
   description: >
     Freight emissions calculator following the GLEC Framework / ISO 14083 approach.
     Emissions are in kg CO2e. TTW = tank-to-wheel, WTW = well-to-wheel.
@@ -739,6 +739,7 @@ components:
           description: "With ?alternatives=2 to 5 only, on routed road legs: other routes, each with the fields of a leg result (calculated the same way), an id, summary and duration_h; ordered by the router's cost."
           items: { $ref: "#/components/schemas/LegResult" }
         restrictions: { $ref: "#/components/schemas/Restrictions" }
+        air_pollutants: { $ref: "#/components/schemas/LegAirPollutants" }
     CountrySection:
       type: object
       description: "A stretch of a leg's route in one country, or a ferry crossing"
@@ -840,6 +841,7 @@ components:
             operator_scope2_kg: { type: number }
             operator_scope3_cat3_kg: { type: number }
             hubs_kg: { type: number }
+        air_pollutants: { $ref: "#/components/schemas/AirPollutantTotals" }
         dataset: { type: string }
         basis: { $ref: "#/components/schemas/Basis" }
         certification: { type: string, description: "What the result says about Regulation (EU) 2026/1030: Not certified under Regulation (EU) 2026/1030 (applies from 2 December 2030). Sootcase never gives out the Regulation's Art. 10(1) statement: only certified tools on the Commission's list may (Art. 9(2), 11)." }
@@ -847,6 +849,46 @@ components:
           type: array
           items: { type: string }
           description: Things left as given that may make the result too low, e.g. a gap between legs not counted
+    AirPollutants:
+      type: object
+      description: >
+        Exhaust air pollutants in kg (GLEC Framework v3.3 Section 3 Module 6, Tier 1: fuel burnt in the
+        vehicle × emission factor per kg of fuel). A field is left out when there is no factor for it for
+        that fuel; electric vehicles burn nothing, so 0.
+      properties:
+        nox_kg: { type: number }
+        so2_kg: { type: number }
+        pm10_kg: { type: number }
+        pm2_5_kg: { type: number }
+        bc_kg: { type: number, description: Black carbon }
+        co_kg: { type: number }
+    LegAirPollutants:
+      type: object
+      description: A leg's exhaust air pollutants (see AirPollutants), from the fuel it burnt.
+      properties:
+        nox_kg: { type: number }
+        so2_kg: { type: number }
+        pm10_kg: { type: number }
+        pm2_5_kg: { type: number }
+        bc_kg: { type: number, description: Black carbon }
+        co_kg: { type: number }
+        fuel_kg: { type: number, description: "Fuel burnt the factors apply to: the measured fuel, or TTW ÷ the TTW per kg of the fuel behind the default value" }
+        fuel: { type: string, description: "The factors' fuel and vehicle category, e.g. heavy-duty vehicle, diesel; none burnt (electric)" }
+        sources: { type: array, items: { type: string } }
+        not_known: { type: string, description: "What of the leg has no figure and why (e.g. a value that names no fuel, jet fuel)" }
+    AirPollutantTotals:
+      type: object
+      description: A shipment's exhaust air pollutants, each summed over the legs that have it. Hubs are outside Module 6.
+      properties:
+        nox_kg: { type: number }
+        so2_kg: { type: number }
+        pm10_kg: { type: number }
+        pm2_5_kg: { type: number }
+        bc_kg: { type: number, description: Black carbon }
+        co_kg: { type: number }
+        method: { type: string }
+        partial: { type: array, items: { type: string }, description: Pollutants some leg (or part of one) has no figure for, so their sums are too low }
+        not_known: { type: array, items: { type: string }, description: "Legs with no figure, and why" }
     Dataset:
       type: object
       properties:
@@ -1005,6 +1047,7 @@ components:
         distance_adjustments: { type: array, items: { type: object } }
         notes: { type: array, items: { type: string } }
         ghg_protocol: { type: object, description: "The totals by GHG Protocol scope: the shipper's scope 3 category, and the operator's scopes 1, 2 and 3 category 3" }
+        air_pollutants: { $ref: "#/components/schemas/AirPollutantTotals" }
     RecommendSettings:
       type: object
       properties:

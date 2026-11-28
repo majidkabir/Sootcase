@@ -415,10 +415,13 @@ func (r rowReader) float(name string) (float64, error) {
 // for a shipper all of wtw_kg is scope 3, category 4 or 9. basis and
 // certification are this build's (calc.CurrentBasis, calc.Certification),
 // the same on every row. biogenic_co2_kg is reported apart from WTW (GLEC
-// p. 64).
+// p. 64). The air pollutant columns (GLEC v3.3 Module 6) are empty where
+// there is no factor; they are too low when some leg has no figure (see
+// the JSON's air_pollutants.partial).
 var ResultHeader = []string{"shipment_id", "weight_kg", "tonne_km", "ttw_kg", "wtt_kg", "wtw_kg",
 	"intensity_g_per_tkm", "primary_data_share", "dataset", "error", "added_road_legs", "warnings",
-	"operator_scope1_kg", "operator_scope2_kg", "operator_scope3_cat3_kg", "hubs_kg", "basis", "certification", "biogenic_co2_kg"}
+	"operator_scope1_kg", "operator_scope2_kg", "operator_scope3_cat3_kg", "hubs_kg", "basis", "certification", "biogenic_co2_kg",
+	"nox_kg", "so2_kg", "pm10_kg", "pm2_5_kg", "bc_kg", "co_kg"}
 
 // Writer writes one summary row per shipment.
 type Writer struct{ cw *csv.Writer }
@@ -436,7 +439,7 @@ func NewWriter(w io.Writer) (*Writer, error) {
 func (w *Writer) Write(id string, r calc.Result, err error) error {
 	if err != nil {
 		return w.cw.Write([]string{id, "", "", "", "", "", "", "", "", err.Error(), "", "", "", "", "", "",
-			calc.CurrentBasis().String(), calc.Certification, ""})
+			calc.CurrentBasis().String(), calc.Certification, "", "", "", "", "", "", ""})
 	}
 	added := 0
 	for _, l := range r.Legs {
@@ -447,7 +450,8 @@ func (w *Writer) Write(id string, r calc.Result, err error) error {
 	return w.cw.Write([]string{id, num(r.WeightKg), num(r.TonneKm), num(r.TTWKg), num(r.WTTKg), num(r.WTWKg),
 		num(r.IntensityG), num(r.PrimaryDataShare), r.Dataset, "", strconv.Itoa(added), strings.Join(calc.WarningTexts(r.Warnings), " | "),
 		num(r.GHGProtocol.OperatorScope1Kg), num(r.GHGProtocol.OperatorScope2Kg), num(r.GHGProtocol.OperatorScope3Cat3Kg), num(r.GHGProtocol.HubsKg),
-		calc.CurrentBasis().String(), calc.Certification, num(r.BiogenicCO2Kg)})
+		calc.CurrentBasis().String(), calc.Certification, num(r.BiogenicCO2Kg),
+		air(r, "nox"), air(r, "so2"), air(r, "pm10"), air(r, "pm2_5"), air(r, "bc"), air(r, "co")})
 }
 
 // Flush flushes buffered rows and reports any write error.
@@ -457,3 +461,16 @@ func (w *Writer) Flush() error {
 }
 
 func num(v float64) string { return strconv.FormatFloat(v, 'f', 4, 64) }
+
+// air is a result's air pollutant total as a CSV cell, "" when it has none.
+func air(r calc.Result, p string) string {
+	if r.AirPollutants == nil {
+		return ""
+	}
+	a := r.AirPollutants.AirPollutants
+	v := map[string]*float64{"nox": a.NOxKg, "so2": a.SO2Kg, "pm10": a.PM10Kg, "pm2_5": a.PM25Kg, "bc": a.BCKg, "co": a.COKg}[p]
+	if v == nil {
+		return ""
+	}
+	return num(*v)
+}

@@ -6,6 +6,8 @@ import (
 	"io"
 	"sort"
 	"strings"
+
+	"github.com/majidkabir/sootcase/pkg/calc"
 )
 
 // WriteMarkdown renders the report as Markdown.
@@ -59,6 +61,8 @@ func WriteMarkdown(w io.Writer, r Report) error {
 	p("| Hub operations (not split by scope) | %s |\n\n", num(g.HubsKg, 1))
 	p("GHG Protocol Corporate Value Chain (Scope 3) Standard and its technical guidance, chapters 3, 4 and 9. " +
 		"Electricity includes the upstream share its factor contains, which isn't split off.\n\n")
+
+	airSection(p, r.AirPollutants)
 
 	if len(r.Modes) > 0 {
 		p("## By mode of transport\n\n")
@@ -224,4 +228,34 @@ func plural(n int, word string) string {
 		return "1 " + word
 	}
 	return fmt.Sprintf("%d %ss", n, word)
+}
+
+// airSection writes the air pollutants (GLEC v3.3 Module 6).
+func airSection(p func(string, ...any), a calc.AirPollutantTotals) {
+	p("## Air pollutants (exhaust)\n\n")
+	partial := map[string]bool{}
+	for _, n := range a.Partial {
+		partial[n] = true
+	}
+	rows := []struct {
+		name, key string
+		v         *float64
+	}{{"NOx", "nox_kg", a.NOxKg}, {"SO2", "so2_kg", a.SO2Kg}, {"PM10", "pm10_kg", a.PM10Kg}, {"PM2.5", "pm2_5_kg", a.PM25Kg},
+		{"Black carbon", "bc_kg", a.BCKg}, {"CO", "co_kg", a.COKg}}
+	p("| Pollutant | kg |\n|---|---:|\n")
+	for _, r := range rows {
+		v := "no factor"
+		if r.v != nil {
+			v = num(*r.v, 3)
+			if partial[r.key] {
+				v += " (some legs not counted)"
+			}
+		}
+		p("| %s | %s |\n", r.name, v)
+	}
+	p("\n%s.", a.Method)
+	if len(a.NotKnown) > 0 {
+		p(" Not counted: %s.", esc(strings.Join(a.NotKnown, "; ")))
+	}
+	p("\n\n")
 }
